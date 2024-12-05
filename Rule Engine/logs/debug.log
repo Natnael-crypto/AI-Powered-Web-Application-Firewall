@@ -1,0 +1,85 @@
+2024/12/05 13:00:49 [DEBUG] Parsing directive line="SecRuleEngine On"
+2024/12/05 13:00:49 [DEBUG] Parsing directive line="SecRequestBodyAccess On"
+2024/12/05 13:00:49 [DEBUG] Parsing directive line="SecResponseBodyAccess On"
+2024/12/05 13:00:49 [DEBUG] Parsing directive line="SecRule ARGS \"@rx <script>\" \"id:1001,phase:2,deny,status:403,log,msg:'XSS detected: <script> tag in input'\""
+2024/12/05 13:00:57 [DEBUG] Transaction started tx_id="WdiduVTqqvMAOIiDVKe"
+2024/12/05 13:00:57 [DEBUG] Evaluating phase tx_id="WdiduVTqqvMAOIiDVKe" phase=1
+2024/12/05 13:00:57 [DEBUG] Finished phase tx_id="WdiduVTqqvMAOIiDVKe" phase=1
+2024/12/05 13:00:57 [DEBUG] Evaluating phase tx_id="WdiduVTqqvMAOIiDVKe" phase=2
+2024/12/05 13:00:57 [DEBUG] Evaluating rule tx_id="WdiduVTqqvMAOIiDVKe" rule_id=1001
+2024/12/05 13:00:57 [DEBUG] Expanding arguments for rule tx_id="WdiduVTqqvMAOIiDVKe" rule_id=1001 variable="ARGS"
+2024/12/05 13:00:57 [DEBUG] Evaluating operator: NO MATCH tx_id="WdiduVTqqvMAOIiDVKe" rule_id=1001 variable="ARGS" operator_function="@rx" operator_data="<script>" arg="a' OR 1=1 -- union"
+2024/12/05 13:00:57 [DEBUG] Finished rule evaluation tx_id="WdiduVTqqvMAOIiDVKe" rule_id=1001
+2024/12/05 13:00:57 [DEBUG] Finished phase tx_id="WdiduVTqqvMAOIiDVKe" phase=2
+2024/12/05 13:00:57 [DEBUG] Transaction finished tx_id="WdiduVTqqvMAOIiDVKe" is_interrupted=false
+2024/12/05 13:01:25 [DEBUG] Transaction started tx_id="lXtVpNWoecfSIZgFulg"
+2024/12/05 13:01:25 [DEBUG] Evaluating phase tx_id="lXtVpNWoecfSIZgFulg" phase=1
+2024/12/05 13:01:25 [DEBUG] Finished phase tx_id="lXtVpNWoecfSIZgFulg" phase=1
+2024/12/05 13:01:25 [DEBUG] Evaluating phase tx_id="lXtVpNWoecfSIZgFulg" phase=2
+2024/12/05 13:01:25 [DEBUG] Evaluating rule tx_id="lXtVpNWoecfSIZgFulg" rule_id=1001
+2024/12/05 13:01:25 [DEBUG] Expanding arguments for rule tx_id="lXtVpNWoecfSIZgFulg" rule_id=1001 variable="ARGS"
+2024/12/05 13:01:25 [DEBUG] Matching rule tx_id="lXtVpNWoecfSIZgFulg" rule_id=1001 variable_name="ARGS" key="page"
+2024/12/05 13:01:25 [DEBUG] Evaluating action tx_id="lXtVpNWoecfSIZgFulg" action="log"
+2024/12/05 13:01:25 [DEBUG] Evaluating action tx_id="lXtVpNWoecfSIZgFulg" action="auditlog"
+2024/12/05 13:01:25 [DEBUG] Evaluating action tx_id="lXtVpNWoecfSIZgFulg" action="log"
+2024/12/05 13:01:25 [DEBUG] Evaluating operator: MATCH tx_id="lXtVpNWoecfSIZgFulg" rule_id=1001 variable="ARGS" operator_function="@rx" operator_data="<script>" arg="<script>"
+2024/12/05 13:01:25 [DEBUG] Executing disruptive action for rule tx_id="lXtVpNWoecfSIZgFulg" rule_id=1001 action="deny"
+2024/12/05 13:01:25 [DEBUG] Rule matched tx_id="lXtVpNWoecfSIZgFulg" rule_id=1001
+2024/12/05 13:01:25 [DEBUG] Finished rule evaluation tx_id="lXtVpNWoecfSIZgFulg" rule_id=1001
+2024/12/05 13:01:25 [DEBUG] Finished phase tx_id="lXtVpNWoecfSIZgFulg" phase=2
+2024/12/05 13:01:25 [DEBUG] Transaction finished tx_id="lXtVpNWoecfSIZgFulg" is_interrupted=true status=403 rule_id=1001
+2024/12/05 13:05:57 [DEBUG] Parsing directive line="SecRuleEngine On"
+2024/12/05 13:05:57 [DEBUG] Parsing directive line="SecRequestBodyAccess On"
+2024/12/05 13:05:57 [DEBUG] Parsing directive line="SecResponseBodyAccess On"
+2024/12/05 13:05:57 [DEBUG] Parsing directive line="SecRule ARGS \"@rx (\\bselect\\b|\\binsert\\b|\\bupdate\\b|\\bdelete\\b|\\bdrop\\b|\\bunion\\b|\\b--|\\b;|\\b'\\s*or\\s*1=1)\" \"id:1002,phase:2,deny,status:403,log,msg:'SQL Injection Detected: suspicious SQL pattern in input'\""
+2024/12/05 13:05:57 [DEBUG] Parsing directive line="SecRule ARGS \"@rx <script>\" \"id:1001,phase:2,deny,status:403,log,msg:'XSS detected: <script> tag in input'\""
+2024/12/05 13:06:27 [DEBUG] Transaction started tx_id="cqoivtPldPjZzXCMBub"
+2024/12/05 13:06:27 [DEBUG] Evaluating phase tx_id="cqoivtPldPjZzXCMBub" phase=1
+2024/12/05 13:06:27 [DEBUG] Finished phase tx_id="cqoivtPldPjZzXCMBub" phase=1
+2024/12/05 13:06:27 [DEBUG] Evaluating phase tx_id="cqoivtPldPjZzXCMBub" phase=2
+2024/12/05 13:06:27 [DEBUG] Evaluating rule tx_id="cqoivtPldPjZzXCMBub" rule_id=1002
+2024/12/05 13:06:27 [DEBUG] Expanding arguments for rule tx_id="cqoivtPldPjZzXCMBub" rule_id=1002 variable="ARGS"
+2024/12/05 13:06:27 [DEBUG] Evaluating operator: NO MATCH tx_id="cqoivtPldPjZzXCMBub" rule_id=1002 variable="ARGS" operator_function="@rx" operator_data="(\\bselect\\b|\\binsert\\b|\\bupdate\\b|\\bdelete\\b|\\bdrop\\b|\\bunion\\b|\\b--|\\b;|\\b'\\s*or\\s*1=1)" arg="<script>"
+2024/12/05 13:06:27 [DEBUG] Finished rule evaluation tx_id="cqoivtPldPjZzXCMBub" rule_id=1002
+2024/12/05 13:06:27 [DEBUG] Evaluating rule tx_id="cqoivtPldPjZzXCMBub" rule_id=1001
+2024/12/05 13:06:27 [DEBUG] Expanding arguments for rule tx_id="cqoivtPldPjZzXCMBub" rule_id=1001 variable="ARGS"
+2024/12/05 13:06:27 [DEBUG] Matching rule tx_id="cqoivtPldPjZzXCMBub" rule_id=1001 variable_name="ARGS" key="page"
+2024/12/05 13:06:27 [DEBUG] Evaluating action tx_id="cqoivtPldPjZzXCMBub" action="log"
+2024/12/05 13:06:27 [DEBUG] Evaluating action tx_id="cqoivtPldPjZzXCMBub" action="auditlog"
+2024/12/05 13:06:27 [DEBUG] Evaluating action tx_id="cqoivtPldPjZzXCMBub" action="log"
+2024/12/05 13:06:27 [DEBUG] Evaluating operator: MATCH tx_id="cqoivtPldPjZzXCMBub" rule_id=1001 variable="ARGS" operator_function="@rx" operator_data="<script>" arg="<script>"
+2024/12/05 13:06:27 [DEBUG] Executing disruptive action for rule tx_id="cqoivtPldPjZzXCMBub" rule_id=1001 action="deny"
+2024/12/05 13:06:27 [DEBUG] Rule matched tx_id="cqoivtPldPjZzXCMBub" rule_id=1001
+2024/12/05 13:06:27 [DEBUG] Finished rule evaluation tx_id="cqoivtPldPjZzXCMBub" rule_id=1001
+2024/12/05 13:06:27 [DEBUG] Finished phase tx_id="cqoivtPldPjZzXCMBub" phase=2
+2024/12/05 13:06:27 [DEBUG] Transaction finished tx_id="cqoivtPldPjZzXCMBub" is_interrupted=true status=403 rule_id=1001
+2024/12/05 13:06:34 [DEBUG] Transaction started tx_id="ZLHLNmMnvaQwFLcjNDa"
+2024/12/05 13:06:34 [DEBUG] Evaluating phase tx_id="ZLHLNmMnvaQwFLcjNDa" phase=1
+2024/12/05 13:06:34 [DEBUG] Finished phase tx_id="ZLHLNmMnvaQwFLcjNDa" phase=1
+2024/12/05 13:06:34 [DEBUG] Evaluating phase tx_id="ZLHLNmMnvaQwFLcjNDa" phase=2
+2024/12/05 13:06:34 [DEBUG] Evaluating rule tx_id="ZLHLNmMnvaQwFLcjNDa" rule_id=1002
+2024/12/05 13:06:34 [DEBUG] Expanding arguments for rule tx_id="ZLHLNmMnvaQwFLcjNDa" rule_id=1002 variable="ARGS"
+2024/12/05 13:06:34 [DEBUG] Matching rule tx_id="ZLHLNmMnvaQwFLcjNDa" rule_id=1002 variable_name="ARGS" key="page"
+2024/12/05 13:06:34 [DEBUG] Evaluating action tx_id="ZLHLNmMnvaQwFLcjNDa" action="log"
+2024/12/05 13:06:34 [DEBUG] Evaluating action tx_id="ZLHLNmMnvaQwFLcjNDa" action="auditlog"
+2024/12/05 13:06:34 [DEBUG] Evaluating action tx_id="ZLHLNmMnvaQwFLcjNDa" action="log"
+2024/12/05 13:06:34 [DEBUG] Evaluating operator: MATCH tx_id="ZLHLNmMnvaQwFLcjNDa" rule_id=1002 variable="ARGS" operator_function="@rx" operator_data="(\\bselect\\b|\\binsert\\b|\\bupdate\\b|\\bdelete\\b|\\bdrop\\b|\\bunion\\b|\\b--|\\b;|\\b'\\s*or\\s*1=1)" arg="a' OR 1=1 -- union"
+2024/12/05 13:06:34 [DEBUG] Executing disruptive action for rule tx_id="ZLHLNmMnvaQwFLcjNDa" rule_id=1002 action="deny"
+2024/12/05 13:06:34 [DEBUG] Rule matched tx_id="ZLHLNmMnvaQwFLcjNDa" rule_id=1002
+2024/12/05 13:06:34 [DEBUG] Finished rule evaluation tx_id="ZLHLNmMnvaQwFLcjNDa" rule_id=1002
+2024/12/05 13:06:34 [DEBUG] Finished phase tx_id="ZLHLNmMnvaQwFLcjNDa" phase=2
+2024/12/05 13:06:34 [DEBUG] Transaction finished tx_id="ZLHLNmMnvaQwFLcjNDa" is_interrupted=true status=403 rule_id=1002
+2024/12/05 13:06:43 [DEBUG] Transaction started tx_id="zuiefzMxRdAQvltAvap"
+2024/12/05 13:06:43 [DEBUG] Evaluating phase tx_id="zuiefzMxRdAQvltAvap" phase=1
+2024/12/05 13:06:43 [DEBUG] Finished phase tx_id="zuiefzMxRdAQvltAvap" phase=1
+2024/12/05 13:06:43 [DEBUG] Evaluating phase tx_id="zuiefzMxRdAQvltAvap" phase=2
+2024/12/05 13:06:43 [DEBUG] Evaluating rule tx_id="zuiefzMxRdAQvltAvap" rule_id=1002
+2024/12/05 13:06:43 [DEBUG] Expanding arguments for rule tx_id="zuiefzMxRdAQvltAvap" rule_id=1002 variable="ARGS"
+2024/12/05 13:06:43 [DEBUG] Evaluating operator: NO MATCH tx_id="zuiefzMxRdAQvltAvap" rule_id=1002 variable="ARGS" operator_function="@rx" operator_data="(\\bselect\\b|\\binsert\\b|\\bupdate\\b|\\bdelete\\b|\\bdrop\\b|\\bunion\\b|\\b--|\\b;|\\b'\\s*or\\s*1=1)" arg="hey"
+2024/12/05 13:06:43 [DEBUG] Finished rule evaluation tx_id="zuiefzMxRdAQvltAvap" rule_id=1002
+2024/12/05 13:06:43 [DEBUG] Evaluating rule tx_id="zuiefzMxRdAQvltAvap" rule_id=1001
+2024/12/05 13:06:43 [DEBUG] Expanding arguments for rule tx_id="zuiefzMxRdAQvltAvap" rule_id=1001 variable="ARGS"
+2024/12/05 13:06:43 [DEBUG] Evaluating operator: NO MATCH tx_id="zuiefzMxRdAQvltAvap" rule_id=1001 variable="ARGS" operator_function="@rx" operator_data="<script>" arg="hey"
+2024/12/05 13:06:43 [DEBUG] Finished rule evaluation tx_id="zuiefzMxRdAQvltAvap" rule_id=1001
+2024/12/05 13:06:43 [DEBUG] Finished phase tx_id="zuiefzMxRdAQvltAvap" phase=2
+2024/12/05 13:06:43 [DEBUG] Transaction finished tx_id="zuiefzMxRdAQvltAvap" is_interrupted=false

@@ -1,0 +1,237 @@
+[2024-12-05 13:00:49] INFO: Server will run on port: 8080
+[2024-12-05 13:00:49] INFO: Redirecting requests to: http://127.0.0.1:5000
+[2024-12-05 13:00:49] INFO: Detected 12 logical CPUs. Setting worker pool size to 12.
+[2024-12-05 13:00:49] INFO: Starting server on port 8080...
+[2024-12-05 13:00:57] INFO: Request Details: Method: GET
+URL: /test?page=a%27%20OR%201=1%20--%20union
+Protocol: HTTP/1.1
+Headers:
+  Cache-Control: max-age=0
+  Upgrade-Insecure-Requests: 1
+  Sec-Fetch-User: ?1
+  Accept-Encoding: gzip, deflate, br, zstd
+  Accept-Language: en-US,en;q=0.9
+  Sec-Fetch-Mode: navigate
+  Sec-Fetch-Dest: document
+  Connection: keep-alive
+  Sec-Ch-Ua: "Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+  Sec-Ch-Ua-Mobile: ?0
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0
+  Sec-Fetch-Site: none
+  Sec-Ch-Ua-Platform: "Windows"
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Query Parameters:
+  page: a' OR 1=1 -- union
+Body:
+
+
+[2024-12-05 13:00:57] INFO: Successfully proxied request to: http://127.0.0.1:5000/test?page=a%27%20OR%201=1%20--%20union
+[2024-12-05 13:00:57] INFO: Request Details: Method: GET
+URL: /test?page=a%27%20OR%201=1%20--%20union
+Protocol: HTTP/1.1
+Headers:
+  Connection: keep-alive
+  Sec-Ch-Ua: "Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+  Sec-Ch-Ua-Mobile: ?0
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0
+  Sec-Fetch-Site: none
+  Sec-Ch-Ua-Platform: "Windows"
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+  Cache-Control: max-age=0
+  Upgrade-Insecure-Requests: 1
+  Sec-Fetch-User: ?1
+  Accept-Encoding: gzip, deflate, br, zstd
+  Accept-Language: en-US,en;q=0.9
+  Sec-Fetch-Mode: navigate
+  Sec-Fetch-Dest: document
+Query Parameters:
+  page: a' OR 1=1 -- union
+Body:
+
+
+[2024-12-05 13:01:25] INFO: Request Details: Method: GET
+URL: /test?page=%3Cscript%3E
+Protocol: HTTP/1.1
+Headers:
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0
+  Sec-Fetch-Site: none
+  Upgrade-Insecure-Requests: 1
+  Sec-Fetch-Mode: navigate
+  Accept-Encoding: gzip, deflate, br, zstd
+  Accept-Language: en-US,en;q=0.9
+  Connection: keep-alive
+  Sec-Ch-Ua: "Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+  Sec-Ch-Ua-Mobile: ?0
+  Sec-Ch-Ua-Platform: "Windows"
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+  Sec-Fetch-User: ?1
+  Sec-Fetch-Dest: document
+Query Parameters:
+  page: <script>
+Body:
+
+
+[2024-12-05 13:01:25] WARN: Request blocked by WAF: Rule Message: XSS detected: <script> tag in input
+[2024-12-05 13:01:25] INFO: Request Details: Method: GET
+URL: /test?page=%3Cscript%3E
+Protocol: HTTP/1.1
+Headers:
+  Upgrade-Insecure-Requests: 1
+  Sec-Fetch-Mode: navigate
+  Accept-Encoding: gzip, deflate, br, zstd
+  Accept-Language: en-US,en;q=0.9
+  Sec-Fetch-Dest: document
+  Connection: keep-alive
+  Sec-Ch-Ua: "Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+  Sec-Ch-Ua-Mobile: ?0
+  Sec-Ch-Ua-Platform: "Windows"
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+  Sec-Fetch-User: ?1
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0
+  Sec-Fetch-Site: none
+Query Parameters:
+  page: <script>
+Body:
+
+
+[2024-12-05 13:05:57] INFO: Server will run on port: 8080
+[2024-12-05 13:05:57] INFO: Redirecting requests to: http://127.0.0.1:5000
+[2024-12-05 13:05:57] INFO: Detected 12 logical CPUs. Setting worker pool size to 12.
+[2024-12-05 13:05:57] INFO: Starting server on port 8080...
+[2024-12-05 13:06:27] INFO: Request Details: Method: GET
+URL: /test?page=%3Cscript%3E
+Protocol: HTTP/1.1
+Headers:
+  Sec-Ch-Ua: "Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+  Sec-Ch-Ua-Mobile: ?0
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+  Accept-Language: en-US,en;q=0.9
+  Upgrade-Insecure-Requests: 1
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0
+  Sec-Fetch-Mode: navigate
+  Sec-Fetch-User: ?1
+  Connection: keep-alive
+  Cache-Control: max-age=0
+  Sec-Ch-Ua-Platform: "Windows"
+  Sec-Fetch-Site: none
+  Sec-Fetch-Dest: document
+  Accept-Encoding: gzip, deflate, br, zstd
+Query Parameters:
+  page: <script>
+Body:
+
+
+[2024-12-05 13:06:27] WARN: Request blocked by WAF: Rule Message: XSS detected: <script> tag in input
+[2024-12-05 13:06:27] INFO: Request Details: Method: GET
+URL: /test?page=%3Cscript%3E
+Protocol: HTTP/1.1
+Headers:
+  Sec-Ch-Ua: "Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+  Sec-Ch-Ua-Mobile: ?0
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+  Accept-Language: en-US,en;q=0.9
+  Upgrade-Insecure-Requests: 1
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0
+  Sec-Fetch-Mode: navigate
+  Sec-Fetch-User: ?1
+  Connection: keep-alive
+  Cache-Control: max-age=0
+  Sec-Ch-Ua-Platform: "Windows"
+  Sec-Fetch-Site: none
+  Sec-Fetch-Dest: document
+  Accept-Encoding: gzip, deflate, br, zstd
+Query Parameters:
+  page: <script>
+Body:
+
+
+[2024-12-05 13:06:34] INFO: Request Details: Method: GET
+URL: /test?page=a%27%20OR%201=1%20--%20union
+Protocol: HTTP/1.1
+Headers:
+  Accept-Language: en-US,en;q=0.9
+  Sec-Fetch-Mode: navigate
+  Sec-Fetch-User: ?1
+  Sec-Fetch-Dest: document
+  Sec-Ch-Ua-Platform: "Windows"
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0
+  Upgrade-Insecure-Requests: 1
+  Sec-Ch-Ua-Mobile: ?0
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+  Sec-Fetch-Site: none
+  Accept-Encoding: gzip, deflate, br, zstd
+  Connection: keep-alive
+  Sec-Ch-Ua: "Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+Query Parameters:
+  page: a' OR 1=1 -- union
+Body:
+
+
+[2024-12-05 13:06:34] WARN: Request blocked by WAF: Rule Message: SQL Injection Detected: suspicious SQL pattern in input
+[2024-12-05 13:06:34] INFO: Request Details: Method: GET
+URL: /test?page=a%27%20OR%201=1%20--%20union
+Protocol: HTTP/1.1
+Headers:
+  Sec-Fetch-Site: none
+  Accept-Encoding: gzip, deflate, br, zstd
+  Connection: keep-alive
+  Sec-Ch-Ua: "Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+  Sec-Ch-Ua-Mobile: ?0
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+  Accept-Language: en-US,en;q=0.9
+  Sec-Fetch-Dest: document
+  Sec-Ch-Ua-Platform: "Windows"
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0
+  Sec-Fetch-Mode: navigate
+  Sec-Fetch-User: ?1
+  Upgrade-Insecure-Requests: 1
+Query Parameters:
+  page: a' OR 1=1 -- union
+Body:
+
+
+[2024-12-05 13:06:43] INFO: Request Details: Method: GET
+URL: /test?page=hey
+Protocol: HTTP/1.1
+Headers:
+  Accept-Language: en-US,en;q=0.9
+  Sec-Ch-Ua: "Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+  Connection: keep-alive
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+  Sec-Fetch-User: ?1
+  Upgrade-Insecure-Requests: 1
+  Sec-Fetch-Dest: document
+  Sec-Ch-Ua-Platform: "Windows"
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0
+  Sec-Fetch-Site: none
+  Sec-Fetch-Mode: navigate
+  Accept-Encoding: gzip, deflate, br, zstd
+  Sec-Ch-Ua-Mobile: ?0
+Query Parameters:
+  page: hey
+Body:
+
+
+[2024-12-05 13:06:43] INFO: Successfully proxied request to: http://127.0.0.1:5000/test?page=hey
+[2024-12-05 13:06:43] INFO: Request Details: Method: GET
+URL: /test?page=hey
+Protocol: HTTP/1.1
+Headers:
+  Sec-Ch-Ua-Platform: "Windows"
+  Upgrade-Insecure-Requests: 1
+  Sec-Fetch-Dest: document
+  Sec-Ch-Ua-Mobile: ?0
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0
+  Sec-Fetch-Site: none
+  Sec-Fetch-Mode: navigate
+  Accept-Encoding: gzip, deflate, br, zstd
+  Sec-Ch-Ua: "Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+  Accept-Language: en-US,en;q=0.9
+  Connection: keep-alive
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+  Sec-Fetch-User: ?1
+Query Parameters:
+  page: hey
+Body:
+
+
