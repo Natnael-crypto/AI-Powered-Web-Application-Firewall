@@ -1,0 +1,4 @@
+server:
+  redirect_url: "http://127.0.0.1:5000"
+  port: 8080
+  debug_mode: true
