@@ -9,7 +9,7 @@ import {
   Shield
 } from "lucide-react"
 
-import { NavMain } from "./NavMain"
+import MainSidebarContent from "./MainSidebarContent"
 import {
   Sidebar,
   SidebarContent,
@@ -35,6 +35,7 @@ const data = {
       title: "Logs",
       url: "#",
       icon: Logs,
+      isActive: false,
       items: [
         {
           title: "Attacks",
@@ -62,6 +63,7 @@ const data = {
       title: "Web Services",
       url: "#",
       icon: Shield,
+      isActive: false,
       items: [
         {
           title: "web services",
@@ -81,6 +83,7 @@ const data = {
       title: "Protection",
       url: "#",
       icon: Settings2,
+      isActive: false,
       items: [
         {
           title: "Rate Limiting",
@@ -110,11 +113,13 @@ const data = {
 
 export function CustomSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+    
+    <Sidebar  {...props} className="min-w-[300px] bg-slate-100 border-none">
+      <SidebarHeader className=" text-center text-3xl my-5">
+        LOGO
       </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
+      <SidebarContent className="">
+        <MainSidebarContent items={data.navMain} />
       </SidebarContent>
       
       <SidebarRail />
