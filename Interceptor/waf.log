@@ -1,0 +1,6 @@
+2024/12/10 00:58:42 Method: GET, URL: /test1?input=test%27%20or%201=1%20, Decision: deny, Reason: SQL Injection Attack Detected via libinjection
+2024/12/10 00:58:42 Worker processing request: GET /favicon.ico
+2024/12/10 00:58:42 Method: GET, URL: /favicon.ico, Decision: deny, Reason: SQL Injection Attack Detected via libinjection
+2024/12/10 01:00:39 Method: GET, URL: /test1?input=test%27%20or%201=1%20, Decision: deny, Reason: SQL Injection Attack Detected via libinjection
+2024/12/10 01:00:39 Method: GET, URL: /favicon.ico, Decision: deny, Reason: SQL Injection Attack Detected via libinjection
+2024/12/10 09:11:34 Method: GET, URL: /test1?input=test%27%20or%201=1, Decision: deny, Reason: SQL Injection Attack Detected via libinjection
