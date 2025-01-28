@@ -1,6 +1,26 @@
-2024/12/10 00:58:42 Method: GET, URL: /test1?input=test%27%20or%201=1%20, Decision: deny, Reason: SQL Injection Attack Detected via libinjection
-2024/12/10 00:58:42 Worker processing request: GET /favicon.ico
-2024/12/10 00:58:42 Method: GET, URL: /favicon.ico, Decision: deny, Reason: SQL Injection Attack Detected via libinjection
-2024/12/10 01:00:39 Method: GET, URL: /test1?input=test%27%20or%201=1%20, Decision: deny, Reason: SQL Injection Attack Detected via libinjection
-2024/12/10 01:00:39 Method: GET, URL: /favicon.ico, Decision: deny, Reason: SQL Injection Attack Detected via libinjection
-2024/12/10 09:11:34 Method: GET, URL: /test1?input=test%27%20or%201=1, Decision: deny, Reason: SQL Injection Attack Detected via libinjection
+2025/01/29 00:03:33 Method: GET, URL: /test_page/index.html, Decision: allow, Reason: 
+2025/01/29 00:03:33 Method: GET, URL: /test_page/index.html/ws, Decision: allow, Reason: 
+2025/01/29 00:03:33 Failed to copy response body: http: request method or response status code does not allow body
+2025/01/29 00:03:35 Method: GET, URL: /test_page/index.html, Decision: allow, Reason: 
+2025/01/29 00:03:35 Failed to send message through WebSocket: write tcp [::1]:54875->[::1]:8080: wsasend: An established connection was aborted by the software in your host machine.
+2025/01/29 00:03:35 Method: GET, URL: /test_page/index.html/ws, Decision: allow, Reason: 
+2025/01/29 00:03:35 Failed to send message through WebSocket: write tcp [::1]:54875->[::1]:8080: wsasend: An established connection was aborted by the software in your host machine.
+2025/01/29 00:03:35 Failed to copy response body: http: request method or response status code does not allow body
+2025/01/29 00:03:39 Method: GET, URL: /test_page/index.html?name=hi, Decision: allow, Reason: 
+2025/01/29 00:03:39 Failed to send message through WebSocket: write tcp [::1]:54875->[::1]:8080: wsasend: An established connection was aborted by the software in your host machine.
+2025/01/29 00:03:39 Method: GET, URL: /test_page/index.html/ws, Decision: allow, Reason: 
+2025/01/29 00:03:39 Failed to send message through WebSocket: write tcp [::1]:54875->[::1]:8080: wsasend: An established connection was aborted by the software in your host machine.
+2025/01/29 00:03:39 Failed to copy response body: http: request method or response status code does not allow body
+2025/01/29 00:03:54 Method: GET, URL: /test_page/index.html?name=%3Cs%3Ehi%3C%2Fs%3E, Decision: allow, Reason: 
+2025/01/29 00:03:54 Failed to send message through WebSocket: write tcp [::1]:54875->[::1]:8080: wsasend: An established connection was aborted by the software in your host machine.
+2025/01/29 00:03:54 Method: GET, URL: /test_page/index.html/ws, Decision: allow, Reason: 
+2025/01/29 00:03:54 Failed to send message through WebSocket: write tcp [::1]:54875->[::1]:8080: wsasend: An established connection was aborted by the software in your host machine.
+2025/01/29 00:03:54 Failed to copy response body: http: request method or response status code does not allow body
+2025/01/29 00:04:02 Method: GET, URL: /test_page/index.html?name=%3Cscript%3E, Decision: deny, Reason: NoScript XSS InjectionChecker: HTML Injection
+2025/01/29 00:04:02 Failed to send message through WebSocket: write tcp [::1]:54875->[::1]:8080: wsasend: An established connection was aborted by the software in your host machine.
+2025/01/29 00:17:13 Method: GET, URL: /test_page/index.html?name=%3Cscript%3E, Decision: deny, Reason: NoScript XSS InjectionChecker: HTML Injection
+2025/01/29 00:17:13 Failed to send message through WebSocket: write tcp [::1]:54875->[::1]:8080: wsasend: An established connection was aborted by the software in your host machine.
+2025/01/29 00:17:42 Method: GET, URL: /test_page/index.html?name=%3Cscript%3E, Decision: deny, Reason: NoScript XSS InjectionChecker: HTML Injection
+2025/01/29 00:40:03 Method: GET, URL: /test_page/index.html?name=%3Cscript%3E, Decision: deny, Reason: NoScript XSS InjectionChecker: HTML Injection
+2025/01/29 00:40:42 Method: GET, URL: /test_page/index.html?name=%3Cscript%3Ealert(1)%3C/script%3E, Decision: deny, Reason: Javascript method detected
+2025/01/29 00:48:55 Method: GET, URL: /test_page/index.html?name=%3Cscript%3Ealert(1)%3C/script%3E, Decision: deny, Reason: Javascript method detected

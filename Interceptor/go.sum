@@ -4,6 +4,8 @@ github.com/corazawaf/coraza/v3 v3.2.2 h1:zZxyLRJ7o8W11BB8XE94X3CxZmYTk0/RhHc1dQx
 github.com/corazawaf/coraza/v3 v3.2.2/go.mod h1:73JSSNpNrWeF8K+TqKAc7Apxm3uz2rBrspsYKR88tGk=
 github.com/corazawaf/libinjection-go v0.2.2 h1:Chzodvb6+NXh6wew5/yhD0Ggioif9ACrQGR4qjTCs1g=
 github.com/corazawaf/libinjection-go v0.2.2/go.mod h1:OP4TM7xdJ2skyXqNX1AN1wN5nNZEmJNuWbNPOItn7aw=
+github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=
+github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/magefile/mage v1.15.1-0.20231118170541-2385abb49a1f h1:iiLWLoibjCL0XND6inF7bs2nc20lU/FYkiR//VIOLUc=
 github.com/magefile/mage v1.15.1-0.20231118170541-2385abb49a1f/go.mod h1:z5UZb/iS3GoOSn0JgWuiw7dxlurVYTu+/jHXqQg881A=
 github.com/petar-dambovaliev/aho-corasick v0.0.0-20240411101913-e07a1f0e8eb4 h1:1Kw2vDBXmjop+LclnzCb/fFy+sgb3gYARwfmoUcQe6o=
