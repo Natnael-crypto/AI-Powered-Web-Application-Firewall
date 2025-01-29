@@ -1,24 +1,32 @@
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
-import RootLayout from "./layout/RootLayout";
-import { SidebarProvider } from "./components/ui/sidebar";
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider,
+} from 'react-router-dom'
+import RootLayout from './layout/RootLayout'
+import Dashboard from './pages/Dashboard'
+import LoginPage from './pages/Login'
+import LogAttack from './pages/LogAttacks'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<RootLayout />}>
-    </Route>
-  )
-);
+    <>
+      <Route path="/" element={<RootLayout />}>
+        <Route path="statistics/dashboard" element={<Dashboard />} />
+        <Route path="logs/attacks" element={<LogAttack />} />
+      </Route>
+      <Route path="/login" element={<LoginPage />} />
+    </>,
+  ),
+)
 
 function App() {
   return (
     <>
-    <SidebarProvider>
       <RouterProvider router={router} />
-      </SidebarProvider>
     </>
-
-  );
+  )
 }
 
-export default App;
-
+export default App
