@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -80,10 +81,12 @@ func addRequestFromInterceptor(message interface{}) {
 		}
 	}
 
+	fmt.Println(requestData["client_ip"])
+
 	// Create a new request from the received data
 	request := models.Request{
 		RequestID:        uuid.New().String(),
-		ApplicationID:    requestData["application_id"].(string),
+		ApplicationName:  requestData["application_name"].(string),
 		ClientIP:         requestData["client_ip"].(string),
 		RequestMethod:    requestData["request_method"].(string),
 		RequestURL:       requestData["request_url"].(string),
@@ -108,8 +111,6 @@ func addRequestFromInterceptor(message interface{}) {
 		log.Printf("Error saving request from interceptor: %v", err)
 		return
 	}
-
-	
 
 	log.Printf("Request saved: %v", request.RequestID)
 }

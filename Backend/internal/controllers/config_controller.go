@@ -11,6 +11,13 @@ import (
 
 // CreateConfig handles the creation of a new config entry
 func CreateConfig(c *gin.Context) {
+
+	// Check if the user is a super admin
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
 	var input struct {
 		ListeningPort   string `json:"listening_port" binding:"required"`
 		RemoteLogServer string `json:"remote_logServer" binding:"required"`

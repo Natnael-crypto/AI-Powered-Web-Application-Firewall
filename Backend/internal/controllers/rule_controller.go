@@ -5,12 +5,20 @@ import (
 	"backend/internal/models"
 	"backend/internal/utils"
 	"log"
+	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
+
+func generateRuleID() string {
+	rand.Seed(time.Now().UnixNano())
+	// Generate a random 19-digit number (within int64 limits)
+	number := rand.Int63n(1000000000000000000) // 19 digits
+	return strconv.FormatInt(number, 10)
+}
 
 // AddRule adds a new rule to the application by a superadmin or assigned admin
 func AddRule(c *gin.Context) {
@@ -48,7 +56,7 @@ func AddRule(c *gin.Context) {
 		}
 	}
 
-	ruleID := uuid.New().String()
+	ruleID := generateRuleID() // Generate 20-character numeric rule ID
 	ruleData := models.RuleData{
 		RuleID:         ruleID,
 		RuleType:       input.RuleType,

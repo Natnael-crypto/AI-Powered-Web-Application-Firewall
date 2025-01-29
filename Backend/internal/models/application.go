@@ -16,7 +16,7 @@ type Application struct {
 }
 
 type UserToApplication struct {
-	ID            string `json:id`
-	UserID        string `json:user_id`
-	ApplicationID string `json:application_id`
+	ID              string `json:id`
+	UserID          string `json:user_id`
+	ApplicationName string `json:application_name`
 }

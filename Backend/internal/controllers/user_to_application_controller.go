@@ -20,7 +20,7 @@ func AddUserToApplication(c *gin.Context) {
 
 	var input struct {
 		UserID        string `json:"user_id" binding:"required"`
-		ApplicationID string `json:"application_id" binding:"required"`
+		ApplicationName string `json:"application_name" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -37,14 +37,14 @@ func AddUserToApplication(c *gin.Context) {
 
 	// Check if application exists
 	var application models.Application
-	if err := config.DB.Where("application_id = ?", input.ApplicationID).First(&application).Error; err != nil {
+	if err := config.DB.Where("application_Name = ?", input.ApplicationName).First(&application).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
 		return
 	}
 
 	// Check if the user is already assigned to the application
 	var existingAssignment models.UserToApplication
-	if err := config.DB.Where("user_id = ? AND application_id = ?", input.UserID, input.ApplicationID).First(&existingAssignment).Error; err == nil {
+	if err := config.DB.Where("user_id = ? AND application_name = ?", input.UserID, input.ApplicationName).First(&existingAssignment).Error; err == nil {
 		// If assignment exists, return an error
 		c.JSON(http.StatusConflict, gin.H{"error": "user is already assigned to this application"})
 		return
@@ -54,7 +54,7 @@ func AddUserToApplication(c *gin.Context) {
 	userToApp := models.UserToApplication{
 		ID:            utils.GenerateUUID(),
 		UserID:        input.UserID,
-		ApplicationID: input.ApplicationID,
+		ApplicationName: input.ApplicationName,
 	}
 
 	if err := config.DB.Create(&userToApp).Error; err != nil {
@@ -75,7 +75,7 @@ func UpdateUserToApplication(c *gin.Context) {
 
 	var input struct {
 		UserID        string `json:"user_id" binding:"required"`
-		ApplicationID string `json:"application_id" binding:"required"`
+		ApplicationName string `json:"application_name" binding:"required"`
 	}
 
 	assignmentID := c.Param("assignment_id")
@@ -94,7 +94,7 @@ func UpdateUserToApplication(c *gin.Context) {
 
 	// Check if application exists
 	var application models.Application
-	if err := config.DB.Where("application_id = ?", input.ApplicationID).First(&application).Error; err != nil {
+	if err := config.DB.Where("application_name = ?", input.ApplicationName).First(&application).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
 		return
 	}
@@ -102,7 +102,7 @@ func UpdateUserToApplication(c *gin.Context) {
 	// Update the assignment
 	if err := config.DB.Model(&models.UserToApplication{}).Where("id = ?", assignmentID).Updates(map[string]interface{}{
 		"user_id":        input.UserID,
-		"application_id": input.ApplicationID,
+		"application_name": input.ApplicationName,
 	}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update user to application assignment"})
 		return

@@ -22,7 +22,7 @@ func AddApplication(c *gin.Context) {
 		ApplicationName string `json:"application_name" binding:"required,max=20"`
 		Description     string `json:"description" binding:"required,max=200"`
 		HostName        string `json:"hostname" binding:"required,max=40"`
-		IpAddress       string `json:"ip_address" binding:"required,max=15"`
+		IpAddress       string `json:"ip_address" binding:"required"`
 		Port            string `json:"port" binding:"required,max=5"`
 		Status          bool   `json:"status"`
 	}
@@ -69,10 +69,10 @@ func AddApplication(c *gin.Context) {
 // GetApplication retrieves a specific application by ID
 func GetApplication(c *gin.Context) {
 	// Check if the user is a super admin
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
-	}
+	// if c.GetString("role") != "super_admin" {
+	// 	c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+	// 	return
+	// }
 
 	applicationID := c.Param("application_id")
 	var application models.Application
@@ -88,10 +88,10 @@ func GetApplication(c *gin.Context) {
 // GetAllApplications retrieves all applications
 func GetAllApplications(c *gin.Context) {
 	// Check if the user is a super admin
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
-	}
+	// if c.GetString("role") != "super_admin" {
+	// 	c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+	// 	return
+	// }
 
 	var applications []models.Application
 	if err := config.DB.Find(&applications).Error; err != nil {

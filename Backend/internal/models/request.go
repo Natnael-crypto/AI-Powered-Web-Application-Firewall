@@ -5,7 +5,7 @@ import "time"
 // Request represents a log of a web request
 type Request struct {
 	RequestID        string    `json:"request_id" gorm:"primaryKey"`
-	ApplicationID    string    `json:"application_id"`
+	ApplicationName  string    `json:"application_name"`
 	ClientIP         string    `json:"client_ip"`
 	RequestMethod    string    `json:"request_method"`
 	RequestURL       string    `json:"request_url"`

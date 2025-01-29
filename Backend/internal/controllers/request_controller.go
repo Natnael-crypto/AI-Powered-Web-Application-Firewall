@@ -13,7 +13,7 @@ import (
 
 func AddRequest(c *gin.Context) {
 	var input struct {
-		ApplicationID    string `json:"application_id" binding:"required"`
+		ApplicationName    string `json:"application_name" binding:"required"`
 		ClientIP         string `json:"client_ip" binding:"required"`
 		RequestMethod    string `json:"request_method" binding:"required"`
 		RequestURL       string `json:"request_url" binding:"required"`
@@ -40,7 +40,7 @@ func AddRequest(c *gin.Context) {
 
 	// Check if the application exists
 	var app models.Application
-	if err := config.DB.Where("application_id = ?", input.ApplicationID).First(&app).Error; err != nil {
+	if err := config.DB.Where("application_name = ?", input.ApplicationName).First(&app).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
 		return
 	}
@@ -48,7 +48,7 @@ func AddRequest(c *gin.Context) {
 	// Create the request
 	request := models.Request{
 		RequestID:        uuid.New().String(),
-		ApplicationID:    input.ApplicationID,
+		ApplicationName:    input.ApplicationName,
 		ClientIP:         input.ClientIP,
 		RequestMethod:    input.RequestMethod,
 		RequestURL:       input.RequestURL,
@@ -99,13 +99,13 @@ func GetRequests(c *gin.Context) {
 		}
 
 		// Collect application IDs assigned to the user
-		applicationIDs := make([]string, len(userApps))
+		applicationNames := make([]string, len(userApps))
 		for i, app := range userApps {
-			applicationIDs[i] = app.ApplicationID
+			applicationNames[i] = app.ApplicationName
 		}
 
 		// Retrieve requests for those applications
-		if err := config.DB.Where("application_id IN ?", applicationIDs).Find(&requests).Error; err != nil {
+		if err := config.DB.Where("application_name IN ?", applicationNames).Find(&requests).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch requests"})
 			return
 		}
