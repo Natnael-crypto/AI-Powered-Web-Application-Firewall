@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+
 	"github.com/RackSec/srslog"
 )
 
@@ -25,6 +26,7 @@ func InitializeLogger(syslogAddr string) error {
 
 	// Initialize Syslog writer
 	syslogWriter, err = srslog.Dial("udp", syslogAddr, srslog.LOG_INFO, "WAF")
+	fmt.Print(syslogAddr)
 	if err != nil {
 		return fmt.Errorf("failed to initialize Syslog writer: %v", err)
 	}
