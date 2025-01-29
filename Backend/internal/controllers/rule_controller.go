@@ -3,6 +3,8 @@ package controllers
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+	"backend/internal/utils"
+	"log"
 	"net/http"
 	"time"
 
@@ -14,6 +16,7 @@ import (
 func AddRule(c *gin.Context) {
 	var input struct {
 		RuleType       string `json:"rule_type" binding:"required"`
+		RuleMethod     string `json:"rule_method" binding:"required"`
 		RuleDefinition string `json:"rule_definition" binding:"required"`
 		Action         string `json:"action" binding:"required"`
 		ApplicationID  string `json:"application_id" binding:"required"`
@@ -45,13 +48,30 @@ func AddRule(c *gin.Context) {
 		}
 	}
 
+	ruleID := uuid.New().String()
+	ruleData := models.RuleData{
+		RuleID:         ruleID,
+		RuleType:       input.RuleType,
+		RuleMethod:     input.RuleMethod,
+		RuleDefinition: input.RuleDefinition,
+		Action:         input.Action,
+		Category:       input.Category,
+	}
+
+	ruleString, err := utils.GenerateRule(ruleData)
+	if err != nil {
+		log.Fatalf("Error generating rule: %v", err)
+	}
+
 	// Create the rule
 	rule := models.Rule{
-		RuleID:         uuid.New().String(),
+		RuleID:         ruleID,
 		RuleType:       input.RuleType,
 		RuleDefinition: input.RuleDefinition,
 		Action:         input.Action,
 		ApplicationID:  input.ApplicationID,
+		RuleMethod:     input.RuleMethod,
+		RuleString:     ruleString,
 		CreatedBy:      userID,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),

@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"net/http"
 	"backend/internal/config"
 	"backend/internal/models"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -12,7 +12,8 @@ import (
 // CreateConfig handles the creation of a new config entry
 func CreateConfig(c *gin.Context) {
 	var input struct {
-		ListeningPort string `json:"listening_port" binding:"required"`
+		ListeningPort   string `json:"listening_port" binding:"required"`
+		RemoteLogServer string `json:"remote_logServer" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -29,8 +30,9 @@ func CreateConfig(c *gin.Context) {
 
 	// Create a new config entry
 	newConf := models.Conf{
-		ID:            uuid.New().String(),
-		ListeningPort: input.ListeningPort,
+		ID:              uuid.New().String(),
+		ListeningPort:   input.ListeningPort,
+		RemoteLogServer: input.RemoteLogServer,
 	}
 
 	if err := config.DB.Create(&newConf).Error; err != nil {
@@ -44,7 +46,8 @@ func CreateConfig(c *gin.Context) {
 // UpdateConfig updates an existing configuration
 func UpdateConfig(c *gin.Context) {
 	var input struct {
-		ListeningPort string `json:"listening_port" binding:"required"`
+		ListeningPort   string `json:"listening_port" binding:"required"`
+		RemoteLogServer string `json:remote_logServer binding:"required"`
 	}
 
 	configID := c.Param("id")
@@ -72,13 +75,10 @@ func UpdateConfig(c *gin.Context) {
 
 // GetConfig retrieves a configuration by ID
 func GetConfig(c *gin.Context) {
-	configID := c.Param("id")
-
 	var conf models.Conf
-	if err := config.DB.Where("id = ?", configID).First(&conf).Error; err != nil {
+	if err := config.DB.First(&conf).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "configuration not found"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"data": conf})
 }

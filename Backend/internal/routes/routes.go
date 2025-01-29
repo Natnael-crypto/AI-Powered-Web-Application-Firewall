@@ -51,8 +51,9 @@ func InitializeRoutes(r *gin.Engine) {
 	{
 		config.POST("/add", controllers.CreateConfig)
 		config.PUT("/update/:id", controllers.UpdateConfig)
-		config.GET("/", controllers.GetConfig)
+
 	}
+	r.GET("/config", controllers.GetConfig)
 
 	// Rule Management
 	rules := authorized.Group("/rule")
