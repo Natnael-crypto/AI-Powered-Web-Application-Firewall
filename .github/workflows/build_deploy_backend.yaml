@@ -45,17 +45,25 @@ jobs:
           echo "DB_SSLMODE=disable" >> ./Backend/.env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ./Backend/.env
 
-      # Step 4: Build the Go application
+      # Step 4: Change directory to Backend and initialize Go module (if needed)
+      - name: Initialize Go module (if needed)
+        run: |
+          pwd
+          cd Backend
+          go mod tidy
+
+      # Step 5: Build the Go application inside Backend directory
       - name: Build the application
         run: |
-          go build -o backend ./Backend/cmd
+          cd Backend
+          go build -o backend ./cmd
 
-      # Step 5: Build Docker image
+      # Step 6: Build Docker image
       - name: Build Docker image
         run: |
           docker build -t natnaelcrypto/waf-backend:latest .
 
-      # Step 6: Push Docker image to Docker Hub
+      # Step 7: Push Docker image to Docker Hub
       - name: Push Docker image to Docker Hub
         run: |
           docker login -u natnaelcrypto -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
