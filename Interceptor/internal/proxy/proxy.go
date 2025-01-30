@@ -178,7 +178,10 @@ func Starter() {
 	}
 	defer func() {
 		if wsConn != nil {
-			wsConn.Close()
+			err := wsConn.Close()
+			if err != nil {
+				log.Println("An error occurred trying to close websocket connection", err)
+			}
 		}
 	}()
 

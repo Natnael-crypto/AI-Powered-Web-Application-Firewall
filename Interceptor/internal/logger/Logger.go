@@ -41,7 +41,10 @@ func LogRequest(r *http.Request, decision, reason string) {
 
 	// Log to Syslog
 	if syslogWriter != nil {
-		syslogWriter.Info(message)
+		err := syslogWriter.Info(message)
+		if err != nil {
+			log.Println("An error occured while trying to write logs:", err)
+		}
 	} else {
 		log.Println("Syslog writer not initialized. Skipping Syslog logging.")
 	}
@@ -58,9 +61,15 @@ func LogRequest(r *http.Request, decision, reason string) {
 // CloseLogger closes the file and Syslog connections
 func CloseLogger() {
 	if logFile != nil {
-		logFile.Close()
+		err := logFile.Close()
+		if err != nil {
+			log.Println("An error occurred trying to close log file:", err)
+		}
 	}
 	if syslogWriter != nil {
-		syslogWriter.Close()
+		err := syslogWriter.Close()
+		if err != nil {
+			log.Println("An error occurred trying to close syslog writer:", err)
+		}
 	}
 }
