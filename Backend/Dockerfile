@@ -20,7 +20,7 @@ RUN go build -o backend ./cmd/main.go
 RUN ls -lah /app/Backend/
 
 # Start a new image to reduce size
-FROM debian:bullseye-slim
+FROM frolvlad/alpine-glibc:latest
 
 # Copy the built binary from the builder stage
 COPY --from=builder /app/Backend/backend /backend
