@@ -11,7 +11,7 @@ COPY . .
 RUN go mod tidy
 
 # Build the Go binary
-RUN go build -o /backend .
+RUN go build -o backend ./Backend/cmd
 
 # Start a new image to reduce size
 FROM debian:bullseye-slim
