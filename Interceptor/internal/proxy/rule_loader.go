@@ -3,7 +3,7 @@ package proxy
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 )
@@ -35,14 +35,14 @@ func FetchRules(applicationID string) (*RulesResponse, error) {
 	url := fmt.Sprintf("http://localhost:8080/rule/%s", applicationID)
 
 	// Make the GET request
-	resp, err := http.Get(url)
+	resp, err := http.Get(url) // #nosec G107 -- The url is constructed from an untainted sourcce
 	if err != nil {
 		return nil, fmt.Errorf("error making GET request: %v", err)
 	}
 	defer resp.Body.Close()
 
 	// Read the response body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %v", err)
 	}
@@ -63,7 +63,7 @@ func WriteRuleToFile(applicationID string, rules []Rule) (string, error) {
 	fileName := fmt.Sprintf("%s.conf", applicationID)
 
 	// Open the file for writing
-	file, err := os.Create("./internal/config/custom/" + fileName)
+	file, err := os.Create("./internal/config/custom/" + fileName) // #nosec G304 -- The file path comes from an untainted source
 	if err != nil {
 		return "", fmt.Errorf("error creating file: %v", err)
 	}

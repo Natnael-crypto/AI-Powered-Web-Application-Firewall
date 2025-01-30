@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 )
 
 type Config struct {
@@ -244,7 +245,11 @@ func Starter() {
 	defer logger.CloseLogger()
 
 	fmt.Printf("Starting server on port %s\n", proxyPort)
-	if err := http.ListenAndServe(proxyPort, nil); err != nil {
+	server := &http.Server{
+		Addr:              ":1234",
+		ReadHeaderTimeout: 3 * time.Second,
+	}
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }
