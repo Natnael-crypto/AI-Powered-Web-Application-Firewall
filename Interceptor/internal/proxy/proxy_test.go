@@ -24,7 +24,7 @@ func TestProxy(t *testing.T) {
 		helloWorldMsg = "Hello, World!"
 	)
 
-	if err := waf.InitializeRuleEngine(); err != nil {
+	if _, err := waf.InitializeRuleEngine(""); err != nil {
 		t.Fatalf("Failed to initialize WAF: %v", err)
 	}
 
