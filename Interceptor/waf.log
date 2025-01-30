@@ -29,3 +29,13 @@
 2025/01/29 23:59:44 Failed to copy response body: http: request method or response status code does not allow body
 2025/01/30 00:00:03 Method: GET, URL: /test_page/admin, Decision: deny, Reason: 
 2025/01/30 00:00:06 Method: GET, URL: /test_page/admin, Decision: deny, Reason: 
+2025/01/30 12:14:28 Method: GET, URL: /test_page/index.html, Decision: allow, Reason: 
+2025/01/30 12:14:28 Method: GET, URL: /test_page/index.html/ws, Decision: allow, Reason: 
+2025/01/30 12:14:28 Failed to copy response body: http: request method or response status code does not allow body
+2025/01/30 12:15:11 Method: GET, URL: /test_page/admin/index.html, Decision: deny, Reason: 
+2025/01/30 12:15:13 Method: GET, URL: /test_page/index.html/ws, Decision: allow, Reason: 
+2025/01/30 12:15:13 Failed to copy response body: http: request method or response status code does not allow body
+2025/01/30 12:15:20 Method: GET, URL: /test_page/admin1/index.html, Decision: deny, Reason: 
+2025/01/30 12:15:27 Method: GET, URL: /test_page/admi/index.html, Decision: allow, Reason: 
+2025/01/30 12:15:31 Method: GET, URL: /test_page/index.html/ws, Decision: allow, Reason: 
+2025/01/30 12:15:31 Failed to copy response body: http: request method or response status code does not allow body

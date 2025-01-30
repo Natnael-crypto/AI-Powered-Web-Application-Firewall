@@ -1,7 +1,6 @@
 package error_page
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -57,9 +56,7 @@ func Send403Response(w http.ResponseWriter, RuleID int, RuleMessage string, Acti
 		<body>
 			<div class="container">
 				<h1>403 Forbidden</h1>
-				<p>Your request has been blocked by the Web Application Firewall.</p>
-				<p>Rule Detected: ` + RuleMessage + `</p>
-				<p>Rule ID: ` + fmt.Sprintf("%d", RuleID) + `</p>
+				<p>Your request has been blocked.</p>
 				<p><a href="/">Go back to Home</a></p>
 			</div>
 		</body>

@@ -158,13 +158,13 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		Status:           fmt.Sprintf("%d", status),
 		MatchedRules:     ruleMessage,
 		ThreatDetected:   blockedByRule,
-		ThreatType:       "SQL Injection", // TODO Replace with actual threat detection logic
+		ThreatType:       "", // TODO Replace with actual threat detection logic
 		ActionTaken:      action,
 		BotDetected:      false,     // TODO Implement bot detection logic
 		GeoLocation:      "Unknown", // TODO Implement GeoLocation resolution
 		RateLimited:      false,     // TODO Implement rate limiting logic
 		UserAgent:        r.UserAgent(),
-		AIAnalysisResult: "No malicious activity detected", // TODO Replace with actual AI analysis results
+		AIAnalysisResult: "", // TODO Replace with actual AI analysis results
 	}
 
 	if blockedByRule {
