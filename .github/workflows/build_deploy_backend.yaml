@@ -61,7 +61,7 @@ jobs:
       # Step 6: Build Docker image
       - name: Build Docker image
         run: |
-          docker build -t natnaelcrypto/waf-backend:latest .
+          docker build -t natnaelcrypto/waf-backend:latest ./Backend
 
       # Step 7: Push Docker image to Docker Hub
       - name: Push Docker image to Docker Hub
