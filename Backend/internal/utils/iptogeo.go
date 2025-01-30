@@ -111,18 +111,3 @@ func GetCountryName(ip string) string {
 	return "Unknown" // Return "Unknown" if IP doesn't match any range
 }
 
-func main() {
-	// Load the IP ranges and country names from the CSV file when the backend starts
-	err := loadIPRanges("ip_to_country.csv")
-	if err != nil {
-		fmt.Println("Error loading IP ranges:", err)
-		return
-	}
-
-	// Example IP address
-	ipAddress := "1.0.0.1"
-
-	// Get the country name for the given IP
-	country := getCountryName(ipAddress)
-	fmt.Println("Country for IP", ipAddress, "is:", country)
-}
