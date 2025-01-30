@@ -18,7 +18,7 @@ func InitializeLogger(syslogAddr string) error {
 	var err error
 
 	// Open local file for logging
-	logFile, err = os.OpenFile("waf.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	logFile, err = os.OpenFile("waf.log", os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to initialize file logger: %v", err)
 	}
