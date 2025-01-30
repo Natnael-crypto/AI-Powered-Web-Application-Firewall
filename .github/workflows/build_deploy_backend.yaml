@@ -55,12 +55,16 @@ jobs:
       # Step 5: Build the Go application inside Backend directory
       - name: Build the application
         run: |
+          pwd
+          ls -R
           cd Backend
           go build -o backend ./cmd
 
       # Step 6: Build Docker image
       - name: Build Docker image
         run: |
+          pwd
+          ls -R  
           docker build -t natnaelcrypto/waf-backend:latest -f Backend/Dockerfile .
 
       # Step 7: Push Docker image to Docker Hub
