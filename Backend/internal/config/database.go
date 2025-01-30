@@ -27,7 +27,6 @@ func InitDB() {
 	password := os.Getenv("DB_PASSWORD")
 	dbname := os.Getenv("DB_NAME")
 	sslmode := os.Getenv("DB_SSLMODE")
-	
 
 	// Ensure required variables are set
 	if host == "" || port == "" || user == "" || password == "" || dbname == "" {
@@ -60,18 +59,49 @@ func InitDB() {
 	err = DB.AutoMigrate(
 		&models.Application{},
 		&models.User{},
-		models.UserToApplication{},
-		models.Conf{},
-		models.Rule{},
-		models.Request{},
-		models.Notification{},
-		models.Cert{},
+		&models.UserToApplication{},
+		&models.Conf{},
+		&models.Rule{},
+		&models.Request{},
+		&models.Notification{},
+		&models.Cert{},
 	)
 	if err != nil {
 		log.Fatalf("Migration failed: %v", err)
 	}
 
 	log.Println("Database migration completed successfully.")
+
+	// Create indexes to optimize queries
+	createIndexes()
+}
+
+// createIndexes ensures database indexes are created for performance optimization
+func createIndexes() {
+	log.Println("Creating necessary indexes...")
+
+	indexQueries := []string{
+		`CREATE INDEX IF NOT EXISTS idx_requests_application_name ON requests(application_name);`,
+		`CREATE INDEX IF NOT EXISTS idx_requests_client_ip ON requests(client_ip);`,
+		`CREATE INDEX IF NOT EXISTS idx_requests_request_method ON requests(request_method);`,
+		`CREATE INDEX IF NOT EXISTS idx_requests_timestamp ON requests(timestamp);`,
+		`CREATE INDEX IF NOT EXISTS idx_requests_threat_detected ON requests(threat_detected);`,
+		`CREATE INDEX IF NOT EXISTS idx_requests_bot_detected ON requests(bot_detected);`,
+		`CREATE INDEX IF NOT EXISTS idx_requests_rate_limited ON requests(rate_limited);`,
+		`CREATE INDEX IF NOT EXISTS idx_requests_threat_type ON requests(threat_type);`,
+		`CREATE INDEX IF NOT EXISTS idx_requests_geo_location ON requests(geo_location);`,
+		`CREATE INDEX IF NOT EXISTS idx_requests_user_agent ON requests(user_agent);`,
+		`CREATE INDEX IF NOT EXISTS idx_requests_action_taken ON requests(action_taken);`,
+		`CREATE INDEX IF NOT EXISTS idx_requests_full_text ON requests USING GIN (to_tsvector('english', headers || ' ' || body || ' ' || request_url));`,
+	}
+
+	for _, query := range indexQueries {
+		if err := DB.Exec(query).Error; err != nil {
+			log.Printf("Failed to create index: %v", err)
+		}
+	}
+
+	log.Println("Indexes created successfully.")
 }
 
 // CloseDB closes the GORM database connection

@@ -1,13 +1,14 @@
 package controllers
 
 import (
-	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"backend/internal/config"
 	"backend/internal/models"
+	"backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -81,7 +82,15 @@ func addRequestFromInterceptor(message interface{}) {
 		}
 	}
 
-	fmt.Println(requestData["client_ip"])
+	clientIP, ok := requestData["client_ip"].(string)
+	if !ok {
+		log.Println("Error: client_ip is not a string")
+		return
+	}
+
+	ipParts := strings.Split(clientIP, ":")
+
+	country := utils.GetCountryName(ipParts[0])
 
 	// Create a new request from the received data
 	request := models.Request{
@@ -100,7 +109,7 @@ func addRequestFromInterceptor(message interface{}) {
 		ThreatType:       requestData["threat_type"].(string),
 		ActionTaken:      requestData["action_taken"].(string),
 		BotDetected:      requestData["bot_detected"].(bool),
-		GeoLocation:      requestData["geo_location"].(string),
+		GeoLocation:      country,
 		RateLimited:      requestData["rate_limited"].(bool),
 		UserAgent:        requestData["user_agent"].(string),
 		AIAnalysisResult: requestData["ai_analysis_result"].(string),
