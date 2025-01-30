@@ -8,21 +8,29 @@ import (
 	"github.com/corazawaf/coraza/v3"
 )
 
-var waf coraza.WAF
-var err error
-
-func InitializeRuleEngine() error {
-
-	cfg := coraza.NewWAFConfig().WithDirectivesFromFile("./internal/config/coreruleset/crs-setup.conf").WithDirectivesFromFile("./internal/config/coreruleset/rules/*.conf")
-	waf, err = coraza.NewWAF(cfg)
-	if err != nil {
-		return fmt.Errorf("failed to initialize WAF: %v", err)
-	}
-	return nil
+// WAF structure to hold Coraza WAF instance
+type WAF struct {
+	engine coraza.WAF // Directly store coraza.WAF instead of a pointer
 }
 
-func EvaluateRules(r *http.Request) (bool, int, string, string, int) {
-	tx := waf.NewTransaction()
+// InitializeRuleEngine initializes a new WAF instance with custom rules
+func InitializeRuleEngine(customRule string) (*WAF, error) {
+	cfg := coraza.NewWAFConfig().
+		WithDirectivesFromFile("./internal/config/coreruleset/crs-setup.conf").
+		WithDirectivesFromFile("./internal/config/coreruleset/rules/*.conf").
+		WithDirectivesFromFile("./internal/config/custom/" + customRule)
+
+	engine, err := coraza.NewWAF(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize WAF: %v", err)
+	}
+
+	return &WAF{engine: engine}, nil // Wrap it in a struct
+}
+
+// EvaluateRules processes incoming requests and applies WAF rules
+func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int) {
+	tx := w.engine.NewTransaction() // Correct usage
 	defer tx.Close()
 
 	for name, values := range r.Header {
@@ -33,7 +41,7 @@ func EvaluateRules(r *http.Request) (bool, int, string, string, int) {
 
 	tx.ProcessRequestHeaders()
 	tx.ProcessURI(r.RequestURI, r.Method, r.Proto)
-	_, err = tx.ProcessRequestBody()
+	_, err := tx.ProcessRequestBody()
 	if err != nil {
 		log.Println("An error occured while trying to process request body", err)
 	}
@@ -48,13 +56,13 @@ func EvaluateRules(r *http.Request) (bool, int, string, string, int) {
 
 	matchedRules := tx.MatchedRules()
 	totalRules := len(matchedRules)
-	rule_message := ""
+	ruleMessage := ""
+
 	if totalRules > 1 {
 		fmt.Println("Matched Rules:")
 		ruleIDPrinted := false
 
 		for i, rule := range matchedRules {
-
 			if i == totalRules-1 {
 				continue
 			}
@@ -69,13 +77,13 @@ func EvaluateRules(r *http.Request) (bool, int, string, string, int) {
 			}
 
 			if len(rule.Message()) > 0 {
-				rule_message = rule.Message()
+				ruleMessage = rule.Message()
 			}
 		}
 	}
 
 	if interruption != nil {
-		return true, interruption.RuleID, rule_message, interruption.Action, interruption.Status
+		return true, interruption.RuleID, ruleMessage, interruption.Action, interruption.Status
 	}
 
 	return false, 0, "", "", 0

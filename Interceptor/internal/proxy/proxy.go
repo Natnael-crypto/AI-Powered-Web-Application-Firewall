@@ -9,110 +9,188 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"runtime"
+	"sync"
 	"time"
-
-	"github.com/gorilla/websocket"
 )
 
-const remoteLogServer = "192.168.1.2:514" // TODO Get the IP address and port from the server
-
-const targetRedirectIP = "http://127.0.0.1:5500" // TODO Get the IP address and port from the server
-
-const proxyPort = ":8000" //TODO Get the port from the server
-
-var requestQueue = make(chan *http.Request, 100)
-var wsConn *websocket.Conn // WebSocket connection to the backend server
-
-// MessageModel represents the structure of the WebSocket message sent to the backend server
-type MessageModel struct {
-	ApplicationID    string `json:"application_id" binding:"required"`
-	ClientIP         string `json:"client_ip" binding:"required"`
-	RequestMethod    string `json:"request_method" binding:"required"`
-	RequestURL       string `json:"request_url" binding:"required"`
-	Headers          string `json:"headers"`
-	Body             string `json:"body"`
-	ResponseCode     int    `json:"response_code" binding:"required"`
-	Status           string `json:"status" binding:"required"`
-	MatchedRules     string `json:"matched_rules"`
-	ThreatDetected   bool   `json:"threat_detected"`
-	ThreatType       string `json:"threat_type"`
-	ActionTaken      string `json:"action_taken"`
-	BotDetected      bool   `json:"bot_detected"`
-	GeoLocation      string `json:"geo_location"`
-	RateLimited      bool   `json:"rate_limited"`
-	UserAgent        string `json:"user_agent"`
-	AIAnalysisResult string `json:"ai_analysis_result"`
+type Config struct {
+	ID              string `json:"ID"`
+	ListeningPort   string `json:"ListeningPort"`
+	RemoteLogServer string `json:"RemoteLogServer"`
 }
 
-// sendToBackend sends the log to the backend server through WebSocket
-func sendToBackend(message MessageModel) {
-	if wsConn == nil {
-		log.Println("WebSocket connection is not established")
-		return
-	}
-
-	data, err := json.Marshal(message)
-	if err != nil {
-		log.Printf("Failed to marshal message: %v", err)
-		return
-	}
-
-	err = wsConn.WriteMessage(websocket.TextMessage, data)
-	if err != nil {
-		log.Printf("Failed to send message through WebSocket: %v", err)
-	}
+type Application struct {
+	ApplicationID   string `json:"application_id"`
+	ApplicationName string `json:"application_name"`
+	Hostname        string `json:"hostname"`
+	IPAddress       string `json:"ip_address"`
+	Port            string `json:"port"`
+	Status          bool   `json:"status"`
 }
 
+var (
+	remoteLogServer string
+	proxyPort       string
+	applications    map[string]string   // Maps hostname -> "IP:Port"
+	wafInstances    map[string]*waf.WAF // Maps hostname -> WAF instance
+	configLock      sync.RWMutex
+	appsLock        sync.RWMutex
+)
+
+// fetchConfig retrieves the configuration from the remote API
+func fetchConfig() error {
+	resp, err := http.Get("http://localhost:8080/config")
+	if err != nil {
+		return fmt.Errorf("failed to fetch config: %v", err)
+	}
+	defer resp.Body.Close()
+
+	var result struct {
+		Config Config `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return fmt.Errorf("failed to decode config: %v", err)
+	}
+
+	configLock.Lock()
+	remoteLogServer = result.Config.RemoteLogServer
+	proxyPort = ":" + result.Config.ListeningPort
+	configLock.Unlock()
+
+	fmt.Printf("Loaded config: LogServer=%s, ProxyPort=%s\n", remoteLogServer, proxyPort)
+	return nil
+}
+
+// fetchApplications retrieves the list of applications and updates the hostname mapping
+func fetchApplications() error {
+	resp, err := http.Get("http://localhost:8080/application/")
+	if err != nil {
+		return fmt.Errorf("failed to fetch applications: %v", err)
+	}
+	defer resp.Body.Close()
+
+	var result struct {
+		Applications []Application `json:"applications"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return fmt.Errorf("failed to decode applications: %v", err)
+	}
+
+	appsLock.Lock()
+	applications = make(map[string]string)
+	wafInstances = make(map[string]*waf.WAF)
+	for _, app := range result.Applications {
+		if app.Status {
+			applications[app.ApplicationName] = app.Hostname
+
+			// Initialize WAF for each application using its application ID
+			rulesResponse, err := FetchRules(app.ApplicationID)
+			if err != nil {
+				log.Fatalf("Error fetching rules: %v", err)
+			}
+
+			// Write the rule strings to a file and get the filename
+			fileName, err := WriteRuleToFile(app.ApplicationID, rulesResponse.Rules)
+			if err != nil {
+				log.Fatalf("Error writing rules to file: %v", err)
+			}
+
+			wafInstance, err := waf.InitializeRuleEngine(fileName)
+			if err != nil {
+				log.Printf("Error initializing WAF for application %s: %v", app.ApplicationName, err)
+				continue
+			}
+
+			// Store the WAF instance by hostname
+			wafInstances[app.ApplicationName] = wafInstance
+		}
+	}
+	appsLock.Unlock()
+
+	fmt.Println("Loaded applications:", applications)
+	return nil
+}
+
+// getTargetRedirectIP gets the backend target URL based on request hostname
+func getTargetRedirectIP(hostname string) (string, bool) {
+	appsLock.RLock()
+	defer appsLock.RUnlock()
+	target, exists := applications[hostname]
+	return target, exists
+}
+
+// proxyRequest handles incoming requests and forwards them to the correct backend server
 func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/favicon.ico" {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	blocked_by_Rule, RuleID, RuleMessage, Action, Status := waf.EvaluateRules(r)
+	hostname := r.Host
+	targetRedirectIP, exists := getTargetRedirectIP(hostname)
+	if r.TLS != nil {
+		targetRedirectIP = "https://" + targetRedirectIP
+	} else {
+		targetRedirectIP = "http://" + targetRedirectIP
+	}
+	if !exists {
+		http.Error(w, "Unknown host", http.StatusBadGateway)
+		return
+	}
 
+	// Retrieve the WAF instance for the application based on the hostname
+	wafInstance, exists := wafInstances[hostname]
+	if !exists {
+		http.Error(w, "WAF instance not found for the application", http.StatusInternalServerError)
+		return
+	}
+
+	// Evaluate the request using the appropriate WAF instance
+	blockedByRule, ruleID, ruleMessage, action, status := wafInstance.EvaluateRules(r)
 	message := MessageModel{
-		ApplicationID:    "b028fd26-fd2c-4486-8a1f-d1b510b652f0",
+		ApplicationName:  hostname,
 		ClientIP:         r.RemoteAddr,
 		RequestMethod:    r.Method,
 		RequestURL:       r.URL.String(),
 		Headers:          fmt.Sprintf("%v", r.Header),
 		ResponseCode:     http.StatusOK,
-		Status:           fmt.Sprintf("%d", Status),
-		MatchedRules:     RuleMessage,
-		ThreatDetected:   blocked_by_Rule,
-		ThreatType:       "SQL Injection", // TODO Replace this with the actual threat type logic
-		ActionTaken:      Action,
-		BotDetected:      false,     // TODO Add logic to detect bot traffic if required
-		GeoLocation:      "Unknown", //TODO Add logic to resolve GeoLocation
-		RateLimited:      false,     //TODO Add logic for rate limiting if required
+		Status:           fmt.Sprintf("%d", status),
+		MatchedRules:     ruleMessage,
+		ThreatDetected:   blockedByRule,
+		ThreatType:       "SQL Injection", // TODO Replace with actual threat detection logic
+		ActionTaken:      action,
+		BotDetected:      false,     // TODO Implement bot detection logic
+		GeoLocation:      "Unknown", // TODO Implement GeoLocation resolution
+		RateLimited:      false,     // TODO Implement rate limiting logic
 		UserAgent:        r.UserAgent(),
 		AIAnalysisResult: "No malicious activity detected", // TODO Replace with actual AI analysis results
 	}
 
-	if blocked_by_Rule {
-		error_page.Send403Response(w, RuleID, RuleMessage, Action, Status)
-		logger.LogRequest(r, Action, RuleMessage)
+	if blockedByRule {
+		error_page.Send403Response(w, ruleID, ruleMessage, action, status)
+		logger.LogRequest(r, action, ruleMessage)
 		message.ResponseCode = http.StatusForbidden
 		message.Status = "blocked"
-		sendToBackend(message) // Send log to backend
+		SendToBackend(message) // Send log to backend
 		return
 	}
 
 	logger.LogRequest(r, "allow", "")
 	message.Status = "allowed"
-	sendToBackend(message) // Send log to backend
+	SendToBackend(message) // Send log to backend
 
 	client := &http.Client{}
 	targetURL := fmt.Sprintf("%s%s", targetRedirectIP, r.URL.Path)
-
+	fmt.Println(targetURL)
 	if r.URL.RawQuery != "" {
 		targetURL = fmt.Sprintf("%s?%s", targetURL, r.URL.RawQuery)
 	}
 
 	req, err := http.NewRequest(r.Method, targetURL, r.Body)
 	if err != nil {
+		fmt.Printf("Failed to create request: %v", err)
 		http.Error(w, "Failed to create request", http.StatusInternalServerError)
 		return
 	}
@@ -142,58 +220,23 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func worker() {
-	for r := range requestQueue {
-		fmt.Printf("Worker processing request: %s %s\n", r.Method, r.URL)
-	}
-}
-
-func initializeWebSocket() error {
-	var err error
-	wsURL := "ws://localhost:8080/ws" // Replace with your backend WebSocket server URL
-	wsConn, _, err = websocket.DefaultDialer.Dial(wsURL, nil)
-	if err != nil {
-		return fmt.Errorf("failed to connect to WebSocket server: %v", err)
-	}
-
-	log.Println("WebSocket connection established")
-	return nil
-}
-
 func Starter() {
-	if err := waf.InitializeRuleEngine(); err != nil {
-		log.Fatalf("Failed to initialize WAF: %v", err)
+	if err := fetchConfig(); err != nil {
+		log.Fatalf("Error fetching config: %v", err)
 	}
 
-	workerPoolSize := runtime.NumCPU()
-	fmt.Printf("Detected %d logical CPUs. Setting worker pool size to %d.\n", workerPoolSize, workerPoolSize)
-
-	for i := 0; i < workerPoolSize; i++ {
-		go worker()
+	if err := fetchApplications(); err != nil {
+		log.Fatalf("Error fetching applications: %v", err)
 	}
 
 	// Initialize WebSocket connection
-	err := initializeWebSocket()
+	err := InitializeWebSocket()
 	if err != nil {
 		log.Fatalf("Failed to initialize WebSocket: %v", err)
 	}
-	defer func() {
-		if wsConn != nil {
-			err := wsConn.Close()
-			if err != nil {
-				log.Println("An error occurred trying to close websocket connection", err)
-			}
-		}
-	}()
+	defer CloseWebSocket()
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		select {
-		case requestQueue <- r:
-		default:
-			http.Error(w, "Server too busy. Try again later.", http.StatusServiceUnavailable)
-		}
-		proxyRequest(w, r)
-	})
+	http.HandleFunc("/", proxyRequest)
 
 	err = logger.InitializeLogger(remoteLogServer)
 	if err != nil {
