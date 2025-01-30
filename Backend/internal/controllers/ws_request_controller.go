@@ -82,7 +82,13 @@ func addRequestFromInterceptor(message interface{}) {
 		}
 	}
 
-	ipParts := strings.Split(requestData["client_ip"], ":")
+	clientIP, ok := requestData["client_ip"].(string)
+	if !ok {
+		log.Println("Error: client_ip is not a string")
+		return
+	}
+
+	ipParts := strings.Split(clientIP, ":")
 
 	country := utils.GetCountryName(ipParts[0])
 
