@@ -22,6 +22,12 @@ func generateRuleID() string {
 
 // AddRule adds a new rule to the application by a superadmin or assigned admin
 func AddRule(c *gin.Context) {
+
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
 	var input struct {
 		RuleType       string `json:"rule_type" binding:"required"`
 		RuleMethod     string `json:"rule_method" binding:"required"`
@@ -98,6 +104,7 @@ func AddRule(c *gin.Context) {
 
 // GetRules fetches all rules for a given application
 func GetRules(c *gin.Context) {
+
 	applicationID := c.Param("application_id")
 
 	var rules []models.Rule
@@ -111,6 +118,12 @@ func GetRules(c *gin.Context) {
 
 // UpdateRule updates an existing rule
 func UpdateRule(c *gin.Context) {
+
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
 	ruleID := c.Param("rule_id")
 
 	var input struct {
@@ -154,6 +167,12 @@ func UpdateRule(c *gin.Context) {
 
 // DeleteRule deletes a rule by its ID
 func DeleteRule(c *gin.Context) {
+
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
 	ruleID := c.Param("rule_id")
 
 	if err := config.DB.Where("rule_id = ?", ruleID).Delete(&models.Rule{}).Error; err != nil {

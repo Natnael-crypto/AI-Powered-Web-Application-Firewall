@@ -85,8 +85,8 @@ func InitializeRoutes(r *gin.Engine) {
 	{
 		certs.POST("/", controllers.AddCert) // Add a certificate
 		// certs.GET("/", controllers.GetCert)               // Get certificate/key file (expects application_id & type=cert/key)
-		certs.PUT("/:cert_id", controllers.UpdateCert)    // Update an existing certificate
-		certs.DELETE("/:cert_id", controllers.DeleteCert) // Delete a certificate
+		certs.PUT("/:application_id", controllers.UpdateCert)    // Update an existing certificate
+		certs.DELETE("/:application_id", controllers.DeleteCert) // Delete a certificate
 	}
 	r.GET("/certs", controllers.GetCert)
 }

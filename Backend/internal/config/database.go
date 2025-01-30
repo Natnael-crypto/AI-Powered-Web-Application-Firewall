@@ -4,7 +4,9 @@ import (
 	"backend/internal/models" // Adjust the import path to where your models are located
 	"fmt"
 	"log"
+	"os"
 
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -13,18 +15,28 @@ var DB *gorm.DB
 
 // InitDB initializes the PostgreSQL database connection using GORM
 func InitDB() {
-	// Database connection configuration
-	const (
-		host     = "pg-2c27c868-qzueos-e68f.e.aivencloud.com" // Update as needed
-		port     = 25211                                      // Default PostgreSQL port
-		user     = "avnadmin"                                 // Replace with your PostgreSQL username
-		password = "AVNS_rcBeTPKpktP4be5ZEZx"                 // Replace with your PostgreSQL password
-		dbname   = "waf"                                      // Replace with your database name
-	)
+	// Load environment variables from .env file
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: No .env file found, falling back to environment variables")
+	}
+
+	// Read database credentials from environment variables
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+	sslmode := os.Getenv("DB_SSLMODE")
+	
+
+	// Ensure required variables are set
+	if host == "" || port == "" || user == "" || password == "" || dbname == "" {
+		log.Fatalf("Missing required database environment variables")
+	}
 
 	// Construct the connection string
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=require",
-		host, port, user, password, dbname)
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		host, port, user, password, dbname, sslmode)
 
 	// Open the database connection using GORM
 	var err error
@@ -45,7 +57,16 @@ func InitDB() {
 	log.Println("Successfully connected to PostgreSQL using GORM!")
 
 	// Run migrations to create the tables if they don't exist
-	err = DB.AutoMigrate(&models.Application{}, &models.User{}, models.UserToApplication{}, models.Conf{}, models.Rule{}, models.Request{}, models.Notification{})
+	err = DB.AutoMigrate(
+		&models.Application{},
+		&models.User{},
+		models.UserToApplication{},
+		models.Conf{},
+		models.Rule{},
+		models.Request{},
+		models.Notification{},
+		models.Cert{},
+	)
 	if err != nil {
 		log.Fatalf("Migration failed: %v", err)
 	}

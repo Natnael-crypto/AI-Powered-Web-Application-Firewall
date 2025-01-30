@@ -52,6 +52,12 @@ func CreateConfig(c *gin.Context) {
 
 // UpdateConfig updates an existing configuration
 func UpdateConfig(c *gin.Context) {
+
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
 	var input struct {
 		ListeningPort   string `json:"listening_port" binding:"required"`
 		RemoteLogServer string `json:remote_logServer binding:"required"`

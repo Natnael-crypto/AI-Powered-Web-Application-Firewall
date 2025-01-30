@@ -10,6 +10,7 @@ import (
 func main() {
 	// Initialize database
 	config.InitDB()
+	config.LoadConfig()
 
 	// Initialize the Gin router
 	r := gin.Default()

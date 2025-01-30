@@ -16,7 +16,7 @@ func GenerateJWT(user models.User) (string, error) {
 		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(config.JWTSecretKey)
+	return token.SignedString([]byte(config.JWTSecretKey)) // Convert to byte slice
 }
 
 // ParseJWT parses the JWT token and returns the claims
@@ -26,6 +26,6 @@ func ParseJWT(tokenString string) (*jwt.Token, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.NewValidationError("invalid signing method", jwt.ValidationErrorSignatureInvalid)
 		}
-		return config.JWTSecretKey, nil
+		return []byte(config.JWTSecretKey), nil // Convert to byte slice
 	})
 }

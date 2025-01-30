@@ -1,6 +1,25 @@
 package config
 
-import "os"
+import (
+	"log"
+	"os"
 
-// JWTSecretKey is used to sign JWT tokens
-var JWTSecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+	"github.com/joho/godotenv"
+)
+
+// JWTSecretKey holds the loaded secret key
+var JWTSecretKey string
+
+// LoadConfig initializes environment variables
+func LoadConfig() {
+	// Load environment variables from .env file
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: No .env file found, falling back to environment variables")
+	}
+
+	// Load JWT Secret Key
+	JWTSecretKey = os.Getenv("JWT_SECRET_KEY")
+	if JWTSecretKey == "" {
+		log.Fatalf("Missing JWT_SECRET_KEY in environment variables")
+	}
+}
