@@ -25,6 +25,8 @@ FROM frolvlad/alpine-glibc:latest
 # Copy the built binary from the builder stage
 COPY --from=builder /app/Backend/backend /backend
 
+COPY /app/Backend.env .env
+
 # Debug: Check if the binary exists in the final image
 RUN ls -lah /
 
