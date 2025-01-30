@@ -11,15 +11,16 @@ jobs:
     services:
       postgres:
         image: postgres:latest
-        env:
-          POSTGRES_USER: ${{ secrets.DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.DB_NAME }}
         ports:
           - 5432:5432
         # Wait for the database to be ready before proceeding 
-        options: --health-cmd="pg_isready -U ${{ secrets.DB_USER }}" --health-timeout=30s --health-retries=5
-        
+        options: --health-cmd="pg_isready -U postgres" --health-timeout=30s --health-retries=5
+
+    env:
+      POSTGRES_USER: ${{ secrets.DB_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.DB_NAME }}
+
     steps:
       # Step 1: Checkout code
       - name: Checkout repository
@@ -34,13 +35,13 @@ jobs:
       # Step 3: Write .env file
       - name: Write ./Backend/.env file
         run: |
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_HOST=localhost" >> .env
-          echo "DB_PORT=5432" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-          echo "DB_SSLMODE=disable" >> .env
-          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> ./Backend/.env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ./Backend/.env
+          echo "DB_HOST=localhost" >> ./Backend/.env
+          echo "DB_PORT=5432" >> ./Backend/.env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> ./Backend/.env
+          echo "DB_SSLMODE=disable" >> ./Backend/.env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ./Backend/.env
 
       # Step 4: Build the Go application
       - name: Build the application
