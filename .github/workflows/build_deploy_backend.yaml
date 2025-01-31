@@ -41,13 +41,12 @@ jobs:
         run: |
           cd Backend
           go build -o backend ./cmd
-          cd ..
-
+          
       # Step 6: Build Docker image for Go application
       - name: Build Docker image for Go app
         run: |
           cd Backend
-          docker build -t natnaelcrypto/waf-backend:latest -f Dockerfile .
+          docker build -t natnaelcrypto/waf-backend:latest -f Backend/Dockerfile .
 
       # Step 7: Create a Dockerfile for PostgreSQL image
       - name: Create Dockerfile for PostgreSQL
