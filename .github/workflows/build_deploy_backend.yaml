@@ -39,8 +39,7 @@ jobs:
       # Step 5: Build the Go application inside Backend directory
       - name: Build the Go application
         run: |
-          cd Backend
-          go build -o backend ./cmd
+          go build -o backend ./Backend/cmd
 
       # Step 6: Build Docker image for Go application
       - name: Build Docker image for Go app
