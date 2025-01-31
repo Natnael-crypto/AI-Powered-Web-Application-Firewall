@@ -23,15 +23,15 @@ RUN ls -lah /app/Interceptor/
 FROM frolvlad/alpine-glibc:latest
 
 # Copy the built binary from the builder stage
-COPY --from=builder /app/Interceptor/interceptor /interceptor
+COPY --from=builder /app/Interceptor/interceptor /
 
-RUN chmod -R 755 /app/Interceptor/internal/config/coreruleset
+# RUN chmod -R 755 /app/Interceptor/internal/config/coreruleset
 
-COPY --from=builder /app/Interceptor/internal/config/coreruleset/rules ./internal/config/coreruleset/rules
+# COPY --from=builder /app/Interceptor/internal/config/coreruleset/rules ./internal/config/coreruleset/rules
 
-RUN ls -lah /app/Interceptor/internal/config/coreruleset
+RUN ls -lah /app/Interceptor/internal/
 
-COPY --from=builder /app/Interceptor/internal/config/coreruleset/crs-setup.conf ./internal/config/coreruleset/crs-setup.conf
+# COPY --from=builder /app/Interceptor/internal/config/coreruleset/crs-setup.conf ./internal/config/coreruleset/crs-setup.conf
 
 # Debug: Check if the binary exists in the final image
 RUN ls -lah /
