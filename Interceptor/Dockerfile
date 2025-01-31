@@ -31,10 +31,9 @@ RUN apk add --no-cache rsync
 
 COPY --from=builder /app/Interceptor/internal/config/coreruleset/rules ./internal/config/coreruleset/rules
 
+RUN ls -lah /app/Interceptor/internal/config/coreruleset
+
 COPY --from=builder /app/Interceptor/internal/config/coreruleset/crs-setup.conf ./internal/config/coreruleset/crs-setup.conf
-
-
-
 
 # Debug: Check if the binary exists in the final image
 RUN ls -lah /
