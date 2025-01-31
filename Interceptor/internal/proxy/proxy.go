@@ -157,6 +157,8 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("Passed")
+
 	hostname := r.Host
 	targetRedirectIP, exists := getTargetRedirectIP(hostname)
 	if r.TLS != nil {
