@@ -25,6 +25,8 @@ FROM frolvlad/alpine-glibc:latest
 # Copy the built binary from the builder stage
 COPY --from=builder /app/Interceptor/interceptor /interceptor
 
+RUN chmod -R 755 /app/Interceptor/internal/config/coreruleset
+
 COPY --from=builder /app/Interceptor/internal/config/coreruleset/rules ./internal/config/coreruleset/rules
 
 RUN ls -lah /app/Interceptor/internal/config/coreruleset
