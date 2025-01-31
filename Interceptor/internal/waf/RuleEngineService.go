@@ -15,8 +15,8 @@ type WAF struct {
 // InitializeRuleEngine initializes a new WAF instance with custom rules
 func InitializeRuleEngine(customRule string) (*WAF, error) {
 	cfg := coraza.NewWAFConfig().
-		WithDirectivesFromFile("./internal/config/coreruleset/crs-setup.conf").
-		WithDirectivesFromFile("./internal/config/coreruleset/rules/*.conf").
+		WithDirectivesFromFile("./internal/config/crs-setup.conf").
+		WithDirectivesFromFile("./internal/config/rules/*.conf").
 		WithDirectivesFromFile("./internal/config/custom/" + customRule)
 
 	engine, err := coraza.NewWAF(cfg)

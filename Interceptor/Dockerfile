@@ -34,7 +34,7 @@ COPY --from=builder /app/Interceptor ./
 # COPY --from=builder /app/Interceptor/internal/config/coreruleset/crs-setup.conf ./internal/config/coreruleset/crs-setup.conf
 
 # Debug: Check if the binary exists in the final image
-RUN ls -lah /internal/config/coreruleset
+RUN ls -lah /internal/config
 
 # Expose the port your application will run on
 EXPOSE 80
