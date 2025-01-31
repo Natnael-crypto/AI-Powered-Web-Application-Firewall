@@ -77,6 +77,7 @@ func UpdateConfig(c *gin.Context) {
 	}
 
 	conf.ListeningPort = input.ListeningPort
+	conf.RemoteLogServer = input.RemoteLogServer
 
 	if err := config.DB.Save(&conf).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update configuration"})
