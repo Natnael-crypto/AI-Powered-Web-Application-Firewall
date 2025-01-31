@@ -25,7 +25,7 @@ FROM frolvlad/alpine-glibc:latest
 # Copy the built binary from the builder stage
 COPY --from=builder /app/Interceptor/interceptor /interceptor
 
-COPY --from=builder /app/Interceptor/internal/config/iptogeo.csv ./internal/static/iptogeo.csv
+COPY --from=builder /app/Interceptor/internal/config/ ./internal/config
 
 # Debug: Check if the binary exists in the final image
 RUN ls -lah /
