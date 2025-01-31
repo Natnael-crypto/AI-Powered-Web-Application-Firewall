@@ -25,10 +25,6 @@ FROM frolvlad/alpine-glibc:latest
 # Copy the built binary from the builder stage
 COPY --from=builder /app/Interceptor/interceptor /interceptor
 
-# COPY --from=builder /app/Interceptor/internal/config/ ./internal/config
-
-RUN apk add --no-cache rsync
-
 COPY --from=builder /app/Interceptor/internal/config/coreruleset/rules ./internal/config/coreruleset/rules
 
 RUN ls -lah /app/Interceptor/internal/config/coreruleset
