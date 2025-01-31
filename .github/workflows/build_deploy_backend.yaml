@@ -57,11 +57,18 @@ jobs:
           echo "ENV POSTGRES_DB=waf_db" >> ./postgres/Dockerfile
           echo "COPY init.sql /docker-entrypoint-initdb.d/" >> ./postgres/Dockerfile
 
-      # Step 8: Add init.sql to initialize the database
+      # Step 8: Add init.sql to initialize the database (updated version)
       - name: Add init.sql for PostgreSQL initialization
         run: |
           mkdir -p ./postgres
-          echo "CREATE DATABASE waf_db;" > ./postgres/init.sql
+          echo "DO" > ./postgres/init.sql
+          echo "\$\$" >> ./postgres/init.sql
+          echo "BEGIN" >> ./postgres/init.sql
+          echo "    IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'waf_db') THEN" >> ./postgres/init.sql
+          echo "        CREATE DATABASE waf_db;" >> ./postgres/init.sql
+          echo "    END IF;" >> ./postgres/init.sql
+          echo "END" >> ./postgres/init.sql
+          echo "\$\$;" >> ./postgres/init.sql
           echo "CREATE USER postgres WITH PASSWORD 'postgres';" >> ./postgres/init.sql
           echo "GRANT ALL PRIVILEGES ON DATABASE waf_db TO postgres;" >> ./postgres/init.sql
 
