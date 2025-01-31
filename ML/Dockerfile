@@ -1,28 +1,34 @@
-# Use an official Python image as the base
-FROM python:3.11
+# First stage: Build the Python environment
+FROM python:3.11 AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the ML
+# Copy the ML directory
 COPY ML /app/ML
 
 # Move into the ML directory
 WORKDIR /app/ML
 
-# Download dependencies
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Debug: Check if the binary exists
 RUN ls -lah /app/ML
 
-# Start a new image to reduce size
+# Second stage: Minimal runtime environment
 FROM frolvlad/alpine-glibc:latest
 
-# Copy the built binary from the builder stage
-COPY --from=builder /app/ML ./
+# Set working directory
+WORKDIR /app
+
+# Copy the built binary and dependencies from the builder stage
+COPY --from=builder /app/ML /app/ML
+
+# Move into the ML directory
+WORKDIR /app/ML
 
 EXPOSE 5000
 
 # Set the default command to run your app
-CMD ["python","api.py"]
+CMD ["python", "api.py"]
