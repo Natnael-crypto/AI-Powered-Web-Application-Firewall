@@ -1,4 +1,4 @@
-name: Build and Deploy WAF
+name: Build and Push WAF Backend
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build_deploy:
+  build_and_push:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -32,42 +32,32 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.23.3
+          go-version: 1.21.x
 
-      # Step 3: Write .env file
-      - name: Write ./Backend/.env file
+      # Step 3: Write environment file
+      - name: Write .env file
         run: |
           echo "DB_USER=postgres" >> ./Backend/.env
           echo "DB_PASSWORD=postgres" >> ./Backend/.env
-          echo "DB_HOST=postgres" >> ./Backend/.env
+          echo "DB_HOST=localhost" >> ./Backend/.env
           echo "DB_PORT=5432" >> ./Backend/.env
           echo "DB_NAME=waf_db" >> ./Backend/.env
           echo "DB_SSLMODE=disable" >> ./Backend/.env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ./Backend/.env
 
-      # Step 4: Change directory to Backend and initialize Go module (if needed)
-      - name: Initialize Go module (if needed)
-        run: |
-          pwd
-          cd Backend
-          go mod tidy
-
-      # Step 5: Build the Go application inside Backend directory
+      # Step 4: Install dependencies & Build the Go application
       - name: Build the application
         run: |
-          pwd
-          ls -R
           cd Backend
+          go mod tidy
           go build -o backend ./cmd
 
-      # Step 6: Build Docker image
+      # Step 5: Build the Docker image
       - name: Build Docker image
         run: |
-          pwd
-          ls -R  
           docker build -t natnaelcrypto/waf-backend:latest -f Backend/Dockerfile .
 
-      # Step 7: Push Docker image to Docker Hub
+      # Step 6: Push the Docker image to Docker Hub
       - name: Push Docker image to Docker Hub
         run: |
           docker login -u natnaelcrypto -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
