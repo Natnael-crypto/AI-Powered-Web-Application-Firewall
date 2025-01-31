@@ -275,7 +275,7 @@ func Starter() {
 	defer logger.CloseLogger()
 
 	fmt.Printf("Starting server on port %s\n", proxyPort)
-	if err := http.ListenAndServe(proxyPort, nil); err != nil {
+	if err := http.ListenAndServe("0.0.0.0"+proxyPort, nil); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }
