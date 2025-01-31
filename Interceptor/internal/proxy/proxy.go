@@ -190,9 +190,9 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		ThreatDetected:   blockedByRule,
 		ThreatType:       "", // TODO Replace with actual threat detection logic
 		ActionTaken:      action,
-		BotDetected:      false,     // TODO Implement bot detection logic
+		BotDetected:      false, // TODO Implement bot detection logic
 		GeoLocation:      "Unknown",
-		RateLimited:      false,     // TODO Implement rate limiting logic
+		RateLimited:      false, // TODO Implement rate limiting logic
 		UserAgent:        r.UserAgent(),
 		AIAnalysisResult: "", // TODO Replace with actual AI analysis results
 	}

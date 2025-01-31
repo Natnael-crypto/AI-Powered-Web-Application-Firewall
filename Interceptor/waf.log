@@ -39,3 +39,7 @@
 2025/01/30 12:15:27 Method: GET, URL: /test_page/admi/index.html, Decision: allow, Reason: 
 2025/01/30 12:15:31 Method: GET, URL: /test_page/index.html/ws, Decision: allow, Reason: 
 2025/01/30 12:15:31 Failed to copy response body: http: request method or response status code does not allow body
+2025/01/31 19:01:05 Method: GET, URL: /, Decision: allow, Reason: 
+2025/01/31 19:01:07 Method: GET, URL: /test_page, Decision: allow, Reason: 
+2025/01/31 19:01:07 Method: GET, URL: /test_page/ws, Decision: allow, Reason: 
+2025/01/31 19:01:07 Failed to copy response body: http: request method or response status code does not allow body
