@@ -24,7 +24,7 @@ jobs:
         run: |
           echo "DB_USER=postgres" >> ./Backend/.env
           echo "DB_PASSWORD=postgres" >> ./Backend/.env
-          echo "DB_HOST=localhost" >> ./Backend/.env
+          echo "DB_HOST=postgres" >> ./Backend/.env
           echo "DB_PORT=5432" >> ./Backend/.env
           echo "DB_NAME=waf_db" >> ./Backend/.env
           echo "DB_SSLMODE=disable" >> ./Backend/.env
