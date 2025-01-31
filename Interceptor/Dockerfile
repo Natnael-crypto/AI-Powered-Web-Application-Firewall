@@ -29,7 +29,7 @@ COPY --from=builder /app/Interceptor ./
 
 # COPY --from=builder /app/Interceptor/internal/config/coreruleset/rules ./internal/config/coreruleset/rules
 
-RUN ls -lah /app/Interceptor/internal/
+# RUN ls -lah /
 
 # COPY --from=builder /app/Interceptor/internal/config/coreruleset/crs-setup.conf ./internal/config/coreruleset/crs-setup.conf
 
