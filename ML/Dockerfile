@@ -14,7 +14,7 @@ WORKDIR /app/ML
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Debug: Check if the binary exists
-RUN ls -lah /app/ML/
+RUN ls -lah /app/ML
 
 # Start a new image to reduce size
 FROM frolvlad/alpine-glibc:latest
