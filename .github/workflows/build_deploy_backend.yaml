@@ -78,7 +78,21 @@ jobs:
           cd ./postgres
           docker build -t natnaelcrypto/waf-db:latest .
 
-      # Step 10: Push Docker images to Docker Hub
+      # Step 10: Create a custom network for both containers to communicate
+      - name: Create a custom Docker network
+        run: |
+          docker network create waf_network
+
+      # Step 11: Run PostgreSQL container and Go application container on the same network
+      - name: Run PostgreSQL container and Go app container
+        run: |
+          # Run PostgreSQL container
+          docker run -d --name postgres --network waf_network natnaelcrypto/waf-db:latest
+
+          # Run Go application container
+          docker run -d --name backend --network waf_network -e DB_USER=postgres -e DB_PASSWORD=postgres -e DB_HOST=postgres -e DB_PORT=5432 -e DB_NAME=waf_db -e DB_SSLMODE=disable -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} natnaelcrypto/waf-backend:latest
+
+      # Step 12: Push Docker images to Docker Hub
       - name: Push Go application Docker image to Docker Hub
         run: |
           docker login -u natnaelcrypto -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
