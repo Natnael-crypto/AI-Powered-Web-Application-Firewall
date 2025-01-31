@@ -27,9 +27,7 @@ COPY --from=builder /app/Interceptor/interceptor /interceptor
 
 # COPY --from=builder /app/Interceptor/internal/config/ ./internal/config
 
-RUN apt-get update && apt-get install -y rsync && \
-    rsync -av /app/Interceptor/internal/config/ ./internal/config/
-
+RUN apk add --no-cache rsync
 
 # Debug: Check if the binary exists in the final image
 RUN ls -lah /
