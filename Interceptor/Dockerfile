@@ -29,7 +29,10 @@ COPY --from=builder /app/Interceptor/interceptor /interceptor
 
 RUN apk add --no-cache rsync
 
-RUN mkdir -p ./internal/config && rsync -av /app/Interceptor/internal/config/ ./internal/config/
+COPY --from=builder /app/Interceptor/internal/config/coreruleset/rules ./internal/config/coreruleset/rules
+
+COPY --from=builder /app/Interceptor/internal/config/coreruleset/crs-setup.conf ./internal/config/coreruleset/crs-setup.conf
+
 
 
 
