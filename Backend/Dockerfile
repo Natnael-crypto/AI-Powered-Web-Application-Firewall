@@ -28,6 +28,8 @@ COPY --from=builder /app/Backend/backend /backend
 
 COPY --from=builder /app/Backend/.env .env
 
+COPY --from=builder /app/Backend/internal/static/iptogeo.csv ./internal/static/iptogeo.csv
+
 # Debug: Check if the binary exists in the final image
 RUN ls -lah /
 
