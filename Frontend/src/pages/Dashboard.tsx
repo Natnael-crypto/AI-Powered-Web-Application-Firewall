@@ -4,6 +4,7 @@ import StatisticCard from '../components/StatisticCard'
 import StatisticGroup from '../components/StatisticGroup'
 import GlobeMap from '../components/GlobeMap'
 import {useState} from 'react'
+import TodaySummary from '../components/TodaySummary'
 
 function Dashboard() {
   const [selectedDashboardMenu, setSelectedDashboardMenu] = useState<
@@ -36,14 +37,14 @@ function Dashboard() {
         <div className="flex gap-5">
           <div className="flex flex-col gap-5 w-full">
             <div className="flex gap-3">
-              <Card className="gap-y-5 flex flex-col justify-center pl-5 py-5">
+              <Card className="gap-y-5 flex bg-white flex-col justify-center pl-5 py-5">
                 <StatisticCard
                   className="h-full w-full py-3"
                   label="Requests"
                   value={700}
                 />
               </Card>
-              <Card className=" items-center">
+              <Card className=" items-center bg-white">
                 <StatisticGroup
                   stats={[
                     {label: 'Requests', value: 700},
@@ -53,16 +54,19 @@ function Dashboard() {
                 />
               </Card>
             </div>
-            <Card>
+            <Card className="bg-white">
               <StatisticGroup className="py-5" stats={stats} />
             </Card>
           </div>
           <Card className="h-full w-[55%] shadow-lg bg-white">Query per second</Card>
         </div>
       )}
-      <Card className="bg-white">
-        <GlobeMap data={requestData} />
-      </Card>
+      <div className="flex gap-8">
+        <Card className="bg-white">
+          <GlobeMap data={requestData} />
+        </Card>
+        <TodaySummary />
+      </div>
     </div>
   )
 }

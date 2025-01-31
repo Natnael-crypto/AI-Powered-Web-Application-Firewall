@@ -8,6 +8,7 @@ import RootLayout from './layout/RootLayout'
 import Dashboard from './pages/Dashboard'
 import LoginPage from './pages/Login'
 import LogAttack from './pages/LogAttacks'
+import PageNotFound from './pages/pageNotFound'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -17,6 +18,7 @@ const router = createBrowserRouter(
         <Route path="logs/attacks" element={<LogAttack />} />
       </Route>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="*" element={<PageNotFound />} />
     </>,
   ),
 )
