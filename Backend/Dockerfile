@@ -4,6 +4,7 @@ FROM golang:1.23.3 AS builder
 # Set the working directory inside the container
 WORKDIR /app
 
+RUN ls -lah
 # Copy the Backend directory
 COPY Backend /app/Backend
 
