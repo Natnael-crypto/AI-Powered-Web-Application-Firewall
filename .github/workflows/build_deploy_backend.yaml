@@ -30,7 +30,7 @@ jobs:
           echo "DB_SSLMODE=disable" >> ./Backend/.env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ./Backend/.env
 
-      # Step 4: Initialize Go module and download dependencies
+      # Step 4: Initialize Go module and tidy dependencies
       - name: Initialize Go module and tidy dependencies
         run: |
           cd Backend
@@ -47,9 +47,10 @@ jobs:
         run: |
           docker build -t natnaelcrypto/waf-backend:latest -f Backend/Dockerfile .
 
-      # Step 7: Create a Dockerfile for PostgreSQL image
+      # Step 7: Create Dockerfile for PostgreSQL image (with directory creation)
       - name: Create Dockerfile for PostgreSQL
         run: |
+          mkdir -p ./postgres
           echo "FROM postgres:latest" > ./postgres/Dockerfile
           echo "ENV POSTGRES_USER=postgres" >> ./postgres/Dockerfile
           echo "ENV POSTGRES_PASSWORD=postgres" >> ./postgres/Dockerfile
