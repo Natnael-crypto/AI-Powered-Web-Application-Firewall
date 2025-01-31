@@ -1,0 +1,104 @@
+name: Build and Push WAF
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Go environment
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.23.3
+
+      # Step 3: Write .env file for Backend
+      - name: Write ./Backend/.env file
+        run: |
+          echo "DB_USER=postgres" >> ./Backend/.env
+          echo "DB_PASSWORD=postgres" >> ./Backend/.env
+          echo "DB_HOST=postgres" >> ./Backend/.env
+          echo "DB_PORT=5432" >> ./Backend/.env
+          echo "DB_NAME=waf_db" >> ./Backend/.env
+          echo "DB_SSLMODE=disable" >> ./Backend/.env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ./Backend/.env
+
+      # Step 4: Initialize Go module and tidy dependencies
+      - name: Initialize Go module and tidy dependencies
+        run: |
+          cd Backend
+          go mod tidy
+
+      # Step 5: Build the Go application inside Backend directory
+      - name: Build the Go application
+        run: |
+          cd Backend
+          go build -o backend ./cmd
+          
+      # Step 6: Build Docker image for Go application
+      - name: Build Docker image for Go app
+        run: |
+          docker build -t natnaelcrypto/waf-backend:latest -f Backend/Dockerfile .
+
+      # Step 7: Create Dockerfile for PostgreSQL image (with directory creation)
+      - name: Create Dockerfile for PostgreSQL
+        run: |
+          mkdir -p ./postgres
+          echo "FROM postgres:latest" > ./postgres/Dockerfile
+          echo "ENV POSTGRES_USER=postgres" >> ./postgres/Dockerfile
+          echo "ENV POSTGRES_PASSWORD=postgres" >> ./postgres/Dockerfile
+          echo "ENV POSTGRES_DB=waf_db" >> ./postgres/Dockerfile
+          echo "COPY init.sql /docker-entrypoint-initdb.d/" >> ./postgres/Dockerfile
+
+      # Step 8: Add init.sql to initialize the database (updated version)
+      - name: Add init.sql for PostgreSQL initialization
+        run: |
+          mkdir -p ./postgres
+          echo "DO" > ./postgres/init.sql
+          echo "\$\$" >> ./postgres/init.sql
+          echo "BEGIN" >> ./postgres/init.sql
+          echo "    IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'waf_db') THEN" >> ./postgres/init.sql
+          echo "        CREATE DATABASE waf_db;" >> ./postgres/init.sql
+          echo "    END IF;" >> ./postgres/init.sql
+          echo "END" >> ./postgres/init.sql
+          echo "\$\$;" >> ./postgres/init.sql
+          echo "CREATE USER postgres WITH PASSWORD 'postgres';" >> ./postgres/init.sql
+          echo "GRANT ALL PRIVILEGES ON DATABASE waf_db TO postgres;" >> ./postgres/init.sql
+
+      # Step 9: Build Docker image for PostgreSQL (with initialized DB)
+      - name: Build Docker image for PostgreSQL
+        run: |
+          cd ./postgres
+          docker build -t natnaelcrypto/waf-db:latest .
+
+      # Step 10: Create a custom network for both containers to communicate
+      - name: Create a custom Docker network
+        run: |
+          docker network create waf_network
+
+      # Step 11: Run PostgreSQL container and Go application container on the same network
+      - name: Run PostgreSQL container and Go app container
+        run: |
+          # Run PostgreSQL container
+          docker run -d --name postgres --network waf_network natnaelcrypto/waf-db:latest
+
+          # Run Go application container
+          docker run -d --name backend --network waf_network -e DB_USER=postgres -e DB_PASSWORD=postgres -e DB_HOST=postgres -e DB_PORT=5432 -e DB_NAME=waf_db -e DB_SSLMODE=disable -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} natnaelcrypto/waf-backend:latest
+
+      # Step 12: Push Docker images to Docker Hub
+      - name: Push Go application Docker image to Docker Hub
+        run: |
+          docker login -u natnaelcrypto -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          docker push natnaelcrypto/waf-backend:latest
+
+      - name: Push PostgreSQL Docker image to Docker Hub
+        run: |
+          docker login -u natnaelcrypto -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          docker push natnaelcrypto/waf-db:latest

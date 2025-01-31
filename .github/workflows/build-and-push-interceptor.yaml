@@ -1,0 +1,45 @@
+name: Build and Push Interceptor
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Go environment
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.23.3
+
+
+      # Step 4: Initialize Go module and tidy dependencies
+      - name: Initialize Go module and tidy dependencies
+        run: |
+          cd Interceptor
+          go mod tidy
+
+      # Step 5: Build the Go application inside Interceptor directory
+      - name: Build the Go application
+        run: |
+          cd Interceptor
+          go build -o interceptor ./cmd
+
+      # Step 6: Build Docker image for Interceptor
+      - name: Build Docker image for Interceptor
+        run: |
+          docker build -t natnaelcrypto/interceptor:latest -f Interceptor/Dockerfile .
+
+      # Step 7: Push Docker image for Interceptor to Docker Hub
+      - name: Push Docker image for Interceptor to Docker Hub
+        run: |
+          docker login -u natnaelcrypto -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          docker push natnaelcrypto/interceptor:latest

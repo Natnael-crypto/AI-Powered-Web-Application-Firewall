@@ -79,7 +79,10 @@ func SendToBackend(message MessageModel) {
 // CloseWebSocket closes the WebSocket connection
 func CloseWebSocket() {
 	if wsConn != nil {
-		wsConn.Close()
+		err := wsConn.Close()
+		if err != nil {
+			log.Println("An error occured while trying to close websocket connection", err)
+		}
 		log.Println("WebSocket connection closed")
 	}
 }
