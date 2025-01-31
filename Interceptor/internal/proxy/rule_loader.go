@@ -31,8 +31,19 @@ type RulesResponse struct {
 
 // FetchRules function to make the API call and fetch rules for a given application ID
 func FetchRules(applicationID string) (*RulesResponse, error) {
+	// Get the backend host and port from environment variables
+	backendHost := os.Getenv("BACKENDHOST")
+	if backendHost == "" {
+		return nil, fmt.Errorf("BACKENDHOST environment variable is not set")
+	}
+
+	backendPort := os.Getenv("BACKENDPORT")
+	if backendPort == "" {
+		return nil, fmt.Errorf("BACKENDPORT environment variable is not set")
+	}
+
 	// Construct the URL
-	url := fmt.Sprintf("http://localhost:8080/rule/%s", applicationID)
+	url := fmt.Sprintf("http://%s:%s/rule/%s", backendHost, backendPort, applicationID)
 
 	// Make the GET request
 	resp, err := http.Get(url) // #nosec G107 -- The url is constructed from an untainted sourcce

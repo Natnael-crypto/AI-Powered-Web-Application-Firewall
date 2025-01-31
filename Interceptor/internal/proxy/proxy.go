@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 )
@@ -39,7 +40,21 @@ var (
 
 // fetchConfig retrieves the configuration from the remote API
 func fetchConfig() error {
-	resp, err := http.Get("http://localhost:8080/config")
+	// Get the backend host and port from environment variables
+	backendHost := os.Getenv("BACKENDHOST")
+	if backendHost == "" {
+		return fmt.Errorf("BACKENDHOST environment variable is not set")
+	}
+
+	backendPort := os.Getenv("BACKENDPORT")
+	if backendPort == "" {
+		return fmt.Errorf("BACKENDPORT environment variable is not set")
+	}
+
+	// Construct the full URL for fetching config
+	configURL := fmt.Sprintf("http://%s:%s/config", backendHost, backendPort)
+
+	resp, err := http.Get(configURL)
 	if err != nil {
 		return fmt.Errorf("failed to fetch config: %v", err)
 	}
@@ -64,7 +79,21 @@ func fetchConfig() error {
 
 // fetchApplications retrieves the list of applications and updates the hostname mapping
 func fetchApplications() error {
-	resp, err := http.Get("http://localhost:8080/application/")
+	// Get the backend host and port from environment variables
+	backendHost := os.Getenv("BACKENDHOST")
+	if backendHost == "" {
+		return fmt.Errorf("BACKENDHOST environment variable is not set")
+	}
+
+	backendPort := os.Getenv("BACKENDPORT")
+	if backendPort == "" {
+		return fmt.Errorf("BACKENDPORT environment variable is not set")
+	}
+
+	// Construct the full URL for fetching applications
+	applicationsURL := fmt.Sprintf("http://%s:%s/application/", backendHost, backendPort)
+
+	resp, err := http.Get(applicationsURL)
 	if err != nil {
 		return fmt.Errorf("failed to fetch applications: %v", err)
 	}
