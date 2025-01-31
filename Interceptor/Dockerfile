@@ -8,7 +8,7 @@ WORKDIR /app
 COPY Interceptor /app/Interceptor
 
 # Move into the Interceptor directory
-WORKDIR /app/Backend
+WORKDIR /app/Interceptor
 
 # Download dependencies
 RUN go mod tidy
