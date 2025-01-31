@@ -43,7 +43,7 @@ func FetchRules(applicationID string) (*RulesResponse, error) {
 	}
 
 	// Construct the URL
-	url := fmt.Sprintf("http://%s:%s/rule/%s", backendHost, backendPort, applicationID)
+	url := fmt.Sprintf("http://%s:%s/rule/%s",backendHost,backendPort, applicationID)
 
 	// Make the GET request
 	resp, err := http.Get(url)

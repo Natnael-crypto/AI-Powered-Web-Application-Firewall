@@ -25,7 +25,11 @@ FROM frolvlad/alpine-glibc:latest
 # Copy the built binary from the builder stage
 COPY --from=builder /app/Interceptor/interceptor /interceptor
 
-COPY --from=builder /app/Interceptor/internal/config/ ./internal/config
+# COPY --from=builder /app/Interceptor/internal/config/ ./internal/config
+
+RUN apt-get update && apt-get install -y rsync && \
+    rsync -av /app/Interceptor/internal/config/ ./internal/config/
+
 
 # Debug: Check if the binary exists in the final image
 RUN ls -lah /
