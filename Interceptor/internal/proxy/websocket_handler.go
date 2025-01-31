@@ -2,7 +2,9 @@ package proxy
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/gorilla/websocket"
 )
@@ -33,7 +35,19 @@ type MessageModel struct {
 // InitializeWebSocket establishes a WebSocket connection to the backend server
 func InitializeWebSocket() error {
 	var err error
-	wsURL := "ws://localhost:8080/ws" // Replace with your backend WebSocket server URL
+
+	// Get the backend host and port from environment variables
+	backendHost := os.Getenv("BACKENDHOST")
+	if backendHost == "" {
+		return fmt.Errorf("BACKENDHOST environment variable is not set")
+	}
+
+	backendPort := os.Getenv("BACKENDPORT")
+	if backendPort == "" {
+		return fmt.Errorf("BACKENDPORT environment variable is not set")
+	}
+
+	wsURL := fmt.Sprintf("ws://%s:%s/ws", backendHost, backendPort) // Replace with your backend WebSocket server URL
 	wsConn, _, err = websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
 		return err
