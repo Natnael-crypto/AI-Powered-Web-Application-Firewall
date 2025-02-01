@@ -1,4 +1,9 @@
+import {useState} from 'react'
+import Button from './atoms/Button'
+
 const CountryData = () => {
+  const [isBlocked, setIsBlocked] = useState(true)
+  const toggleIsBlocked = () => setIsBlocked(!isBlocked)
   const data = [
     {country: 'China', value: '2.0m'},
     {country: 'Singapore', value: '8.4k'},
@@ -10,13 +15,29 @@ const CountryData = () => {
   ]
 
   return (
-    <div className="px-5 py-3 bg-gray-100 rounded-lg shadow-md my-3">
+    <div className="px-5 py-3 rounded-lg w-max space-y-10">
+      <div className="border border-1 p-1 border-gray-300 flex self-end">
+        <Button
+          size="s"
+          classname={`w-1/2 text-gray-500 text-md font-thin ${isBlocked ? 'bg-green-500 text-white' : ''}`}
+          onClick={!isBlocked ? toggleIsBlocked : () => {}}
+        >
+          Requests
+        </Button>
+        <Button
+          size="s"
+          classname={`w-1/2 text-gray-500 text-md font-thin ${!isBlocked ? 'bg-green-500 text-white' : ''}`}
+          onClick={isBlocked ? toggleIsBlocked : () => {}}
+        >
+          Blocked
+        </Button>
+      </div>
       <h2 className="text-2xl font-bold mb-4 text-gray-800">Country Data</h2>
       <ul className="space-y-2">
         {data.map((item, index) => (
           <li
             key={index}
-            className="p-3 space-y-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            className="p-3 space-y-2  rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex justify-between items-center gap-16">
               <span className="text-gray-700 font-medium">{item.country}</span>

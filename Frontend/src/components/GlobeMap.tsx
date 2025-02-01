@@ -19,7 +19,7 @@ const GlobeMap: React.FC<GlobeMapProps> = ({data}) => {
   const colorScale = scaleSequential(interpolatePlasma).domain([0, maxIntensity])
 
   return (
-    <div className="w-full  h-full flex    bg-white">
+    <div className="w-full  h-full flex justify-between bg-white">
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{

@@ -59,7 +59,7 @@ export const SiderbarContentItems = [
       },
       {
         title: 'Custom Rules',
-        href: '/custom_rules',
+        href: 'protection/custom_rules',
       },
       {
         title: 'Detection Mod',

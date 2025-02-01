@@ -1,54 +1,63 @@
-import clsx from 'clsx'
+import {useTable, useSortBy, Column} from 'react-table'
 
-interface Column {
-  key: string
-  header: string
-}
-
-interface TableProps<T extends Record<string, any>> {
-  columns: Column[]
+interface TableProps<T extends object> {
+  columns: Column<T>[]
   data: T[]
-  className?: string
 }
 
-const Table = <T extends Record<string, any>>({
-  columns,
-  data,
-  className,
-}: TableProps<T>) => {
+const Table = <T extends object>({columns, data}: TableProps<T>) => {
+  const {getTableProps, getTableBodyProps, headerGroups, rows, prepareRow} = useTable(
+    {
+      columns,
+      data,
+    },
+    useSortBy,
+  )
+
   return (
-    <div className={clsx('rounded-lg overflow-y-scroll ', className)}>
-      <table className="min-w-full">
-        <thead className="bg-gray-100 ">
-          <tr>
-            {columns.map(column => (
+    <table {...getTableProps()} className="w-full">
+      <thead>
+        {headerGroups.map(headerGroup => (
+          <tr {...headerGroup.getHeaderGroupProps()}>
+            {headerGroup.headers.map(column => (
               <th
-                key={column.key}
-                className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
+                {...column.getHeaderProps((column as any).getSortByToggleProps())}
+                className="p-2 text-left bg-gray-200 uppercase text-sm"
               >
-                {column.header}
+                {column.render('Header')}
+                <span>
+                  {(column as any).isSorted
+                    ? (column as any).isSortedDesc
+                      ? ' 🔽'
+                      : ' 🔼'
+                    : ''}
+                </span>
               </th>
             ))}
           </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100">
-          {data.map((row, rowIndex) => (
-            <tr key={rowIndex} className="hover:bg-gray-50 transition-colors">
-              {columns.map(column => (
-                <td key={column.key} className="px-6 py-4 text-xl text-gray-700">
-                  <div className="flex flex-col gap-2">
-                    {row[column.key]}
-                    {column.key === 'ipAddress' && (
-                      <span className="text-gray-400 text-lg">China</span>
-                    )}
-                  </div>
+        ))}
+      </thead>
+      <tbody {...getTableBodyProps()}>
+        {rows.map(row => {
+          prepareRow(row)
+          return (
+            <tr
+              {...row.getRowProps()}
+              className="hover:bg-gray-50 transition-all duration-200"
+            >
+              {row.cells.map(cell => (
+                <td
+                  {...cell.getCellProps()}
+                  className="p-4 border-b border-gray-200 text-gray-700"
+                >
+                  {cell.render('Cell')}
                 </td>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          )
+        })}
+      </tbody>
+    </table>
   )
 }
 
