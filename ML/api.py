@@ -10,7 +10,6 @@ app = Flask(__name__)
 
 # Load the pre-trained CNN model
 curr_dir = os.path.dirname(os.path.realpath(__file__))
-# MODEL_PATH = "csic_model.keras"  # Ensure the model is saved in the same directory or provide full path
 MODEL_PATH = os.path.join(curr_dir, "csic_model.keras")
 model = load_model(MODEL_PATH)
 
@@ -102,4 +101,6 @@ def predict():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=False)
+
+    # Run the app on all network interfaces (0.0.0.0)
+    app.run(host='0.0.0.0', debug=False)
