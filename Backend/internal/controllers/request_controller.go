@@ -83,32 +83,109 @@ func GetRequests(c *gin.Context) {
 	userID := c.GetString("user_id")
 
 	var requests []models.Request
+	query := config.DB.Model(&models.Request{})
 
-	if userRole == "super_admin" {
-		// Super admin: Get all requests
-		if err := config.DB.Find(&requests).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch requests"})
-			return
-		}
-	} else {
-		// Admin: Get requests for assigned applications
+	// 🔹 Check if user is an admin (not super_admin), filter by assigned applications
+	if userRole != "super_admin" {
 		var userApps []models.UserToApplication
 		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch user applications"})
 			return
 		}
 
-		// Collect application IDs assigned to the user
+		// Collect assigned application names
 		applicationNames := make([]string, len(userApps))
 		for i, app := range userApps {
 			applicationNames[i] = app.ApplicationName
 		}
 
-		// Retrieve requests for those applications
-		if err := config.DB.Where("application_name IN ?", applicationNames).Find(&requests).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch requests"})
+		// Restrict query to assigned applications
+		if len(applicationNames) > 0 {
+			query = query.Where("application_name IN ?", applicationNames)
+		} else {
+			// If user has no assigned applications, return empty response
+			c.JSON(http.StatusOK, gin.H{"requests": []models.Request{}})
 			return
 		}
+	}
+
+	// 🔹 Apply filtering based on query parameters
+
+	if applicationName := c.Query("application_name"); applicationName != "" {
+		query = query.Where("application_name ILIKE ?", "%"+applicationName+"%")
+	}
+	if clientIP := c.Query("client_ip"); clientIP != "" {
+		query = query.Where("client_ip ILIKE ?", "%"+clientIP+"%")
+	}
+	if requestMethod := c.Query("request_method"); requestMethod != "" {
+		query = query.Where("request_method ILIKE ?", "%"+requestMethod+"%")
+	}
+	if requestURL := c.Query("request_url"); requestURL != "" {
+		query = query.Where("request_url ILIKE ?", "%"+requestURL+"%")
+	}
+	if threatType := c.Query("threat_type"); threatType != "" {
+		query = query.Where("threat_type ILIKE ?", "%"+threatType+"%")
+	}
+	if actionTaken := c.Query("action_taken"); actionTaken != "" {
+		query = query.Where("action_taken ILIKE ?", "%"+actionTaken+"%")
+	}
+	if userAgent := c.Query("user_agent"); userAgent != "" {
+		query = query.Where("user_agent ILIKE ?", "%"+userAgent+"%")
+	}
+	if geoLocation := c.Query("geo_location"); geoLocation != "" {
+		query = query.Where("geo_location ILIKE ?", "%"+geoLocation+"%")
+	}
+
+	// 🔹 Boolean filters
+	if c.Query("threat_detected") != "" {
+		threatDetected := c.Query("threat_detected") == "true"
+		query = query.Where("threat_detected = ?", threatDetected)
+	}
+	if c.Query("bot_detected") != "" {
+		botDetected := c.Query("bot_detected") == "true"
+		query = query.Where("bot_detected = ?", botDetected)
+	}
+	if c.Query("rate_limited") != "" {
+		rateLimited := c.Query("rate_limited") == "true"
+		query = query.Where("rate_limited = ?", rateLimited)
+	}
+
+	// 🔹 Date and Time Filtering
+	if startDate := c.Query("start_date"); startDate != "" {
+		query = query.Where("timestamp >= ?", startDate)
+	}
+	if endDate := c.Query("end_date"); endDate != "" {
+		query = query.Where("timestamp <= ?", endDate)
+	}
+
+	// 🔹 Time Filtering for a Specific Date
+	if date := c.Query("date"); date != "" {
+		if startTime := c.Query("start_time"); startTime != "" {
+			query = query.Where("timestamp >= ?", date+" "+startTime)
+		}
+		if endTime := c.Query("end_time"); endTime != "" {
+			query = query.Where("timestamp <= ?", date+" "+endTime)
+		}
+	}
+
+	// 🔹 Last X Hours Filtering
+	if lastHours := c.Query("last_hours"); lastHours != "" {
+		query = query.Where("timestamp >= NOW() - INTERVAL '? HOURS'", lastHours)
+	}
+
+	// 🔹 Full-Text Search for Large Fields (headers, body, request_url)
+	if searchQuery := c.Query("search"); searchQuery != "" {
+		query = query.Where("to_tsvector('english', headers || ' ' || body || ' ' || request_url) @@ plainto_tsquery(?)", searchQuery)
+	}
+
+	// 🔹 Pagination (Default: 50 results per page)
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize := 50
+	offset := (page - 1) * pageSize
+
+	if err := query.Limit(pageSize).Offset(offset).Find(&requests).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch requests"})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"requests": requests})
