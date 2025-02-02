@@ -3,7 +3,7 @@ import {BsPersonX} from 'react-icons/bs'
 import Table from '../components/Table'
 import Card from '../components/Card'
 import Button from '../components/atoms/Button'
-import AddAppModal from '../components/AddAppModal'
+import CreateRuleModal from '../components/CreateRuleModal'
 
 interface CustomeRulesData {
   status: string
@@ -76,7 +76,7 @@ function CustomeRules() {
 
   return (
     <div className="">
-      <AddAppModal isModalOpen={isModalOpen} toggleModal={toggleModal} />
+      <CreateRuleModal isModalOpen={isModalOpen} onClose={toggleModal} />
       <Card className="flex justify-between items-center py3 px-2">
         <p> Custom Rule</p>
         <Button
