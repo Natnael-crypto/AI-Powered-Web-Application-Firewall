@@ -32,12 +32,12 @@ export const SiderbarContentItems = [
     ],
   },
   {
-    title: 'Web Services',
-    href: '/sites',
+    title: 'Application',
+    href: 'application/applications',
     children: [
       {
-        title: 'Web services',
-        href: '/list',
+        title: 'applications',
+        href: 'application/applications',
       },
       {
         title: 'SSL Cert',
@@ -51,7 +51,7 @@ export const SiderbarContentItems = [
   },
   {
     title: 'Protections',
-    href: '/protection',
+    href: 'protection/custom_rules',
     children: [
       {
         title: 'Rate Limiting',
