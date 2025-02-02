@@ -2,7 +2,7 @@ import React from 'react'
 import {MdCancel} from 'react-icons/md'
 
 interface ModalProps {
-  isOpen: boolean
+  isOpen: boolean | undefined
   onClose: () => void
   children: React.ReactNode
 }

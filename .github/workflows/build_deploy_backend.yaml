@@ -41,7 +41,7 @@ jobs:
         run: |
           cd Backend
           go build -o backend ./cmd
-          
+
       # Step 6: Build Docker image for Go application
       - name: Build Docker image for Go app
         run: |
@@ -69,7 +69,7 @@ jobs:
           echo "    END IF;" >> ./postgres/init.sql
           echo "END" >> ./postgres/init.sql
           echo "\$\$;" >> ./postgres/init.sql
-          echo "CREATE USER postgres WITH PASSWORD 'postgres';" >> ./postgres/init.sql
+          echo "DO \$\$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'postgres') THEN CREATE USER postgres WITH PASSWORD 'postgres'; END IF; END \$\$;" >> ./postgres/init.sql
           echo "GRANT ALL PRIVILEGES ON DATABASE waf_db TO postgres;" >> ./postgres/init.sql
 
       # Step 9: Build Docker image for PostgreSQL (with initialized DB)
