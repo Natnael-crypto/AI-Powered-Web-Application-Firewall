@@ -1,8 +1,5 @@
 import React from 'react'
-import {FcCancel} from 'react-icons/fc'
-import {GiCancel} from 'react-icons/gi'
 import {MdCancel} from 'react-icons/md'
-import {TbCancel} from 'react-icons/tb'
 
 interface ModalProps {
   isOpen: boolean
