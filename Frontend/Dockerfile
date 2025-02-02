@@ -14,7 +14,6 @@ COPY . .
 # Build the Vite app
 RUN npm run build
 
-# Step 2: Serve with Nginx
 FROM nginx:alpine
 
 # Remove default Nginx static files
