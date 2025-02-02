@@ -1,4 +1,4 @@
-name: Build and Push fronted Docker Image
+name: Build and Push frontend Docker Image
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
       # Step 2: Build Docker Image
       - name: Build Docker Image
         run: |
-          docker build -t natnaelcrypto/waf-frontend:latest -f Frontend/Dockerfile .
+          docker build -t natnaelcrypto/waf-frontend:latest -f Frontend/Dockerfile Frontend/
 
       # Step 3: Push Docker Image to Docker Hub
       - name: Push Docker Image to Docker Hub
