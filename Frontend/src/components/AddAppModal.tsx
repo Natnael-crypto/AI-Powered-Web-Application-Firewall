@@ -1,7 +1,6 @@
-import React from 'react'
 import Modal from './Modal'
 import Button from './atoms/Button'
-import {BiLockAlt, BiInfoCircle, BiTag} from 'react-icons/bi' // Icons for form fields
+import {BiInfoCircle, BiTag} from 'react-icons/bi'
 
 interface AddAppModalProps {
   isModalOpen: boolean

@@ -42,7 +42,7 @@ function Application() {
         Header: 'Security',
         accessor: 'security' as const,
         Cell: ({row}: {row: {index: number; original: ApplicationData}}) => {
-          const {index, original} = row
+          const {index} = row
           const selectedOption = securityOptions[index]
 
           return (
