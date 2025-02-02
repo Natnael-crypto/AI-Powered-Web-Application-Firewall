@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 
 # Build the Vite app
-RUN npm run build
+RUN npm run build --no-cache
 
 # Step 2: Serve with Nginx
 FROM nginx:alpine
