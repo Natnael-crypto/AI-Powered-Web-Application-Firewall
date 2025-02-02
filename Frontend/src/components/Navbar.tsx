@@ -7,7 +7,7 @@ function Navbar() {
   const urls = location.pathname.split('/').filter(url => url !== '')
 
   return (
-    <div className="w-full h-max bg-inherit ">
+    <div className="w-full h-max bg-inherit">
       <div className="flex justify-between items-center py-4 px-8 ">
         {/* Breadcrumbs */}
         <div className="flex gap-2 items-center">

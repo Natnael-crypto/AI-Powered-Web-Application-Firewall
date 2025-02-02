@@ -30,7 +30,7 @@ function SidebarContent({
   const isActive = url.pathname.split('/')[-1] === href.split('/')[-1]
 
   return (
-    <div className="transition-all duration-200 ease-in-out">
+    <div className="transition-all duration-200 ease-in-out w-full">
       <Link
         to={href}
         onClick={() => changeOpenItem && changeOpenItem({title, href})}
