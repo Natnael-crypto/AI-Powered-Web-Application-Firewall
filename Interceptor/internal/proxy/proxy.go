@@ -111,11 +111,14 @@ func fetchApplications() error {
 	wafInstances = make(map[string]*waf.WAF)
 	for _, app := range result.Applications {
 		if app.Status {
-			applications[app.ApplicationName] = app.Hostname
+
+			address := app.IPAddress + ":" + app.Port
+			applications[app.Hostname] = address
 
 			// Initialize WAF for each application using its application ID
 			rulesResponse, err := FetchRules(app.ApplicationID)
 			if err != nil {
+
 				log.Fatalf("Error fetching rules: %v", err)
 			}
 
@@ -127,12 +130,12 @@ func fetchApplications() error {
 
 			wafInstance, err := waf.InitializeRuleEngine(fileName)
 			if err != nil {
-				log.Printf("Error initializing WAF for application %s: %v", app.ApplicationName, err)
+				log.Printf("Error initializing WAF for application %s: %v", app.Hostname, err)
 				continue
 			}
 
 			// Store the WAF instance by hostname
-			wafInstances[app.ApplicationName] = wafInstance
+			wafInstances[app.Hostname] = wafInstance
 		}
 	}
 	appsLock.Unlock()
