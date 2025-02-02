@@ -40,7 +40,6 @@ const LogAttack = () => {
 
   const handleFilter = (filters: FilterValues) => {
     console.log('Applied Filters:', filters)
-    // Implement your filter logic here (e.g., filter logs based on the criteria)
   }
 
   const [logType, setLogType] = useState<'log' | 'event'>('log')
