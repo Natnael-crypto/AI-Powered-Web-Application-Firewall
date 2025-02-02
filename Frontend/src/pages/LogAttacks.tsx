@@ -1,9 +1,9 @@
 import {Column} from 'react-table'
 import Table from '../components/Table'
-import LogFilter from '../components/Logs/LogFilter'
+import LogFilter from '../components/Request_Logs/LogFilter'
 import {AttackLog, FilterValues} from '../lib/types'
 import {useState} from 'react'
-import LogLogs from '../components/Logs/LogLogs'
+import LogLogs from '../components/Request_Logs/LogLogs'
 
 const LogAttack = () => {
   const columns: Column<AttackLog>[] = [
