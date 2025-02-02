@@ -7,7 +7,7 @@ import {
 import RootLayout from './layout/RootLayout'
 import Dashboard from './pages/Dashboard'
 import LoginPage from './pages/Login'
-import LogAttack from './pages/Logs/LogAttacks'
+import LogAttack from './pages/LogAttacks'
 import PageNotFound from './pages/PageNotFound'
 import Application from './pages/Application'
 import CustomeRules from './pages/CustomeRules'
