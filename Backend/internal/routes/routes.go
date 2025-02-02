@@ -89,4 +89,13 @@ func InitializeRoutes(r *gin.Engine) {
 		certs.DELETE("/:application_id", controllers.DeleteCert) // Delete a certificate
 	}
 	r.GET("/certs", controllers.GetCert)
+
+	docker := authorized.Group("/docker")
+	{
+		// Docker Management
+		docker.GET("/start", controllers.StartContainer)
+		docker.GET("/stop", controllers.StopContainer)
+		docker.GET("/restart", controllers.RestartContainer)
+	}
+
 }
