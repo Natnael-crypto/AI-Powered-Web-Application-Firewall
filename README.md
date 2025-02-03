@@ -3,7 +3,7 @@
 ## Overview
 The **AI-Powered Web Application Firewall (WAF)** is a next-generation security solution designed to protect web applications from evolving cyber threats. This project combines traditional WAF capabilities with artificial intelligence (AI) to provide enhanced threat detection, traffic analysis, and real-time protection. 
 
-This project is the capstone submission for [Your Degree/Program Name] and was developed over the course of four months.
+This project is the capstone submission for AAiT's Software Engineering Program and was developed over the course of four months.
 
 ## Features
 - **Real-Time Traffic Monitoring**: Captures and logs HTTP requests for analysis.
