@@ -13,7 +13,7 @@ function Sidebar() {
   }
 
   return (
-    <div className="h-full bg-gray-300 flex flex-col items-center py-7 w-[15%]">
+    <div className="h-full  flex flex-col items-center py-7 w-[15%]">
       <div className=" text-3xl text-black font-semibold">Logo</div>
       <div className="flex flex-col justify-center py-10 gap-3 overflow-y-scroll w-[80%]">
         {SiderbarContentItems.map(item => (

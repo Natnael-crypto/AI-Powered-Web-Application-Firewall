@@ -1,10 +1,11 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import Table from '../components/Table'
 import Button from '../components/atoms/Button'
 import Card from '../components/Card'
 import {BiBot, BiKey} from 'react-icons/bi'
 import {CiWavePulse1} from 'react-icons/ci'
 import AddAppModal from '../components/AddAppModal'
+import axios from 'axios'
 
 interface ApplicationData {
   application: string
@@ -18,6 +19,24 @@ interface ApplicationData {
 }
 
 function Application() {
+  const getAppplications = async () => {
+    try {
+      const applications = await axios.get('/api/application', {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `${localStorage.getItem('token')}`,
+        },
+      })
+      console.log(await applications.data)
+    } catch (error) {
+      console.error('Error adding application:', error)
+    }
+  }
+
+  useEffect(() => {
+    getAppplications()
+  }, [])
+
   const [securityOptions, setSecurityOptions] = useState<Record<number, string>>({
     0: 'High',
     1: 'Medium',

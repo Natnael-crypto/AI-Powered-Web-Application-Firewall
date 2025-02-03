@@ -20,9 +20,9 @@ const router = createBrowserRouter(
         <Route path="logs/attacks" element={<LogAttack />} />
         <Route path="application/applications" element={<Application />} />
         <Route path="protection/custom_rules" element={<CustomeRules />} />
+        <Route path="*" element={<PageNotFound />} />
       </Route>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="*" element={<PageNotFound />} />
     </>,
   ),
 )
