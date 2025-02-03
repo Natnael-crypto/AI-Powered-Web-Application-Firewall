@@ -2,7 +2,6 @@ package waf
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/corazawaf/coraza/v3"
@@ -41,10 +40,7 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int) {
 
 	tx.ProcessRequestHeaders()
 	tx.ProcessURI(r.RequestURI, r.Method, r.Proto)
-	_, err := tx.ProcessRequestBody()
-	if err != nil {
-		log.Println("An error occured while trying to process request body", err)
-	}
+	tx.ProcessRequestBody()
 
 	interruption := tx.Interruption()
 
