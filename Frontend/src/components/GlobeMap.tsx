@@ -25,7 +25,7 @@ const GlobeMap: React.FC<GlobeMapProps> = ({data}) => {
         projectionConfig={{
           scale: 70,
         }}
-        width={500}
+        width={400}
         height={300}
         className="w-2/3"
       >

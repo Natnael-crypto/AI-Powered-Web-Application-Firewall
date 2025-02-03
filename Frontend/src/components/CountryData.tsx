@@ -37,7 +37,7 @@ const CountryData = () => {
         {data.map((item, index) => (
           <li
             key={index}
-            className="p-3 space-y-2  rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            className="p-3 space-y-2  rounded-lg  hover:shadow-md transition-shadow"
           >
             <div className="flex justify-between items-center gap-16">
               <span className="text-gray-700 font-medium">{item.country}</span>
