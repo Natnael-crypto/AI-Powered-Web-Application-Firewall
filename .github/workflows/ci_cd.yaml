@@ -1,4 +1,4 @@
-name: Deploy Secure Go Web Application with Static and Dynamic Analysis
+name: Static Analysis
 
 on:
   pull_request:
