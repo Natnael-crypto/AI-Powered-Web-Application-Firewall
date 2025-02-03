@@ -16,7 +16,7 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route path="/" element={<RootLayout />}>
-        <Route path="statistics/dashboard" element={<Dashboard />} />
+        <Route path="dashboard" element={<Dashboard />} />
         <Route path="logs/attacks" element={<LogAttack />} />
         <Route path="application/applications" element={<Application />} />
         <Route path="protection/custom_rules" element={<CustomeRules />} />

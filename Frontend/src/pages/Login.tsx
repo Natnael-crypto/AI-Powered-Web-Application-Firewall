@@ -23,16 +23,21 @@ const LoginPage = () => {
     e.preventDefault()
     if (!validateForm()) return
 
+    const api_url = isLogin ? '/api/login' : '/api/register'
+
     try {
       console.log('Form submitted:', formData)
-      const {data} = await axios.post<{message: string; token: string}>(
-        '/api/register',
-        formData,
-      )
+      console.log(api_url)
+      const data = await axios.post<{message: string; token: string}>(api_url, formData)
       if (data) {
-        const {token} = await data
+        if (!isLogin) {
+          setIsLogin(true)
+          return
+        }
+        const token = data.data.token
+
         localStorage.setItem('token', token)
-        navigate('/statistics/dashboard')
+        navigate('/dashboard')
       }
     } catch (error) {
       setErrorMessage('Invalid username or password')
@@ -41,7 +46,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (localStorage.getItem('token')) {
-      navigate('/statistics/dashboard')
+      navigate('/dashboard')
     }
   }, [])
 

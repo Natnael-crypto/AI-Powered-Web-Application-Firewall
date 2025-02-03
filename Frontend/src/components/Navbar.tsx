@@ -1,12 +1,14 @@
 import {LuLogOut} from 'react-icons/lu'
-import {useLocation} from 'react-router-dom'
+import {useLocation, useNavigate} from 'react-router-dom'
 
 function Navbar() {
   const location = useLocation()
   const urls = location.pathname.split('/').filter(url => url !== '')
+  const navigate = useNavigate()
 
   const handleLogout = () => {
     localStorage.removeItem('token')
+    navigate('/login')
   }
 
   return (
