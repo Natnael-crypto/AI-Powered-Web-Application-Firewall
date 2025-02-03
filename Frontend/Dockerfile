@@ -1,27 +1,17 @@
-# Step 1: Build the Vite App
-FROM node:18-alpine AS build
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json first for better caching
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json* ./
 
-RUN npm install
+RUN npm install --frozen-lockfile
 
-# Copy the rest of the project files
 COPY . .
 
-# Build the Vite app
-RUN npm run build
+RUN npm run build 
 
-FROM nginx:alpine
+RUN npm install -g serve
 
-# Remove default Nginx static files
-RUN rm -rf /usr/share/nginx/html/*
+EXPOSE 3000
 
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# Expose port 80
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["serve", "-s", "dist", "-l", "3000"]
