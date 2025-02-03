@@ -11,9 +11,8 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // Proxy all requests starting with `/api` to the backend
       '/api': {
-        target: 'http://localhost:8080', // Your backend server URL
+        target: 'http://backend:8080', // Your backend server URL
         changeOrigin: true, // Needed for virtual hosted sites
         rewrite: path => path.replace(/^\/api/, ''), // Remove `/api` prefix when forwarding
       },

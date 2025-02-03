@@ -21,10 +21,13 @@ function Dashboard() {
   // ]
 
   const requestData = [
-    {lat: 37.7749, lng: -122.4194, intensity: 100}, // San Francisco
-    {lat: 40.7128, lng: -74.006, intensity: 200}, // New York
-    {lat: 51.5074, lng: -0.1278, intensity: 150}, // London
-    {lat: 35.6895, lng: 139.6917, intensity: 300}, // Tokyo
+    {lat: 37.7749, lng: -122.4194, intensity: 100}, // San Francisco, USA
+    {lat: 48.8566, lng: 2.3522, intensity: 200}, // Paris, France
+    {lat: 51.5074, lng: -0.1278, intensity: 150}, // London, UK
+    {lat: 35.6895, lng: 139.6917, intensity: 300}, // Tokyo, Japan
+    {lat: -33.8688, lng: 151.2093, intensity: 250}, // Sydney, Australia
+    {lat: 55.7558, lng: 37.6173, intensity: 180}, // Moscow, Russia
+    {lat: -23.5505, lng: -46.6333, intensity: 220}, // São Paulo, Brazil
   ]
 
   return (
