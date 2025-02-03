@@ -12,9 +12,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://backend:8080', // Your backend server URL
-        changeOrigin: true, // Needed for virtual hosted sites
-        rewrite: path => path.replace(/^\/api/, ''), // Remove `/api` prefix when forwarding
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/api/, ''),
       },
     },
   },
