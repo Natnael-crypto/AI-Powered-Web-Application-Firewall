@@ -13,12 +13,12 @@ function Dashboard() {
 
   const changeDashboardMenu = () =>
     setSelectedDashboardMenu(selectedDashboardMenu == 'basic' ? 'advanced' : 'basic')
-  const stats = [
-    {label: 'Requests', value: 700},
-    {label: 'Requests', value: 700},
-    {label: 'Requests', value: 700},
-    {label: 'Requests', value: 700},
-  ]
+  // const stats = [
+  //   {label: 'Requests', value: 2400},
+  //   {label: 'Today Blocked', value: 700},
+  //   {label: 'Today Attack IP', value: 700},
+  //   {label: 'Requests', value: 700},
+  // ]
 
   const requestData = [
     {lat: 37.7749, lng: -122.4194, intensity: 100}, // San Francisco
@@ -47,16 +47,16 @@ function Dashboard() {
               <Card className=" items-center bg-white">
                 <StatisticGroup
                   stats={[
-                    {label: 'Requests', value: 700},
-                    {label: 'Requests', value: 700},
+                    {label: 'Today Blocked', value: 700},
+                    {label: 'Today Attack IP', value: 20},
                   ]}
                   className=" h-full w-full"
                 />
               </Card>
             </div>
-            <Card className="bg-white">
+            {/* <Card className="bg-white">
               <StatisticGroup className="py-5" stats={stats} />
-            </Card>
+            </Card> */}
           </div>
           <Card className="h-full w-[55%] shadow-lg bg-white">Query per second</Card>
         </div>

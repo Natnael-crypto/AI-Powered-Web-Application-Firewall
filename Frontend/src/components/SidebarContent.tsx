@@ -30,11 +30,11 @@ function SidebarContent({
   const isActive = url.pathname.split('/')[-1] === href.split('/')[-1]
 
   return (
-    <div className="transition-all duration-200 ease-in-out w-full">
+    <div className="transition-all duration-200 ease-in-out w-full ">
       <Link
         to={href}
         onClick={() => changeOpenItem && changeOpenItem({title, href})}
-        className={`flex w-full justify-between items-center gap-4 ${children?.length ? 'py-3 ' : ''} px-7 hover:bg-green-50 hover:text-green-600 rounded-xl transition-colors duration-200 ${
+        className={`flex w-full justify-between items-center gap-4 ${children?.length ? 'py-3 ' : ''} px-7 py-4 hover:bg-green-50 hover:text-green-600 rounded-xl transition-colors duration-200 ${
           isOpen ? 'bg-green-50 text-green-600 mb-3' : 'text-gray-700'
         }`}
       >

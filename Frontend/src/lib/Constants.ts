@@ -1,13 +1,8 @@
 export const SiderbarContentItems = [
   {
-    title: 'Statistics',
+    title: 'Dashboard',
     href: 'statistics/dashboard',
-    children: [
-      {
-        title: 'Dashboard',
-        href: 'statistics/dashboard',
-      },
-    ],
+    children: [],
   },
   {
     title: 'Logs',

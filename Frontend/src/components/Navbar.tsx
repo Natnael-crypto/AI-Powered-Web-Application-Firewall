@@ -1,4 +1,3 @@
-import {BsLightning} from 'react-icons/bs'
 import {LuLogOut} from 'react-icons/lu'
 import {useLocation} from 'react-router-dom'
 
@@ -6,8 +5,12 @@ function Navbar() {
   const location = useLocation()
   const urls = location.pathname.split('/').filter(url => url !== '')
 
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+  }
+
   return (
-    <div className="w-full h-max bg-inherit">
+    <div className="w-full h-max ">
       <div className="flex justify-between items-center py-4 px-8 ">
         {/* Breadcrumbs */}
         <div className="flex gap-2 items-center">
@@ -24,7 +27,7 @@ function Navbar() {
         {/* Right Section */}
         <div className="flex items-center gap-5">
           {/* Pro Badge */}
-          <div className="flex items-center overflow-hidden rounded-lg shadow-sm">
+          {/* <div className="flex items-center overflow-hidden rounded-lg shadow-sm">
             <div className="flex gap-2 items-center text-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2">
               <BsLightning className="text-yellow-400" />
               <span>Pro</span>
@@ -32,10 +35,13 @@ function Navbar() {
             <div className="bg-gray-100 text-gray-700 px-4 py-2 text-lg font-medium">
               233 days left
             </div>
-          </div>
+          </div> */}
 
           {/* Logout Button */}
-          <button className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
+          <button
+            onClick={handleLogout}
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+          >
             <LuLogOut
               size={25}
               className="text-gray-700 hover:text-red-600 transition-colors duration-200"

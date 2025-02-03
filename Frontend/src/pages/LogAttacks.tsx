@@ -14,7 +14,7 @@ const LogAttack = () => {
     {Header: 'Start At', accessor: 'startAt'},
   ]
 
-  const data: AttackLog[] = [
+  const initialData: AttackLog[] = [
     {
       ipAddress: '192.168.1.1',
       application: 'https://webserver.example.com',
@@ -38,17 +38,31 @@ const LogAttack = () => {
     },
   ]
 
+  const [filteredData, setFilteredData] = useState(initialData)
+  const [logType, setLogType] = useState<'log' | 'event'>('log')
+
   const handleFilter = (filters: FilterValues) => {
-    console.log('Applied Filters:', filters)
+    const filtered = initialData.filter(log => {
+      return (
+        (!filters.ipAddress || log.ipAddress.includes(filters.ipAddress)) &&
+        (!filters.domain || log.application.includes(filters.domain)) &&
+        (!filters.startAt || log.startAt >= filters.startAt) &&
+        (!filters.endAt || log.startAt <= filters.endAt)
+      )
+    })
+    setFilteredData(filtered)
   }
 
-  const [logType, setLogType] = useState<'log' | 'event'>('log')
   const toggleType = () => setLogType(logType === 'log' ? 'event' : 'log')
 
   return (
-    <div className="px-10 overflow-y-scroll">
+    <div className="px-10 overflow-y-scroll my-5">
       <LogFilter onFilter={handleFilter} logtype={logType} onLogtypeChange={toggleType} />
-      {logType === 'event' ? <Table columns={columns} data={data} /> : <LogLogs />}
+      {logType === 'event' ? (
+        <Table columns={columns} data={filteredData} />
+      ) : (
+        <LogLogs />
+      )}
     </div>
   )
 }
