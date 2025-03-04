@@ -19,7 +19,7 @@ func AddUserToApplication(c *gin.Context) {
 	}
 
 	var input struct {
-		UserID        string `json:"user_id" binding:"required"`
+		UserID          string `json:"user_id" binding:"required,uuid"`
 		ApplicationName string `json:"application_name" binding:"required"`
 	}
 
@@ -52,8 +52,8 @@ func AddUserToApplication(c *gin.Context) {
 
 	// Create the assignment
 	userToApp := models.UserToApplication{
-		ID:            utils.GenerateUUID(),
-		UserID:        input.UserID,
+		ID:              utils.GenerateUUID(),
+		UserID:          input.UserID,
 		ApplicationName: input.ApplicationName,
 	}
 
@@ -74,7 +74,7 @@ func UpdateUserToApplication(c *gin.Context) {
 	}
 
 	var input struct {
-		UserID        string `json:"user_id" binding:"required"`
+		UserID          string `json:"user_id" binding:"required"`
 		ApplicationName string `json:"application_name" binding:"required"`
 	}
 
@@ -101,7 +101,7 @@ func UpdateUserToApplication(c *gin.Context) {
 
 	// Update the assignment
 	if err := config.DB.Model(&models.UserToApplication{}).Where("id = ?", assignmentID).Updates(map[string]interface{}{
-		"user_id":        input.UserID,
+		"user_id":          input.UserID,
 		"application_name": input.ApplicationName,
 	}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update user to application assignment"})

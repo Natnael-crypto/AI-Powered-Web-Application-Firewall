@@ -4,7 +4,7 @@ import "time"
 
 // Application represents the structure of an application in the system.
 type Application struct {
-	ApplicationID   string    `json:"application_id"`
+	ApplicationID   string    `json:"application_id" gorm:"primaryKey"`
 	ApplicationName string    `json:"application_name"`
 	Description     string    `json:"description"`
 	HostName        string    `json:"hostname"`

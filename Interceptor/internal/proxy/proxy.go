@@ -1,148 +1,25 @@
 package proxy
 
 import (
-	"encoding/json"
 	"fmt"
 	"interceptor/internal/error_page"
 	"interceptor/internal/logger"
-	"interceptor/internal/waf"
 	"io"
 	"log"
 	"net/http"
-	"os"
+	"strings"
 	"sync"
+	"time"
+
+	"golang.org/x/time/rate"
 )
-
-type Config struct {
-	ID              string `json:"ID"`
-	ListeningPort   string `json:"ListeningPort"`
-	RemoteLogServer string `json:"RemoteLogServer"`
-}
-
-type Application struct {
-	ApplicationID   string `json:"application_id"`
-	ApplicationName string `json:"application_name"`
-	Hostname        string `json:"hostname"`
-	IPAddress       string `json:"ip_address"`
-	Port            string `json:"port"`
-	Status          bool   `json:"status"`
-}
 
 var (
-	remoteLogServer string
-	proxyPort       string
-	applications    map[string]string   // Maps hostname -> "IP:Port"
-	wafInstances    map[string]*waf.WAF // Maps hostname -> WAF instance
-	configLock      sync.RWMutex
-	appsLock        sync.RWMutex
+	maintenanceMode bool
+	maintenanceLock sync.RWMutex
+	ipRateLimiters  = make(map[string]*rate.Limiter)
+	limiterLock     sync.Mutex
 )
-
-// fetchConfig retrieves the configuration from the remote API
-func fetchConfig() error {
-	// Get the backend host and port from environment variables
-	backendHost := os.Getenv("BACKENDHOST")
-	if backendHost == "" {
-		return fmt.Errorf("BACKENDHOST environment variable is not set")
-	}
-
-	backendPort := os.Getenv("BACKENDPORT")
-	if backendPort == "" {
-		return fmt.Errorf("BACKENDPORT environment variable is not set")
-	}
-
-	// Construct the full URL for fetching config
-	configURL := fmt.Sprintf("http://%s:%s/config", backendHost, backendPort)
-
-	resp, err := http.Get(configURL)
-	if err != nil {
-		return fmt.Errorf("failed to fetch config: %v", err)
-	}
-	defer resp.Body.Close()
-
-	var result struct {
-		Config Config `json:"data"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return fmt.Errorf("failed to decode config: %v", err)
-	}
-
-	configLock.Lock()
-	remoteLogServer = result.Config.RemoteLogServer
-	proxyPort = ":" + result.Config.ListeningPort
-	configLock.Unlock()
-
-	fmt.Printf("Loaded config: LogServer=%s, ProxyPort=%s\n", remoteLogServer, proxyPort)
-	return nil
-}
-
-// fetchApplications retrieves the list of applications and updates the hostname mapping
-func fetchApplications() error {
-	// Get the backend host and port from environment variables
-	backendHost := os.Getenv("BACKENDHOST")
-	if backendHost == "" {
-		return fmt.Errorf("BACKENDHOST environment variable is not set")
-	}
-
-	backendPort := os.Getenv("BACKENDPORT")
-	if backendPort == "" {
-		return fmt.Errorf("BACKENDPORT environment variable is not set")
-	}
-
-	// Construct the full URL for fetching applications
-	applicationsURL := fmt.Sprintf("http://%s:%s/application/", backendHost, backendPort)
-
-	resp, err := http.Get(applicationsURL)
-	if err != nil {
-		return fmt.Errorf("failed to fetch applications: %v", err)
-	}
-	defer resp.Body.Close()
-
-	var result struct {
-		Applications []Application `json:"applications"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return fmt.Errorf("failed to decode applications: %v", err)
-	}
-
-	appsLock.Lock()
-	applications = make(map[string]string)
-	wafInstances = make(map[string]*waf.WAF)
-	for _, app := range result.Applications {
-		if app.Status {
-
-			address := app.IPAddress + ":" + app.Port
-			applications[app.Hostname] = address
-
-			// Initialize WAF for each application using its application ID
-			rulesResponse, err := FetchRules(app.ApplicationID)
-			if err != nil {
-
-				log.Fatalf("Error fetching rules: %v", err)
-			}
-
-			// Write the rule strings to a file and get the filename
-			fileName, err := WriteRuleToFile(app.ApplicationID, rulesResponse.Rules)
-			if err != nil {
-				log.Fatalf("Error writing rules to file: %v", err)
-			}
-
-			wafInstance, err := waf.InitializeRuleEngine(fileName)
-			if err != nil {
-				log.Printf("Error initializing WAF for application %s: %v", app.Hostname, err)
-				continue
-			}
-
-			// Store the WAF instance by hostname
-			wafInstances[app.Hostname] = wafInstance
-		}
-	}
-	appsLock.Unlock()
-
-	fmt.Println("Loaded applications:", applications)
-	return nil
-}
 
 // getTargetRedirectIP gets the backend target URL based on request hostname
 func getTargetRedirectIP(hostname string) (string, bool) {
@@ -152,14 +29,94 @@ func getTargetRedirectIP(hostname string) (string, bool) {
 	return target, exists
 }
 
+// getLimiter retrieves or creates a new rate limiter for each client IP
+func getLimiter(ip string) *rate.Limiter {
+	limiterLock.Lock()
+	defer limiterLock.Unlock()
+
+	if limiter, exists := ipRateLimiters[ip]; exists {
+		return limiter
+	}
+
+	// Create a new limiter: 5 requests per second with a burst of 10
+	// limiter := rate.NewLimiter(1, 10)
+	configLock.RLock()
+	limiter := rate.NewLimiter(rate.Limit(rateLimit), windowSize)
+	configLock.RUnlock()
+	ipRateLimiters[ip] = limiter
+
+	// Optional: clean up old entries periodically (could use a background go routine)
+	go func() {
+		time.Sleep(5 * time.Minute)
+		limiterLock.Lock()
+		delete(ipRateLimiters, ip)
+		limiterLock.Unlock()
+	}()
+
+	return limiter
+}
+
+func StartInterceptor(w http.ResponseWriter, r *http.Request) {
+	maintenanceLock.Lock()
+	maintenanceMode = false
+	maintenanceLock.Unlock()
+	fmt.Println("Starting interceptor")
+	w.WriteHeader(http.StatusOK)
+}
+
+func StopInterceptor(w http.ResponseWriter, r *http.Request) {
+	maintenanceLock.Lock()
+	maintenanceMode = true
+	maintenanceLock.Unlock()
+	fmt.Println("Stopping interceptor")
+	w.WriteHeader(http.StatusOK)
+}
+
+func RestartInterceptor(w http.ResponseWriter, r *http.Request) {
+	if err := fetchConfig(); err != nil {
+		log.Fatalf("Error fetching config: %v", err)
+	}
+
+	if err := fetchApplications(); err != nil {
+		log.Fatalf("Error fetching applications: %v", err)
+	}
+	err := InitializeWebSocket()
+	if err != nil {
+		log.Fatalf("Failed to initialize WebSocket: %v", err)
+	}
+	defer CloseWebSocket()
+	fmt.Println("Restarting interceptor")
+}
+
 // proxyRequest handles incoming requests and forwards them to the correct backend server
 func proxyRequest(w http.ResponseWriter, r *http.Request) {
+	maintenanceLock.RLock()
+	if maintenanceMode {
+		maintenanceLock.RUnlock()
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		fmt.Fprintf(w, `<!DOCTYPE html>
+			<html><head><title>Under Maintenance</title></head>
+			<body><h1>Site Under Maintenance</h1><p>We're currently performing maintenance. Please check back soon.</p></body></html>`)
+		return
+	}
+	maintenanceLock.RUnlock()
+
 	if r.URL.Path == "/favicon.ico" {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	fmt.Println("Passed")
+	// Apply rate limiting here
+	ip := r.RemoteAddr
+	ip = strings.Split(ip, ":")[0]
+	limiter := getLimiter(ip)
+
+	if !limiter.Allow() {
+		// Respond with a 429 status code if the rate limit is exceeded
+		http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
+		return
+	}
 
 	hostname := r.Host
 	targetRedirectIP, exists := getTargetRedirectIP(hostname)
@@ -212,7 +169,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 
 	logger.LogRequest(r, "allow", "")
 	message.Status = "allowed"
-	SendToBackend(message) // Send log to backend
+	// Send log to backend
 
 	client := &http.Client{}
 	targetURL := fmt.Sprintf("%s%s", targetRedirectIP, r.URL.Path)
@@ -239,6 +196,8 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to reach target server", http.StatusBadGateway)
 		return
 	}
+	message.ResponseCode = resp.StatusCode
+	SendToBackend(message)
 	defer resp.Body.Close()
 
 	for name, values := range resp.Header {
@@ -270,6 +229,9 @@ func Starter() {
 	defer CloseWebSocket()
 
 	http.HandleFunc("/", proxyRequest)
+	http.HandleFunc("/interceptor/startinterceptor", StartInterceptor)
+	http.HandleFunc("/interceptor/stopinterceptor", StopInterceptor)
+	http.HandleFunc("/interceptor/restartinterceptor", RestartInterceptor)
 
 	err = logger.InitializeLogger(remoteLogServer)
 	if err != nil {

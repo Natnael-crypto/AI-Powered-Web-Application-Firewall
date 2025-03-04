@@ -28,6 +28,12 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
+	var userExist models.User
+	if err := config.DB.Where("username = ?", input.Username).First(&userExist).Error; err == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "super admin exist"})
+		return
+	}
+
 	user := models.User{
 		UserID:       utils.GenerateUUID(),
 		Username:     input.Username,
@@ -37,6 +43,8 @@ func RegisterUser(c *gin.Context) {
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
+
+	
 
 	if err := config.DB.Create(&user).Error; err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "username already exists"})

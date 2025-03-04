@@ -121,14 +121,23 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	// Hash the new password
-	hashedPassword, err := utils.HashPassword(input.NewPassword)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash new password"})
+	if admin.Role == "super_admin" && c.GetString("user_id") != admin.UserID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "super admin cannot be updated by this user"})
 		return
 	}
 
-	admin.PasswordHash = hashedPassword
+	var hashedPassword string
+	var err error
+
+	if input.NewPassword != "" {
+		hashedPassword, err = utils.HashPassword(input.NewPassword)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash new password"})
+			return
+		}
+		admin.PasswordHash = hashedPassword
+	}
+
 	admin.UpdatedAt = time.Now()
 
 	// Use Updates with WHERE condition on admin.UserID
@@ -158,4 +167,36 @@ func DeleteAdmin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "admin deleted successfully"})
+}
+
+func InactiveAdmin(c *gin.Context) {
+	// Check if the user is a super admin
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	username := c.Param("username")
+
+	if err := config.DB.Model(&models.User{}).Where("username = ?", username).Update("status", "inactive").Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update admin status"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "admin status updated successfully"})
+}
+
+func ActiveAdmin(c *gin.Context) {
+	// Check if the user is a super admin
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	username := c.Param("username")
+
+	if err := config.DB.Model(&models.User{}).Where("username = ?", username).Update("status", "active").Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update admin status"})
+		return
+	}
 }

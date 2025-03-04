@@ -3,7 +3,7 @@ package models
 import "time"
 
 type Rule struct {
-	RuleID         string    `json:"rule_id"`
+	RuleID         string    `json:"rule_id" gorm:"primaryKey"`
 	RuleType       string    `json:"rule_type" binding:"required"`
 	RuleMethod     string    `json:"rule_method" binding:"required"`
 	RuleDefinition string    `json:"rule_definition" binding:"required"`

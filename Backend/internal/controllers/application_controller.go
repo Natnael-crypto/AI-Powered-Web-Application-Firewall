@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -69,10 +68,10 @@ func AddApplication(c *gin.Context) {
 // GetApplication retrieves a specific application by ID
 func GetApplication(c *gin.Context) {
 	// Check if the user is a super admin
-	// if c.GetString("role") != "super_admin" {
-	// 	c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-	// 	return
-	// }
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
 
 	applicationID := c.Param("application_id")
 	var application models.Application
@@ -87,12 +86,7 @@ func GetApplication(c *gin.Context) {
 
 // GetAllApplications retrieves all applications
 func GetAllApplications(c *gin.Context) {
-	// Check if the user is a super admin
-	// if c.GetString("role") != "super_admin" {
-	// 	c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-	// 	return
-	// }
-
+	
 	var applications []models.Application
 	if err := config.DB.Find(&applications).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch applications"})

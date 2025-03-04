@@ -3,7 +3,7 @@ package models
 import "time"
 
 type User struct {
-	UserID               string    `json:"user_id"`
+	UserID               string    `json:"user_id" gorm:"primaryKey"`
 	Username             string    `json:"username"`
 	PasswordHash         string    `json:"password_hash"`
 	Role                 string    `json:"role"`

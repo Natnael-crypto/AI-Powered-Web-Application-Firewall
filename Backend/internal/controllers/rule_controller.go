@@ -34,7 +34,7 @@ func AddRule(c *gin.Context) {
 		RuleDefinition string `json:"rule_definition" binding:"required"`
 		Action         string `json:"action" binding:"required"`
 		ApplicationID  string `json:"application_id" binding:"required"`
-		IsActive       bool   `json:"is_active"`
+		IsActive       bool   `json:"is_active" binding:"required"`
 		Category       string `json:"category" binding:"required"`
 	}
 

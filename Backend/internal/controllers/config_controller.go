@@ -9,6 +9,16 @@ import (
 	"github.com/google/uuid"
 )
 
+// GetConfig retrieves a configuration by ID
+func GetConfig(c *gin.Context) {
+	var conf models.Conf
+	if err := config.DB.First(&conf).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "configuration not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": conf})
+}
+
 // CreateConfig handles the creation of a new config entry
 func CreateConfig(c *gin.Context) {
 
@@ -19,12 +29,25 @@ func CreateConfig(c *gin.Context) {
 	}
 
 	var input struct {
-		ListeningPort   string `json:"listening_port" binding:"required"`
-		RemoteLogServer string `json:"remote_logServer" binding:"required"`
+		ListeningPort   string `json:"listening_port" binding:"numeric"`
+		RemoteLogServer string `json:"remote_logServer"`
+		RateLimit       int    `json:"rate_limit" binding:"numeric"`
+		WindowSize      int    `json:"window_size" binding:"numeric"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	existingConfig, err := GetConfig()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get existing configuration"})
+		return
+	}
+
+	if existingConfig != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "A configuration entry already exists"})
 		return
 	}
 
@@ -51,7 +74,7 @@ func CreateConfig(c *gin.Context) {
 }
 
 // UpdateConfig updates an existing configuration
-func UpdateConfig(c *gin.Context) {
+func UpdateListeningPort(c *gin.Context) {
 
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
@@ -59,8 +82,7 @@ func UpdateConfig(c *gin.Context) {
 	}
 
 	var input struct {
-		ListeningPort   string `json:"listening_port" binding:"required"`
-		RemoteLogServer string `json:remote_logServer binding:"required"`
+		ListeningPort string `json:"listening_port" binding:"required"`
 	}
 
 	configID := c.Param("id")
@@ -77,7 +99,6 @@ func UpdateConfig(c *gin.Context) {
 	}
 
 	conf.ListeningPort = input.ListeningPort
-	conf.RemoteLogServer = input.RemoteLogServer
 
 	if err := config.DB.Save(&conf).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update configuration"})
@@ -87,12 +108,56 @@ func UpdateConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "configuration updated successfully", "data": conf})
 }
 
-// GetConfig retrieves a configuration by ID
-func GetConfig(c *gin.Context) {
+func UpdateRateLimit(c *gin.Context) {
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	var input struct {
+		RateLimit  int `json:"rate_limit" binding:"required"`
+		WindowSize int `json:"window_size" binding:"required"`
+	}
+
 	var conf models.Conf
 	if err := config.DB.First(&conf).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "configuration not found"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": conf})
+
+	conf.RateLimit = input.RateLimit
+	conf.WindowSize = input.WindowSize
+
+	if err := config.DB.Save(&conf).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update configuration"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "configuration updated successfully", "data": conf})
+}
+
+func UpdateRemoteLogServer(c *gin.Context) {
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	var input struct {
+		RemoteLogServer string `json:"remote_logServer" binding:"required"`
+	}
+
+	var conf models.Conf
+	if err := config.DB.First(&conf).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "configuration not found"})
+		return
+	}
+
+	conf.RemoteLogServer = input.RemoteLogServer
+
+	if err := config.DB.Save(&conf).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update configuration"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "configuration updated successfully", "data": conf})
 }

@@ -104,6 +104,19 @@ func createIndexes() {
 	log.Println("Indexes created successfully.")
 }
 
+// func createNotificationRules() {
+// 	notificationRules := []models.NotificationRule{
+// 		{
+// 			NotificationRuleID: "1",
+// 			UserID:             "1",
+// 			NotificationType:   "email",
+// 			Threshold:          10,
+// 			Status:             true,
+// 			Description:        "Email notification for requests above 10",
+// 		},
+// 	}
+// }	
+
 // CloseDB closes the GORM database connection
 func CloseDB() {
 	if DB != nil {
