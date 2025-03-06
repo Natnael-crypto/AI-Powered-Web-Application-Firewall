@@ -1,14 +1,19 @@
 package proxy
 
 import (
+	"context"
+	"crypto/tls"
 	"fmt"
 	"interceptor/internal/error_page"
 	"interceptor/internal/logger"
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"golang.org/x/time/rate"
@@ -38,8 +43,6 @@ func getLimiter(ip string) *rate.Limiter {
 		return limiter
 	}
 
-	// Create a new limiter: 5 requests per second with a burst of 10
-	// limiter := rate.NewLimiter(1, 10)
 	configLock.RLock()
 	limiter := rate.NewLimiter(rate.Limit(rateLimit), windowSize)
 	configLock.RUnlock()
@@ -114,6 +117,25 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 
 	if !limiter.Allow() {
 		// Respond with a 429 status code if the rate limit is exceeded
+		message := MessageModel{
+			ApplicationName:  r.Host,
+			ClientIP:         r.RemoteAddr,
+			RequestMethod:    r.Method,
+			RequestURL:       r.URL.String(),
+			Headers:          fmt.Sprintf("%v", r.Header),
+			ResponseCode:     http.StatusTooManyRequests,
+			Status:           "blocked",
+			MatchedRules:     "Rate Limit Exceeded",
+			ThreatDetected:   true,
+			ThreatType:       "Rate Limit Exceeded",
+			ActionTaken:      "Rate Limit Exceeded",
+			BotDetected:      false, // TODO Implement bot detection logic
+			GeoLocation:      "Unknown",
+			RateLimited:      true, // TODO Implement rate limiting logic
+			UserAgent:        r.UserAgent(),
+			AIAnalysisResult: "", // TODO Replace with actual AI analysis results
+		}
+		SendToBackend(message)
 		http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
 		return
 	}
@@ -121,7 +143,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	hostname := r.Host
 	targetRedirectIP, exists := getTargetRedirectIP(hostname)
 	if r.TLS != nil {
-		targetRedirectIP = "https://" + targetRedirectIP
+		targetRedirectIP = "http://" + targetRedirectIP
 	} else {
 		targetRedirectIP = "http://" + targetRedirectIP
 	}
@@ -139,6 +161,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Evaluate the request using the appropriate WAF instance
 	blockedByRule, ruleID, ruleMessage, action, status := wafInstance.EvaluateRules(r)
+
 	message := MessageModel{
 		ApplicationName:  hostname,
 		ClientIP:         r.RemoteAddr,
@@ -213,25 +236,23 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func Starter() {
-	if err := fetchConfig(); err != nil {
-		log.Fatalf("Error fetching config: %v", err)
+	// Load configuration
+	err := fetchConfig()
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	if err := fetchApplications(); err != nil {
-		log.Fatalf("Error fetching applications: %v", err)
+	// Fetch applications and configure proxy
+	err = fetchApplications()
+	if err != nil {
+		log.Fatalf("Failed to fetch applications: %v", err)
 	}
 
-	// Initialize WebSocket connection
-	err := InitializeWebSocket()
+	err = InitializeWebSocket()
 	if err != nil {
 		log.Fatalf("Failed to initialize WebSocket: %v", err)
 	}
 	defer CloseWebSocket()
-
-	http.HandleFunc("/", proxyRequest)
-	http.HandleFunc("/interceptor/startinterceptor", StartInterceptor)
-	http.HandleFunc("/interceptor/stopinterceptor", StopInterceptor)
-	http.HandleFunc("/interceptor/restartinterceptor", RestartInterceptor)
 
 	err = logger.InitializeLogger(remoteLogServer)
 	if err != nil {
@@ -239,8 +260,83 @@ func Starter() {
 	}
 	defer logger.CloseLogger()
 
-	fmt.Printf("Starting server on port %s\n", proxyPort)
-	if err := http.ListenAndServe("0.0.0.0"+proxyPort, nil); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+	httpServer := &http.Server{
+		Addr:    "0.0.0.0" + proxyPort,
+		Handler: http.HandlerFunc(proxyRequest),
 	}
+
+	// Load TLS certificates into a map
+	certMap := make(map[string]tls.Certificate)
+	CertApp.mu.Lock()
+	for _, cert := range CertApp.Certs {
+		if cert.CertPath != "" && cert.KeyPath != "" {
+			tlsCert, err := tls.LoadX509KeyPair(cert.CertPath, cert.KeyPath)
+			if err != nil {
+				log.Printf("Failed to load cert for %s: %v", cert.HostName, err)
+				continue
+			}
+			certMap[cert.HostName] = tlsCert
+		}
+	}
+	CertApp.mu.Unlock()
+
+	// Custom certificate selection function
+	getCertificate := func(chi *tls.ClientHelloInfo) (*tls.Certificate, error) {
+		if cert, exists := certMap[chi.ServerName]; exists {
+			return &cert, nil
+		}
+		log.Printf("No certificate found for %s, serving default certificate", chi.ServerName)
+		for _, cert := range certMap {
+			return &cert, nil // Return the first available cert as a fallback
+		}
+		return nil, fmt.Errorf("no valid certificate found")
+	}
+
+	tlsConfig := &tls.Config{
+		GetCertificate: getCertificate,
+	}
+
+	httpsListener, err := tls.Listen("tcp", ":443", tlsConfig)
+	if err != nil {
+		log.Fatalf("Failed to create HTTPS listener: %v", err)
+	}
+
+	httpsServer := &http.Server{
+		Handler: http.HandlerFunc(proxyRequest),
+	}
+
+	// Start HTTP and HTTPS servers concurrently
+	go func() {
+		log.Printf("Starting HTTP server on port %s", proxyPort)
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("HTTP server error: %v", err)
+		}
+	}()
+
+	go func() {
+		log.Println("Starting HTTPS server on port 443 with SNI support")
+		if err := httpsServer.Serve(httpsListener); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("HTTPS server error: %v", err)
+		}
+	}()
+
+	// Graceful shutdown handling
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	<-stop
+	log.Println("Shutting down servers...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := httpServer.Shutdown(ctx); err != nil {
+		log.Printf("HTTP server shutdown error: %v", err)
+	}
+
+	if err := httpsServer.Shutdown(ctx); err != nil {
+		log.Printf("HTTPS server shutdown error: %v", err)
+	}
+
+	log.Println("Servers gracefully stopped")
 }

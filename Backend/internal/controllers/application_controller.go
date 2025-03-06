@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +25,7 @@ func AddApplication(c *gin.Context) {
 		IpAddress       string `json:"ip_address" binding:"required"`
 		Port            string `json:"port" binding:"required,max=5"`
 		Status          bool   `json:"status"`
+		Tls             bool   `json:"tls"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -52,6 +54,7 @@ func AddApplication(c *gin.Context) {
 		IpAddress:       input.IpAddress,
 		Port:            input.Port,
 		Status:          input.Status,
+		Tls:             input.Tls,
 		CreatedAt:       time.Now(),
 		UpdatedAt:       time.Now(),
 	}
@@ -86,7 +89,7 @@ func GetApplication(c *gin.Context) {
 
 // GetAllApplications retrieves all applications
 func GetAllApplications(c *gin.Context) {
-	
+
 	var applications []models.Application
 	if err := config.DB.Find(&applications).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch applications"})
@@ -111,6 +114,7 @@ func UpdateApplication(c *gin.Context) {
 		IpAddress       string `json:"ip_address" binding:"required,max=15"`
 		Port            string `json:"port" binding:"required,max=5"`
 		Status          bool   `json:"status" binding:"required"`
+		Tls             bool   `json:"tls"`
 	}
 
 	applicationID := c.Param("application_id")
@@ -136,6 +140,7 @@ func UpdateApplication(c *gin.Context) {
 	application.IpAddress = input.IpAddress
 	application.Port = input.Port
 	application.Status = input.Status
+	application.Tls = input.Tls
 	application.UpdatedAt = time.Now()
 
 	// Explicitly update the application using WHERE condition
@@ -146,6 +151,7 @@ func UpdateApplication(c *gin.Context) {
 		"ip_address":       application.IpAddress,
 		"port":             application.Port,
 		"status":           application.Status,
+		"tls":              application.Tls,
 		"updated_at":       application.UpdatedAt,
 	}).Error; err != nil {
 		// Log the error for debugging purposes

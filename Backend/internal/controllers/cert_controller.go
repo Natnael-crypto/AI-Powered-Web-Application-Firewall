@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 	"time"
 
 	"backend/internal/config"
@@ -14,9 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
-
-// Folder to store certificates
-const certStoragePath = "./certs"
 
 // AddCert handles uploading a certificate and key file
 func AddCert(c *gin.Context) {
@@ -32,6 +27,12 @@ func AddCert(c *gin.Context) {
 		return
 	}
 
+	var application models.Application
+	if err := config.DB.Where("application_id = ?", applicationID).First(&application).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Application not found"})
+		return
+	}
+
 	// Check if a certificate already exists for this application
 	var existingCert models.Cert
 	if err := config.DB.Where("application_id = ?", applicationID).First(&existingCert).Error; err == nil {
@@ -40,70 +41,52 @@ func AddCert(c *gin.Context) {
 	}
 
 	// Parse files
-	certFile, certHeader, err := c.Request.FormFile("cert")
+	certFile, _, err := c.Request.FormFile("cert")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get cert file"})
 		return
 	}
 	defer certFile.Close()
 
-	keyFile, keyHeader, err := c.Request.FormFile("key")
+	keyFile, _, err := c.Request.FormFile("key")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get key file"})
 		return
 	}
 	defer keyFile.Close()
 
-	// Define directory path based on application ID
-	applicationCertPath := filepath.Join(certStoragePath, applicationID)
-
-	// Ensure storage directory exists
-	if err := os.MkdirAll(applicationCertPath, os.ModePerm); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create application directory"})
-		return
-	}
-
-	// Define file paths
-	certFilePath := filepath.Join(applicationCertPath, certHeader.Filename)
-	keyFilePath := filepath.Join(applicationCertPath, keyHeader.Filename)
-
-	// Save cert file
-	outCert, err := os.Create(certFilePath)
+	// Read the contents of the cert file
+	certContent, err := io.ReadAll(certFile)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save cert file"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read cert file"})
 		return
 	}
-	defer outCert.Close()
-	io.Copy(outCert, certFile)
 
-	// Save key file
-	outKey, err := os.Create(keyFilePath)
+	// Read the contents of the key file
+	keyContent, err := io.ReadAll(keyFile)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save key file"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read key file"})
 		return
 	}
-	defer outKey.Close()
-	io.Copy(outKey, keyFile)
 
-	// Save to DB
+	// Save to DB (store the contents as BLOB)
 	newCert := models.Cert{
 		CertID:        uuid.New().String(),
-		CertPath:      certFilePath,
-		KeyPath:       keyFilePath,
+		Cert:          certContent, // Store cert content as BLOB
+		Key:           keyContent,  // Store key content as BLOB
 		ApplicationID: applicationID,
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
 	}
+
 	if err := config.DB.Create(&newCert).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to store certificate in database"})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message":  "Certificate uploaded successfully",
-		"cert_id":  newCert.CertID,
-		"certPath": certFilePath,
-		"keyPath":  keyFilePath,
+		"message": "Certificate uploaded successfully",
+		"cert_id": newCert.CertID,
 	})
 }
 
@@ -123,17 +106,17 @@ func GetCert(c *gin.Context) {
 		return
 	}
 
-	filePath := cert.CertPath
+	var file []byte
 	if fileType == "key" {
-		filePath = cert.KeyPath
+		file = cert.Key // No need to convert to string, since it's []byte
+	} else {
+		file = cert.Cert // No need to convert to string, since it's []byte
 	}
 
-	c.File(filePath)
+	c.Data(http.StatusOK, "application/octet-stream", file) // Pass []byte directly
 }
 
-// UpdateCert updates the certificate or key file
 func UpdateCert(c *gin.Context) {
-
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
@@ -147,6 +130,12 @@ func UpdateCert(c *gin.Context) {
 		return
 	}
 
+	var application models.Application
+	if err := config.DB.Where("application_id = ?", applicationID).First(&application).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Application not found"})
+		return
+	}
+
 	// Fetch the certificate record using ApplicationID
 	var cert models.Cert
 	if err := config.DB.Where("application_id = ?", applicationID).First(&cert).Error; err != nil {
@@ -155,60 +144,37 @@ func UpdateCert(c *gin.Context) {
 	}
 
 	// Get the uploaded file
-	file, fileHeader, err := c.Request.FormFile(fileType)
+	file, _, err := c.Request.FormFile(fileType)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to get %s file", fileType)})
 		return
 	}
 	defer file.Close()
 
-	// Define application-specific folder
-	appCertFolder := filepath.Join(certStoragePath, applicationID)
-	if err := os.MkdirAll(appCertFolder, os.ModePerm); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create application cert folder"})
-		return
-	}
-
-	// Define new file path
-	newFilePath := filepath.Join(appCertFolder, fileHeader.Filename)
-
-	// Save the new file
-	outFile, err := os.Create(newFilePath)
+	// Read the contents of the file into []byte
+	fileContent, err := io.ReadAll(file)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to save %s file", fileType)})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to read %s file", fileType)})
 		return
 	}
-	defer outFile.Close()
-	io.Copy(outFile, file)
 
-	// Remove the old file
-	var oldFilePath string
+	// Update the certificate content
 	if fileType == "cert" {
-		oldFilePath = cert.CertPath
-		cert.CertPath = newFilePath
+		cert.Cert = fileContent // Store the certificate content as []byte
 	} else {
-		oldFilePath = cert.KeyPath
-		cert.KeyPath = newFilePath
-	}
-
-	// Delete old file if it exists
-	if oldFilePath != "" {
-		if err := os.Remove(oldFilePath); err != nil {
-			fmt.Printf("Warning: Could not delete old file %s\n", oldFilePath)
-		}
+		cert.Key = fileContent // Store the private key content as []byte
 	}
 
 	// Update the database record
 	if err := config.DB.Save(&cert).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update certificate path in database"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update certificate in database"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":  fmt.Sprintf("%s file updated successfully", fileType),
-		"new_path": newFilePath,
-		"cert_id":  cert.CertID,
-		"app_id":   cert.ApplicationID,
+		"message": fmt.Sprintf("%s file updated successfully", fileType),
+		"cert_id": cert.CertID,
+		"app_id":  cert.ApplicationID,
 	})
 }
 
@@ -223,17 +189,9 @@ func DeleteCert(c *gin.Context) {
 	certID := c.Param("cert_id")
 	var cert models.Cert
 
-	if err := config.DB.First(&cert, certID).Error; err != nil {
+	if err := config.DB.Where("cert_id = ?", certID).First(&cert).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Certificate not found"})
 		return
-	}
-
-	// Remove files from storage
-	if err := os.Remove(cert.CertPath); err != nil {
-		fmt.Println("Warning: Could not delete cert file")
-	}
-	if err := os.Remove(cert.KeyPath); err != nil {
-		fmt.Println("Warning: Could not delete key file")
 	}
 
 	// Delete from DB

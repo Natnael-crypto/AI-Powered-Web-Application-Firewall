@@ -11,6 +11,7 @@ type Application struct {
 	IpAddress       string    `json:"ip_address"`
 	Port            string    `json:"port"`
 	Status          bool      `json:"status"`
+	Tls             bool      `json:"tls"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }

@@ -27,6 +27,18 @@ type Application struct {
 	IPAddress       string `json:"ip_address"`
 	Port            string `json:"port"`
 	Status          bool   `json:"status"`
+	Tls             bool   `json:tls`
+}
+
+type Cert struct {
+	HostName string `json:"hostname"`
+	CertPath string `json:"cert_path"`
+	KeyPath  string `json: key_path`
+}
+
+var CertApp struct {
+	Certs []Cert     `json:"certs"`
+	mu    sync.Mutex // Ensures thread safety when modifying Certs
 }
 
 var (
@@ -34,6 +46,7 @@ var (
 	proxyPort       string
 	applications    map[string]string   // Maps hostname -> "IP:Port"
 	wafInstances    map[string]*waf.WAF // Maps hostname -> WAF instance
+	Apps            map[string]Application
 	configLock      sync.RWMutex
 	appsLock        sync.RWMutex
 	rateLimit       int
@@ -86,7 +99,6 @@ func fetchConfig() error {
 
 // fetchApplications retrieves the list of applications and updates the hostname mapping
 func fetchApplications() error {
-
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: No .env file found, falling back to environment variables")
 	}
@@ -120,19 +132,44 @@ func fetchApplications() error {
 	appsLock.Lock()
 	applications = make(map[string]string)
 	wafInstances = make(map[string]*waf.WAF)
+	Apps = make(map[string]Application)
+	appsLock.Unlock()
+
 	for _, app := range result.Applications {
 		if app.Status {
 			address := app.IPAddress + ":" + app.Port
+
+			appsLock.Lock()
 			applications[app.Hostname] = address
+			Apps[app.Hostname] = app
+			appsLock.Unlock()
+
+			if app.Tls {
+				certPath, keyPath, err := fetchCert(app.ApplicationID)
+				if err != nil {
+					log.Printf("Failed to get cert: %v", err)
+					continue
+				}
+
+				CertApp.mu.Lock()
+				CertApp.Certs = append(CertApp.Certs, Cert{
+					HostName: app.Hostname,
+					CertPath: certPath,
+					KeyPath:  keyPath,
+				})
+				CertApp.mu.Unlock()
+			}
 
 			rulesResponse, err := FetchRules(app.ApplicationID)
 			if err != nil {
-				log.Fatalf("Error fetching rules: %v", err)
+				log.Printf("Error fetching rules: %v", err)
+				continue
 			}
 
 			fileName, err := WriteRuleToFile(app.ApplicationID, rulesResponse.Rules)
 			if err != nil {
-				log.Fatalf("Error writing rules to file: %v", err)
+				log.Printf("Error writing rules to file: %v", err)
+				continue
 			}
 
 			wafInstance, err := waf.InitializeRuleEngine(fileName)
@@ -141,10 +178,11 @@ func fetchApplications() error {
 				continue
 			}
 
+			appsLock.Lock()
 			wafInstances[app.Hostname] = wafInstance
+			appsLock.Unlock()
 		}
 	}
-	appsLock.Unlock()
 
 	fmt.Println("Loaded applications:", applications)
 	return nil

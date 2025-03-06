@@ -40,13 +40,9 @@ func CreateConfig(c *gin.Context) {
 		return
 	}
 
-	existingConfig, err := GetConfig()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get existing configuration"})
-		return
-	}
-
-	if existingConfig != nil {
+	// Check if a config entry already exists
+	var existingConfig models.Conf
+	if err := config.DB.First(&existingConfig).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "A configuration entry already exists"})
 		return
 	}

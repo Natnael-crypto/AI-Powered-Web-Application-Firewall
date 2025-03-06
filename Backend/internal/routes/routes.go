@@ -96,7 +96,7 @@ func InitializeRoutes(r *gin.Engine) {
 	// Certificate Management
 	certs := authorized.Group("/certs")
 	{
-		certs.POST("/", controllers.AddCert) // Add a certificate
+		certs.POST("/:application_id", controllers.AddCert) // Add a certificate
 		// certs.GET("/", controllers.GetCert)               // Get certificate/key file (expects application_id & type=cert/key)
 		certs.PUT("/:application_id", controllers.UpdateCert)    // Update an existing certificate
 		certs.DELETE("/:application_id", controllers.DeleteCert) // Delete a certificate
@@ -109,6 +109,11 @@ func InitializeRoutes(r *gin.Engine) {
 		interceptor.GET("/start", controllers.StartInterceptor)
 		interceptor.GET("/stop", controllers.StopInterceptor)
 		interceptor.GET("/restart", controllers.RestartInterceptor)
+	}
+
+	generateCsv := authorized.Group("/generate-csv")
+	{
+		generateCsv.GET("/", controllers.GenerateRequestsCSV)
 	}
 
 }

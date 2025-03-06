@@ -1,18 +1,31 @@
-2025/03/04 22:15:37 Method: GET, URL: /Interceptor/test_page?name=%2e%2f%7bbase%7d, Decision: allow, Reason: 
-2025/03/04 22:15:37 Method: GET, URL: /Interceptor/test_page?name=%2f%7bbase%7d, Decision: allow, Reason: 
-2025/03/04 22:15:37 Method: GET, URL: /Interceptor/test_page?name=%3Cscript%3E, Decision: deny, Reason: NoScript XSS InjectionChecker: HTML Injection
-2025/03/04 22:15:37 Method: GET, URL: /Interceptor/test_page?name=%7bbase%7d%3a%3a$DATA, Decision: allow, Reason: 
-2025/03/04 22:15:37 Method: GET, URL: /Interceptor/test_page?name=xxx%2f%2e%2e%2f%7bbase%7d, Decision: deny, Reason: Path Traversal Attack (/../) or (/.../)
-2025/03/04 22:15:37 Method: GET, URL: /Interceptor/test_page?name=%2e%2e%2f%2e%2e%2f%2e%2e%2fWEB-INF%2fweb%2exml, Decision: deny, Reason: Path Traversal Attack (/../) or (/.../)
-2025/03/04 22:15:37 Method: GET, URL: /Interceptor/test_page?name=%2f%2e%2e%2f%7bbase%7d, Decision: deny, Reason: Path Traversal Attack (/../) or (/.../)
-2025/03/04 22:15:38 Method: GET, URL: /Interceptor/test_page?name=%2f%2e%2f%7bbase%7d, Decision: allow, Reason: 
-2025/03/04 22:15:38 Method: GET, URL: /Interceptor/test_page?name=__init__%2epy, Decision: allow, Reason: 
-2025/03/04 22:15:38 Method: GET, URL: /Interceptor/test_page?name=%2e%2e%2f%7bbase%7d, Decision: deny, Reason: Path Traversal Attack (/../) or (/.../)
-2025/03/04 22:15:38 Method: GET, URL: /Interceptor/test_page?name=%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2fsetup%2epy, Decision: deny, Reason: Path Traversal Attack (/../) or (/.../)
-2025/03/04 22:15:39 Method: GET, URL: /Interceptor/test_page?name=%2e%2e%5c%2e%2e%5c%2e%2e%5crequirements%2etxt, Decision: deny, Reason: Path Traversal Attack (/../) or (/.../)
-2025/03/04 22:15:40 Method: GET, URL: /Interceptor/test_page?name=%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2egitignore, Decision: deny, Reason: Path Traversal Attack (/../) or (/.../)
-2025/03/04 22:15:41 Method: GET, URL: /Interceptor/test_page?name=%2e%c0%2e%2f%2e%c0%2e%2f%2e%c0%2e%2f%2e%c0%2e%2f%2e%c0%2e%2f%2e%c0%2e%2f%2e%c0%2e%2f%2e%c0%2e%2f%2e%c0%2e%2f%2e%c0%2e%2f%2e%c0%2e%2f%2e%c0%2e%2fwindows%2fwin%2eini, Decision: deny, Reason: Path Traversal Attack (/../) or (/.../)
-2025/03/04 22:15:42 Method: GET, URL: /Interceptor/test_page?name=%2e%2e%2f%2e%2e%2f%2ehtpasswd, Decision: deny, Reason: OS File Access Attempt
+2025/03/06 15:19:37 Method: GET, URL: /Interceptor/, Decision: allow, Reason: 
+2025/03/06 15:19:41 Method: GET, URL: /Interceptor/internal, Decision: allow, Reason: 
+2025/03/06 15:19:43 Method: GET, URL: /Interceptor/internal/captcha, Decision: allow, Reason: 
+2025/03/06 15:19:45 Method: GET, URL: /Interceptor/internal/captcha/challenge.html, Decision: allow, Reason: 
+2025/03/06 15:19:46 Method: GET, URL: /Interceptor/internal/captcha/challenge.html/ws, Decision: allow, Reason: 
+2025/03/06 15:19:46 Failed to copy response body: http: request method or response status code does not allow body
+2025/03/06 15:19:48 Method: POST, URL: /interceptor, Decision: allow, Reason: 
+2025/03/06 15:19:50 Method: POST, URL: /interceptor, Decision: allow, Reason: 
+2025/03/06 15:19:51 Method: POST, URL: /interceptor, Decision: allow, Reason: 
+2025/03/06 15:19:58 Method: POST, URL: /interceptor, Decision: allow, Reason: 
+2025/03/06 15:19:59 Method: POST, URL: /interceptor, Decision: allow, Reason: 
+2025/03/06 15:20:01 Method: POST, URL: /interceptor, Decision: allow, Reason: 
+2025/03/06 15:20:01 Method: POST, URL: /interceptor, Decision: allow, Reason: 
+2025/03/06 15:21:30 Method: GET, URL: /Interceptor/internal/captcha/challenge.html, Decision: allow, Reason: 
+2025/03/06 15:21:30 Method: GET, URL: /Interceptor/internal/captcha/challenge.html/ws, Decision: allow, Reason: 
+2025/03/06 15:21:30 Failed to copy response body: http: request method or response status code does not allow body
+2025/03/06 15:24:48 Shutting down servers...
+2025/03/06 15:24:48 Servers gracefully stopped
+rvers...
+2025/03/06 14:16:56 Servers gracefully stopped
+37 http: TLS handshake error from 192.168.1.3:54840: remote error: tls: unknown certificate
+2025/03/06 12:25:37 Method: GET, URL: /Interceptor/test_page, Decision: allow, Reason: 
+2025/03/06 12:25:37 http: TLS handshake error from 192.168.1.3:54843: remote error: tls: unknown certificate
+2025/03/06 12:25:37 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
+2025/03/06 12:25:37 Failed to copy response body: http: request method or response status code does not allow body
+2025/03/06 12:28:27 Shutting down servers...
+2025/03/06 12:28:27 Failed to start HTTPS server: http: Server closed
+2e%2e%2f%2ehtpasswd, Decision: deny, Reason: OS File Access Attempt
 2025/03/04 22:15:43 Method: GET, URL: /Interceptor/test_page?name=%2e%2e%2e%2e%2f%2f%2e%2e%2e%2e%2f%2fWEB-INF%2fweb%2exml, Decision: allow, Reason: 
 2025/03/04 22:15:44 Method: GET, URL: /Interceptor/test_page?name=%2e%c0%ae%2f%2e%c0%ae%2f%2e%c0%ae%2f%2e%c0%ae%2f%2e%c0%ae%2f%2e%c0%ae%2fWEB-INF%2fweb%2exml, Decision: deny, Reason: Path Traversal Attack (/../) or (/.../)
 2025/03/04 22:15:45 Method: GET, URL: /Interceptor/test_page?name=%2e%2e%c0%2f%2e%2e%c0%2fpackage%2ejson, Decision: deny, Reason: OS File Access Attempt
