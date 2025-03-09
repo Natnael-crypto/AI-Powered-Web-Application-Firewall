@@ -63,9 +63,6 @@ func GenerateRequestsCSV(c *gin.Context) {
 	if threatType := c.Query("threat_type"); threatType != "" {
 		query = query.Where("threat_type ILIKE ?", "%"+threatType+"%")
 	}
-	if actionTaken := c.Query("action_taken"); actionTaken != "" {
-		query = query.Where("action_taken ILIKE ?", "%"+actionTaken+"%")
-	}
 	if userAgent := c.Query("user_agent"); userAgent != "" {
 		query = query.Where("user_agent ILIKE ?", "%"+userAgent+"%")
 	}
@@ -199,6 +196,7 @@ func GenerateRequestsCSV(c *gin.Context) {
 	// Write request data rows
 	for _, req := range requests {
 		row := []string{
+			req.RequestID,
 			req.ApplicationName,
 			req.ClientIP,
 			req.RequestMethod,
@@ -210,7 +208,6 @@ func GenerateRequestsCSV(c *gin.Context) {
 			req.Status,
 			req.MatchedRules,
 			req.ThreatType,
-			req.ActionTaken,
 			fmt.Sprintf("%t", req.BotDetected),
 			req.GeoLocation,
 			fmt.Sprintf("%t", req.RateLimited),

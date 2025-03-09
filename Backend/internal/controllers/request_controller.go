@@ -27,7 +27,6 @@ func AddRequest(c *gin.Context) {
 		MatchedRules     string `json:"matched_rules"`
 		ThreatDetected   bool   `json:"threat_detected"`
 		ThreatType       string `json:"threat_type"`
-		ActionTaken      string `json:"action_taken"`
 		BotDetected      bool   `json:"bot_detected"`
 		GeoLocation      string `json:"geo_location"`
 		RateLimited      bool   `json:"rate_limited"`
@@ -63,7 +62,6 @@ func AddRequest(c *gin.Context) {
 		MatchedRules:     input.MatchedRules,
 		ThreatDetected:   input.ThreatDetected,
 		ThreatType:       input.ThreatType,
-		ActionTaken:      input.ActionTaken,
 		BotDetected:      input.BotDetected,
 		GeoLocation:      input.GeoLocation,
 		RateLimited:      input.RateLimited,
@@ -128,9 +126,6 @@ func GetRequests(c *gin.Context) {
 	}
 	if threatType := c.Query("threat_type"); threatType != "" {
 		query = query.Where("threat_type ILIKE ?", "%"+threatType+"%")
-	}
-	if actionTaken := c.Query("action_taken"); actionTaken != "" {
-		query = query.Where("action_taken ILIKE ?", "%"+actionTaken+"%")
 	}
 	if userAgent := c.Query("user_agent"); userAgent != "" {
 		query = query.Where("user_agent ILIKE ?", "%"+userAgent+"%")
@@ -635,7 +630,6 @@ func GetRequestsPerMinute(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"range": timeSeriesData})
 }
 
-
 // GetClientOSStats retrieves statistics about client operating systems from request headers
 func GetClientOSStats(c *gin.Context) {
 	userRole := c.GetString("role")
@@ -731,7 +725,6 @@ func GetClientOSStats(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"os_statistics": osStats})
 }
 
-
 // GetResponseStatusStats returns the top 5 response status codes and their counts
 func GetResponseStatusStats(c *gin.Context) {
 	// Initialize query
@@ -803,8 +796,8 @@ func GetMostTargetedEndpoints(c *gin.Context) {
 
 	type EndpointStats struct {
 		ApplicationName string `json:"application_name"`
-		Endpoint       string `json:"endpoint"`
-		Count         int64  `json:"count"`
+		Endpoint        string `json:"endpoint"`
+		Count           int64  `json:"count"`
 	}
 
 	var stats []EndpointStats
@@ -822,7 +815,6 @@ func GetMostTargetedEndpoints(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"most_targeted_endpoints": stats})
 }
-
 
 // GetTopAttackTypes returns the top 5 attack types and their counts
 func GetTopAttackTypes(c *gin.Context) {
@@ -869,5 +861,3 @@ func GetTopAttackTypes(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"top_attack_types": stats})
 }
-
-

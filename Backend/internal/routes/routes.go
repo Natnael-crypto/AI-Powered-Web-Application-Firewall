@@ -55,6 +55,9 @@ func InitializeRoutes(r *gin.Engine) {
 		config.PUT("/update/listening-port", controllers.UpdateListeningPort)
 		config.PUT("/update/rate-limit", controllers.UpdateRateLimit)
 		config.PUT("/update/remote-log-server", controllers.UpdateRemoteLogServer)
+		config.PUT("/update/detect-bot", controllers.UpdateDetectBot)
+		config.POST("/add-app-config", controllers.CreateAppConfig)
+		config.GET("/get-app-config/:application_id", controllers.GetAppConfig)
 	}
 	r.GET("/config", controllers.GetConfig)
 

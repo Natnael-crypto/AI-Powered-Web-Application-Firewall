@@ -35,7 +35,7 @@ func getTargetRedirectIP(hostname string) (string, bool) {
 }
 
 // getLimiter retrieves or creates a new rate limiter for each client IP
-func getLimiter(ip string) *rate.Limiter {
+func getLimiter(ip string, hostname string) *rate.Limiter {
 	limiterLock.Lock()
 	defer limiterLock.Unlock()
 
@@ -44,7 +44,7 @@ func getLimiter(ip string) *rate.Limiter {
 	}
 
 	configLock.RLock()
-	limiter := rate.NewLimiter(rate.Limit(rateLimit), windowSize)
+	limiter := rate.NewLimiter(rate.Limit(application_config[hostname].RateLimit), application_config[hostname].WindowSize)
 	configLock.RUnlock()
 	ipRateLimiters[ip] = limiter
 
@@ -113,7 +113,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	// Apply rate limiting here
 	ip := r.RemoteAddr
 	ip = strings.Split(ip, ":")[0]
-	limiter := getLimiter(ip)
+	limiter := getLimiter(ip, r.Host)
 
 	if !limiter.Allow() {
 		// Respond with a 429 status code if the rate limit is exceeded

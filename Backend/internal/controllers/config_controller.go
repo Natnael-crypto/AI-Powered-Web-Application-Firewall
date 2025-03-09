@@ -19,6 +19,71 @@ func GetConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": conf})
 }
 
+func GetAppConfig(c *gin.Context) {
+	var appConf models.AppConf
+	application_id := c.Param("application_id")
+
+	if err := config.DB.Where("application_id=?", application_id).First(&appConf).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "App configuration not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": appConf})
+
+}
+
+func CreateAppConfig(c *gin.Context) {
+
+	// Check if the user is a super admin
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	var input struct {
+		ApplicationID string `json:application_id`
+		RateLimit     int    `json:"rate_limit" binding:"numeric"`
+		WindowSize    int    `json:"window_size" binding:"numeric"`
+		DetectBot     bool   `json:detect_bot`
+		HostName      string `json:"hostname" binding:"required`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var existingAppConfig models.AppConf
+
+	if err := config.DB.Where("application_id=?", input.ApplicationID).First(&existingAppConfig).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "A configuration entry already exists for this Application"})
+		return
+	}
+
+	var existingApplication models.Application
+
+	if err := config.DB.Where("application_id=?", input.ApplicationID).First(&existingApplication).Error; err != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Application does not exist"})
+		return
+	}
+
+	newAppConf := models.AppConf{
+		ID:            uuid.New().String(),
+		ApplicationID: input.ApplicationID,
+		RateLimit:     input.RateLimit,
+		WindowSize:    input.WindowSize,
+		DetectBot:     input.DetectBot,
+		HostName:      input.HostName,
+	}
+
+	if err := config.DB.Create(&newAppConf).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create configuration"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Configuration created successfully", "config": newAppConf})
+}
+
 // CreateConfig handles the creation of a new config entry
 func CreateConfig(c *gin.Context) {
 
@@ -31,8 +96,6 @@ func CreateConfig(c *gin.Context) {
 	var input struct {
 		ListeningPort   string `json:"listening_port" binding:"numeric"`
 		RemoteLogServer string `json:"remote_logServer"`
-		RateLimit       int    `json:"rate_limit" binding:"numeric"`
-		WindowSize      int    `json:"window_size" binding:"numeric"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -43,13 +106,6 @@ func CreateConfig(c *gin.Context) {
 	// Check if a config entry already exists
 	var existingConfig models.Conf
 	if err := config.DB.First(&existingConfig).Error; err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "A configuration entry already exists"})
-		return
-	}
-
-	// Check if a config entry already exists
-	var conf models.Conf
-	if err := config.DB.First(&conf).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "A configuration entry already exists"})
 		return
 	}
@@ -115,7 +171,7 @@ func UpdateRateLimit(c *gin.Context) {
 		WindowSize int `json:"window_size" binding:"required"`
 	}
 
-	var conf models.Conf
+	var conf models.AppConf
 	if err := config.DB.First(&conf).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "configuration not found"})
 		return
@@ -123,6 +179,32 @@ func UpdateRateLimit(c *gin.Context) {
 
 	conf.RateLimit = input.RateLimit
 	conf.WindowSize = input.WindowSize
+
+	if err := config.DB.Save(&conf).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update configuration"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "configuration updated successfully", "data": conf})
+}
+
+func UpdateDetectBot(c *gin.Context) {
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	var input struct {
+		DetectBot bool `json:"detect_bot" binding:"required"`
+	}
+
+	var conf models.AppConf
+	if err := config.DB.First(&conf).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "configuration not found"})
+		return
+	}
+
+	conf.DetectBot = input.DetectBot
 
 	if err := config.DB.Save(&conf).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update configuration"})

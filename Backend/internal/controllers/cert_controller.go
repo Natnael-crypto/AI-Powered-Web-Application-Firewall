@@ -21,7 +21,7 @@ func AddCert(c *gin.Context) {
 		return
 	}
 
-	applicationID := c.PostForm("application_id")
+	applicationID := c.Param("application_id")
 	if applicationID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "application_id is required"})
 		return
