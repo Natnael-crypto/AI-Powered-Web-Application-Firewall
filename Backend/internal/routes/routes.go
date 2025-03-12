@@ -34,7 +34,6 @@ func InitializeRoutes(r *gin.Engine) {
 
 	// Application Management
 	r.GET("/application", controllers.GetAllApplications)
-	r.GET("/:application_id", controllers.GetApplication)
 	application := authorized.Group("/application")
 	{
 		application.POST("/add", controllers.AddApplication)
@@ -46,19 +45,22 @@ func InitializeRoutes(r *gin.Engine) {
 		application.PUT("/assign/:assignment_id", controllers.UpdateUserToApplication)
 		application.GET("/assignments", controllers.GetAllUserToApplications)
 		application.DELETE("/assign/:assignment_id", controllers.DeleteUserToApplication)
+		application.GET("/:application_id", controllers.GetApplication)
+
 	}
 
 	// Configuration Management
 	config := authorized.Group("/config")
 	{
-		config.POST("/add", controllers.CreateConfig)
+		// config.POST("/add", controllers.CreateConfig)
 		config.PUT("/update/listening-port", controllers.UpdateListeningPort)
-		config.PUT("/update/rate-limit", controllers.UpdateRateLimit)
+		config.PUT("/update/rate-limit/:application_id", controllers.UpdateRateLimit)
 		config.PUT("/update/remote-log-server", controllers.UpdateRemoteLogServer)
-		config.PUT("/update/detect-bot", controllers.UpdateDetectBot)
-		config.POST("/add-app-config", controllers.CreateAppConfig)
-		config.GET("/get-app-config/:application_id", controllers.GetAppConfig)
+		config.PUT("/update/detect-bot/:application_id", controllers.UpdateDetectBot)
+		// config.POST("/add-app-config", controllers.CreateAppConfig)
+
 	}
+	r.GET("/config/get-app-config/:application_id", controllers.GetAppConfig)
 	r.GET("/config", controllers.GetConfig)
 
 	// Rule Management
@@ -73,8 +75,8 @@ func InitializeRoutes(r *gin.Engine) {
 	// Request Management with WebSocket Support
 	requests := authorized.Group("/requests")
 	{
-		requests.GET("/", controllers.GetRequests)    // Existing HTTP route to get requests
-		requests.POST("/add", controllers.AddRequest) // Existing HTTP route to add requests
+		requests.GET("/", controllers.GetRequests) // Existing HTTP route to get requests
+		// requests.POST("/add", controllers.AddRequest) // Existing HTTP route to add requests
 		requests.GET("/stats", controllers.GetRequestStats)
 		requests.GET("/blocked-stats", controllers.GetBlockedStats)
 		requests.GET("/requests-per-minute", controllers.GetRequestsPerMinute)

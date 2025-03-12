@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -69,9 +70,15 @@ func HandleWebSocket(c *gin.Context) {
 // addRequestFromInterceptor adds the request from an interceptor directly to the database
 func addRequestFromInterceptor(message interface{}) {
 	// Cast message to the expected structure
+
 	requestData, ok := message.(map[string]interface{})
 	if !ok {
 		log.Println("Error: Invalid request data received from interceptor")
+		return
+	}
+
+	if config.WsKey != requestData["token"] {
+		fmt.Errorf("Unauthorized")
 		return
 	}
 

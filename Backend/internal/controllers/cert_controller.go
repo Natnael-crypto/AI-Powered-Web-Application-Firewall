@@ -186,10 +186,10 @@ func DeleteCert(c *gin.Context) {
 		return
 	}
 
-	certID := c.Param("cert_id")
+	certID := c.Param("application_id")
 	var cert models.Cert
 
-	if err := config.DB.Where("cert_id = ?", certID).First(&cert).Error; err != nil {
+	if err := config.DB.Where("application_id = ?", certID).First(&cert).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Certificate not found"})
 		return
 	}

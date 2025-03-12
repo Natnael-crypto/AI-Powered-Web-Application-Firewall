@@ -199,4 +199,6 @@ func ActiveAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update admin status"})
 		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "admin status updated successfully"})
 }

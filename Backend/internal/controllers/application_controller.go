@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func AddApplication(c *gin.Context) {
@@ -63,6 +64,19 @@ func AddApplication(c *gin.Context) {
 	if err := config.DB.Create(&application).Error; err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "failed to create application"})
 		return
+	}
+
+	newAppConf := models.AppConf{
+		ID:            uuid.New().String(),
+		ApplicationID: application.ApplicationID,
+		RateLimit:     50,
+		WindowSize:    10,
+		DetectBot:     false,
+		HostName:      application.HostName,
+	}
+
+	if err := CreateAppConfigLocal(newAppConf); err != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "failed to create app config"})
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "application created successfully"})

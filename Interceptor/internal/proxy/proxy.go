@@ -135,6 +135,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 			UserAgent:        r.UserAgent(),
 			AIAnalysisResult: "", // TODO Replace with actual AI analysis results
 		}
+		message.Token = WsKey
 		SendToBackend(message)
 		http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
 		return
@@ -186,6 +187,8 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		logger.LogRequest(r, action, ruleMessage)
 		message.ResponseCode = http.StatusForbidden
 		message.Status = "blocked"
+		message.Token = WsKey
+
 		SendToBackend(message) // Send log to backend
 		return
 	}
@@ -220,6 +223,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	message.ResponseCode = resp.StatusCode
+	message.Token = WsKey
 	SendToBackend(message)
 	defer resp.Body.Close()
 
@@ -254,11 +258,13 @@ func Starter() {
 	}
 	defer CloseWebSocket()
 
-	err = logger.InitializeLogger(remoteLogServer)
-	if err != nil {
-		log.Fatalf("Failed to initialize logger: %v", err)
+	if remoteLogServer != "" {
+		err = logger.InitializeLogger(remoteLogServer)
+		if err != nil {
+			log.Fatalf("Failed to initialize logger: %v", err)
+		}
+		defer logger.CloseLogger()
 	}
-	defer logger.CloseLogger()
 
 	httpServer := &http.Server{
 		Addr:    "0.0.0.0" + proxyPort,

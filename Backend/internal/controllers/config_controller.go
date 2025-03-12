@@ -3,6 +3,8 @@ package controllers
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +18,7 @@ func GetConfig(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "configuration not found"})
 		return
 	}
+	fmt.Println(conf)
 	c.JSON(http.StatusOK, gin.H{"data": conf})
 }
 
@@ -84,6 +87,14 @@ func CreateAppConfig(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Configuration created successfully", "config": newAppConf})
 }
 
+func CreateAppConfigLocal(conf models.AppConf) error {
+
+	if err := config.DB.Create(&conf).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 // CreateConfig handles the creation of a new config entry
 func CreateConfig(c *gin.Context) {
 
@@ -134,18 +145,18 @@ func UpdateListeningPort(c *gin.Context) {
 	}
 
 	var input struct {
-		ListeningPort string `json:"listening_port" binding:"required"`
+		ListeningPort string `json:"listening_port"`
 	}
 
-	configID := c.Param("id")
-
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		// Log the error for debugging purposes
+		log.Printf("Error binding JSON for application update: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format"})
 		return
 	}
 
 	var conf models.Conf
-	if err := config.DB.Where("id = ?", configID).First(&conf).Error; err != nil {
+	if err := config.DB.First(&conf).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "configuration not found"})
 		return
 	}
@@ -167,13 +178,21 @@ func UpdateRateLimit(c *gin.Context) {
 	}
 
 	var input struct {
-		RateLimit  int `json:"rate_limit" binding:"required"`
-		WindowSize int `json:"window_size" binding:"required"`
+		RateLimit  int `json:"rate_limit" binding:"required,min=1"`
+		WindowSize int `json:"window_size" binding:"required,min=1"`
 	}
 
+	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Error binding JSON for rate limit update: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format or missing fields"})
+		return
+	}
+
+	appId := c.Param("application_id")
+
 	var conf models.AppConf
-	if err := config.DB.First(&conf).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "configuration not found"})
+	if err := config.DB.Where("application_id = ?", appId).First(&conf).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "App configuration not found"})
 		return
 	}
 
@@ -181,11 +200,11 @@ func UpdateRateLimit(c *gin.Context) {
 	conf.WindowSize = input.WindowSize
 
 	if err := config.DB.Save(&conf).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update configuration"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update configuration"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "configuration updated successfully", "data": conf})
+	c.JSON(http.StatusOK, gin.H{"message": "Configuration updated successfully", "data": conf})
 }
 
 func UpdateDetectBot(c *gin.Context) {
@@ -198,20 +217,28 @@ func UpdateDetectBot(c *gin.Context) {
 		DetectBot bool `json:"detect_bot" binding:"required"`
 	}
 
+	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Error binding JSON for detect bot update: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format or missing fields"})
+		return
+	}
+
+	appId := c.Param("application_id")
+
 	var conf models.AppConf
-	if err := config.DB.First(&conf).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "configuration not found"})
+	if err := config.DB.Where("application_id = ?", appId).First(&conf).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "App configuration not found"})
 		return
 	}
 
 	conf.DetectBot = input.DetectBot
 
 	if err := config.DB.Save(&conf).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update configuration"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update configuration"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "configuration updated successfully", "data": conf})
+	c.JSON(http.StatusOK, gin.H{"message": "Configuration updated successfully", "data": conf})
 }
 
 func UpdateRemoteLogServer(c *gin.Context) {
@@ -221,7 +248,14 @@ func UpdateRemoteLogServer(c *gin.Context) {
 	}
 
 	var input struct {
-		RemoteLogServer string `json:"remote_logServer" binding:"required"`
+		RemoteLogServer string `json:"remote_logServer"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		// Log the error for debugging purposes
+		log.Printf("Error binding JSON for application update: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format"})
+		return
 	}
 
 	var conf models.Conf

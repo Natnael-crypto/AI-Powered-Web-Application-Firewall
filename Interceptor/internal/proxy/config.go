@@ -14,8 +14,8 @@ import (
 
 type Config struct {
 	ID              string `json:"ID"`
-	ListeningPort   string `json:"ListeningPort"`
-	RemoteLogServer string `json: "remote_log_server"`
+	ListeningPort   string `json:"listening_port"`
+	RemoteLogServer string `json:"remote_logServer"`
 }
 
 type AppConfig struct {
@@ -48,7 +48,6 @@ var CertApp struct {
 	mu    sync.Mutex // Ensures thread safety when modifying Certs
 }
 
-
 var (
 	remoteLogServer    string
 	proxyPort          string
@@ -62,11 +61,19 @@ var (
 	windowSize         int
 )
 
+var WsKey string
+
 // fetchConfig retrieves the configuration from the remote API
 func fetchConfig() error {
 
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: No .env file found, falling back to environment variables")
+	}
+
+	WsKey = os.Getenv("WSKEY")
+
+	if WsKey == "" {
+		return fmt.Errorf("WsKey environment variable is not set")
 	}
 
 	backendHost := os.Getenv("BACKENDHOST")

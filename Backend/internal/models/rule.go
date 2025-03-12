@@ -26,3 +26,18 @@ type RuleData struct {
 	Action         string `json:"action"`
 	Category       string `json:"category"`
 }
+
+type RuleCondition struct {
+	RuleType       string `json:"rule_type" binding:"required"`
+	RuleMethod     string `json:"rule_method" binding:"required"`
+	RuleDefinition string `json:"rule_definition" binding:"required"`
+}
+
+type RuleInput struct {
+	Conditions    []RuleCondition `json:"conditions" binding:"required"` // list of conditions for chaining
+	Action        string          `json:"action" binding:"required"`
+	ApplicationID string          `json:"application_id" binding:"required"`
+	IsActive      bool            `json:"is_active" binding:"required"`
+	Category      string          `json:"category" binding:"required"`
+	RuleID        string          `json:"rule_id"`
+}
