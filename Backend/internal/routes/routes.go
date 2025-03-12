@@ -108,13 +108,14 @@ func InitializeRoutes(r *gin.Engine) {
 	}
 	r.GET("/certs", controllers.GetCert)
 
-	interceptor := authorized.Group("/interceptor")
-	{
-		// Docker Management
-		interceptor.GET("/start", controllers.StartInterceptor)
-		interceptor.GET("/stop", controllers.StopInterceptor)
-		interceptor.GET("/restart", controllers.RestartInterceptor)
-	}
+	// interceptor := authorized.Group("/interceptor")
+	// {
+	// 	// Docker Management
+	// 	interceptor.GET("/start", controllers.StartInterceptor)
+	// 	interceptor.GET("/stop", controllers.StopInterceptor)
+	// 	interceptor.GET("/restart", controllers.ScaleInterceptor)
+	// 	interceptor.GET("/repull", controllers.ScaleInterceptor)
+	// }
 
 	generateCsv := authorized.Group("/generate-csv")
 	{
