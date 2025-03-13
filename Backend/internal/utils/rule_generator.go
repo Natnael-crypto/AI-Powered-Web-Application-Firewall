@@ -32,7 +32,7 @@ func GenerateRule(ruleData models.RuleInput) (string, error) {
 		"severity:2": true, "severity:3": true, "status:403": true,
 	}
 
-	// Validate action tokens (split by comma and check individually)
+	// Validate actions
 	actionTokens := strings.Split(ruleData.Action, ",")
 	for _, token := range actionTokens {
 		t := strings.TrimSpace(token)
@@ -44,20 +44,17 @@ func GenerateRule(ruleData models.RuleInput) (string, error) {
 	var ruleBuilder strings.Builder
 
 	for i, cond := range ruleData.Conditions {
-		// Validate rule method
 		if !validRuleMethods[cond.RuleMethod] {
 			return "", fmt.Errorf("invalid rule method '%s'", cond.RuleMethod)
 		}
-
-		// Validate rule type
 		if !validRuleTypes[cond.RuleType] {
 			return "", fmt.Errorf("invalid rule type '%s'", cond.RuleType)
 		}
 
-		// Write rules
 		if i == 0 {
-			// First condition (main rule)
-			ruleBuilder.WriteString(fmt.Sprintf("SecRule %s \"@%s %s\" \"id:%s,phase:2,%s,msg:'%s'",
+			// First rule (main) with action and chain
+			ruleBuilder.WriteString(fmt.Sprintf(
+				"SecRule %s \"@%s %s\" \"id:%s,phase:2,%s,msg:'%s',chain\"\n",
 				cond.RuleType,
 				cond.RuleMethod,
 				cond.RuleDefinition,
@@ -65,9 +62,18 @@ func GenerateRule(ruleData models.RuleInput) (string, error) {
 				ruleData.Action,
 				ruleData.Category,
 			))
+		} else if i < len(ruleData.Conditions)-1 {
+			// Middle chained rules
+			ruleBuilder.WriteString(fmt.Sprintf(
+				"    SecRule %s \"@%s %s\" \"chain\"\n",
+				cond.RuleType,
+				cond.RuleMethod,
+				cond.RuleDefinition,
+			))
 		} else {
-			// Chained condition
-			ruleBuilder.WriteString(fmt.Sprintf("\n    chain\n    SecRule %s \"@%s %s\"",
+			// Last rule in chain (no "chain")
+			ruleBuilder.WriteString(fmt.Sprintf(
+				"    SecRule %s \"@%s %s\"\n",
 				cond.RuleType,
 				cond.RuleMethod,
 				cond.RuleDefinition,
