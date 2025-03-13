@@ -96,7 +96,6 @@ func addRequestFromInterceptor(message interface{}) {
 	}
 
 	ipParts := strings.Split(clientIP, ":")
-
 	country := utils.GetCountryName(ipParts[0])
 	headers := utils.ParseHeaders(requestData["headers"].(string))
 
@@ -104,7 +103,7 @@ func addRequestFromInterceptor(message interface{}) {
 	request := models.Request{
 		RequestID:        uuid.New().String(),
 		ApplicationName:  requestData["application_name"].(string),
-		ClientIP:         requestData["client_ip"].(string),
+		ClientIP:         ipParts[0],
 		RequestMethod:    requestData["request_method"].(string),
 		RequestURL:       requestData["request_url"].(string),
 		Headers:          headers,

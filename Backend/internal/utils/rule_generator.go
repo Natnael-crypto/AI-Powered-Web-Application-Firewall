@@ -51,19 +51,30 @@ func GenerateRule(ruleData models.RuleInput) (string, error) {
 			return "", fmt.Errorf("invalid rule type '%s'", cond.RuleType)
 		}
 
+		// Only add "chain" if there's more than one condition
 		if i == 0 {
-			// First rule (main) with action and chain
-			ruleBuilder.WriteString(fmt.Sprintf(
-				"SecRule %s \"@%s %s\" \"id:%s,phase:2,%s,msg:'%s',chain\"\n",
-				cond.RuleType,
-				cond.RuleMethod,
-				cond.RuleDefinition,
-				ruleData.RuleID,
-				ruleData.Action,
-				ruleData.Category,
-			))
+			if len(ruleData.Conditions) > 1 {
+				ruleBuilder.WriteString(fmt.Sprintf(
+					"SecRule %s \"@%s %s\" \"id:%s,phase:2,%s,msg:'%s',chain\"\n",
+					cond.RuleType,
+					cond.RuleMethod,
+					cond.RuleDefinition,
+					ruleData.RuleID,
+					ruleData.Action,
+					ruleData.Category,
+				))
+			} else {
+				ruleBuilder.WriteString(fmt.Sprintf(
+					"SecRule %s \"@%s %s\" \"id:%s,phase:2,%s,msg:'%s'\"\n",
+					cond.RuleType,
+					cond.RuleMethod,
+					cond.RuleDefinition,
+					ruleData.RuleID,
+					ruleData.Action,
+					ruleData.Category,
+				))
+			}
 		} else if i < len(ruleData.Conditions)-1 {
-			// Middle chained rules
 			ruleBuilder.WriteString(fmt.Sprintf(
 				"    SecRule %s \"@%s %s\" \"chain\"\n",
 				cond.RuleType,
@@ -71,7 +82,6 @@ func GenerateRule(ruleData models.RuleInput) (string, error) {
 				cond.RuleDefinition,
 			))
 		} else {
-			// Last rule in chain (no "chain")
 			ruleBuilder.WriteString(fmt.Sprintf(
 				"    SecRule %s \"@%s %s\"\n",
 				cond.RuleType,

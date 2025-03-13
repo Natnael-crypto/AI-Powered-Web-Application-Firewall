@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -9,6 +8,7 @@ import (
 
 	"backend/internal/config"
 	"backend/internal/models"
+	"backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -80,154 +80,20 @@ func AddRequest(c *gin.Context) {
 
 // GetRequests retrieves requests based on user role
 func GetRequests(c *gin.Context) {
-	userRole := c.GetString("role")
-	userID := c.GetString("user_id")
+	// Apply filters using the helper function
+	query := utils.ApplyRequestFilters(c)
 
-	var requests []models.Request
-	query := config.DB.Model(&models.Request{})
-
-	// 🔹 Check if user is an admin (not super_admin), filter by assigned applications
-	if userRole != "super_admin" {
-		var userApps []models.UserToApplication
-		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch user applications"})
-			return
-		}
-
-		// Collect assigned application names
-		applicationNames := make([]string, len(userApps))
-		for i, app := range userApps {
-			applicationNames[i] = app.ApplicationName
-		}
-
-		// Restrict query to assigned applications
-		if len(applicationNames) > 0 {
-			query = query.Where("application_name IN ?", applicationNames)
-		} else {
-			// If user has no assigned applications, return empty response
-			c.JSON(http.StatusOK, gin.H{"requests": []models.Request{}})
-			return
-		}
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
 	}
 
-	// 🔹 Apply filtering based on query parameters
-
-	if applicationName := c.Query("application_name"); applicationName != "" {
-		query = query.Where("application_name ILIKE ?", "%"+applicationName+"%")
-	}
-	if clientIP := c.Query("client_ip"); clientIP != "" {
-		query = query.Where("client_ip ILIKE ?", "%"+clientIP+"%")
-	}
-	if requestMethod := c.Query("request_method"); requestMethod != "" {
-		query = query.Where("request_method ILIKE ?", "%"+requestMethod+"%")
-	}
-	if requestURL := c.Query("request_url"); requestURL != "" {
-		query = query.Where("request_url ILIKE ?", "%"+requestURL+"%")
-	}
-	if threatType := c.Query("threat_type"); threatType != "" {
-		query = query.Where("threat_type ILIKE ?", "%"+threatType+"%")
-	}
-	if userAgent := c.Query("user_agent"); userAgent != "" {
-		query = query.Where("user_agent ILIKE ?", "%"+userAgent+"%")
-	}
-	if geoLocation := c.Query("geo_location"); geoLocation != "" {
-		query = query.Where("geo_location ILIKE ?", "%"+geoLocation+"%")
-	}
-
-	// 🔹 Boolean filters
-	if c.Query("threat_detected") != "" {
-		threatDetected := c.Query("threat_detected") == "true"
-		query = query.Where("threat_detected = ?", threatDetected)
-	}
-	if c.Query("bot_detected") != "" {
-		botDetected := c.Query("bot_detected") == "true"
-		query = query.Where("bot_detected = ?", botDetected)
-	}
-	if c.Query("rate_limited") != "" {
-		rateLimited := c.Query("rate_limited") == "true"
-		query = query.Where("rate_limited = ?", rateLimited)
-	}
-
-	// 🔹 Date and Time Filtering
-	if startDate := c.Query("start_date"); startDate != "" {
-		parsedDate, err := time.Parse("2006-01-02", startDate)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid start_date format"})
-			return
-		}
-		// Set time to start of day (00:00:00)
-		parsedDate = time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), 0, 0, 0, 0, time.UTC)
-		query = query.Where("timestamp >= ?", parsedDate)
-	}
-	if endDate := c.Query("end_date"); endDate != "" {
-		parsedDate, err := time.Parse("2006-01-02", endDate)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid end_date format"})
-			return
-		}
-		// Set time to end of day (23:59:59)
-		parsedDate = time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), 23, 59, 59, 999999999, time.UTC)
-		query = query.Where("timestamp <= ?", parsedDate)
-	}
-
-	// 🔹 Time Filtering for a Specific Date
-	if date := c.Query("date"); date != "" {
-		parsedDate, err := time.Parse("2006-01-02", date)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid date format"})
-			return
-		}
-
-		loc, _ := time.LoadLocation("Local")
-
-		if startTime := c.Query("start_time"); startTime != "" {
-			parsedTime, err := time.Parse("15:04:05", startTime)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "invalid start_time format"})
-				return
-			}
-			// Combine date and time in local timezone
-			startDateTime := time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(),
-				parsedTime.Hour(), parsedTime.Minute(), parsedTime.Second(), 0, loc)
-			query = query.Where("timestamp >= ?", startDateTime)
-		}
-		if endTime := c.Query("end_time"); endTime != "" {
-			parsedTime, err := time.Parse("15:04:05", endTime)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "invalid end_time format"})
-				return
-			}
-			// Combine date and time in local timezone
-			endDateTime := time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(),
-				parsedTime.Hour(), parsedTime.Minute(), parsedTime.Second(), 999999999, loc)
-			query = query.Where("timestamp <= ?", endDateTime)
-		}
-	}
-
-	// 🔹 Last X Hours Filtering
-	if lastHours := c.Query("last_hours"); lastHours != "" {
-		hours, err := strconv.Atoi(lastHours)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid last_hours format"})
-			return
-		}
-		// Use time.Now() in local timezone
-		loc, _ := time.LoadLocation("Local")
-		now := time.Now().In(loc)
-		startTime := now.Add(-time.Duration(hours) * time.Hour)
-		query = query.Where("timestamp >= ?", startTime)
-	}
-
-	// 🔹 Full-Text Search for Large Fields (headers, body, request_url)
-	if searchQuery := c.Query("search"); searchQuery != "" {
-		query = query.Where("to_tsvector('english', headers || ' ' || body || ' ' || request_url) @@ plainto_tsquery(?)", searchQuery)
-	}
-
-	// 🔹 Pagination (Default: 50 results per page)
+	// 🔹 Pagination
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize := 50
 	offset := (page - 1) * pageSize
 
+	var requests []models.Request
 	if err := query.Limit(pageSize).Offset(offset).Find(&requests).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch requests"})
 		return
@@ -281,10 +147,13 @@ func GetRequestStats(c *gin.Context) {
 		apps = strings.Split(apps[0], ",")
 	}
 
-	fmt.Println(apps)
-
 	// Initialize query builder
-	query := config.DB.Model(&models.Request{})
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
 
 	// Handle application filtering based on role and input
 	if userRole == "super_admin" {
@@ -358,14 +227,22 @@ func GetBlockedStats(c *gin.Context) {
 		apps = strings.Split(apps[0], ",")
 	}
 
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
 	// Initialize query
-	query := config.DB.Model(&models.Request{}).Where("status = ?", "blocked")
+	query = config.DB.Model(&models.Request{}).Where("status = ?", "blocked")
 
 	// Handle access control based on role
 	if userRole == "super_admin" {
 		// Super admin can see all applications
-		if len(apps) > 0 {
+		if len(apps) > 0 && apps[0] != "all" {
 			query = query.Where("application_name IN ?", apps)
+		} else if apps[0] == "all" {
+
 		}
 	} else {
 		// Regular users can only see their assigned applications
@@ -423,7 +300,15 @@ func GetBlockedStats(c *gin.Context) {
 // GetTopBlockedCountries returns the top 5 countries with the most blocked requests
 func GetTopBlockedCountries(c *gin.Context) {
 	// Initialize query
-	query := config.DB.Model(&models.Request{}).
+
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	query = config.DB.Model(&models.Request{}).
 		Where("status = ?", "blocked")
 
 	// Get user role and ID from context
@@ -469,7 +354,15 @@ func GetTopBlockedCountries(c *gin.Context) {
 // GetAllBlockedCountries returns all countries and their blocked request counts
 func GetAllBlockedCountries(c *gin.Context) {
 	// Initialize query
-	query := config.DB.Model(&models.Request{}).
+
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	query = config.DB.Model(&models.Request{}).
 		Where("status = ?", "blocked")
 
 	// Get user role and ID from context
@@ -559,7 +452,13 @@ func GetRequestsPerMinute(c *gin.Context) {
 	}
 
 	// Initialize query
-	query := config.DB.Model(&models.Request{})
+	query := utils.ApplyRequestFilters(c)
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	query = config.DB.Model(&models.Request{})
 
 	// Get user role and ID from context
 	role := c.GetString("role")
@@ -595,9 +494,11 @@ func GetRequestsPerMinute(c *gin.Context) {
 		Count        int64
 	}
 
+	// Get request counts in the time range with no exact match on timestamp
 	var counts []TimeCount
 	err = query.
 		Where("timestamp >= ?", startTime).
+		Where("timestamp < ?", now.Add(time.Minute)). // Fetch requests from the current minute up to the next minute
 		Select("date_trunc('minute', timestamp) as time_interval, count(*) as count").
 		Group("time_interval").
 		Order("time_interval ASC").
@@ -618,6 +519,7 @@ func GetRequestsPerMinute(c *gin.Context) {
 	timeSeriesData := make([]map[string]interface{}, 0)
 	currentTime := startTime
 
+	// Iterate over each minute, even if there are no matches in the database
 	for currentTime.Before(now) || currentTime.Equal(now) {
 		count := countMap[currentTime]
 		timeSeriesData = append(timeSeriesData, map[string]interface{}{
@@ -634,14 +536,22 @@ func GetRequestsPerMinute(c *gin.Context) {
 func GetClientOSStats(c *gin.Context) {
 	userRole := c.GetString("role")
 	userID := c.GetString("user_id")
+
 	// Parse application names from query params
 	apps := c.QueryArray("apps")
 	if len(apps) == 1 {
 		apps = strings.Split(apps[0], ",")
 	}
 
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
 	// Initialize query
-	query := config.DB.Model(&models.Request{})
+	query = config.DB.Model(&models.Request{})
 
 	// Handle access control based on role
 	if userRole == "super_admin" {
@@ -677,24 +587,24 @@ func GetClientOSStats(c *gin.Context) {
 		}
 	}
 
-	type OSCount struct {
-		OS    string
-		Count int64
+	type UserAgentCount struct {
+		UserAgent string
+		Count     int64
 	}
 
-	var osCounts []OSCount
+	var uaCounts []UserAgentCount
 	err := query.
-		Select("headers->>'User-Agent' as os, count(*) as count").
-		Where("headers->>'User-Agent' IS NOT NULL").
-		Group("headers->>'User-Agent'").
-		Find(&osCounts).Error
+		Select("user_agent, count(*) as count").
+		Where("user_agent IS NOT NULL").
+		Group("user_agent").
+		Find(&uaCounts).Error
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch OS statistics"})
 		return
 	}
 
-	// Process User-Agent strings to categorize OS
+	// Categorize OS
 	osStats := map[string]int64{
 		"Windows": 0,
 		"Linux":   0,
@@ -704,21 +614,21 @@ func GetClientOSStats(c *gin.Context) {
 		"Other":   0,
 	}
 
-	for _, count := range osCounts {
-		userAgent := strings.ToLower(count.OS)
+	for _, entry := range uaCounts {
+		ua := strings.ToLower(entry.UserAgent)
 		switch {
-		case strings.Contains(userAgent, "windows"):
-			osStats["Windows"] += count.Count
-		case strings.Contains(userAgent, "linux"):
-			osStats["Linux"] += count.Count
-		case strings.Contains(userAgent, "mac os") || strings.Contains(userAgent, "macos"):
-			osStats["macOS"] += count.Count
-		case strings.Contains(userAgent, "iphone") || strings.Contains(userAgent, "ipad"):
-			osStats["iOS"] += count.Count
-		case strings.Contains(userAgent, "android"):
-			osStats["Android"] += count.Count
+		case strings.Contains(ua, "windows"):
+			osStats["Windows"] += entry.Count
+		case strings.Contains(ua, "linux"):
+			osStats["Linux"] += entry.Count
+		case strings.Contains(ua, "mac os") || strings.Contains(ua, "macos"):
+			osStats["macOS"] += entry.Count
+		case strings.Contains(ua, "iphone") || strings.Contains(ua, "ipad"):
+			osStats["iOS"] += entry.Count
+		case strings.Contains(ua, "android"):
+			osStats["Android"] += entry.Count
 		default:
-			osStats["Other"] += count.Count
+			osStats["Other"] += entry.Count
 		}
 	}
 
@@ -726,15 +636,25 @@ func GetClientOSStats(c *gin.Context) {
 }
 
 // GetResponseStatusStats returns the top 5 response status codes and their counts
-func GetResponseStatusStats(c *gin.Context) {
-	// Initialize query
-	query := config.DB.Model(&models.Request{})
+type StatusStats struct {
+	ResponseCode int   `json:"response_code"`
+	Count        int64 `json:"count"`
+}
 
-	// Get user role and ID from context
+func GetResponseStatusStats(c *gin.Context) {
+
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	query = config.DB.Model(&models.Request{})
+
 	role := c.GetString("role")
 	userID := c.GetString("user_id")
 
-	// Handle non-super admin users
 	if role != "super_admin" {
 		var userApps []models.UserToApplication
 		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
@@ -749,15 +669,13 @@ func GetResponseStatusStats(c *gin.Context) {
 		query = query.Where("application_name IN ?", allowedApps)
 	}
 
-	type StatusStats struct {
-		Status string `json:"status"`
-		Count  int64  `json:"count"`
-	}
+	// Filter out null or empty response_code
+	query = query.Where("response_code IS NOT NULL")
 
 	var stats []StatusStats
-
-	err := query.Select("status, count(*) as count").
-		Group("status").
+	err := query.
+		Select("response_code, COUNT(*) as count").
+		Group("response_code").
 		Order("count DESC").
 		Limit(5).
 		Find(&stats).Error
@@ -772,14 +690,18 @@ func GetResponseStatusStats(c *gin.Context) {
 
 // GetMostTargetedEndpoints returns the most frequently targeted endpoints across applications
 func GetMostTargetedEndpoints(c *gin.Context) {
-	// Initialize query
-	query := config.DB.Model(&models.Request{})
+	query := utils.ApplyRequestFilters(c)
 
-	// Get user role and ID from context
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	query = config.DB.Model(&models.Request{})
+
 	role := c.GetString("role")
 	userID := c.GetString("user_id")
 
-	// Handle non-super admin users
 	if role != "super_admin" {
 		var userApps []models.UserToApplication
 		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
@@ -794,16 +716,20 @@ func GetMostTargetedEndpoints(c *gin.Context) {
 		query = query.Where("application_name IN ?", allowedApps)
 	}
 
+	// Filter out empty or null request_url values
+	query = query.Where("request_url IS NOT NULL AND request_url != ''")
+
 	type EndpointStats struct {
 		ApplicationName string `json:"application_name"`
-		Endpoint        string `json:"endpoint"`
+		RequestURL      string `json:"request_url"`
 		Count           int64  `json:"count"`
 	}
 
 	var stats []EndpointStats
 
-	err := query.Select("application_name, endpoint, count(*) as count").
-		Group("application_name, endpoint").
+	err := query.
+		Select("application_name, request_url, count(*) as count").
+		Group("application_name, request_url").
 		Order("count DESC").
 		Limit(10).
 		Find(&stats).Error
@@ -816,17 +742,21 @@ func GetMostTargetedEndpoints(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"most_targeted_endpoints": stats})
 }
 
-// GetTopAttackTypes returns the top 5 attack types and their counts
-func GetTopAttackTypes(c *gin.Context) {
-	// Initialize query
-	query := config.DB.Model(&models.Request{}).
+// GetTopThreatTypes returns the top 5 attack types and their counts
+func GetTopThreatTypes(c *gin.Context) {
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	query = config.DB.Model(&models.Request{}).
 		Where("threat_detected = ?", true)
 
-	// Get user role and ID from context
 	role := c.GetString("role")
 	userID := c.GetString("user_id")
 
-	// Handle non-super admin users
 	if role != "super_admin" {
 		var userApps []models.UserToApplication
 		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
@@ -841,15 +771,17 @@ func GetTopAttackTypes(c *gin.Context) {
 		query = query.Where("application_name IN ?", allowedApps)
 	}
 
+	// Struct with field name matching DB column
 	type AttackStats struct {
-		AttackType string `json:"attack_type"`
+		ThreatType string `json:"threat_type"`
 		Count      int64  `json:"count"`
 	}
 
 	var stats []AttackStats
 
-	err := query.Select("attack_type, count(*) as count").
-		Group("attack_type").
+	err := query.
+		Select("threat_type, count(*) as count").
+		Group("threat_type").
 		Order("count DESC").
 		Limit(5).
 		Find(&stats).Error
@@ -859,5 +791,5 @@ func GetTopAttackTypes(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"top_attack_types": stats})
+	c.JSON(http.StatusOK, gin.H{"top_threat_type": stats})
 }

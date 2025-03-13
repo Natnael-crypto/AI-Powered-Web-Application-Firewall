@@ -44,6 +44,8 @@ func getLimiter(ip string, hostname string) *rate.Limiter {
 	}
 
 	configLock.RLock()
+	fmt.Printf("Rate Limit: %d, Window Size: %d\n", application_config[hostname].RateLimit, application_config[hostname].WindowSize)
+
 	limiter := rate.NewLimiter(rate.Limit(application_config[hostname].RateLimit), application_config[hostname].WindowSize)
 	configLock.RUnlock()
 	ipRateLimiters[ip] = limiter

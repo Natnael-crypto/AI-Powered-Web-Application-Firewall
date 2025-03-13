@@ -57,8 +57,6 @@ var (
 	application_config map[string]AppConfig
 	configLock         sync.RWMutex
 	appsLock           sync.RWMutex
-	rateLimit          int
-	windowSize         int
 )
 
 var WsKey string
@@ -109,23 +107,6 @@ func fetchConfig() error {
 
 	fmt.Printf("Loaded config: LogServer=%s, ProxyPort=%s\n", remoteLogServer, proxyPort)
 
-	for _, app := range Apps {
-		appConfigURL := fmt.Sprintf("http://%s:%s/config/get-app-config/%s", backendHost, backendPort, app.ApplicationID)
-
-		resp, err = http.Get(appConfigURL)
-
-		var appConfigResult struct {
-			AppConfig AppConfig `json:"data"`
-		}
-
-		if err := json.NewDecoder(resp.Body).Decode(&appConfigResult); err != nil {
-			return fmt.Errorf("failed to decode config: %v", err)
-		}
-
-		application_config[app.Hostname] = appConfigResult.AppConfig
-
-	}
-
 	return nil
 }
 
@@ -165,6 +146,7 @@ func fetchApplications() error {
 	applications = make(map[string]string)
 	wafInstances = make(map[string]*waf.WAF)
 	Apps = make(map[string]Application)
+	application_config = make(map[string]AppConfig)
 
 	appsLock.Unlock()
 
@@ -215,6 +197,22 @@ func fetchApplications() error {
 			wafInstances[app.Hostname] = wafInstance
 			appsLock.Unlock()
 		}
+	}
+
+	for _, app := range Apps {
+		appConfigURL := fmt.Sprintf("http://%s:%s/config/get-app-config/%s", backendHost, backendPort, app.ApplicationID)
+
+		resp, err = http.Get(appConfigURL)
+
+		var appConfigResult struct {
+			AppConfig AppConfig `json:"data"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&appConfigResult); err != nil {
+			return fmt.Errorf("failed to decode config: %v", err)
+		}
+		application_config[app.Hostname] = appConfigResult.AppConfig
+
 	}
 
 	fmt.Println("Loaded applications:", applications)
