@@ -87,6 +87,8 @@ func InitializeRoutes(r *gin.Engine) {
 		requests.GET("/response-status-stats", controllers.GetResponseStatusStats)
 		requests.GET("/most-targeted-endpoints", controllers.GetMostTargetedEndpoints)
 		requests.GET("/top-attack-types", controllers.GetTopThreatTypes)
+		requests.DELETE("/delete", controllers.DeleteFilteredRequests)
+
 	}
 	r.GET("/ws", controllers.HandleWebSocket)
 

@@ -558,3 +558,24 @@ func GetTopThreatTypes(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"top_threat_type": stats})
 }
+
+func DeleteFilteredRequests(c *gin.Context) {
+	// Get the query with filters applied
+	query := utils.ApplyRequestFilters(c)
+	if query == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	// Perform deletion of the filtered records in batch
+	result := query.Delete(&models.Request{})
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete requests"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Filtered requests deleted successfully",
+		"count":   result.RowsAffected,
+	})
+}
