@@ -220,6 +220,5 @@ func GenerateRequestsCSV(c *gin.Context) {
 			fmt.Printf("Error writing request %s to CSV: %v\n", req.RequestID, err)
 		}
 	}
-
 	// The writer will write to the response when Flush() is called
 }

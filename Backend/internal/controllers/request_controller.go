@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -81,6 +82,13 @@ func AddRequest(c *gin.Context) {
 // GetRequests retrieves requests based on user role
 func GetRequests(c *gin.Context) {
 	// Apply filters using the helper function
+	apps := c.QueryArray("application_name")
+	// Split apps string by comma if provided as single string
+	if len(apps) == 1 {
+		apps = strings.Split(apps[0], ",")
+	}
+
+	// Initialize query builder
 	query := utils.ApplyRequestFilters(c)
 
 	if query == nil {
@@ -139,13 +147,6 @@ func GetRequestByID(c *gin.Context) {
 
 // GetRequestStats returns request count and unique IP addresses for specified applications
 func GetRequestStats(c *gin.Context) {
-	userRole := c.GetString("role")
-	userID := c.GetString("user_id")
-	apps := c.QueryArray("apps")
-	// Split apps string by comma if provided as single string
-	if len(apps) == 1 {
-		apps = strings.Split(apps[0], ",")
-	}
 
 	// Initialize query builder
 	query := utils.ApplyRequestFilters(c)
@@ -153,46 +154,6 @@ func GetRequestStats(c *gin.Context) {
 	if query == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
 		return
-	}
-
-	// Handle application filtering based on role and input
-	if userRole == "super_admin" {
-		if len(apps) == 1 && apps[0] == "all" {
-			// Super admin requesting all apps - no filtering needed
-		} else if len(apps) > 0 {
-			// Filter by specified applications
-			query = query.Where("application_name IN ?", apps)
-		}
-	} else {
-		// For regular admin, get their assigned applications
-		var userApps []models.UserToApplication
-		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch user applications"})
-			return
-		}
-
-		// Extract application names
-		var allowedApps []string
-		for _, ua := range userApps {
-			allowedApps = append(allowedApps, ua.ApplicationName)
-		}
-
-		// If specific apps requested, intersect with allowed apps
-		if len(apps) > 0 {
-			var filteredApps []string
-			for _, app := range apps {
-				for _, allowedApp := range allowedApps {
-					if app == allowedApp {
-						filteredApps = append(filteredApps, app)
-						break
-					}
-				}
-			}
-			query = query.Where("application_name IN ?", filteredApps)
-		} else {
-			// Use all allowed apps
-			query = query.Where("application_name IN ?", allowedApps)
-		}
 	}
 
 	// Get total request count
@@ -218,14 +179,6 @@ func GetRequestStats(c *gin.Context) {
 
 // GetBlockedStats retrieves statistics about blocked requests
 func GetBlockedStats(c *gin.Context) {
-	userRole := c.GetString("role")
-	userID := c.GetString("user_id")
-	// Parse application names from query params
-	apps := c.QueryArray("apps")
-	// Split apps string by comma if provided as single string
-	if len(apps) == 1 {
-		apps = strings.Split(apps[0], ",")
-	}
 
 	query := utils.ApplyRequestFilters(c)
 
@@ -234,47 +187,7 @@ func GetBlockedStats(c *gin.Context) {
 		return
 	}
 	// Initialize query
-	query = config.DB.Model(&models.Request{}).Where("status = ?", "blocked")
-
-	// Handle access control based on role
-	if userRole == "super_admin" {
-		// Super admin can see all applications
-		if len(apps) > 0 && apps[0] != "all" {
-			query = query.Where("application_name IN ?", apps)
-		} else if apps[0] == "all" {
-
-		}
-	} else {
-		// Regular users can only see their assigned applications
-		var userApps []models.UserToApplication
-		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch user applications"})
-			return
-		}
-
-		// Extract application names
-		var allowedApps []string
-		for _, ua := range userApps {
-			allowedApps = append(allowedApps, ua.ApplicationName)
-		}
-
-		// If specific apps requested, intersect with allowed apps
-		if len(apps) > 0 {
-			var filteredApps []string
-			for _, app := range apps {
-				for _, allowedApp := range allowedApps {
-					if app == allowedApp {
-						filteredApps = append(filteredApps, app)
-						break
-					}
-				}
-			}
-			query = query.Where("application_name IN ?", filteredApps)
-		} else {
-			// Use all allowed apps
-			query = query.Where("application_name IN ?", allowedApps)
-		}
-	}
+	query = query.Where("status = ?", "blocked")
 
 	// Get total blocked request count
 	var blockedCount int64
@@ -308,27 +221,7 @@ func GetTopBlockedCountries(c *gin.Context) {
 		return
 	}
 
-	query = config.DB.Model(&models.Request{}).
-		Where("status = ?", "blocked")
-
-	// Get user role and ID from context
-	role := c.GetString("role")
-	userID := c.GetString("user_id")
-
-	// Handle non-super admin users
-	if role != "super_admin" {
-		var userApps []models.UserToApplication
-		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch user applications"})
-			return
-		}
-
-		var allowedApps []string
-		for _, ua := range userApps {
-			allowedApps = append(allowedApps, ua.ApplicationName)
-		}
-		query = query.Where("application_name IN ?", allowedApps)
-	}
+	query = query.Where("status = ?", "blocked")
 
 	type CountryStats struct {
 		Country string `json:"country"`
@@ -362,27 +255,7 @@ func GetAllBlockedCountries(c *gin.Context) {
 		return
 	}
 
-	query = config.DB.Model(&models.Request{}).
-		Where("status = ?", "blocked")
-
-	// Get user role and ID from context
-	role := c.GetString("role")
-	userID := c.GetString("user_id")
-
-	// Handle non-super admin users
-	if role != "super_admin" {
-		var userApps []models.UserToApplication
-		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch user applications"})
-			return
-		}
-
-		var allowedApps []string
-		for _, ua := range userApps {
-			allowedApps = append(allowedApps, ua.ApplicationName)
-		}
-		query = query.Where("application_name IN ?", allowedApps)
-	}
+	query = query.Where("status = ?", "blocked")
 
 	type CountryStats struct {
 		Country string `json:"country"`
@@ -420,8 +293,6 @@ func GetRequestsPerMinute(c *gin.Context) {
 
 	// Get time range from query params (e.g. "2H" for 2 hours, "2D" for 2 days)
 	timeRange := c.DefaultQuery("timerange", "1H")
-
-	// Parse the time range value and unit
 	rangeValue := timeRange[:len(timeRange)-1]
 	rangeUnit := timeRange[len(timeRange)-1:]
 
@@ -431,7 +302,6 @@ func GetRequestsPerMinute(c *gin.Context) {
 		return
 	}
 
-	// Validate time range unit and calculate duration
 	var duration time.Duration
 	switch strings.ToUpper(rangeUnit) {
 	case "H":
@@ -443,13 +313,14 @@ func GetRequestsPerMinute(c *gin.Context) {
 		return
 	}
 
-	// Get interval from query params (default to 1 minute if not specified)
-	interval := c.DefaultQuery("interval", "1")
-	_, err = strconv.Atoi(interval)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid interval"})
+	// Get interval in minutes (default to 1)
+	intervalStr := c.DefaultQuery("interval", "1")
+	intervalMin, err := strconv.Atoi(intervalStr)
+	if err != nil || intervalMin <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid interval - must be a positive number"})
 		return
 	}
+	intervalDuration := time.Duration(intervalMin) * time.Minute
 
 	// Initialize query
 	query := utils.ApplyRequestFilters(c)
@@ -458,75 +329,70 @@ func GetRequestsPerMinute(c *gin.Context) {
 		return
 	}
 
-	query = config.DB.Model(&models.Request{})
-
-	// Get user role and ID from context
-	role := c.GetString("role")
-	userID := c.GetString("user_id")
-
-	// Handle non-super admin users
-	if role != "super_admin" {
-		var userApps []models.UserToApplication
-		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch user applications"})
-			return
-		}
-
-		var allowedApps []string
-		for _, ua := range userApps {
-			allowedApps = append(allowedApps, ua.ApplicationName)
-		}
-		query = query.Where("application_name IN ?", allowedApps)
-	}
-
-	// Get current time in local timezone
+	// Get the current time and calculate the start time for the requested range
 	loc, _ := time.LoadLocation("Local")
 	now := time.Now().In(loc)
 	startTime := now.Add(-duration)
 
-	// Apply blocked filter if needed
 	if isBlocked {
 		query = query.Where("threat_detected = ?", true)
 	}
 
 	type TimeCount struct {
-		TimeInterval time.Time
-		Count        int64
+		Timestamp time.Time
+		Count     int64
 	}
 
-	// Get request counts in the time range with no exact match on timestamp
 	var counts []TimeCount
+
+	// Fetch raw data (timestamps and counts) within the time range
 	err = query.
 		Where("timestamp >= ?", startTime).
-		Where("timestamp < ?", now.Add(time.Minute)). // Fetch requests from the current minute up to the next minute
-		Select("date_trunc('minute', timestamp) as time_interval, count(*) as count").
-		Group("time_interval").
-		Order("time_interval ASC").
-		Find(&counts).Error
+		Where("timestamp < ?", now).
+		Select("timestamp, count(*) as count").
+		Group("timestamp").
+		Order("timestamp ASC").
+		Scan(&counts).Error
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch request counts"})
 		return
 	}
 
-	// Create a map for faster lookups
+	// Map for fast access to the count for each timestamp
 	countMap := make(map[time.Time]int64)
-	for _, count := range counts {
-		countMap[count.TimeInterval] = count.Count
+	for _, c := range counts {
+		countMap[c.Timestamp] = c.Count
 	}
 
-	// Generate time series data with zero counts for missing minutes
+	// Generate full time series with 0s for missing intervals
 	timeSeriesData := make([]map[string]interface{}, 0)
-	currentTime := startTime
+	current := startTime.Truncate(intervalDuration)
 
-	// Iterate over each minute, even if there are no matches in the database
-	for currentTime.Before(now) || currentTime.Equal(now) {
-		count := countMap[currentTime]
+	// Iterate over the time range in intervals
+	for current.Before(now) {
+		next := current.Add(intervalDuration)
+		intervalCount := int64(0) // Initialize the counter for the current interval
+
+		// Check if any timestamp in the countMap is within this interval
+		for timestamp, count := range countMap {
+			if timestamp.After(current) && timestamp.Before(next) {
+				// Increment the counter for this interval
+				intervalCount += count
+			}
+		}
+
+		// Add the interval data to the response
 		timeSeriesData = append(timeSeriesData, map[string]interface{}{
-			"time":  currentTime.Format("2006-01-02 15:04:05"),
-			"count": count,
+			"time_range": fmt.Sprintf("%s - %s",
+				current.Format("2006-01-02 15:04:05"),
+				next.Format("2006-01-02 15:04:05")),
+			"time":  current.Format("2006-01-02 15:04:05"),
+			"count": intervalCount,
 		})
-		currentTime = currentTime.Add(time.Minute)
+
+		// Move to the next interval
+		current = next
 	}
 
 	c.JSON(http.StatusOK, gin.H{"range": timeSeriesData})
@@ -534,57 +400,12 @@ func GetRequestsPerMinute(c *gin.Context) {
 
 // GetClientOSStats retrieves statistics about client operating systems from request headers
 func GetClientOSStats(c *gin.Context) {
-	userRole := c.GetString("role")
-	userID := c.GetString("user_id")
-
-	// Parse application names from query params
-	apps := c.QueryArray("apps")
-	if len(apps) == 1 {
-		apps = strings.Split(apps[0], ",")
-	}
 
 	query := utils.ApplyRequestFilters(c)
 
 	if query == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
 		return
-	}
-
-	// Initialize query
-	query = config.DB.Model(&models.Request{})
-
-	// Handle access control based on role
-	if userRole == "super_admin" {
-		if len(apps) > 0 {
-			query = query.Where("application_name IN ?", apps)
-		}
-	} else {
-		// Regular users can only see their assigned applications
-		var userApps []models.UserToApplication
-		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch user applications"})
-			return
-		}
-
-		var allowedApps []string
-		for _, ua := range userApps {
-			allowedApps = append(allowedApps, ua.ApplicationName)
-		}
-
-		if len(apps) > 0 {
-			var filteredApps []string
-			for _, app := range apps {
-				for _, allowedApp := range allowedApps {
-					if app == allowedApp {
-						filteredApps = append(filteredApps, app)
-						break
-					}
-				}
-			}
-			query = query.Where("application_name IN ?", filteredApps)
-		} else {
-			query = query.Where("application_name IN ?", allowedApps)
-		}
 	}
 
 	type UserAgentCount struct {
@@ -650,25 +471,6 @@ func GetResponseStatusStats(c *gin.Context) {
 		return
 	}
 
-	query = config.DB.Model(&models.Request{})
-
-	role := c.GetString("role")
-	userID := c.GetString("user_id")
-
-	if role != "super_admin" {
-		var userApps []models.UserToApplication
-		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch user applications"})
-			return
-		}
-
-		var allowedApps []string
-		for _, ua := range userApps {
-			allowedApps = append(allowedApps, ua.ApplicationName)
-		}
-		query = query.Where("application_name IN ?", allowedApps)
-	}
-
 	// Filter out null or empty response_code
 	query = query.Where("response_code IS NOT NULL")
 
@@ -695,25 +497,6 @@ func GetMostTargetedEndpoints(c *gin.Context) {
 	if query == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
 		return
-	}
-
-	query = config.DB.Model(&models.Request{})
-
-	role := c.GetString("role")
-	userID := c.GetString("user_id")
-
-	if role != "super_admin" {
-		var userApps []models.UserToApplication
-		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch user applications"})
-			return
-		}
-
-		var allowedApps []string
-		for _, ua := range userApps {
-			allowedApps = append(allowedApps, ua.ApplicationName)
-		}
-		query = query.Where("application_name IN ?", allowedApps)
 	}
 
 	// Filter out empty or null request_url values
@@ -751,25 +534,7 @@ func GetTopThreatTypes(c *gin.Context) {
 		return
 	}
 
-	query = config.DB.Model(&models.Request{}).
-		Where("threat_detected = ?", true)
-
-	role := c.GetString("role")
-	userID := c.GetString("user_id")
-
-	if role != "super_admin" {
-		var userApps []models.UserToApplication
-		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch user applications"})
-			return
-		}
-
-		var allowedApps []string
-		for _, ua := range userApps {
-			allowedApps = append(allowedApps, ua.ApplicationName)
-		}
-		query = query.Where("application_name IN ?", allowedApps)
-	}
+	query = query.Where("threat_detected = ?", true)
 
 	// Struct with field name matching DB column
 	type AttackStats struct {

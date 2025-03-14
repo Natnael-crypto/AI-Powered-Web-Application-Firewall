@@ -1,13 +1,15 @@
-2025/03/14 00:35:06 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
-2025/03/14 00:35:06 Failed to copy response body: http: request method or response status code does not allow body
-2025/03/14 00:35:07 Method: GET, URL: /Interceptor/test_page?name=admin, Decision: deny, Reason: 
-/03/13 20:04:26 Method: GET, URL: /Interceptor/test_page?name=boom, Decision: allow, Reason: 
-2025/03/13 20:04:26 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
-2025/03/13 20:04:26 Failed to copy response body: http: request method or response status code does not allow body
-2025/03/13 20:07:39 Method: GET, URL: /Interceptor/test_page?name=boom, Decision: allow, Reason: 
-2025/03/13 20:07:39 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
-2025/03/13 20:07:39 Failed to copy response body: http: request method or response status code does not allow body
-2025/03/13 20:07:42 Method: GET, URL: /Interceptor/test_page?name=admin, Decision: deny, Reason: 
+2025/03/14 14:44:54 Method: GET, URL: /Interceptor/test_page, Decision: allow, Reason: 
+2025/03/14 14:44:54 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
+2025/03/14 14:44:54 Failed to copy response body: http: request method or response status code does not allow body
+2025/03/14 14:45:05 Method: GET, URL: /Interceptor/test_page?name=admin, Decision: deny, Reason: 
+2025/03/14 14:45:07 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
+2025/03/14 14:45:07 Failed to copy response body: http: request method or response status code does not allow body
+2025/03/14 14:45:11 Method: GET, URL: /Interceptor/test_page?name=adminj, Decision: deny, Reason: 
+2025/03/14 14:45:15 Method: GET, URL: /Interceptor/test_page?name=adminj, Decision: deny, Reason: 
+2025/03/14 14:47:54 Method: GET, URL: /Interceptor/test_page?name=adminj, Decision: deny, Reason: 
+2025/03/14 14:53:12 Shutting down servers...
+2025/03/14 14:53:12 Servers gracefully stopped
+on: deny, Reason: 
 2025/03/13 20:07:45 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
 2025/03/13 20:07:45 Failed to copy response body: http: request method or response status code does not allow body
 2025/03/14 00:34:45 Shutting down servers...
