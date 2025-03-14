@@ -1,16 +1,17 @@
-2025/03/14 14:44:54 Method: GET, URL: /Interceptor/test_page, Decision: allow, Reason: 
-2025/03/14 14:44:54 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
-2025/03/14 14:44:54 Failed to copy response body: http: request method or response status code does not allow body
-2025/03/14 14:45:05 Method: GET, URL: /Interceptor/test_page?name=admin, Decision: deny, Reason: 
-2025/03/14 14:45:07 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
-2025/03/14 14:45:07 Failed to copy response body: http: request method or response status code does not allow body
-2025/03/14 14:45:11 Method: GET, URL: /Interceptor/test_page?name=adminj, Decision: deny, Reason: 
-2025/03/14 14:45:15 Method: GET, URL: /Interceptor/test_page?name=adminj, Decision: deny, Reason: 
-2025/03/14 14:47:54 Method: GET, URL: /Interceptor/test_page?name=adminj, Decision: deny, Reason: 
-2025/03/14 14:53:12 Shutting down servers...
-2025/03/14 14:53:12 Servers gracefully stopped
-on: deny, Reason: 
-2025/03/13 20:07:45 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
+2025/03/14 19:34:20 Method: GET, URL: /Interceptor/test_page, Decision: allow, Reason: 
+2025/03/14 19:34:29 Method: GET, URL: /, Decision: allow, Reason: 
+2025/03/14 19:36:37 Method: GET, URL: /?name=man, Decision: allow, Reason: 
+2025/03/14 19:36:41 Method: GET, URL: /?name=admin, Decision: deny, Reason: 
+copy response body: http: request method or response status code does not allow body
+2025/03/14 19:24:58 Method: GET, URL: /Interceptor/test_page, Decision: allow, Reason: 
+2025/03/14 19:24:59 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
+2025/03/14 19:24:59 Failed to copy response body: http: request method or response status code does not allow body
+2025/03/14 19:25:36 Method: GET, URL: /Interceptor/test_page, Decision: allow, Reason: 
+2025/03/14 19:25:36 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
+2025/03/14 19:25:37 Failed to copy response body: http: request method or response status code does not allow body
+2025/03/14 19:34:01 Shutting down servers...
+2025/03/14 19:34:01 Servers gracefully stopped
+cision: allow, Reason: 
 2025/03/13 20:07:45 Failed to copy response body: http: request method or response status code does not allow body
 2025/03/14 00:34:45 Shutting down servers...
 2025/03/14 00:34:45 Servers gracefully stopped

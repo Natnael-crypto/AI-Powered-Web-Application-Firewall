@@ -172,3 +172,50 @@ func DeleteRule(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "rule deleted successfully"})
 }
+
+
+var validRuleTypes = map[string]bool{
+	"REQUEST_HEADERS": true, "REQUEST_URI": true, "ARGS": true,
+	"ARGS_GET": true, "ARGS_POST": true, "REQUEST_COOKIES": true,
+	"REQUEST_BODY": true, "XML": true, "JSON": true,
+	"REQUEST_METHOD": true, "REQUEST_PROTOCOL": true, "REMOTE_ADDR": true,
+}
+
+var validRuleMethods = map[string]bool{
+	"regex": true, "streq": true, "contains": true,
+	"ipMatch": true, "rx": true, "beginsWith": true,
+	"endsWith": true, "eq": true, "pm": true,
+}
+
+var validActions = map[string]bool{
+	"deny": true, "drop": true, "pass": true, "log": true,
+	"redirect": true, "proxy": true, "auditlog": true,
+	"status": true, "tag": true, "msg": true,
+	"capture": true, "setvar": true,
+}
+
+func GetRuleMetadata(c *gin.Context) {
+	// Convert maps to string slices
+	actions := make([]string, 0, len(validActions))
+	for k := range validActions {
+		actions = append(actions, k)
+	}
+
+	methods := make([]string, 0, len(validRuleMethods))
+	for k := range validRuleMethods {
+		methods = append(methods, k)
+	}
+
+	types := make([]string, 0, len(validRuleTypes))
+	for k := range validRuleTypes {
+		types = append(types, k)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"actions": actions,
+		"methods": methods,
+		"types":   types,
+	})
+}
+
+

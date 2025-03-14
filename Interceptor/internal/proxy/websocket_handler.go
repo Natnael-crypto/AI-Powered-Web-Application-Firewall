@@ -62,7 +62,7 @@ func InitializeWebSocket() error {
 func SendToBackend(message MessageModel) {
 	if wsConn == nil {
 		log.Println("WebSocket connection is not established")
-		return
+		InitializeWebSocket()
 	}
 
 	data, err := json.Marshal(message)

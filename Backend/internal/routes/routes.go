@@ -71,6 +71,7 @@ func InitializeRoutes(r *gin.Engine) {
 		rules.DELETE("/delete/:rule_id", controllers.DeleteRule)
 	}
 	r.GET("/rule/:application_id", controllers.GetRules)
+	r.GET("/rule/metadata", controllers.GetRuleMetadata)
 
 	// Request Management with WebSocket Support
 	requests := authorized.Group("/requests")
