@@ -1,60 +1,63 @@
 import React from 'react'
-import {ComposableMap, Geographies, Geography, Marker} from 'react-simple-maps'
 import {scaleSequential} from 'd3-scale'
-import {interpolatePlasma} from 'd3-scale-chromatic'
-import CountryData from './CountryData'
+import {interpolateRgb} from 'd3-interpolate'
+import {VectorMap} from '@react-jvectormap/core'
+import {worldMill} from '@react-jvectormap/world'
 
-interface RequestData {
-  lat: number
-  lng: number
-  intensity: number
+const requestData: Record<string, number> = {
+  US: 120000,
+  IN: 80000,
+  FR: 300,
+  CN: 70000,
+  DE: 50000,
+  BR: 40000,
+  AU: 150000,
+  RU: 200000,
 }
 
-interface GlobeMapProps {
-  data: RequestData[]
+const maxRequests = Math.max(...Object.values(requestData), 1)
+
+const getColor = (requests: number) => {
+  const scale = scaleSequential(interpolateRgb('#D3D3D3', '#006400')).domain([
+    0,
+    maxRequests,
+  ])
+  return scale(requests)
 }
 
-const GlobeMap: React.FC<GlobeMapProps> = ({data}) => {
-  const maxIntensity = Math.max(...data.map(d => d.intensity))
-  const colorScale = scaleSequential(interpolatePlasma).domain([0, maxIntensity])
-
+const GlobeMap: React.FC = () => {
   return (
-    <div className="w-full  h-full flex justify-between bg-white">
-      <ComposableMap
-        projection="geoMercator"
-        projectionConfig={{
-          scale: 70,
+    <div className="w-full h-full flex justify-between bg-white">
+      <VectorMap
+        backgroundColor="#f4f4f4"
+        className="h-full"
+        zoomOnScroll={false}
+        regionStyle={{
+          initial: {fill: '#D3D3D3', stroke: '#fff', strokeWidth: 1},
+          hover: {fill: '#228B22', cursor: 'pointer'},
         }}
-        width={400}
-        height={300}
-        className="w-2/3"
-      >
-        <Geographies geography="https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json">
-          {({geographies}) =>
-            geographies.map(geo => (
-              <Geography
-                key={geo.rsmKey}
-                geography={geo}
-                fill="#EAEAEC"
-                stroke="#D6D6DA"
-              />
-            ))
-          }
-        </Geographies>
-        {data.map(({lat, lng, intensity}, index) => (
-          <Marker key={index} coordinates={[lng, lat]}>
-            <circle
-              r={Math.sqrt(intensity) / 2}
-              fill={colorScale(intensity)}
-              stroke="#000"
-              strokeWidth={0.5}
-            />
-          </Marker>
-        ))}
-      </ComposableMap>
-      <div className="flex items-center justify-between">
-        <CountryData />
-      </div>
+        series={{
+          regions: [
+            {
+              values: Object.fromEntries(
+                Object.entries(requestData).map(([country, requests]) => [
+                  country,
+                  getColor(requests),
+                ]),
+              ),
+              attribute: 'fill',
+            },
+          ],
+        }}
+        onRegionTipShow={(e, el: any, code) => {
+          const requests = requestData[code] || 0
+          el.html(
+            `<strong>${el.html()}</strong><br>
+            Requests: <b>${requests.toLocaleString()}</b>`,
+          )
+        }}
+        map={worldMill}
+      />
     </div>
   )
 }

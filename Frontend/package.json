@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-jvectormap/core": "^1.0.4",
+    "@react-jvectormap/world": "^1.1.2",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "d3-scale": "^4.0.2",

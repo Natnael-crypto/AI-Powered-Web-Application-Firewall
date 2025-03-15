@@ -31,7 +31,7 @@ function Dashboard() {
   ]
 
   return (
-    <div className="px-5 flex flex-col gap-5 w-full overflow-y-scroll">
+    <div className="px-5 h-screen flex flex-col gap-5 w-full overflow-y-scroll">
       <DashboardMenu
         changeMenu={changeDashboardMenu}
         selectedMenu={selectedDashboardMenu}
@@ -64,9 +64,9 @@ function Dashboard() {
           <Card className="h-full w-[55%] shadow-lg bg-white">Query per second</Card>
         </div>
       )}
-      <div className="flex gap-8">
+      <div className="flex min-h-[500px] gap-8">
         <Card className="bg-white">
-          <GlobeMap data={requestData} />
+          <GlobeMap />
         </Card>
         <TodaySummary />
       </div>
