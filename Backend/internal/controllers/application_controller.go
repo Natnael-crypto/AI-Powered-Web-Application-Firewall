@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func AddApplication(c *gin.Context) {
@@ -25,6 +26,7 @@ func AddApplication(c *gin.Context) {
 		IpAddress       string `json:"ip_address" binding:"required"`
 		Port            string `json:"port" binding:"required,max=5"`
 		Status          bool   `json:"status"`
+		Tls             bool   `json:"tls"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -53,6 +55,7 @@ func AddApplication(c *gin.Context) {
 		IpAddress:       input.IpAddress,
 		Port:            input.Port,
 		Status:          input.Status,
+		Tls:             input.Tls,
 		CreatedAt:       time.Now(),
 		UpdatedAt:       time.Now(),
 	}
@@ -63,16 +66,29 @@ func AddApplication(c *gin.Context) {
 		return
 	}
 
+	newAppConf := models.AppConf{
+		ID:            uuid.New().String(),
+		ApplicationID: application.ApplicationID,
+		RateLimit:     50,
+		WindowSize:    10,
+		DetectBot:     false,
+		HostName:      application.HostName,
+	}
+
+	if err := CreateAppConfigLocal(newAppConf); err != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "failed to create app config"})
+	}
+
 	c.JSON(http.StatusCreated, gin.H{"message": "application created successfully"})
 }
 
 // GetApplication retrieves a specific application by ID
 func GetApplication(c *gin.Context) {
 	// Check if the user is a super admin
-	// if c.GetString("role") != "super_admin" {
-	// 	c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-	// 	return
-	// }
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
 
 	applicationID := c.Param("application_id")
 	var application models.Application
@@ -87,11 +103,6 @@ func GetApplication(c *gin.Context) {
 
 // GetAllApplications retrieves all applications
 func GetAllApplications(c *gin.Context) {
-	// Check if the user is a super admin
-	// if c.GetString("role") != "super_admin" {
-	// 	c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-	// 	return
-	// }
 
 	var applications []models.Application
 	if err := config.DB.Find(&applications).Error; err != nil {
@@ -117,6 +128,7 @@ func UpdateApplication(c *gin.Context) {
 		IpAddress       string `json:"ip_address" binding:"required,max=15"`
 		Port            string `json:"port" binding:"required,max=5"`
 		Status          bool   `json:"status" binding:"required"`
+		Tls             bool   `json:"tls"`
 	}
 
 	applicationID := c.Param("application_id")
@@ -142,6 +154,7 @@ func UpdateApplication(c *gin.Context) {
 	application.IpAddress = input.IpAddress
 	application.Port = input.Port
 	application.Status = input.Status
+	application.Tls = input.Tls
 	application.UpdatedAt = time.Now()
 
 	// Explicitly update the application using WHERE condition
@@ -152,6 +165,7 @@ func UpdateApplication(c *gin.Context) {
 		"ip_address":       application.IpAddress,
 		"port":             application.Port,
 		"status":           application.Status,
+		"tls":              application.Tls,
 		"updated_at":       application.UpdatedAt,
 	}).Error; err != nil {
 		// Log the error for debugging purposes

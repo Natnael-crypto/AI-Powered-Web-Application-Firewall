@@ -1,12 +1,15 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
-	"time"
 	"strconv"
+	"strings"
+	"time"
 
 	"backend/internal/config"
 	"backend/internal/models"
+	"backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -14,7 +17,7 @@ import (
 
 func AddRequest(c *gin.Context) {
 	var input struct {
-		ApplicationName    string `json:"application_name" binding:"required"`
+		ApplicationName  string `json:"application_name" binding:"required"`
 		ClientIP         string `json:"client_ip" binding:"required"`
 		RequestMethod    string `json:"request_method" binding:"required"`
 		RequestURL       string `json:"request_url" binding:"required"`
@@ -25,7 +28,6 @@ func AddRequest(c *gin.Context) {
 		MatchedRules     string `json:"matched_rules"`
 		ThreatDetected   bool   `json:"threat_detected"`
 		ThreatType       string `json:"threat_type"`
-		ActionTaken      string `json:"action_taken"`
 		BotDetected      bool   `json:"bot_detected"`
 		GeoLocation      string `json:"geo_location"`
 		RateLimited      bool   `json:"rate_limited"`
@@ -49,7 +51,7 @@ func AddRequest(c *gin.Context) {
 	// Create the request
 	request := models.Request{
 		RequestID:        uuid.New().String(),
-		ApplicationName:    input.ApplicationName,
+		ApplicationName:  input.ApplicationName,
 		ClientIP:         input.ClientIP,
 		RequestMethod:    input.RequestMethod,
 		RequestURL:       input.RequestURL,
@@ -61,7 +63,6 @@ func AddRequest(c *gin.Context) {
 		MatchedRules:     input.MatchedRules,
 		ThreatDetected:   input.ThreatDetected,
 		ThreatType:       input.ThreatType,
-		ActionTaken:      input.ActionTaken,
 		BotDetected:      input.BotDetected,
 		GeoLocation:      input.GeoLocation,
 		RateLimited:      input.RateLimited,
@@ -80,114 +81,501 @@ func AddRequest(c *gin.Context) {
 
 // GetRequests retrieves requests based on user role
 func GetRequests(c *gin.Context) {
-	userRole := c.GetString("role")
-	userID := c.GetString("user_id")
-
-	var requests []models.Request
-	query := config.DB.Model(&models.Request{})
-
-	// 🔹 Check if user is an admin (not super_admin), filter by assigned applications
-	if userRole != "super_admin" {
-		var userApps []models.UserToApplication
-		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch user applications"})
-			return
-		}
-
-		// Collect assigned application names
-		applicationNames := make([]string, len(userApps))
-		for i, app := range userApps {
-			applicationNames[i] = app.ApplicationName
-		}
-
-		// Restrict query to assigned applications
-		if len(applicationNames) > 0 {
-			query = query.Where("application_name IN ?", applicationNames)
-		} else {
-			// If user has no assigned applications, return empty response
-			c.JSON(http.StatusOK, gin.H{"requests": []models.Request{}})
-			return
-		}
+	// Apply filters using the helper function
+	apps := c.QueryArray("application_name")
+	// Split apps string by comma if provided as single string
+	if len(apps) == 1 {
+		apps = strings.Split(apps[0], ",")
 	}
 
-	// 🔹 Apply filtering based on query parameters
+	// Initialize query builder
+	query := utils.ApplyRequestFilters(c)
 
-	if applicationName := c.Query("application_name"); applicationName != "" {
-		query = query.Where("application_name ILIKE ?", "%"+applicationName+"%")
-	}
-	if clientIP := c.Query("client_ip"); clientIP != "" {
-		query = query.Where("client_ip ILIKE ?", "%"+clientIP+"%")
-	}
-	if requestMethod := c.Query("request_method"); requestMethod != "" {
-		query = query.Where("request_method ILIKE ?", "%"+requestMethod+"%")
-	}
-	if requestURL := c.Query("request_url"); requestURL != "" {
-		query = query.Where("request_url ILIKE ?", "%"+requestURL+"%")
-	}
-	if threatType := c.Query("threat_type"); threatType != "" {
-		query = query.Where("threat_type ILIKE ?", "%"+threatType+"%")
-	}
-	if actionTaken := c.Query("action_taken"); actionTaken != "" {
-		query = query.Where("action_taken ILIKE ?", "%"+actionTaken+"%")
-	}
-	if userAgent := c.Query("user_agent"); userAgent != "" {
-		query = query.Where("user_agent ILIKE ?", "%"+userAgent+"%")
-	}
-	if geoLocation := c.Query("geo_location"); geoLocation != "" {
-		query = query.Where("geo_location ILIKE ?", "%"+geoLocation+"%")
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
 	}
 
-	// 🔹 Boolean filters
-	if c.Query("threat_detected") != "" {
-		threatDetected := c.Query("threat_detected") == "true"
-		query = query.Where("threat_detected = ?", threatDetected)
-	}
-	if c.Query("bot_detected") != "" {
-		botDetected := c.Query("bot_detected") == "true"
-		query = query.Where("bot_detected = ?", botDetected)
-	}
-	if c.Query("rate_limited") != "" {
-		rateLimited := c.Query("rate_limited") == "true"
-		query = query.Where("rate_limited = ?", rateLimited)
-	}
-
-	// 🔹 Date and Time Filtering
-	if startDate := c.Query("start_date"); startDate != "" {
-		query = query.Where("timestamp >= ?", startDate)
-	}
-	if endDate := c.Query("end_date"); endDate != "" {
-		query = query.Where("timestamp <= ?", endDate)
-	}
-
-	// 🔹 Time Filtering for a Specific Date
-	if date := c.Query("date"); date != "" {
-		if startTime := c.Query("start_time"); startTime != "" {
-			query = query.Where("timestamp >= ?", date+" "+startTime)
-		}
-		if endTime := c.Query("end_time"); endTime != "" {
-			query = query.Where("timestamp <= ?", date+" "+endTime)
-		}
-	}
-
-	// 🔹 Last X Hours Filtering
-	if lastHours := c.Query("last_hours"); lastHours != "" {
-		query = query.Where("timestamp >= NOW() - INTERVAL '? HOURS'", lastHours)
-	}
-
-	// 🔹 Full-Text Search for Large Fields (headers, body, request_url)
-	if searchQuery := c.Query("search"); searchQuery != "" {
-		query = query.Where("to_tsvector('english', headers || ' ' || body || ' ' || request_url) @@ plainto_tsquery(?)", searchQuery)
-	}
-
-	// 🔹 Pagination (Default: 50 results per page)
+	// 🔹 Pagination
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize := 50
 	offset := (page - 1) * pageSize
 
+	var requests []models.Request
 	if err := query.Limit(pageSize).Offset(offset).Find(&requests).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch requests"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"requests": requests})
+}
+
+func GetRequestByID(c *gin.Context) {
+	userRole := c.GetString("role")
+	userID := c.GetString("user_id")
+
+	if userRole != "super_admin" {
+
+		userToApplication := models.UserToApplication{
+			UserID:          userID,
+			ApplicationName: c.Param("application_name"),
+		}
+		if err := config.DB.Where("user_id = ? AND application_name = ?", userID, c.Param("application_name")).First(&userToApplication).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
+			return
+		}
+		requestID := c.Param("request_id")
+
+		var request models.Request
+		if err := config.DB.Where("request_id = ?", requestID).First(&request).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "request not found"})
+			return
+		}
+
+	}
+
+	requestID := c.Param("request_id")
+
+	var request models.Request
+	if err := config.DB.Where("request_id = ?", requestID).First(&request).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "request not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"request": request})
+}
+
+// GetRequestStats returns request count and unique IP addresses for specified applications
+func GetRequestStats(c *gin.Context) {
+
+	// Initialize query builder
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	// Get total request count
+	var requestCount int64
+	if err := query.Count(&requestCount).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count requests"})
+		return
+	}
+
+	// Get unique IP count
+	var uniqueIPs []string
+	if err := query.Distinct("client_ip").Pluck("client_ip", &uniqueIPs).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count unique IPs"})
+		return
+	}
+
+	// Return stats
+	c.JSON(http.StatusOK, gin.H{
+		"total_requests": requestCount,
+		"unique_ips":     len(uniqueIPs),
+	})
+}
+
+// GetBlockedStats retrieves statistics about blocked requests
+func GetBlockedStats(c *gin.Context) {
+
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+	// Initialize query
+	query = query.Where("status = ?", "blocked")
+
+	// Get total blocked request count
+	var blockedCount int64
+	if err := query.Count(&blockedCount).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count blocked requests"})
+		return
+	}
+
+	// Get unique blocked IP count
+	var uniqueBlockedIPs []string
+	if err := query.Distinct("client_ip").Pluck("client_ip", &uniqueBlockedIPs).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count unique blocked IPs"})
+		return
+	}
+
+	// Return stats
+	c.JSON(http.StatusOK, gin.H{
+		"total_blocked_requests": blockedCount,
+		"unique_blocked_ips":     len(uniqueBlockedIPs),
+	})
+}
+
+// GetTopBlockedCountries returns the top 5 countries with the most blocked requests
+func GetTopBlockedCountries(c *gin.Context) {
+	// Initialize query
+
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	query = query.Where("status = ?", "blocked")
+
+	type CountryStats struct {
+		Country string `json:"country"`
+		Count   int64  `json:"count"`
+	}
+
+	var stats []CountryStats
+
+	err := query.Select("geo_location as country, count(*) as count").
+		Group("geo_location").
+		Order("count DESC").
+		Limit(5).
+		Find(&stats).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch country statistics"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"top_blocked_countries": stats})
+}
+
+// GetAllBlockedCountries returns all countries and their blocked request counts
+func GetAllBlockedCountries(c *gin.Context) {
+	// Initialize query
+
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	query = query.Where("status = ?", "blocked")
+
+	type CountryStats struct {
+		Country string `json:"country"`
+		Count   int64  `json:"count"`
+	}
+
+	var stats []CountryStats
+
+	err := query.Select("geo_location as country, count(*) as count").
+		Group("geo_location").
+		Order("count DESC").
+		Find(&stats).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch country statistics"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"blocked_countries": stats})
+}
+
+// GetRequestsPerMinute returns the number of requests per minute for different time intervals
+func GetRequestsPerMinute(c *gin.Context) {
+	// Get blocked parameter from query
+	blocked := c.Query("blocked")
+	var isBlocked bool
+	if blocked != "" {
+		var err error
+		isBlocked, err = strconv.ParseBool(blocked)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid blocked parameter - must be true or false"})
+			return
+		}
+	}
+
+	// Get time range from query params (e.g. "2H" for 2 hours, "2D" for 2 days)
+	timeRange := c.DefaultQuery("timerange", "1H")
+	rangeValue := timeRange[:len(timeRange)-1]
+	rangeUnit := timeRange[len(timeRange)-1:]
+
+	value, err := strconv.Atoi(rangeValue)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid time range value"})
+		return
+	}
+
+	var duration time.Duration
+	switch strings.ToUpper(rangeUnit) {
+	case "H":
+		duration = time.Duration(value) * time.Hour
+	case "D":
+		duration = time.Duration(value*24) * time.Hour
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid time range unit - use H for hours or D for days"})
+		return
+	}
+
+	// Get interval in minutes (default to 1)
+	intervalStr := c.DefaultQuery("interval", "1")
+	intervalMin, err := strconv.Atoi(intervalStr)
+	if err != nil || intervalMin <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid interval - must be a positive number"})
+		return
+	}
+	intervalDuration := time.Duration(intervalMin) * time.Minute
+
+	// Initialize query
+	query := utils.ApplyRequestFilters(c)
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	// Get the current time and calculate the start time for the requested range
+	loc, _ := time.LoadLocation("Local")
+	now := time.Now().In(loc)
+	startTime := now.Add(-duration)
+
+	if isBlocked {
+		query = query.Where("threat_detected = ?", true)
+	}
+
+	type TimeCount struct {
+		Timestamp time.Time
+		Count     int64
+	}
+
+	var counts []TimeCount
+
+	// Fetch raw data (timestamps and counts) within the time range
+	err = query.
+		Where("timestamp >= ?", startTime).
+		Where("timestamp < ?", now).
+		Select("timestamp, count(*) as count").
+		Group("timestamp").
+		Order("timestamp ASC").
+		Scan(&counts).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch request counts"})
+		return
+	}
+
+	// Map for fast access to the count for each timestamp
+	countMap := make(map[time.Time]int64)
+	for _, c := range counts {
+		countMap[c.Timestamp] = c.Count
+	}
+
+	// Generate full time series with 0s for missing intervals
+	timeSeriesData := make([]map[string]interface{}, 0)
+	current := startTime.Truncate(intervalDuration)
+
+	// Iterate over the time range in intervals
+	for current.Before(now) {
+		next := current.Add(intervalDuration)
+		intervalCount := int64(0) // Initialize the counter for the current interval
+
+		// Check if any timestamp in the countMap is within this interval
+		for timestamp, count := range countMap {
+			if timestamp.After(current) && timestamp.Before(next) {
+				// Increment the counter for this interval
+				intervalCount += count
+			}
+		}
+
+		// Add the interval data to the response
+		timeSeriesData = append(timeSeriesData, map[string]interface{}{
+			"time_range": fmt.Sprintf("%s - %s",
+				current.Format("2006-01-02 15:04:05"),
+				next.Format("2006-01-02 15:04:05")),
+			"time":  current.Format("2006-01-02 15:04:05"),
+			"count": intervalCount,
+		})
+
+		// Move to the next interval
+		current = next
+	}
+
+	c.JSON(http.StatusOK, gin.H{"range": timeSeriesData})
+}
+
+// GetClientOSStats retrieves statistics about client operating systems from request headers
+func GetClientOSStats(c *gin.Context) {
+
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	type UserAgentCount struct {
+		UserAgent string
+		Count     int64
+	}
+
+	var uaCounts []UserAgentCount
+	err := query.
+		Select("user_agent, count(*) as count").
+		Where("user_agent IS NOT NULL").
+		Group("user_agent").
+		Find(&uaCounts).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch OS statistics"})
+		return
+	}
+
+	// Categorize OS
+	osStats := map[string]int64{
+		"Windows": 0,
+		"Linux":   0,
+		"macOS":   0,
+		"iOS":     0,
+		"Android": 0,
+		"Other":   0,
+	}
+
+	for _, entry := range uaCounts {
+		ua := strings.ToLower(entry.UserAgent)
+		switch {
+		case strings.Contains(ua, "windows"):
+			osStats["Windows"] += entry.Count
+		case strings.Contains(ua, "linux"):
+			osStats["Linux"] += entry.Count
+		case strings.Contains(ua, "mac os") || strings.Contains(ua, "macos"):
+			osStats["macOS"] += entry.Count
+		case strings.Contains(ua, "iphone") || strings.Contains(ua, "ipad"):
+			osStats["iOS"] += entry.Count
+		case strings.Contains(ua, "android"):
+			osStats["Android"] += entry.Count
+		default:
+			osStats["Other"] += entry.Count
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"os_statistics": osStats})
+}
+
+// GetResponseStatusStats returns the top 5 response status codes and their counts
+type StatusStats struct {
+	ResponseCode int   `json:"response_code"`
+	Count        int64 `json:"count"`
+}
+
+func GetResponseStatusStats(c *gin.Context) {
+
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	// Filter out null or empty response_code
+	query = query.Where("response_code IS NOT NULL")
+
+	var stats []StatusStats
+	err := query.
+		Select("response_code, COUNT(*) as count").
+		Group("response_code").
+		Order("count DESC").
+		Limit(5).
+		Find(&stats).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch response status statistics"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"response_status_stats": stats})
+}
+
+// GetMostTargetedEndpoints returns the most frequently targeted endpoints across applications
+func GetMostTargetedEndpoints(c *gin.Context) {
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	// Filter out empty or null request_url values
+	query = query.Where("request_url IS NOT NULL AND request_url != ''")
+
+	type EndpointStats struct {
+		ApplicationName string `json:"application_name"`
+		RequestURL      string `json:"request_url"`
+		Count           int64  `json:"count"`
+	}
+
+	var stats []EndpointStats
+
+	err := query.
+		Select("application_name, request_url, count(*) as count").
+		Group("application_name, request_url").
+		Order("count DESC").
+		Limit(10).
+		Find(&stats).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch endpoint statistics"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"most_targeted_endpoints": stats})
+}
+
+// GetTopThreatTypes returns the top 5 attack types and their counts
+func GetTopThreatTypes(c *gin.Context) {
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	query = query.Where("threat_detected = ?", true)
+
+	// Struct with field name matching DB column
+	type AttackStats struct {
+		ThreatType string `json:"threat_type"`
+		Count      int64  `json:"count"`
+	}
+
+	var stats []AttackStats
+
+	err := query.
+		Select("threat_type, count(*) as count").
+		Group("threat_type").
+		Order("count DESC").
+		Limit(5).
+		Find(&stats).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch attack type statistics"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"top_threat_type": stats})
+}
+
+func DeleteFilteredRequests(c *gin.Context) {
+	// Get the query with filters applied
+	query := utils.ApplyRequestFilters(c)
+	if query == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	// Perform deletion of the filtered records in batch
+	result := query.Delete(&models.Request{})
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete requests"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Filtered requests deleted successfully",
+		"count":   result.RowsAffected,
+	})
 }

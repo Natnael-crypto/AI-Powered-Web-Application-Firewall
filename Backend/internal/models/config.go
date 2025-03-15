@@ -1,7 +1,16 @@
 package models
 
 type Conf struct {
-	ID              string `json:id`
-	ListeningPort   string `json:listening_port`
-	RemoteLogServer string `json:remote_logServer`
+	ID              string `json:id gorm:"primaryKey"`
+	ListeningPort   string `json:"listening_port"  binding:"default=80"`
+	RemoteLogServer string `json:"remote_logServer"`
+}
+
+type AppConf struct {
+	ID            string `json:id gorm:"primaryKey"`
+	ApplicationID string `json:application_id binding:"required"`
+	RateLimit     int    `json:rate_limit binding:"default=50"`
+	WindowSize    int    `json:window_size binding:"default=10"`
+	DetectBot     bool   `json:detect_bot binding:"default=false"`
+	HostName      string `json:"hostname" binding:"required"`
 }

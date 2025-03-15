@@ -17,7 +17,7 @@ type Request struct {
 	MatchedRules     string    `json:"matched_rules"`
 	ThreatDetected   bool      `json:"threat_detected"`
 	ThreatType       string    `json:"threat_type"`
-	ActionTaken      string    `json:"action_taken"`
+	// ActionTaken      string    `json:"action_taken"`
 	BotDetected      bool      `json:"bot_detected"`
 	GeoLocation      string    `json:"geo_location"`
 	RateLimited      bool      `json:"rate_limited"`

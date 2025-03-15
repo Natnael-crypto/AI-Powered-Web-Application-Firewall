@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -65,6 +66,7 @@ func InitDB() {
 		&models.Request{},
 		&models.Notification{},
 		&models.Cert{},
+		&models.AppConf{},
 	)
 	if err != nil {
 		log.Fatalf("Migration failed: %v", err)
@@ -73,35 +75,27 @@ func InitDB() {
 	log.Println("Database migration completed successfully.")
 
 	// Create indexes to optimize queries
-	createIndexes()
+
+	newConf := models.Conf{
+		ID:              uuid.New().String(),
+		ListeningPort:   "80",
+		RemoteLogServer: "",
+	}
+
+	if err := CreateConfigLocal(newConf); err != nil {
+		fmt.Println("Unable to set Default Listening Port 80")
+	}
 }
 
-// createIndexes ensures database indexes are created for performance optimization
-func createIndexes() {
-	log.Println("Creating necessary indexes...")
-
-	indexQueries := []string{
-		`CREATE INDEX IF NOT EXISTS idx_requests_application_name ON requests(application_name);`,
-		`CREATE INDEX IF NOT EXISTS idx_requests_client_ip ON requests(client_ip);`,
-		`CREATE INDEX IF NOT EXISTS idx_requests_request_method ON requests(request_method);`,
-		`CREATE INDEX IF NOT EXISTS idx_requests_timestamp ON requests(timestamp);`,
-		`CREATE INDEX IF NOT EXISTS idx_requests_threat_detected ON requests(threat_detected);`,
-		`CREATE INDEX IF NOT EXISTS idx_requests_bot_detected ON requests(bot_detected);`,
-		`CREATE INDEX IF NOT EXISTS idx_requests_rate_limited ON requests(rate_limited);`,
-		`CREATE INDEX IF NOT EXISTS idx_requests_threat_type ON requests(threat_type);`,
-		`CREATE INDEX IF NOT EXISTS idx_requests_geo_location ON requests(geo_location);`,
-		`CREATE INDEX IF NOT EXISTS idx_requests_user_agent ON requests(user_agent);`,
-		`CREATE INDEX IF NOT EXISTS idx_requests_action_taken ON requests(action_taken);`,
-		`CREATE INDEX IF NOT EXISTS idx_requests_full_text ON requests USING GIN (to_tsvector('english', headers || ' ' || body || ' ' || request_url));`,
+func CreateConfigLocal(conf models.Conf) error {
+	var existingConfig models.Conf
+	if err := DB.First(&existingConfig).Error; err == nil {
+		return nil
 	}
-
-	for _, query := range indexQueries {
-		if err := DB.Exec(query).Error; err != nil {
-			log.Printf("Failed to create index: %v", err)
-		}
+	if err := DB.Create(&conf).Error; err != nil {
+		return err
 	}
-
-	log.Println("Indexes created successfully.")
+	return nil
 }
 
 // CloseDB closes the GORM database connection

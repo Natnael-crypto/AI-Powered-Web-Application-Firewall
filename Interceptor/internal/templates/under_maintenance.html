@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Maintenance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* General Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 500px;
+      padding: 25px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 15px;
+      color: #2c3e50;
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      color: #555;
+    }
+
+    .logo {
+      max-width: 100px;
+      margin-bottom: 15px;
+    }
+
+    .countdown {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #e74c3c;
+      margin-bottom: 20px;
+    }
+
+    .contact {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 15px;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .social-links a {
+      color: #3498db;
+      font-size: 1.4rem;
+      transition: color 0.3s ease;
+      text-decoration: none;
+    }
+
+    .social-links a:hover {
+      color: #2980b9;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+
+      .countdown {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <h1>We're Improving Our Website!</h1>
+    <p>Our website is currently undergoing scheduled maintenance. We’ll be back online shortly. Thank you for your patience!</p>
+
+  </div>
+
+  <script>
+    // Countdown Timer (Example: 2 hours)
+    let countdownTime = 2 * 60 * 60; // 2 hours in seconds
+
+    function updateCountdown() {
+      const hours = Math.floor(countdownTime / 3600);
+      const minutes = Math.floor((countdownTime % 3600) / 60);
+      const seconds = countdownTime % 60;
+
+      document.getElementById('countdown').innerText = 
+        `Maintenance ends in: ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+      if (countdownTime > 0) {
+        countdownTime--;
+      } else {
+        clearInterval(interval);
+        document.getElementById('countdown').innerText = "We're Back Online!";
+      }
+    }
+
+    updateCountdown(); // Initial call
+    const interval = setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>

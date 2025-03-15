@@ -2,6 +2,7 @@ package waf
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 
@@ -41,9 +42,13 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int) {
 
 	tx.ProcessRequestHeaders()
 	tx.ProcessURI(r.RequestURI, r.Method, r.Proto)
-	_, err := tx.ProcessRequestBody()
-	if err != nil {
-		log.Println("An error occured while trying to process request body", err)
+	if r.Body != nil {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.Println("error while reading the request body", err)
+		}
+		tx.AddPostRequestArgument("body", string(body))
+		tx.ProcessRequestBody()
 	}
 
 	interruption := tx.Interruption()

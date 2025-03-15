@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -69,9 +70,15 @@ func HandleWebSocket(c *gin.Context) {
 // addRequestFromInterceptor adds the request from an interceptor directly to the database
 func addRequestFromInterceptor(message interface{}) {
 	// Cast message to the expected structure
+
 	requestData, ok := message.(map[string]interface{})
 	if !ok {
 		log.Println("Error: Invalid request data received from interceptor")
+		return
+	}
+
+	if config.WsKey != requestData["token"] {
+		fmt.Errorf("Unauthorized")
 		return
 	}
 
@@ -89,17 +96,17 @@ func addRequestFromInterceptor(message interface{}) {
 	}
 
 	ipParts := strings.Split(clientIP, ":")
-
 	country := utils.GetCountryName(ipParts[0])
+	headers := utils.ParseHeaders(requestData["headers"].(string))
 
 	// Create a new request from the received data
 	request := models.Request{
 		RequestID:        uuid.New().String(),
 		ApplicationName:  requestData["application_name"].(string),
-		ClientIP:         requestData["client_ip"].(string),
+		ClientIP:         ipParts[0],
 		RequestMethod:    requestData["request_method"].(string),
 		RequestURL:       requestData["request_url"].(string),
-		Headers:          requestData["headers"].(string),
+		Headers:          headers,
 		Body:             requestData["body"].(string),
 		Timestamp:        time.Now(),
 		ResponseCode:     int(requestData["response_code"].(float64)),
@@ -107,7 +114,6 @@ func addRequestFromInterceptor(message interface{}) {
 		MatchedRules:     matchedRules,
 		ThreatDetected:   requestData["threat_detected"].(bool),
 		ThreatType:       requestData["threat_type"].(string),
-		ActionTaken:      requestData["action_taken"].(string),
 		BotDetected:      requestData["bot_detected"].(bool),
 		GeoLocation:      country,
 		RateLimited:      requestData["rate_limited"].(bool),

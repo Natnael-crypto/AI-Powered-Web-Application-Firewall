@@ -4,7 +4,7 @@ import (
 	"backend/internal/config"
 	"backend/internal/models"
 	"backend/internal/utils"
-	"log"
+	"encoding/json"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -20,23 +20,21 @@ func generateRuleID() string {
 	return strconv.FormatInt(number, 10)
 }
 
-// AddRule adds a new rule to the application by a superadmin or assigned admin
-func AddRule(c *gin.Context) {
+func marshalConditions(conditions []models.RuleCondition) string {
+	b, err := json.Marshal(conditions)
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
 
+func AddRule(c *gin.Context) {
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
 	}
 
-	var input struct {
-		RuleType       string `json:"rule_type" binding:"required"`
-		RuleMethod     string `json:"rule_method" binding:"required"`
-		RuleDefinition string `json:"rule_definition" binding:"required"`
-		Action         string `json:"action" binding:"required"`
-		ApplicationID  string `json:"application_id" binding:"required"`
-		IsActive       bool   `json:"is_active"`
-		Category       string `json:"category" binding:"required"`
-	}
+	var input models.RuleInput
 
 	// Parse the input
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -51,7 +49,7 @@ func AddRule(c *gin.Context) {
 		return
 	}
 
-	// Check if the user has permission to add rules for the application
+	// Check if the user has permission
 	userRole := c.GetString("role")
 	userID := c.GetString("user_id")
 	if userRole != "super_admin" {
@@ -62,29 +60,25 @@ func AddRule(c *gin.Context) {
 		}
 	}
 
-	ruleID := generateRuleID() // Generate 20-character numeric rule ID
-	ruleData := models.RuleData{
-		RuleID:         ruleID,
-		RuleType:       input.RuleType,
-		RuleMethod:     input.RuleMethod,
-		RuleDefinition: input.RuleDefinition,
-		Action:         input.Action,
-		Category:       input.Category,
-	}
+	// Generate RuleID
+	ruleID := generateRuleID()
+	input.RuleID = ruleID // assign to input for rule generator
 
-	ruleString, err := utils.GenerateRule(ruleData)
+	// Generate Rule String
+	ruleString, err := utils.GenerateRule(input)
 	if err != nil {
-		log.Fatalf("Error generating rule: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate rule"})
+		return
 	}
 
-	// Create the rule
+	// Save the rule
 	rule := models.Rule{
 		RuleID:         ruleID,
-		RuleType:       input.RuleType,
-		RuleDefinition: input.RuleDefinition,
+		RuleDefinition: marshalConditions(input.Conditions),
 		Action:         input.Action,
 		ApplicationID:  input.ApplicationID,
-		RuleMethod:     input.RuleMethod,
+		RuleMethod:     "chained",
+		RuleType:       "multiple",
 		RuleString:     ruleString,
 		CreatedBy:      userID,
 		CreatedAt:      time.Now(),
@@ -93,7 +87,6 @@ func AddRule(c *gin.Context) {
 		Category:       input.Category,
 	}
 
-	// Save to the database
 	if err := config.DB.Create(&rule).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create rule"})
 		return
@@ -116,9 +109,7 @@ func GetRules(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"rules": rules})
 }
 
-// UpdateRule updates an existing rule
 func UpdateRule(c *gin.Context) {
-
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
@@ -126,42 +117,41 @@ func UpdateRule(c *gin.Context) {
 
 	ruleID := c.Param("rule_id")
 
-	var input struct {
-		RuleType       string `json:"rule_type" binding:"required"`
-		RuleDefinition string `json:"rule_definition" binding:"required"`
-		Action         string `json:"action" binding:"required"`
-		IsActive       bool   `json:"is_active"`
-		Category       string `json:"category" binding:"required"`
-	}
-
-	// Validate input
+	var input models.RuleInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Check if the rule exists
 	var rule models.Rule
 	if err := config.DB.Where("rule_id = ?", ruleID).First(&rule).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "rule not found"})
 		return
 	}
 
-	// Update the rule details
-	rule.RuleType = input.RuleType
-	rule.RuleDefinition = input.RuleDefinition
+	// Regenerate the rule string
+	input.RuleID = ruleID
+	ruleString, err := utils.GenerateRule(input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to regenerate rule"})
+		return
+	}
+
+	// Update rule fields
+	rule.RuleDefinition = marshalConditions(input.Conditions)
 	rule.Action = input.Action
 	rule.IsActive = input.IsActive
 	rule.Category = input.Category
 	rule.UpdatedAt = time.Now()
+	rule.RuleString = ruleString
+	rule.RuleMethod = "chained"
+	rule.RuleType = "multiple"
 
-	// Save the updated rule, specifying the `rule_id`
 	if err := config.DB.Model(&models.Rule{}).Where("rule_id = ?", ruleID).Updates(rule).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update rule"})
 		return
 	}
 
-	// Respond with success
 	c.JSON(http.StatusOK, gin.H{"message": "rule updated successfully", "rule": rule})
 }
 
@@ -182,3 +172,50 @@ func DeleteRule(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "rule deleted successfully"})
 }
+
+
+var validRuleTypes = map[string]bool{
+	"REQUEST_HEADERS": true, "REQUEST_URI": true, "ARGS": true,
+	"ARGS_GET": true, "ARGS_POST": true, "REQUEST_COOKIES": true,
+	"REQUEST_BODY": true, "XML": true, "JSON": true,
+	"REQUEST_METHOD": true, "REQUEST_PROTOCOL": true, "REMOTE_ADDR": true,
+}
+
+var validRuleMethods = map[string]bool{
+	"regex": true, "streq": true, "contains": true,
+	"ipMatch": true, "rx": true, "beginsWith": true,
+	"endsWith": true, "eq": true, "pm": true,
+}
+
+var validActions = map[string]bool{
+	"deny": true, "drop": true, "pass": true, "log": true,
+	"redirect": true, "proxy": true, "auditlog": true,
+	"status": true, "tag": true, "msg": true,
+	"capture": true, "setvar": true,
+}
+
+func GetRuleMetadata(c *gin.Context) {
+	// Convert maps to string slices
+	actions := make([]string, 0, len(validActions))
+	for k := range validActions {
+		actions = append(actions, k)
+	}
+
+	methods := make([]string, 0, len(validRuleMethods))
+	for k := range validRuleMethods {
+		methods = append(methods, k)
+	}
+
+	types := make([]string, 0, len(validRuleTypes))
+	for k := range validRuleTypes {
+		types = append(types, k)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"actions": actions,
+		"methods": methods,
+		"types":   types,
+	})
+}
+
+

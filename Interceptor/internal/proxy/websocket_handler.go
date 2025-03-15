@@ -30,6 +30,7 @@ type MessageModel struct {
 	RateLimited      bool   `json:"rate_limited"`
 	UserAgent        string `json:"user_agent"`
 	AIAnalysisResult string `json:"ai_analysis_result"`
+	Token            string `json:"token"`
 }
 
 // InitializeWebSocket establishes a WebSocket connection to the backend server
@@ -61,7 +62,7 @@ func InitializeWebSocket() error {
 func SendToBackend(message MessageModel) {
 	if wsConn == nil {
 		log.Println("WebSocket connection is not established")
-		return
+		InitializeWebSocket()
 	}
 
 	data, err := json.Marshal(message)

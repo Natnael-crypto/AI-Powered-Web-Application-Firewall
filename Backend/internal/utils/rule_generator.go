@@ -6,50 +6,90 @@ import (
 	"strings"
 )
 
-// Define the possible rule methods
-var validRuleMethods = []string{
-	"regex", "streq", "contains", "ipMatch", "rx", "beginsWith", "endsWith", "eq", "pm",
-}
+func GenerateRule(ruleData models.RuleInput) (string, error) {
+	if len(ruleData.Conditions) == 0 {
+		return "", fmt.Errorf("no conditions provided")
+	}
 
-// generateRule function to generate WAF rules
-func GenerateRule(ruleData models.RuleData) (string, error) {
-	// Validate the rule method
-	validMethod := false
-	for _, method := range validRuleMethods {
-		if ruleData.RuleMethod == method {
-			validMethod = true
-			break
+	validRuleMethods := map[string]bool{
+		"regex": true, "streq": true, "contains": true,
+		"ipMatch": true, "rx": true, "beginsWith": true,
+		"endsWith": true, "eq": true, "pm": true,
+	}
+
+	validRuleTypes := map[string]bool{
+		"REQUEST_HEADERS": true, "REQUEST_URI": true, "ARGS": true,
+		"ARGS_GET": true, "ARGS_POST": true, "REQUEST_COOKIES": true,
+		"REQUEST_BODY": true, "XML": true, "JSON": true,
+		"REQUEST_METHOD": true, "REQUEST_PROTOCOL": true, "REMOTE_ADDR": true,
+	}
+
+	validActions := map[string]bool{
+		"deny": true, "log": true, "nolog": true, "pass": true,
+		"drop": true, "redirect": true, "capture": true,
+		"t:none": true, "t:lowercase": true, "t:normalizePath": true,
+		"t:urlDecode": true, "t:compressWhitespace": true,
+		"severity:2": true, "severity:3": true, "status:403": true,
+	}
+
+	// Validate actions
+	actionTokens := strings.Split(ruleData.Action, ",")
+	for _, token := range actionTokens {
+		t := strings.TrimSpace(token)
+		if !validActions[t] && !strings.HasPrefix(t, "t:") && !strings.HasPrefix(t, "status:") && !strings.HasPrefix(t, "severity:") {
+			return "", fmt.Errorf("invalid action '%s'", t)
 		}
 	}
 
-	if !validMethod {
-		return "", fmt.Errorf("invalid rule method '%s'. Valid methods are: %s", ruleData.RuleMethod, strings.Join(validRuleMethods, ", "))
+	var ruleBuilder strings.Builder
+
+	for i, cond := range ruleData.Conditions {
+		if !validRuleMethods[cond.RuleMethod] {
+			return "", fmt.Errorf("invalid rule method '%s'", cond.RuleMethod)
+		}
+		if !validRuleTypes[cond.RuleType] {
+			return "", fmt.Errorf("invalid rule type '%s'", cond.RuleType)
+		}
+
+		// Only add "chain" if there's more than one condition
+		if i == 0 {
+			if len(ruleData.Conditions) > 1 {
+				ruleBuilder.WriteString(fmt.Sprintf(
+					"SecRule %s \"@%s %s\" \"id:%s,phase:2,%s,msg:'%s',chain\"\n",
+					cond.RuleType,
+					cond.RuleMethod,
+					cond.RuleDefinition,
+					ruleData.RuleID,
+					ruleData.Action,
+					ruleData.Category,
+				))
+			} else {
+				ruleBuilder.WriteString(fmt.Sprintf(
+					"SecRule %s \"@%s %s\" \"id:%s,phase:2,%s,msg:'%s'\"\n",
+					cond.RuleType,
+					cond.RuleMethod,
+					cond.RuleDefinition,
+					ruleData.RuleID,
+					ruleData.Action,
+					ruleData.Category,
+				))
+			}
+		} else if i < len(ruleData.Conditions)-1 {
+			ruleBuilder.WriteString(fmt.Sprintf(
+				"    SecRule %s \"@%s %s\" \"chain\"\n",
+				cond.RuleType,
+				cond.RuleMethod,
+				cond.RuleDefinition,
+			))
+		} else {
+			ruleBuilder.WriteString(fmt.Sprintf(
+				"    SecRule %s \"@%s %s\"\n",
+				cond.RuleType,
+				cond.RuleMethod,
+				cond.RuleDefinition,
+			))
+		}
 	}
 
-	// Generate the rule based on the method
-	var rule string
-	switch ruleData.RuleMethod {
-	case "regex":
-		rule = fmt.Sprintf("SecRule %s \"@rx %s\" \"id:%s,phase:2,%s,status:403,msg:'%s'\"", ruleData.RuleType, ruleData.RuleDefinition, ruleData.RuleID, ruleData.Action, ruleData.Category)
-	case "streq":
-		rule = fmt.Sprintf("SecRule %s \"@streq %s\" \"id:%s,phase:2,%s,status:403,msg:'%s'\"", ruleData.RuleType, ruleData.RuleDefinition, ruleData.RuleID, ruleData.Action, ruleData.Category)
-	case "contains":
-		rule = fmt.Sprintf("SecRule %s \"@contains %s\" \"id:%s,phase:2,%s,status:403,msg:'%s'\"", ruleData.RuleType, ruleData.RuleDefinition, ruleData.RuleID, ruleData.Action, ruleData.Category)
-	case "ipMatch":
-		rule = fmt.Sprintf("SecRule %s \"@ipMatch %s\" \"id:%s,phase:2,%s,status:403,msg:'%s'\"", ruleData.RuleType, ruleData.RuleDefinition, ruleData.RuleID, ruleData.Action, ruleData.Category)
-	case "rx":
-		rule = fmt.Sprintf("SecRule %s \"@rx %s\" \"id:%s,phase:2,%s,status:403,msg:'%s'\"", ruleData.RuleType, ruleData.RuleDefinition, ruleData.RuleID, ruleData.Action, ruleData.Category)
-	case "beginsWith":
-		rule = fmt.Sprintf("SecRule %s \"@beginsWith %s\" \"id:%s,phase:2,%s,status:403,msg:'%s'\"", ruleData.RuleType, ruleData.RuleDefinition, ruleData.RuleID, ruleData.Action, ruleData.Category)
-	case "endsWith":
-		rule = fmt.Sprintf("SecRule %s \"@endsWith %s\" \"id:%s,phase:2,%s,status:403,msg:'%s'\"", ruleData.RuleType, ruleData.RuleDefinition, ruleData.RuleID, ruleData.Action, ruleData.Category)
-	case "eq":
-		rule = fmt.Sprintf("SecRule %s \"@eq %s\" \"id:%s,phase:2,%s,status:403,msg:'%s'\"", ruleData.RuleType, ruleData.RuleDefinition, ruleData.RuleID, ruleData.Action, ruleData.Category)
-	case "pm":
-		rule = fmt.Sprintf("SecRule %s \"@pm %s\" \"id:%s,phase:2,%s,status:403,msg:'%s'\"", ruleData.RuleType, ruleData.RuleDefinition, ruleData.RuleID, ruleData.Action, ruleData.Category)
-	default:
-		return "", fmt.Errorf("invalid rule method '%s'", ruleData.RuleMethod)
-	}
-
-	return rule, nil
+	return ruleBuilder.String(), nil
 }

@@ -5,6 +5,7 @@ import (
 	"backend/internal/routes"
 	"backend/internal/utils"
 	"fmt"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +26,9 @@ func main() {
 	// Initialize the routes
 	routes.InitializeRoutes(r)
 
-	// Start the server
-	r.Run() // Default is localhost:8080
+	// Start the server on port 8000
+	log.Printf("Starting server on port 8080")
+	if err := r.Run(":8080"); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
 }
