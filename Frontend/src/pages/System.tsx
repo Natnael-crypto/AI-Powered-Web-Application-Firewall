@@ -1,0 +1,60 @@
+import {ColumnDef} from '@tanstack/react-table'
+import ManageUser from '../components/ManageUser'
+import Table from '../components/Table'
+type UserAccount = {
+  name: string
+  role: string
+  '2FA': boolean
+  lastLogin: string
+}
+
+const mockUserData: UserAccount[] = [
+  {
+    name: 'Alice Johnson',
+    role: 'Admin',
+    '2FA': true,
+    lastLogin: '2023-10-01T10:00:00Z',
+  },
+  {
+    name: 'Bob Smith',
+    role: 'User',
+    '2FA': false,
+    lastLogin: '2023-10-02T12:30:00Z',
+  },
+  {
+    name: 'Charlie Brown',
+    role: 'Moderator',
+    '2FA': true,
+    lastLogin: '2023-10-03T14:45:00Z',
+  },
+]
+function System() {
+  const columns: ColumnDef<UserAccount>[] = [
+    {
+      accessorKey: 'name',
+      header: 'Name',
+    },
+    {
+      accessorKey: 'role',
+      header: 'Role',
+    },
+    {
+      accessorKey: '2FA',
+      header: '2FA Enabled',
+      cell: info => (info.getValue() ? 'Enabled' : 'Disabled'),
+    },
+    {
+      accessorKey: 'lastLogin',
+      header: 'Last Login',
+      cell: info => new Date(info.getValue() as string).toLocaleString(),
+    },
+  ]
+  return (
+    <div className="flex flex-col justify-start items-center gap-2">
+      <ManageUser />
+      <Table columns={columns} data={mockUserData} />
+    </div>
+  )
+}
+
+export default System

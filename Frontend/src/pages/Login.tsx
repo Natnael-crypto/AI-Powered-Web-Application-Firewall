@@ -1,14 +1,14 @@
-import {useEffect, useState} from 'react'
+import {useState} from 'react'
 import {motion} from 'framer-motion'
-import {UserIcon, LockIcon, LogInIcon, UserPlusIcon} from 'lucide-react'
-import axios from 'axios'
+import {UserIcon, LockIcon, LogInIcon} from 'lucide-react'
 import {useNavigate} from 'react-router-dom'
+import {useLogin} from '../hooks/useUser'
 
 const LoginPage = () => {
-  const [isLogin, setIsLogin] = useState(true)
   const [formData, setFormData] = useState({username: '', password: ''})
   const [errors, setErrors] = useState<{username?: string; password?: string}>({})
   const [errorMessage, setErrorMessage] = useState('')
+  const {mutate} = useLogin()
   const navigate = useNavigate()
 
   const validateForm = () => {
@@ -22,33 +22,21 @@ const LoginPage = () => {
   const handleSubmit = async (e: {preventDefault: () => void}) => {
     e.preventDefault()
     if (!validateForm()) return
-
-    const api_url = isLogin ? '/api/login' : '/api/register'
-
     try {
-      console.log('Form submitted:', formData)
-      console.log(api_url)
-      const data = await axios.post<{message: string; token: string}>(api_url, formData)
-      if (data) {
-        if (!isLogin) {
-          setIsLogin(true)
-          return
-        }
-        const token = data.data.token
-
-        localStorage.setItem('token', token)
-        navigate('/dashboard')
-      }
+      mutate(formData, {
+        onSuccess: data => {
+          const token = data.token
+          localStorage.setItem('token', token)
+          navigate('/dashboard')
+        },
+        onError: () => {
+          setErrorMessage('Invalid username or password')
+        },
+      })
     } catch (error) {
       setErrorMessage('Invalid username or password')
     }
   }
-
-  useEffect(() => {
-    if (localStorage.getItem('token')) {
-      navigate('/dashboard')
-    }
-  }, [])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -68,7 +56,7 @@ const LoginPage = () => {
         </motion.div>
 
         <h1 className="text-4xl font-bold text-center text-gray-900 mb-8">
-          {isLogin ? 'Welcome Back' : 'Create Account'}
+          Welcome Back
         </h1>
 
         {errorMessage && (
@@ -133,28 +121,11 @@ const LoginPage = () => {
               type="submit"
               className="w-full bg-gray-900 text-white py-4 rounded-xl text-lg font-medium shadow-lg hover:bg-gray-800 transition-all flex items-center justify-center gap-3"
             >
-              {isLogin ? (
-                <>
-                  <LogInIcon className="h-6 w-6" />
-                  Sign In
-                </>
-              ) : (
-                <>
-                  <UserPlusIcon className="h-6 w-6" />
-                  Create Account
-                </>
-              )}
+              <>
+                <LogInIcon className="h-6 w-6" />
+                Sign In
+              </>
             </motion.button>
-
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="w-full text-gray-600 hover:text-gray-800 text-base font-medium transition-colors py-2"
-            >
-              {isLogin
-                ? "Don't have an account? Sign up"
-                : 'Already have an account? Sign in'}
-            </button>
           </div>
         </form>
       </motion.div>

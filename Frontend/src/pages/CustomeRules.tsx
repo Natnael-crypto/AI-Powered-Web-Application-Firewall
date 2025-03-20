@@ -1,11 +1,12 @@
 import React, {useState} from 'react'
 import {BsPersonX} from 'react-icons/bs'
+import {ColumnDef} from '@tanstack/react-table'
 import Table from '../components/Table'
 import Card from '../components/Card'
 import Button from '../components/atoms/Button'
 import CreateRuleModal from '../components/CreateRuleModal'
 
-interface CustomeRulesData {
+interface CustomRulesData {
   status: string
   type: string
   name: string
@@ -14,85 +15,92 @@ interface CustomeRulesData {
   updatedAt: string
 }
 
-function CustomeRules() {
-  const columns: Array<{
-    Header: string
-    accessor: keyof CustomeRulesData
-    Cell?: ({value}: {value: string}) => JSX.Element
-  }> = React.useMemo(
-    () => [
-      {
-        Header: 'Status',
-        accessor: 'status',
-        Cell: ({value}: {value: string}) => (
-          <span className="px-3 py-2 bg-green-400 text-white">{value}</span>
-        ),
-      },
-      {
-        Header: 'Name',
-        accessor: 'name',
-      },
-      {
-        Header: 'Type',
-        accessor: 'type',
-        Cell: ({value}: {value: string}) => (
-          <>
-            <div className="flex gap-3 items-center ">
-              {value === 'allow' ? <BsPersonX size={20} /> : <BsPersonX />}
-              <span className="px-3 py-2 bg-green-400 text-white">{value}</span>
-            </div>
-          </>
-        ),
-      },
-      {
-        Header: 'Detail',
-        accessor: 'detail',
-      },
-      {
-        Header: 'Hits Today',
-        accessor: 'hitsToday',
-      },
-      {
-        Header: 'Updated At',
-        accessor: 'updatedAt',
-      },
-    ],
-    [],
-  )
+const columns: ColumnDef<CustomRulesData>[] = [
+  {
+    header: 'Status',
+    accessorKey: 'status',
+    cell: ({row}) => (
+      <span className="px-3 py-2 bg-green-400 text-white rounded">
+        {row.original.status}
+      </span>
+    ),
+  },
+  {
+    header: 'Name',
+    accessorKey: 'name',
+  },
+  {
+    header: 'Type',
+    accessorKey: 'type',
+    cell: ({row}) => (
+      <div className="flex gap-3 items-center">
+        {row.original.type.toLowerCase() === 'allow' ? (
+          <BsPersonX size={20} />
+        ) : (
+          <BsPersonX />
+        )}
+        <span className="px-3 py-2 bg-green-400 text-white rounded">
+          {row.original.type}
+        </span>
+      </div>
+    ),
+  },
+  {
+    header: 'Detail',
+    accessorKey: 'detail',
+  },
+  {
+    header: 'Hits Today',
+    accessorKey: 'hitsToday',
+  },
+  {
+    header: 'Updated At',
+    accessorKey: 'updatedAt',
+  },
+]
 
-  const data: CustomeRulesData[] = [
-    {
-      status: 'Enabled',
-      type: 'Allow',
-      name: 'Search Engine Spider',
-      detail: 'Search Engine Spider',
-      hitsToday: '10',
-      updatedAt: '2024-11-1412:47:35',
-    },
-  ]
+const mockData: CustomRulesData[] = [
+  {
+    status: 'Enabled',
+    type: 'Allow',
+    name: 'Search Engine Spider',
+    detail: 'Search Engine Spider',
+    hitsToday: '10',
+    updatedAt: '2024-11-14 12:47:35',
+  },
+  {
+    status: 'Disabled',
+    type: 'Block',
+    name: 'Suspicious User',
+    detail: 'Blocked due to unusual activity',
+    hitsToday: '3',
+    updatedAt: '2024-11-14 10:15:22',
+  },
+]
 
+function CustomRules() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const toggleModal = () => setIsModalOpen(!isModalOpen)
 
   return (
-    <div className="">
+    <div>
       <CreateRuleModal isModalOpen={isModalOpen} onClose={toggleModal} />
-      <Card className="flex justify-between items-center py3 px-2">
-        <p> Custom Rule</p>
+      <Card className="flex justify-between items-center py-3 px-2">
+        <p>Custom Rule</p>
         <Button
           classname="text-white uppercase"
           size="l"
           variant="primary"
           onClick={toggleModal}
         >
-          Add Applicatins
+          Add Applications
         </Button>
       </Card>
       <Card>
-        <Table columns={columns} data={data} />
+        <Table columns={columns} data={mockData} />
       </Card>
     </div>
   )
 }
 
-export default CustomeRules
+export default CustomRules

@@ -11,6 +11,7 @@ import LogAttack from './pages/LogAttacks'
 import PageNotFound from './pages/PageNotFound'
 import Application from './pages/Application'
 import CustomeRules from './pages/CustomeRules'
+import System from './pages/System'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -20,6 +21,7 @@ const router = createBrowserRouter(
         <Route path="logs/attacks" element={<LogAttack />} />
         <Route path="application/applications" element={<Application />} />
         <Route path="protection/custom_rules" element={<CustomeRules />} />
+        <Route path="system" element={<System />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
       <Route path="/login" element={<LoginPage />} />
