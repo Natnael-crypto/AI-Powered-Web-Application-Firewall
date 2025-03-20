@@ -1,17 +1,17 @@
-import {Column} from 'react-table'
 import Table from '../components/Table'
 import LogFilter from '../components/Request_Logs/LogFilter'
 import {AttackLog, FilterValues} from '../lib/types'
 import {useState} from 'react'
 import LogLogs from '../components/Request_Logs/LogLogs'
+import {ColumnDef} from '@tanstack/react-table'
 
 const LogAttack = () => {
-  const columns: Column<AttackLog>[] = [
-    {Header: 'IP Address', accessor: 'ipAddress'},
-    {Header: 'Application', accessor: 'application'},
-    {Header: 'Attack Count', accessor: 'attackCount'},
-    {Header: 'Duration', accessor: 'duration'},
-    {Header: 'Start At', accessor: 'startAt'},
+  const columns: ColumnDef<AttackLog>[] = [
+    {header: 'IP Address', accessorKey: 'ipAddress'},
+    {header: 'Application', accessorKey: 'application'},
+    {header: 'Attack Count', accessorKey: 'attackCount'},
+    {header: 'Duration', accessorKey: 'duration'},
+    {header: 'Start At', accessorKey: 'startAt'},
   ]
 
   const initialData: AttackLog[] = [
@@ -58,11 +58,8 @@ const LogAttack = () => {
   return (
     <div className="px-10 overflow-y-scroll my-5">
       <LogFilter onFilter={handleFilter} logtype={logType} onLogtypeChange={toggleType} />
-      {logType === 'event' ? (
-        <Table columns={columns} data={filteredData} />
-      ) : (
-        <LogLogs />
-      )}
+
+      <LogLogs />
     </div>
   )
 }

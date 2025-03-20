@@ -3,17 +3,8 @@ import {scaleSequential} from 'd3-scale'
 import {interpolateRgb} from 'd3-interpolate'
 import {VectorMap} from '@react-jvectormap/core'
 import {worldMill} from '@react-jvectormap/world'
-
-const requestData: Record<string, number> = {
-  US: 120000,
-  IN: 80000,
-  FR: 300,
-  CN: 70000,
-  DE: 50000,
-  BR: 40000,
-  AU: 150000,
-  RU: 200000,
-}
+import {requestData} from '../lib/Constants'
+import RequestStat from './RequestStat'
 
 const maxRequests = Math.max(...Object.values(requestData), 1)
 
@@ -30,7 +21,7 @@ const GlobeMap: React.FC = () => {
     <div className="w-full h-full flex justify-between bg-white">
       <VectorMap
         backgroundColor="#f4f4f4"
-        className="h-full"
+        className="h-full w-full"
         zoomOnScroll={false}
         regionStyle={{
           initial: {fill: '#D3D3D3', stroke: '#fff', strokeWidth: 1},
@@ -58,6 +49,7 @@ const GlobeMap: React.FC = () => {
         }}
         map={worldMill}
       />
+      <RequestStat />
     </div>
   )
 }

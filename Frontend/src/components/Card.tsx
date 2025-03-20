@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import {ReactNode} from 'react'
+import {cn} from '../lib/utils'
 
 interface CardProps {
   size?: 's' | 'm' | 'l'
@@ -14,7 +15,7 @@ function Card({className, children, size = 'm'}: CardProps) {
     l: 'px-6 py-4',
   }
 
-  const finalClassName = clsx(baseClass, sizeClasses[size], className)
+  const finalClassName = cn(baseClass, sizeClasses[size], className)
   return <div className={finalClassName}>{children}</div>
 }
 

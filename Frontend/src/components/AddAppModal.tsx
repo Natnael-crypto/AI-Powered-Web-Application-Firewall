@@ -1,6 +1,8 @@
 import React, {useState} from 'react'
-import axios from 'axios'
 import {Info, Tag, Save, X} from 'lucide-react'
+import {useAddApplication} from '../hooks/useApplication'
+import {data} from 'react-router-dom'
+import {QueryClient} from '@tanstack/react-query'
 
 interface AddAppModalProps {
   isModalOpen: boolean
@@ -14,6 +16,7 @@ interface AddAppPayload {
   ip_address: string
   port: string
   status: boolean
+  tls: boolean
 }
 
 export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps) {
@@ -24,31 +27,63 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
     ip_address: '',
     port: '',
     status: true,
+    tls: false,
   })
+
+  const queryClient = new QueryClient()
+
+  const {mutate} = useAddApplication()
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
-    const {name, value, type} = e.target
+    const {name, value, type, checked} = e.target
     setPayload({
       ...payload,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+      [name]: type === 'checkbox' ? checked : value,
     })
+  }
+
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {}
+
+    if (!payload.application_name.trim())
+      newErrors.application_name = 'Application name is required'
+    if (!payload.description.trim()) newErrors.description = 'Description is required'
+    if (!payload.hostname.trim()) newErrors.hostname = 'Hostname is required'
+
+    // Validate IP Address (Simple IPv4 Check)
+    const ipRegex =
+      /^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}$/
+    if (!ipRegex.test(payload.ip_address)) newErrors.ip_address = 'Invalid IP address'
+
+    // Validate Port (1 - 65535)
+    const portNumber = Number(payload.port)
+    if (isNaN(portNumber) || portNumber < 1 || portNumber > 65535) {
+      newErrors.port = 'Port must be between 1 and 65535'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      await axios.post('/api/application/add', payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `${localStorage.getItem('token')}`,
-        },
-      })
-      toggleModal()
-    } catch (error) {
-      console.error('Error adding application:', error)
-    }
+
+    if (!validate()) return
+
+    mutate(payload, {
+      onSuccess: () => {
+        alert('Application added successfully!')
+        queryClient.invalidateQueries({queryKey: ['applications']})
+        toggleModal()
+      },
+      onError: error => {
+        alert('Failed to add application: ' + error.message)
+      },
+    })
   }
 
   if (!isModalOpen) return null
@@ -180,6 +215,20 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
                     <option value="true">Active</option>
                     <option value="false">Inactive</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">TLS</label>
+                  <div className="relative mt-1 rounded-md shadow-sm">
+                    <input
+                      type="checkbox"
+                      name="tls"
+                      checked={payload.tls}
+                      onChange={handleChange}
+                      className="h-4 w-4 border-gray-300 rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Enable TLS</span>
+                  </div>
                 </div>
               </div>
             </div>

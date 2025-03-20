@@ -1,64 +1,78 @@
-import {Column} from 'react-table'
-import {LogTable} from '../../lib/types'
+import {useEffect, useState} from 'react'
+import {CellContext, ColumnDef} from '@tanstack/react-table'
 import Table from '../Table'
+import {useGetRequests} from '../../hooks/useRequests'
+
+interface RequestLog {
+  request_id: string
+  application_name: string
+  client_ip: string
+  request_method: string
+  request_url: string
+  headers: string
+  body: string
+  timestamp: string
+  response_code: number
+  status: string
+  matched_rules: string
+  threat_detected: boolean
+  threat_type: string
+  bot_detected: boolean
+  geo_location: string
+  rate_limited: boolean
+  user_agent: string
+  ai_analysis_result: string
+}
 
 function LogLogs() {
-  const columns: Column<LogTable>[] = [
+  const {data, isLoading, error} = useGetRequests('waf.local')
+
+  const columns: ColumnDef<RequestLog>[] = [
     {
-      Header: 'Action',
-      accessor: 'action',
-      Cell: ({value}: {value: string}) => (
+      header: 'Status',
+      accessorKey: 'status',
+      cell: ({getValue}: CellContext<RequestLog, unknown>) => (
         <div
-          className={` rounded-md py-1 text-white text-center ${value.toLowerCase() === 'blocked' ? 'bg-red-700' : 'bg-yellow-400'}`}
+          className={`rounded-md py-1 px-2 text-white text-center font-semibold text-sm shadow-md ${
+            (getValue() as string).toLowerCase() === 'blocked'
+              ? 'bg-red-700'
+              : 'bg-yellow-400'
+          }`}
         >
-          {value}
+          {getValue() as string}
         </div>
       ),
     },
-    {Header: 'URL', accessor: 'url'},
-    {Header: 'Attack Type', accessor: 'attackType'},
-    {Header: 'Ip Address', accessor: 'ipAddress'},
-    {Header: 'Time', accessor: 'time'},
+    {header: 'Application', accessorKey: 'application_name'},
+    {header: 'Request Method', accessorKey: 'request_method'},
+    {header: 'Request URL', accessorKey: 'request_url'},
+    {header: 'Threat Type', accessorKey: 'threat_type'},
+    {header: 'Client IP', accessorKey: 'client_ip'},
+    {header: 'Geo Location', accessorKey: 'geo_location'},
+    {
+      header: 'Response Code',
+      accessorKey: 'response_code',
+      cell: ({getValue}: CellContext<RequestLog, unknown>) => (
+        <div className="text-center font-semibold text-sm">{getValue() as number}</div>
+      ),
+    },
+    {header: 'Timestamp', accessorKey: 'timestamp'},
   ]
 
-  const mockData: LogTable[] = [
-    {
-      action: 'Blocked',
-      url: 'https://example.com/login',
-      attackType: 'SQL Injection',
-      ipAddress: '192.168.1.101',
-      time: '2023-10-01T14:32:45Z',
-    },
-    {
-      action: 'Allowed',
-      url: 'https://example.com/dashboard',
-      attackType: 'None',
-      ipAddress: '192.168.1.102',
-      time: '2023-10-02T09:15:22Z',
-    },
-    {
-      action: 'Blocked',
-      url: 'https://example.com/checkout',
-      attackType: 'XSS Attack',
-      ipAddress: '192.168.1.103',
-      time: '2023-10-03T18:47:11Z',
-    },
-    {
-      action: 'Blocked',
-      url: 'https://example.com/api/data',
-      attackType: 'Brute Force',
-      ipAddress: '192.168.1.104',
-      time: '2023-10-04T11:05:33Z',
-    },
-    {
-      action: 'Allowed',
-      url: 'https://example.com/about',
-      attackType: 'None',
-      ipAddress: '192.168.1.105',
-      time: '2023-10-05T16:20:59Z',
-    },
-  ]
-  return <Table data={mockData} columns={columns} />
+  if (isLoading) return <div className="text-center text-lg font-bold">Loading...</div>
+  if (error)
+    return (
+      <div className="text-center text-red-600 font-semibold">
+        Error loading data: {error.message}
+      </div>
+    )
+
+  return (
+    <div className="p-4 bg-gray-100 rounded-lg shadow-lg">
+      <h2 className="text-xl font-bold mb-4">Request Logs</h2>
+      <Table data={data || []} columns={columns} />
+    </div>
+  )
 }
 
 export default LogLogs

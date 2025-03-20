@@ -74,18 +74,12 @@ export const SiderbarContentItems = [
 ]
 
 export const requestData: Record<string, number> = {
-  US: 1200,
-  IN: 800,
+  US: 120000,
+  IN: 80000,
   FR: 300,
-  CN: 700,
-  DE: 500,
-  BR: 400,
-}
-
-export const getColor = (requests: number) => {
-  if (requests === 0) return '#E6F4EA' // Very faint green
-  const maxRequests = Math.max(...Object.values(requestData), 1000) // Prevent division by zero
-  const intensity = Math.min(1, requests / maxRequests) // Normalize intensity (0 - 1)
-  const greenLevel = Math.floor(255 - intensity * 155) // Darker green as requests increase
-  return `rgb(0, ${greenLevel}, 0)`
+  CN: 70000,
+  DE: 50000,
+  BR: 40000,
+  AU: 150000,
+  RU: 200000,
 }

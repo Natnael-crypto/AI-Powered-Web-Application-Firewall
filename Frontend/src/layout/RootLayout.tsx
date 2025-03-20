@@ -6,11 +6,11 @@ import {useEffect} from 'react'
 function RootLayout() {
   const {pathname} = useLocation()
   const navigate = useNavigate()
-  // useEffect(() => {
-  //   if (!localStorage.getItem('token')) {
-  //     navigate('/login')
-  //   }
-  // }, [pathname])
+  useEffect(() => {
+    if (!localStorage.getItem('token')) {
+      navigate('/login')
+    }
+  }, [pathname])
   return (
     <div className="h-screen w-full flex bg-slate-100">
       <Sidebar />
