@@ -3,33 +3,48 @@ package controllers
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+	"errors"
 	"net/http"
 	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 // CreateNotification creates a new notification
-func CreateNotification(c *gin.Context) {
-	var input struct {
-		UserID           string `json:"user_id" binding:"required"`
-		NotificationType string `json:"notification_type" binding:"required"`
-		Message          string `json:"message" binding:"required"`
-		Status           bool   `json:"status" binding:"required"`
-		Severity         string `json:"severity" binding:"required"`
+func CreateNotification(input models.NotificationInput) (string, error) {
+
+	// Input validation already handled by binding tags
+	if input.UserID == "" || input.NotificationType == "" || input.Message == "" || input.Severity == "" {
+		return "", errors.New("missing required fields")
 	}
 
-	// Parse the input
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	// Validate severity level
+	validSeverities := map[string]bool{
+		"low":      true,
+		"medium":   true,
+		"high":     true,
+		"critical": true,
+	}
+	if !validSeverities[input.Severity] {
+		return "", errors.New("invalid severity level")
+	}
+
+	// Validate notification type
+	validTypes := map[string]bool{
+		"alert":   true,
+		"warning": true,
+		"info":    true,
+	}
+	if !validTypes[input.NotificationType] {
+		return "", errors.New("invalid notification type")
 	}
 
 	// Check if the user exists
 	var user models.User
 	if err := config.DB.Where("user_id = ?", input.UserID).First(&user).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
-		return
+		return "", errors.New("user not found")
+
 	}
 
 	// Create the notification
@@ -45,11 +60,10 @@ func CreateNotification(c *gin.Context) {
 
 	// Save to the database
 	if err := config.DB.Create(&notification).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create notification"})
-		return
+		return "", errors.New("failed to create notification")
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "notification created successfully", "notification": notification})
+	return "notification created successfully", nil
 }
 
 // GetNotifications fetches all notifications for a given user

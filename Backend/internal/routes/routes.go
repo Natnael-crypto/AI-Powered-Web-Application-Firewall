@@ -92,14 +92,13 @@ func InitializeRoutes(r *gin.Engine) {
 	}
 	r.GET("/ws", controllers.HandleWebSocket)
 
-	// // Notification Management
-	// notifications := authorized.Group("/notifications")
-	// {
-	// 	notifications.POST("/add", controllers.CreateNotification)
-	// 	notifications.PUT("/update/:notification_id", controllers.UpdateNotification)
-	// 	notifications.GET("/all/:user_id", controllers.GetNotifications)
-	// 	notifications.DELETE("/delete/:notification_id", controllers.DeleteNotification)
-	// }
+	// Notification Management
+	notifications := authorized.Group("/notifications")
+	{
+		notifications.PUT("/update/:notification_id", controllers.UpdateNotification)
+		notifications.GET("/all/:user_id", controllers.GetNotifications)
+		notifications.DELETE("/delete/:notification_id", controllers.DeleteNotification)
+	}
 
 	// Certificate Management
 	certs := authorized.Group("/certs")
@@ -120,9 +119,34 @@ func InitializeRoutes(r *gin.Engine) {
 	// 	interceptor.GET("/repull", controllers.ScaleInterceptor)
 	// }
 
+	headers := authorized.Group("/security-headers")
+	{
+		headers.POST("/", controllers.AddSecurityHeader)
+		headers.GET("/", controllers.GetSecurityHeaders)
+		headers.PUT("/:header_id", controllers.UpdateSecurityHeader)
+		headers.DELETE("/:header_id", controllers.DeleteSecurityHeader)
+	}
+
 	generateCsv := authorized.Group("/generate-csv")
 	{
 		generateCsv.GET("/", controllers.GenerateRequestsCSV)
+	}
+
+	notification_rule := authorized.Group("/notification-rule")
+	{
+		notification_rule.POST("/", controllers.AddNotificationRule)
+		notification_rule.GET("/", controllers.GetNotificationRules)
+		notification_rule.PUT("/:rule_id", controllers.UpdateNotificationRule)
+		notification_rule.DELETE("/:rule_id", controllers.DeleteNotificationRule)
+	}
+
+	//NotificationConfig
+	notification_config := authorized.Group("/notification-config")
+	{
+		notification_config.POST("/", controllers.AddNotificationConfig)
+		notification_config.GET("/:user_id", controllers.GetNotificationConfig)
+		notification_config.PUT("/:user_id", controllers.UpdateNotificationConfig)
+		notification_config.DELETE("/:user_id", controllers.DeleteNotificationConfig)
 	}
 
 }

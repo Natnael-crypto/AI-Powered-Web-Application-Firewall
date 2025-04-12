@@ -29,7 +29,7 @@ func RegisterUser(c *gin.Context) {
 	}
 
 	var userExist models.User
-	if err := config.DB.Where("username = ?", input.Username).First(&userExist).Error; err == nil {
+	if err := config.DB.Where("role = ?", input.Username).First(&userExist).Error; err == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "super admin exist"})
 		return
 	}

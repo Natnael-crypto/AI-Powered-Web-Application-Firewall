@@ -4,36 +4,37 @@ import "time"
 
 type Notification struct {
 	NotificationID   string    `json:"notification_id" gorm:"primaryKey"`
-	UserID           string    `json:"user_id"`
-	NotificationType string    `json:"notification_type"`
-	Message          string    `json:"message"`
-	Timestamp        time.Time `json:"timestamp"`
-	Status           bool      `json:"status"`
-	Severity         string    `json:"severity"`
+	UserID           string    `json:"user_id" `
+	NotificationType string    `json:"notification_type" `
+	Message          string    `json:"message" `
+	Timestamp        time.Time `json:"timestamp" `
+	Status           bool      `json:"status" `
+	Severity         string    `json:"severity" `
 }
 
 type NotificationRule struct {
-	NotificationRuleID string `json:"notification_rule_id" gorm:"primaryKey"`
-	UserID             string `json:"user_id"`
-	NotificationType   string `json:"notification_type"`
-	Description        string `json:"description"`
-	Threshold          int    `json:"threshold"`
-	Active             bool   `json:"active"`
-	CreatedAt          time.Time `json:"created_at"`
-	UpdatedAt          time.Time `json:"updated_at"`
+	ID         uint      `gorm:"primaryKey" json:"id"`
+	Name       string    `json:"name" `
+	HostName   string    `json:"hostname" `
+	RuleType   string    `json:"rule_type" `
+	Threshold  int       `json:"threshold" `
+	TimeWindow int       `json:"time_window" `
+	Severity   string    `json:"severity" `
+	IsActive   bool      `json:"is_active" `
+	UsersID    []string  `gorm:"type:json" json:"users_id" ` // List of users to notify
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
-
-type NotificationType string
-
-const (
-	Critical NotificationType = "Critical"
-	High NotificationType = "High"
-	Medium NotificationType = "Medium"
-	Low NotificationType = "Low"
-)
 
 type NotificationConfig struct {
-	NotificationConfigID string `json:"notification_config_id" gorm:"primaryKey"`
-	Email                string `json:"email"`
+	UserID string `json:"user_id" gorm:"primaryKey"`
+	Email  string `json:"email"`
 }
 
+type NotificationInput struct {
+	UserID           string `json:"user_id" `
+	NotificationType string `json:"notification_type" `
+	Message          string `json:"message" `
+	Status           bool   `json:"status" `
+	Severity         string `json:"severity" `
+}

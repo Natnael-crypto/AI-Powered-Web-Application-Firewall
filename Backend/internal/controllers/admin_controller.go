@@ -19,8 +19,8 @@ func AddAdmin(c *gin.Context) {
 	}
 
 	var input struct {
-		Username string `json:"username" binding:"required,min=4"`
-		Password string `json:"password" binding:"required,min=8"`
+		Username string `json:"username" binding:"required,min=4,max=12"`
+		Password string `json:"password" binding:"required,min=8,max=25"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -107,8 +107,8 @@ func UpdateAdmin(c *gin.Context) {
 	}
 
 	var input struct {
-		Username    string `json:"username" binding:"required"`
-		NewPassword string `json:"new_password" binding:"required,min=8"`
+		Username    string `json:"username" binding:"required,min=4,max=12"`
+		NewPassword string `json:"new_password" binding:"required,min=8,max=25"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

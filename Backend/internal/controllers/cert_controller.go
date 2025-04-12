@@ -121,7 +121,6 @@ func UpdateCert(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
 	}
-
 	applicationID := c.Param("application_id")
 	fileType := c.PostForm("type") // Expected values: "cert" or "key"
 
@@ -129,7 +128,6 @@ func UpdateCert(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid type. Must be 'cert' or 'key'"})
 		return
 	}
-
 	var application models.Application
 	if err := config.DB.Where("application_id = ?", applicationID).First(&application).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Application not found"})

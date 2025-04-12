@@ -2,6 +2,7 @@ package waf
 
 import (
 	"fmt"
+	"interceptor/internal/utils"
 	"io"
 	"log"
 	"net/http"
@@ -36,12 +37,14 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int) {
 
 	for name, values := range r.Header {
 		for _, value := range values {
-			tx.AddRequestHeader(name, value)
+			val := utils.RecursiveDecode(value, 3)
+			tx.AddRequestHeader(name, val)
 		}
 	}
 
 	tx.ProcessRequestHeaders()
-	tx.ProcessURI(r.RequestURI, r.Method, r.Proto)
+	url := utils.RecursiveDecode(r.RequestURI, 3)
+	tx.ProcessURI(url, r.Method, r.Proto)
 	if r.Body != nil {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -93,3 +96,4 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int) {
 
 	return false, 0, "", "", 0
 }
+

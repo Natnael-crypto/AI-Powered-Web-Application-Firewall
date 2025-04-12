@@ -1,19 +1,19 @@
-2025/03/14 19:34:20 Method: GET, URL: /Interceptor/test_page, Decision: allow, Reason: 
-2025/03/14 19:34:29 Method: GET, URL: /, Decision: allow, Reason: 
-2025/03/14 19:36:37 Method: GET, URL: /?name=man, Decision: allow, Reason: 
-2025/03/14 19:36:41 Method: GET, URL: /?name=admin, Decision: deny, Reason: 
-copy response body: http: request method or response status code does not allow body
-2025/03/14 19:24:58 Method: GET, URL: /Interceptor/test_page, Decision: allow, Reason: 
-2025/03/14 19:24:59 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
-2025/03/14 19:24:59 Failed to copy response body: http: request method or response status code does not allow body
-2025/03/14 19:25:36 Method: GET, URL: /Interceptor/test_page, Decision: allow, Reason: 
-2025/03/14 19:25:36 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 
-2025/03/14 19:25:37 Failed to copy response body: http: request method or response status code does not allow body
-2025/03/14 19:34:01 Shutting down servers...
-2025/03/14 19:34:01 Servers gracefully stopped
-cision: allow, Reason: 
-2025/03/13 20:07:45 Failed to copy response body: http: request method or response status code does not allow body
-2025/03/14 00:34:45 Shutting down servers...
+2025/03/29 11:58:32 Method: GET, URL: /, Decision: allow, Reason: 
+2025/03/29 11:58:32 Method: GET, URL: /socket, Decision: allow, Reason: 
+2025/03/29 11:58:36 Method: POST, URL: /submit, Decision: deny, Reason: Content-Length HTTP header is not numeric
+2025/03/29 11:59:14 Method: POST, URL: /submit, Decision: deny, Reason: Content-Length HTTP header is not numeric
+2025/03/29 11:59:20 Method: POST, URL: /submit, Decision: deny, Reason: Content-Length HTTP header is not numeric
+2025/03/29 12:00:37 Shutting down servers...
+2025/03/29 12:00:37 Servers gracefully stopped
+ 10:46:53 Method: GET, URL: /?hi=%3Cscript%3E, Decision: deny, Reason: NoScript XSS InjectionChecker: HTML Injection
+2025/03/29 11:53:11 Method: GET, URL: /?hi=%3Cscrpt%3E, Decision: allow, Reason: 
+2025/03/29 11:53:12 Backend dial error: websocket: duplicate header not allowed: Upgrade
+2025/03/29 11:53:55 Method: POST, URL: /submit, Decision: deny, Reason: Content-Length HTTP header is not numeric
+2025/03/29 11:53:59 Method: GET, URL: /, Decision: allow, Reason: 
+2025/03/29 11:53:59 Backend dial error: websocket: duplicate header not allowed: Sec-Websocket-Version
+2025/03/29 11:57:37 Shutting down servers...
+2025/03/29 11:57:37 Servers gracefully stopped
+ng down servers...
 2025/03/14 00:34:45 Servers gracefully stopped
 ason: NoScript XSS InjectionChecker: HTML Injection
 2025/03/13 19:58:56 Method: GET, URL: /Interceptor/test_page/ws, Decision: allow, Reason: 

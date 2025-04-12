@@ -48,7 +48,7 @@ func CreateAppConfig(c *gin.Context) {
 		RateLimit     int    `json:"rate_limit" binding:"numeric"`
 		WindowSize    int    `json:"window_size" binding:"numeric"`
 		DetectBot     bool   `json:detect_bot`
-		HostName      string `json:"hostname" binding:"required`
+		HostName      string `json:"hostname" binding:"required,max=40"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -106,7 +106,7 @@ func CreateConfig(c *gin.Context) {
 
 	var input struct {
 		ListeningPort   string `json:"listening_port" binding:"numeric"`
-		RemoteLogServer string `json:"remote_logServer"`
+		RemoteLogServer string `json:"remote_logServer" binding:"required,max=40"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {

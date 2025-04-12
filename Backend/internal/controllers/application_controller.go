@@ -23,7 +23,7 @@ func AddApplication(c *gin.Context) {
 		ApplicationName string `json:"application_name" binding:"required,max=20"`
 		Description     string `json:"description" binding:"required,max=200"`
 		HostName        string `json:"hostname" binding:"required,max=40"`
-		IpAddress       string `json:"ip_address" binding:"required"`
+		IpAddress       string `json:"ip_address" binding:"required,ip"`
 		Port            string `json:"port" binding:"required,max=5"`
 		Status          bool   `json:"status"`
 		Tls             bool   `json:"tls"`
@@ -125,7 +125,7 @@ func UpdateApplication(c *gin.Context) {
 		ApplicationName string `json:"application_name" binding:"required,max=20"`
 		Description     string `json:"description" binding:"required,max=200"`
 		HostName        string `json:"hostname" binding:"required,max=40"`
-		IpAddress       string `json:"ip_address" binding:"required,max=15"`
+		IpAddress       string `json:"ip_address" binding:"required,ip"`
 		Port            string `json:"port" binding:"required,max=5"`
 		Status          bool   `json:"status" binding:"required"`
 		Tls             bool   `json:"tls"`
