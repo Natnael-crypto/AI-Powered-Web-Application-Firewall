@@ -72,3 +72,14 @@ export const SiderbarContentItems = [
     children: [],
   },
 ]
+
+export const requestData: Record<string, number> = {
+  US: 120000,
+  IN: 80000,
+  FR: 300,
+  CN: 70000,
+  DE: 50000,
+  BR: 40000,
+  AU: 150000,
+  RU: 200000,
+}
