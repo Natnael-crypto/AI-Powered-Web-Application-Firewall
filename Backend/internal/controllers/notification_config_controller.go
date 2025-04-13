@@ -3,11 +3,14 @@ package controllers
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // AddNotificationRule creates a new notification rule
@@ -283,7 +286,7 @@ func GetNotificationConfig(c *gin.Context) {
 
 	currentUserID := c.GetString("user_id")
 	// Check if current user is the creator of the rule
-	if currentUserID != configEntry.userID {
+	if currentUserID != configEntry.UserID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
 		return
 	}
@@ -295,8 +298,12 @@ func GetNotificationConfig_local(c *gin.Context) (string, error) {
 	userID := c.Param("user_id")
 
 	var configEntry models.NotificationConfig
-	if err := config.DB.Where("user_id = ?", userID).First(&configEntry).Error; err != nil {
-		return nil, error.error("notification config not found")
+	err := config.DB.Where("user_id = ?", userID).First(&configEntry).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", errors.New("notification config not found")
+		}
+		return "", fmt.Errorf("failed to retrieve notification config: %w", err)
 	}
 
 	return configEntry.Email, nil
@@ -323,7 +330,7 @@ func UpdateNotificationConfig(c *gin.Context) {
 	}
 
 	// Check if current user is the creator of the rule
-	if currentUserID != configEntry.userID {
+	if currentUserID != configEntry.UserID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
 		return
 	}
@@ -340,16 +347,16 @@ func UpdateNotificationConfig(c *gin.Context) {
 
 // DeleteNotificationConfig removes a user's notification config
 func DeleteNotificationConfig(c *gin.Context) {
-	userID := c.Param("user_id")
+	UserID := c.Param("user_id")
 	currentUserID := c.GetString("user_id")
 
 	// Check if current user is the creator of the rule
-	if currentUserID != configEntry.userID {
+	if currentUserID != UserID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
 		return
 	}
 
-	if err := config.DB.Where("user_id = ?", userID).Delete(&models.NotificationConfig{}).Error; err != nil {
+	if err := config.DB.Where("user_id = ?", UserID).Delete(&models.NotificationConfig{}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete notification config"})
 		return
 	}
