@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/corazawaf/coraza/v3"
 )
@@ -37,8 +38,13 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int) {
 
 	for name, values := range r.Header {
 		for _, value := range values {
-			val := utils.RecursiveDecode(value, 3)
-			tx.AddRequestHeader(name, val)
+			if _, err := strconv.ParseFloat(value, 64); err == nil {
+				tx.AddRequestHeader(name, value)
+				continue
+			}
+
+			decodedVal := utils.RecursiveDecode(value, 3)
+			tx.AddRequestHeader(name, decodedVal)
 		}
 	}
 
@@ -50,6 +56,7 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int) {
 		if err != nil {
 			log.Println("error while reading the request body", err)
 		}
+		fmt.Println(string(body))
 		tx.AddPostRequestArgument("body", string(body))
 		tx.ProcessRequestBody()
 	}
@@ -86,6 +93,7 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int) {
 
 			if len(rule.Message()) > 0 {
 				ruleMessage = rule.Message()
+				fmt.Println(rule.Message())
 			}
 		}
 	}
@@ -96,4 +104,3 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int) {
 
 	return false, 0, "", "", 0
 }
-

@@ -69,7 +69,7 @@ func InitDB() {
 		&models.AppConf{},
 		&models.NotificationRule{},
 		&models.NotificationConfig{},
-		DB.AutoMigrate(&models.SecurityHeader{}),
+		&models.SecurityHeader{},
 	)
 	if err != nil {
 		log.Fatalf("Migration failed: %v", err)
