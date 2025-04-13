@@ -13,7 +13,7 @@ import (
 // AddNotificationRule creates a new notification rule
 func AddNotificationRule(c *gin.Context) {
 
-	currentUserID := c.GetString("user_id") 
+	currentUserID := c.GetString("user_id")
 	var input struct {
 		Name       string   `json:"name" binding:"required"`
 		HostName   string   `json:"hostname" binding:"required"`
@@ -75,7 +75,7 @@ func AddNotificationRule(c *gin.Context) {
 	rule := models.NotificationRule{
 		Name:       input.Name,
 		HostName:   input.HostName,
-		CreatedBy: currentUserID
+		CreatedBy:  currentUserID,
 		RuleType:   input.RuleType,
 		Threshold:  input.Threshold,
 		TimeWindow: input.TimeWindow,
@@ -202,8 +202,6 @@ func DeleteNotificationRule(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
 		return
 	}
-	
-
 
 	if err := config.DB.Delete(&existingRule).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete notification rule"})
@@ -290,12 +288,10 @@ func GetNotificationConfig(c *gin.Context) {
 		return
 	}
 
-
-
 	c.JSON(http.StatusOK, gin.H{"notification_config": configEntry})
 }
 
-func GetNotificationConfig_local(c *gin.Context) (string,error){
+func GetNotificationConfig_local(c *gin.Context) (string, error) {
 	userID := c.Param("user_id")
 
 	var configEntry models.NotificationConfig
@@ -303,7 +299,7 @@ func GetNotificationConfig_local(c *gin.Context) (string,error){
 		return nil, error.error("notification config not found")
 	}
 
-	return configEntry.Email,nil
+	return configEntry.Email, nil
 }
 
 // UpdateNotificationConfig updates a user's notification config
