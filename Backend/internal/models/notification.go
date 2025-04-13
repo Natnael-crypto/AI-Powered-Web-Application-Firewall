@@ -13,7 +13,8 @@ type Notification struct {
 }
 
 type NotificationRule struct {
-	ID         uint      `gorm:"primaryKey" json:"id"`
+	ID         string      `gorm:"primaryKey" json:"id"`
+	CreatedBy  string		`json:"created_by" `
 	Name       string    `json:"name" `
 	HostName   string    `json:"hostname" `
 	RuleType   string    `json:"rule_type" `

@@ -4,6 +4,7 @@ import (
 	"backend/internal/config"
 	"backend/internal/routes"
 	"backend/internal/utils"
+	"backend/internal/background"
 	"fmt"
 	"log"
 
@@ -19,6 +20,10 @@ func main() {
 		fmt.Println("Error loading IP ranges:", err)
 		return
 	}
+
+	// Start the notification watcher
+	background.StartNotificationWatcher()
+	log.Println("Notification watcher started")
 
 	// Initialize the Gin router
 	r := gin.Default()

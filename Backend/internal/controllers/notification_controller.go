@@ -69,13 +69,13 @@ func CreateNotification(input models.NotificationInput) (string, error) {
 // GetNotifications fetches all notifications for a given user
 func GetNotifications(c *gin.Context) {
 	userId := c.Param("user_id")
-
+	
 	// Get the current user's role and ID from the context
 	currentUserID := c.GetString("user_id") // Assuming the user ID is set in the context
 	currentUserRole := c.GetString("role")  // Assuming the user role is set in the context
 
 	// Check if the current user is the same as the requested user or if the user is a super admin
-	if currentUserID != userId && currentUserRole != "super_admin" {
+	if currentUserID != userId {
 		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
 		return
 	}
@@ -95,6 +95,24 @@ func GetNotifications(c *gin.Context) {
 func UpdateNotification(c *gin.Context) {
 	notificationID := c.Param("notification_id")
 
+	currentUserRole := c.GetString("role")  // Assuming the user role is set in the context
+
+	// Get the notification to check ownership
+	var existingNotification models.Notification
+	if err := config.DB.Where("notification_id = ?", notificationID).First(&existingNotification).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "notification not found"})
+		return
+	}
+
+	// Get current user's ID from context
+	currentUserID := c.GetString("user_id")
+
+	// Check if the current user owns this notification or is a super admin
+	if currentUserID != existingNotification.UserID{
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+		return
+	}
+
 	var input struct {
 		Status bool `json:"status" binding:"required"`
 	}
@@ -105,18 +123,13 @@ func UpdateNotification(c *gin.Context) {
 		return
 	}
 
-	// Check if the notification exists
-	var notification models.Notification
-	if err := config.DB.Where("notification_id = ?", notificationID).First(&notification).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "notification not found"})
-		return
-	}
+	
 
 	// Update the notification details
-	notification.Status = input.Status
+	existingNotification.Status = input.Status
 
 	// Save the updated notification, specifying the `notification_id`
-	if err := config.DB.Model(&models.Notification{}).Where("notification_id = ?", notificationID).Updates(notification).Error; err != nil {
+	if err := config.DB.Model(&models.Notification{}).Where("notification_id = ?", notificationID).Updates(existingNotification).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update notification"})
 		return
 	}
@@ -128,6 +141,21 @@ func UpdateNotification(c *gin.Context) {
 // DeleteNotification deletes a notification by its ID
 func DeleteNotification(c *gin.Context) {
 	notificationID := c.Param("notification_id")
+
+	var existingNotification models.Notification
+	if err := config.DB.Where("notification_id = ?", notificationID).First(&existingNotification).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "notification not found"})
+		return
+	}
+
+	// Get current user's ID from context
+	currentUserID := c.GetString("user_id")
+
+	// Check if the current user owns this notification or is a super admin
+	if currentUserID != existingNotification.UserID{
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+		return
+	}
 
 	if err := config.DB.Where("notification_id = ?", notificationID).Delete(&models.Notification{}).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "notification not found"})

@@ -12,6 +12,8 @@ import (
 
 // AddNotificationRule creates a new notification rule
 func AddNotificationRule(c *gin.Context) {
+
+	currentUserID := c.GetString("user_id") 
 	var input struct {
 		Name       string   `json:"name" binding:"required"`
 		HostName   string   `json:"hostname" binding:"required"`
@@ -73,6 +75,7 @@ func AddNotificationRule(c *gin.Context) {
 	rule := models.NotificationRule{
 		Name:       input.Name,
 		HostName:   input.HostName,
+		CreatedBy: currentUserID
 		RuleType:   input.RuleType,
 		Threshold:  input.Threshold,
 		TimeWindow: input.TimeWindow,
@@ -103,20 +106,31 @@ func GetNotificationRules(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"notification_rules": rules})
 }
 
-func GetNotificationRules(c *gin.Context) {
+func GetNotificationRules_Local() ([]models.NotificationRule, error) {
 	var rules []models.NotificationRule
-
 	if err := config.DB.Find(&rules).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch notification rules"})
-		return
+		return nil, err
 	}
-
-	c.JSON(http.StatusOK, gin.H{"notification_rules": rules})
+	return rules, nil
 }
 
 // UpdateNotificationRule updates an existing notification rule
 func UpdateNotificationRule(c *gin.Context) {
 	ruleID := c.Param("rule_id")
+	currentUserID := c.GetString("user_id")
+
+	// Get the existing rule to check ownership
+	var rule models.NotificationRule
+	if err := config.DB.Where("id = ?", ruleID).First(&rule).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "notification rule not found"})
+		return
+	}
+
+	// Check if current user is the creator of the rule
+	if currentUserID != rule.CreatedBy {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+		return
+	}
 
 	var input struct {
 		Name       string   `json:"name" binding:"required"`
@@ -131,12 +145,6 @@ func UpdateNotificationRule(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	var rule models.NotificationRule
-	if err := config.DB.Where("id = ?", ruleID).First(&rule).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "notification rule not found"})
 		return
 	}
 
@@ -180,13 +188,24 @@ func UpdateNotificationRule(c *gin.Context) {
 func DeleteNotificationRule(c *gin.Context) {
 	ruleID := c.Param("rule_id")
 
-	var rule models.NotificationRule
-	if err := config.DB.Where("id = ?", ruleID).First(&rule).Error; err != nil {
+	currentUserID := c.GetString("user_id")
+
+	// Get the existing rule to check ownership
+	var existingRule models.NotificationRule
+	if err := config.DB.Where("id = ?", ruleID).First(&existingRule).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "notification rule not found"})
 		return
 	}
 
-	if err := config.DB.Delete(&rule).Error; err != nil {
+	// Check if current user is the creator of the rule
+	if currentUserID != existingRule.CreatedBy {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+		return
+	}
+	
+
+
+	if err := config.DB.Delete(&existingRule).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete notification rule"})
 		return
 	}
@@ -198,22 +217,31 @@ func DeleteNotificationRule(c *gin.Context) {
 func ToggleNotificationRuleStatus(c *gin.Context) {
 	ruleID := c.Param("rule_id")
 
-	var rule models.NotificationRule
-	if err := config.DB.Where("id = ?", ruleID).First(&rule).Error; err != nil {
+	currentUserID := c.GetString("user_id")
+
+	// Get the existing rule to check ownership
+	var existingRule models.NotificationRule
+	if err := config.DB.Where("id = ?", ruleID).First(&existingRule).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "notification rule not found"})
 		return
 	}
 
-	rule.IsActive = !rule.IsActive
-	rule.UpdatedAt = time.Now()
+	// Check if current user is the creator of the rule
+	if currentUserID != existingRule.CreatedBy {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+		return
+	}
 
-	if err := config.DB.Save(&rule).Error; err != nil {
+	existingRule.IsActive = !existingRule.IsActive
+	existingRule.UpdatedAt = time.Now()
+
+	if err := config.DB.Save(&existingRule).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update rule status"})
 		return
 	}
 
 	status := "activated"
-	if !rule.IsActive {
+	if !existingRule.IsActive {
 		status = "deactivated"
 	}
 
@@ -255,12 +283,33 @@ func GetNotificationConfig(c *gin.Context) {
 		return
 	}
 
+	currentUserID := c.GetString("user_id")
+	// Check if current user is the creator of the rule
+	if currentUserID != configEntry.userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+		return
+	}
+
+
+
 	c.JSON(http.StatusOK, gin.H{"notification_config": configEntry})
+}
+
+func GetNotificationConfig_local(c *gin.Context) (string,error){
+	userID := c.Param("user_id")
+
+	var configEntry models.NotificationConfig
+	if err := config.DB.Where("user_id = ?", userID).First(&configEntry).Error; err != nil {
+		return nil, error.error("notification config not found")
+	}
+
+	return configEntry.Email,nil
 }
 
 // UpdateNotificationConfig updates a user's notification config
 func UpdateNotificationConfig(c *gin.Context) {
 	userID := c.Param("user_id")
+	currentUserID := c.GetString("user_id")
 
 	var input struct {
 		Email string `json:"email" binding:"required,email"`
@@ -277,6 +326,12 @@ func UpdateNotificationConfig(c *gin.Context) {
 		return
 	}
 
+	// Check if current user is the creator of the rule
+	if currentUserID != configEntry.userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+		return
+	}
+
 	configEntry.Email = input.Email
 
 	if err := config.DB.Save(&configEntry).Error; err != nil {
@@ -290,6 +345,13 @@ func UpdateNotificationConfig(c *gin.Context) {
 // DeleteNotificationConfig removes a user's notification config
 func DeleteNotificationConfig(c *gin.Context) {
 	userID := c.Param("user_id")
+	currentUserID := c.GetString("user_id")
+
+	// Check if current user is the creator of the rule
+	if currentUserID != configEntry.userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+		return
+	}
 
 	if err := config.DB.Where("user_id = ?", userID).Delete(&models.NotificationConfig{}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete notification config"})
