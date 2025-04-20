@@ -10,6 +10,7 @@ import (
 // JWTSecretKey holds the loaded secret key
 var JWTSecretKey string
 var WsKey string
+var Change bool
 
 // LoadConfig initializes environment variables
 func LoadConfig() {
@@ -23,10 +24,11 @@ func LoadConfig() {
 	if WsKey == "" {
 		log.Fatalf("Missing WsKey in environment variables")
 	}
-
 	// Load JWT Secret Key
 	JWTSecretKey = os.Getenv("JWT_SECRET_KEY")
 	if JWTSecretKey == "" {
 		log.Fatalf("Missing JWT_SECRET_KEY in environment variables")
 	}
+
+	Change = true
 }

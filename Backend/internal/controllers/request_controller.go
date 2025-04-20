@@ -17,22 +17,20 @@ import (
 
 func AddRequest(c *gin.Context) {
 	var input struct {
-		ApplicationName  string `json:"application_name" binding:"required"`
-		ClientIP         string `json:"client_ip" binding:"required"`
-		RequestMethod    string `json:"request_method" binding:"required"`
-		RequestURL       string `json:"request_url" binding:"required"`
-		Headers          string `json:"headers"`
-		Body             string `json:"body"`
-		ResponseCode     int    `json:"response_code" binding:"required"`
-		Status           string `json:"status" binding:"required"`
-		MatchedRules     string `json:"matched_rules"`
-		ThreatDetected   bool   `json:"threat_detected"`
-		ThreatType       string `json:"threat_type"`
-		BotDetected      bool   `json:"bot_detected"`
-		GeoLocation      string `json:"geo_location"`
-		RateLimited      bool   `json:"rate_limited"`
-		UserAgent        string `json:"user_agent"`
-		AIAnalysisResult string `json:"ai_analysis_result"`
+		ApplicationName string `json:"application_name" binding:"required"`
+		ClientIP        string `json:"client_ip" binding:"required"`
+		RequestMethod   string `json:"request_method" binding:"required"`
+		RequestURL      string `json:"request_url" binding:"required"`
+		Headers         string `json:"headers"`
+		Body            string `json:"body"`
+		ResponseCode    int    `json:"response_code" binding:"required"`
+		Status          string `json:"status" binding:"required"`
+		ThreatDetected  bool   `json:"threat_detected"`
+		ThreatType      string `json:"threat_type"`
+		BotDetected     bool   `json:"bot_detected"`
+		GeoLocation     string `json:"geo_location"`
+		RateLimited     bool   `json:"rate_limited"`
+		UserAgent       string `json:"user_agent"`
 	}
 
 	// Parse the input
@@ -50,24 +48,22 @@ func AddRequest(c *gin.Context) {
 
 	// Create the request
 	request := models.Request{
-		RequestID:        uuid.New().String(),
-		ApplicationName:  input.ApplicationName,
-		ClientIP:         input.ClientIP,
-		RequestMethod:    input.RequestMethod,
-		RequestURL:       input.RequestURL,
-		Headers:          input.Headers,
-		Body:             input.Body,
-		Timestamp:        time.Now(),
-		ResponseCode:     input.ResponseCode,
-		Status:           input.Status,
-		MatchedRules:     input.MatchedRules,
-		ThreatDetected:   input.ThreatDetected,
-		ThreatType:       input.ThreatType,
-		BotDetected:      input.BotDetected,
-		GeoLocation:      input.GeoLocation,
-		RateLimited:      input.RateLimited,
-		UserAgent:        input.UserAgent,
-		AIAnalysisResult: input.AIAnalysisResult,
+		RequestID:       uuid.New().String(),
+		ApplicationName: input.ApplicationName,
+		ClientIP:        input.ClientIP,
+		RequestMethod:   input.RequestMethod,
+		RequestURL:      input.RequestURL,
+		Headers:         input.Headers,
+		Body:            input.Body,
+		Timestamp:       float64(time.Now().UnixMilli()),
+		ResponseCode:    input.ResponseCode,
+		Status:          input.Status,
+		ThreatDetected:  input.ThreatDetected,
+		ThreatType:      input.ThreatType,
+		BotDetected:     input.BotDetected,
+		GeoLocation:     input.GeoLocation,
+		RateLimited:     input.RateLimited,
+		UserAgent:       input.UserAgent,
 	}
 
 	// Save the request to the database
@@ -279,7 +275,7 @@ func GetAllBlockedCountries(c *gin.Context) {
 
 // GetRequestsPerMinute returns the number of requests per minute for different time intervals
 func GetRequestsPerMinute(c *gin.Context) {
-	// Get blocked parameter from query
+	// Parse `blocked` query parameter
 	blocked := c.Query("blocked")
 	var isBlocked bool
 	if blocked != "" {
@@ -291,10 +287,10 @@ func GetRequestsPerMinute(c *gin.Context) {
 		}
 	}
 
-	// Get time range from query params (e.g. "2H" for 2 hours, "2D" for 2 days)
+	// Parse `timerange` (e.g. "2H", "1D")
 	timeRange := c.DefaultQuery("timerange", "1H")
 	rangeValue := timeRange[:len(timeRange)-1]
-	rangeUnit := timeRange[len(timeRange)-1:]
+	rangeUnit := strings.ToUpper(timeRange[len(timeRange)-1:])
 
 	value, err := strconv.Atoi(rangeValue)
 	if err != nil {
@@ -303,7 +299,7 @@ func GetRequestsPerMinute(c *gin.Context) {
 	}
 
 	var duration time.Duration
-	switch strings.ToUpper(rangeUnit) {
+	switch rangeUnit {
 	case "H":
 		duration = time.Duration(value) * time.Hour
 	case "D":
@@ -313,7 +309,7 @@ func GetRequestsPerMinute(c *gin.Context) {
 		return
 	}
 
-	// Get interval in minutes (default to 1)
+	// Parse interval in minutes
 	intervalStr := c.DefaultQuery("interval", "1")
 	intervalMin, err := strconv.Atoi(intervalStr)
 	if err != nil || intervalMin <= 0 {
@@ -321,78 +317,67 @@ func GetRequestsPerMinute(c *gin.Context) {
 		return
 	}
 	intervalDuration := time.Duration(intervalMin) * time.Minute
+	intervalSeconds := float64(intervalDuration.Seconds())
 
-	// Initialize query
+	// Get the current UNIX time and calculate start time
+	nowUnix := float64(time.Now().Unix())
+	startUnix := nowUnix - duration.Seconds()
+
+	// Apply filters
 	query := utils.ApplyRequestFilters(c)
 	if query == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
 		return
 	}
 
-	// Get the current time and calculate the start time for the requested range
-	loc, _ := time.LoadLocation("Local")
-	now := time.Now().In(loc)
-	startTime := now.Add(-duration)
-
 	if isBlocked {
 		query = query.Where("threat_detected = ?", true)
 	}
 
-	type TimeCount struct {
-		Timestamp time.Time
+	type CountResult struct {
+		Timestamp float64
 		Count     int64
 	}
 
-	var counts []TimeCount
+	var results []CountResult
 
-	// Fetch raw data (timestamps and counts) within the time range
+	// Get all raw timestamps in the range
 	err = query.
-		Where("timestamp >= ?", startTime).
-		Where("timestamp < ?", now).
-		Select("timestamp, count(*) as count").
+		Where("timestamp >= ?", startUnix).
+		Where("timestamp < ?", nowUnix).
+		Select("timestamp, COUNT(*) as count").
 		Group("timestamp").
 		Order("timestamp ASC").
-		Scan(&counts).Error
+		Scan(&results).Error
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch request counts"})
 		return
 	}
 
-	// Map for fast access to the count for each timestamp
-	countMap := make(map[time.Time]int64)
-	for _, c := range counts {
-		countMap[c.Timestamp] = c.Count
+	// Aggregate timestamps into intervals
+	buckets := make(map[int64]int64)
+
+	for _, r := range results {
+		bucketStart := int64(r.Timestamp/intervalSeconds) * int64(intervalSeconds)
+		buckets[bucketStart] += r.Count
 	}
 
-	// Generate full time series with 0s for missing intervals
+	// Build time series with 0s for missing intervals
 	timeSeriesData := make([]map[string]interface{}, 0)
-	current := startTime.Truncate(intervalDuration)
+	for ts := int64(startUnix); ts < int64(nowUnix); ts += int64(intervalSeconds) {
+		start := ts
+		end := ts + int64(intervalSeconds)
 
-	// Iterate over the time range in intervals
-	for current.Before(now) {
-		next := current.Add(intervalDuration)
-		intervalCount := int64(0) // Initialize the counter for the current interval
+		count := buckets[start]
 
-		// Check if any timestamp in the countMap is within this interval
-		for timestamp, count := range countMap {
-			if timestamp.After(current) && timestamp.Before(next) {
-				// Increment the counter for this interval
-				intervalCount += count
-			}
-		}
-
-		// Add the interval data to the response
 		timeSeriesData = append(timeSeriesData, map[string]interface{}{
 			"time_range": fmt.Sprintf("%s - %s",
-				current.Format("2006-01-02 15:04:05"),
-				next.Format("2006-01-02 15:04:05")),
-			"time":  current.Format("2006-01-02 15:04:05"),
-			"count": intervalCount,
+				time.Unix(start, 0).Format("2006-01-02 15:04:05"),
+				time.Unix(end, 0).Format("2006-01-02 15:04:05")),
+			"time":  time.Unix(start, 0).Format("2006-01-02 15:04:05"),
+			"count": count,
 		})
-
-		// Move to the next interval
-		current = next
 	}
 
 	c.JSON(http.StatusOK, gin.H{"range": timeSeriesData})

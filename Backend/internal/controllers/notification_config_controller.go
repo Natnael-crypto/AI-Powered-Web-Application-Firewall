@@ -3,6 +3,7 @@ package controllers
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -10,21 +11,21 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 // AddNotificationRule creates a new notification rule
 func AddNotificationRule(c *gin.Context) {
-
 	currentUserID := c.GetString("user_id")
+
 	var input struct {
 		Name       string   `json:"name" binding:"required"`
 		HostName   string   `json:"hostname" binding:"required"`
-		RuleType   string   `json:"rule_type" binding:"required"`
+		ThreatType string   `json:"threat_type" binding:"required"`
 		Threshold  int      `json:"threshold" binding:"required"`
 		TimeWindow int      `json:"time_window" binding:"required"`
-		Severity   string   `json:"severity" binding:"required"`
-		IsActive   bool     `json:"is_active"`
+		IsActive   bool     `json:"is_active" binding:"required"`
 		UsersID    []string `json:"users_id" binding:"required"`
 	}
 
@@ -33,26 +34,17 @@ func AddNotificationRule(c *gin.Context) {
 		return
 	}
 
-	// Validate severity level
-	validSeverities := map[string]bool{
-		"low":      true,
-		"medium":   true,
-		"high":     true,
-		"critical": true,
-	}
-	if !validSeverities[input.Severity] {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid severity level"})
+	// Check if the hostname exists in the applications table
+	var app models.Application
+	if err := config.DB.Where("host_name = ?", input.HostName).First(&app).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "hostname does not exist in the application list"})
 		return
 	}
 
-	// Validate rule type
-	validTypes := map[string]bool{
-		"request_count": true,
-		"error_rate":    true,
-		"response_time": true,
-	}
-	if !validTypes[input.RuleType] {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid rule type"})
+	// Check for duplicate notification rule with same host_name and threat_type
+	var existingRule models.NotificationRule
+	if err := config.DB.Where("host_name = ? AND threat_type = ?", input.HostName, input.ThreatType).First(&existingRule).Error; err != gorm.ErrRecordNotFound {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "notification rule already exists for this hostname and threat type"})
 		return
 	}
 
@@ -75,16 +67,24 @@ func AddNotificationRule(c *gin.Context) {
 		}
 	}
 
+	// Encode users ID to JSON
+	jsonUsers, err := json.Marshal(input.UsersID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to encode users_id"})
+		return
+	}
+
+	// Create the new notification rule
 	rule := models.NotificationRule{
+		ID:         uuid.New().String(),
 		Name:       input.Name,
 		HostName:   input.HostName,
 		CreatedBy:  currentUserID,
-		RuleType:   input.RuleType,
+		ThreatType: input.ThreatType,
 		Threshold:  input.Threshold,
 		TimeWindow: input.TimeWindow,
-		Severity:   input.Severity,
 		IsActive:   input.IsActive,
-		UsersID:    input.UsersID,
+		UsersID:    jsonUsers,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	}
@@ -109,14 +109,6 @@ func GetNotificationRules(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"notification_rules": rules})
 }
 
-func GetNotificationRules_Local() ([]models.NotificationRule, error) {
-	var rules []models.NotificationRule
-	if err := config.DB.Find(&rules).Error; err != nil {
-		return nil, err
-	}
-	return rules, nil
-}
-
 // UpdateNotificationRule updates an existing notification rule
 func UpdateNotificationRule(c *gin.Context) {
 	ruleID := c.Param("rule_id")
@@ -138,16 +130,21 @@ func UpdateNotificationRule(c *gin.Context) {
 	var input struct {
 		Name       string   `json:"name" binding:"required"`
 		HostName   string   `json:"hostname" binding:"required"`
-		RuleType   string   `json:"rule_type" binding:"required"`
+		ThreatType string   `json:"threat_type" binding:"required"`
 		Threshold  int      `json:"threshold" binding:"required"`
 		TimeWindow int      `json:"time_window" binding:"required"`
-		Severity   string   `json:"severity" binding:"required"`
 		IsActive   bool     `json:"is_active"`
 		UsersID    []string `json:"users_id" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	jsonUsers, err := json.Marshal(input.UsersID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to encode users_id"})
 		return
 	}
 
@@ -158,8 +155,8 @@ func UpdateNotificationRule(c *gin.Context) {
 	if input.HostName != "" {
 		rule.HostName = input.HostName
 	}
-	if input.RuleType != "" {
-		rule.RuleType = input.RuleType
+	if input.ThreatType != "" {
+		rule.ThreatType = input.ThreatType
 	}
 	if input.Threshold != 0 {
 		rule.Threshold = input.Threshold
@@ -167,14 +164,11 @@ func UpdateNotificationRule(c *gin.Context) {
 	if input.TimeWindow != 0 {
 		rule.TimeWindow = input.TimeWindow
 	}
-	if input.Severity != "" {
-		rule.Severity = input.Severity
-	}
 	if input.IsActive != false {
 		rule.IsActive = input.IsActive
 	}
 	if input.UsersID != nil {
-		rule.UsersID = input.UsersID
+		rule.UsersID = jsonUsers
 	}
 	rule.UpdatedAt = time.Now()
 

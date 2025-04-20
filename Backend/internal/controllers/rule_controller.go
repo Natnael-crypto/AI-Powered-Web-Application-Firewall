@@ -91,6 +91,7 @@ func AddRule(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create rule"})
 		return
 	}
+	config.Change = true
 
 	c.JSON(http.StatusCreated, gin.H{"message": "rule added successfully", "rule": rule})
 }
@@ -152,6 +153,8 @@ func UpdateRule(c *gin.Context) {
 		return
 	}
 
+	config.Change = true
+
 	c.JSON(http.StatusOK, gin.H{"message": "rule updated successfully", "rule": rule})
 }
 
@@ -170,9 +173,10 @@ func DeleteRule(c *gin.Context) {
 		return
 	}
 
+	config.Change = true
+
 	c.JSON(http.StatusOK, gin.H{"message": "rule deleted successfully"})
 }
-
 
 var validRuleTypes = map[string]bool{
 	"REQUEST_HEADERS": true, "REQUEST_URI": true, "ARGS": true,
@@ -217,5 +221,3 @@ func GetRuleMetadata(c *gin.Context) {
 		"types":   types,
 	})
 }
-
-

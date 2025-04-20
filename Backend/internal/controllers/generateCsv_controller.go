@@ -38,7 +38,7 @@ func GenerateRequestsCSV(c *gin.Context) {
 
 	// Write CSV header
 	headers := []string{
-		"ID", "Application Name", "Client IP", "Request Method", "Request URL", "Headers", "Body", "Timestamp", "ResponseCode", "Status", "MatchedRules", "ThreatType", "ActionTaken", "BotDetected", "GeoLocation", "RateLimited", "UserAgent", "AIAnalysisResult",
+		"ID", "Application Name", "Client IP", "Request Method", "Request URL", "Headers", "Body", "Timestamp", "ResponseCode", "Status", "ThreatType", "BotDetected", "GeoLocation", "RateLimited", "UserAgent",
 		// Add more fields as needed based on your request structure
 	}
 	if err := writer.Write(headers); err != nil {
@@ -58,16 +58,14 @@ func GenerateRequestsCSV(c *gin.Context) {
 			req.RequestURL,
 			req.Headers,
 			req.Body,
-			req.Timestamp.Format(time.RFC3339),
+			fmt.Sprintf("%.3f", req.Timestamp),
 			fmt.Sprintf("%d", req.ResponseCode),
 			req.Status,
-			req.MatchedRules,
 			req.ThreatType,
 			fmt.Sprintf("%t", req.BotDetected),
 			req.GeoLocation,
 			fmt.Sprintf("%t", req.RateLimited),
 			req.UserAgent,
-			req.AIAnalysisResult,
 			// Add more fields as needed
 		}
 		if err := writer.Write(row); err != nil {

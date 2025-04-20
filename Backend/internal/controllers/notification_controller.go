@@ -51,11 +51,9 @@ func CreateNotification(input models.NotificationInput) (string, error) {
 	notification := models.Notification{
 		NotificationID:   uuid.New().String(),
 		UserID:           input.UserID,
-		NotificationType: input.NotificationType,
 		Message:          input.Message,
 		Timestamp:        time.Now(),
 		Status:           input.Status,
-		Severity:         input.Severity,
 	}
 
 	// Save to the database

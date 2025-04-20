@@ -20,13 +20,14 @@ func AddApplication(c *gin.Context) {
 	}
 
 	var input struct {
-		ApplicationName string `json:"application_name" binding:"required,max=20"`
-		Description     string `json:"description" binding:"required,max=200"`
-		HostName        string `json:"hostname" binding:"required,max=40"`
-		IpAddress       string `json:"ip_address" binding:"required,ip"`
-		Port            string `json:"port" binding:"required,max=5"`
-		Status          bool   `json:"status"`
-		Tls             bool   `json:"tls"`
+		ApplicationName string  `json:"application_name" binding:"required,max=20"`
+		Description     string  `json:"description" binding:"required,max=200"`
+		HostName        string  `json:"hostname" binding:"required,max=40"`
+		IpAddress       string  `json:"ip_address" binding:"required,ip"`
+		Port            string  `json:"port" binding:"required,max=5"`
+		Status          bool    `json:"status"`
+		Tls             bool    `json:"tls"`
+		MaxPostDataSize float64 `json:"max_post_data_size" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -67,19 +68,23 @@ func AddApplication(c *gin.Context) {
 	}
 
 	newAppConf := models.AppConf{
-		ID:            uuid.New().String(),
-		ApplicationID: application.ApplicationID,
-		RateLimit:     50,
-		WindowSize:    10,
-		DetectBot:     false,
-		HostName:      application.HostName,
+		ID:              uuid.New().String(),
+		ApplicationID:   application.ApplicationID,
+		RateLimit:       50,
+		WindowSize:      10,
+		DetectBot:       false,
+		HostName:        application.HostName,
+		MaxPostDataSize: 5.0,
 	}
 
 	if err := CreateAppConfigLocal(newAppConf); err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "failed to create app config"})
 	}
 
+	config.Change = true
+
 	c.JSON(http.StatusCreated, gin.H{"message": "application created successfully"})
+
 }
 
 // GetApplication retrieves a specific application by ID
@@ -173,7 +178,7 @@ func UpdateApplication(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update application"})
 		return
 	}
-
+	config.Change = true
 	c.JSON(http.StatusOK, gin.H{"message": "application updated successfully"})
 }
 
@@ -191,6 +196,8 @@ func DeleteApplication(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
 		return
 	}
+
+	config.Change = true
 
 	c.JSON(http.StatusOK, gin.H{"message": "application deleted successfully"})
 }

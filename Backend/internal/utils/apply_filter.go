@@ -94,62 +94,49 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 		query = query.Where("rate_limited = ?", rateLimited)
 	}
 
-	// 🔹 Date Range Filtering
+	// 🔹 Date Range Filtering with float-based UNIX timestamps
 	if startDate := c.Query("start_date"); startDate != "" {
-		parsedDate, err := time.Parse("2006-01-02", startDate)
+		startTs, err := strconv.ParseFloat(startDate, 64)
 		if err != nil {
 			return nil
 		}
-		parsedDate = time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), 0, 0, 0, 0, time.UTC)
-		query = query.Where("timestamp >= ?", parsedDate)
+		query = query.Where("timestamp >= ?", startTs)
 	}
 	if endDate := c.Query("end_date"); endDate != "" {
-		parsedDate, err := time.Parse("2006-01-02", endDate)
+		endTs, err := strconv.ParseFloat(endDate, 64)
 		if err != nil {
 			return nil
 		}
-		parsedDate = time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), 23, 59, 59, 999999999, time.UTC)
-		query = query.Where("timestamp <= ?", parsedDate)
+		query = query.Where("timestamp <= ?", endTs)
 	}
 
-	// 🔹 Specific Date with Time Filtering
+	// 🔹 Specific Date with Time Filtering (expects float UNIX timestamps)
 	if date := c.Query("date"); date != "" {
-		parsedDate, err := time.Parse("2006-01-02", date)
-		if err != nil {
-			return nil
-		}
-		loc, _ := time.LoadLocation("Local")
-
 		if startTime := c.Query("start_time"); startTime != "" {
-			parsedTime, err := time.Parse("15:04:05", startTime)
+			startTs, err := strconv.ParseFloat(startTime, 64)
 			if err != nil {
 				return nil
 			}
-			startDateTime := time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(),
-				parsedTime.Hour(), parsedTime.Minute(), parsedTime.Second(), 0, loc)
-			query = query.Where("timestamp >= ?", startDateTime)
+			query = query.Where("timestamp >= ?", startTs)
 		}
 		if endTime := c.Query("end_time"); endTime != "" {
-			parsedTime, err := time.Parse("15:04:05", endTime)
+			endTs, err := strconv.ParseFloat(endTime, 64)
 			if err != nil {
 				return nil
 			}
-			endDateTime := time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(),
-				parsedTime.Hour(), parsedTime.Minute(), parsedTime.Second(), 999999999, loc)
-			query = query.Where("timestamp <= ?", endDateTime)
+			query = query.Where("timestamp <= ?", endTs)
 		}
 	}
 
-	// 🔹 Last X Hours Filtering
+	// 🔹 Last X Hours Filtering (based on current UNIX time in float)
 	if lastHours := c.Query("last_hours"); lastHours != "" {
 		hours, err := strconv.Atoi(lastHours)
 		if err != nil {
 			return nil
 		}
-		loc, _ := time.LoadLocation("Local")
-		now := time.Now().In(loc)
-		startTime := now.Add(-time.Duration(hours) * time.Hour)
-		query = query.Where("timestamp >= ?", startTime)
+		now := float64(time.Now().Unix())
+		past := now - float64(hours*3600)
+		query = query.Where("timestamp >= ?", past)
 	}
 
 	// 🔹 Full-Text Search

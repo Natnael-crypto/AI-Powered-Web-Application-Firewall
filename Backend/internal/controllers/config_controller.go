@@ -44,11 +44,12 @@ func CreateAppConfig(c *gin.Context) {
 	}
 
 	var input struct {
-		ApplicationID string `json:application_id`
-		RateLimit     int    `json:"rate_limit" binding:"numeric"`
-		WindowSize    int    `json:"window_size" binding:"numeric"`
-		DetectBot     bool   `json:detect_bot`
-		HostName      string `json:"hostname" binding:"required,max=40"`
+		ApplicationID   string  `json:application_id`
+		RateLimit       int     `json:"rate_limit" binding:"numeric"`
+		WindowSize      int     `json:"window_size" binding:"numeric"`
+		DetectBot       bool    `json:detect_bot`
+		HostName        string  `json:"hostname" binding:"required,max=40"`
+		MaxPostDataSize float64 `json:"max_post_data_size" `
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -71,18 +72,21 @@ func CreateAppConfig(c *gin.Context) {
 	}
 
 	newAppConf := models.AppConf{
-		ID:            uuid.New().String(),
-		ApplicationID: input.ApplicationID,
-		RateLimit:     input.RateLimit,
-		WindowSize:    input.WindowSize,
-		DetectBot:     input.DetectBot,
-		HostName:      input.HostName,
+		ID:              uuid.New().String(),
+		ApplicationID:   input.ApplicationID,
+		RateLimit:       input.RateLimit,
+		WindowSize:      input.WindowSize,
+		DetectBot:       input.DetectBot,
+		HostName:        input.HostName,
+		MaxPostDataSize: input.MaxPostDataSize,
 	}
 
 	if err := config.DB.Create(&newAppConf).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create configuration"})
 		return
 	}
+
+	config.Change = true
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Configuration created successfully", "config": newAppConf})
 }
@@ -272,4 +276,37 @@ func UpdateRemoteLogServer(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "configuration updated successfully", "data": conf})
+}
+
+func UpdateMaxPosyDataSize(c *gin.Context) {
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	var input struct {
+		MaxPostDataSize float64 `json:"max_post_data_size" `
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Error binding JSON for rate limit update: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format or missing fields"})
+		return
+	}
+
+	appId := c.Param("application_id")
+
+	var conf models.AppConf
+	if err := config.DB.Where("application_id = ?", appId).First(&conf).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "App configuration not found"})
+		return
+	}
+
+	conf.MaxPostDataSize = input.MaxPostDataSize
+
+	if err := config.DB.Save(&conf).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update configuration"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Configuration updated successfully", "data": conf})
 }

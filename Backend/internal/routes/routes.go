@@ -57,6 +57,7 @@ func InitializeRoutes(r *gin.Engine) {
 		config.PUT("/update/rate-limit/:application_id", controllers.UpdateRateLimit)
 		config.PUT("/update/remote-log-server", controllers.UpdateRemoteLogServer)
 		config.PUT("/update/detect-bot/:application_id", controllers.UpdateDetectBot)
+		config.PUT("/update/post-data-size/:application_id", controllers.UpdateMaxPosyDataSize)
 		// config.POST("/add-app-config", controllers.CreateAppConfig)
 
 	}
@@ -90,7 +91,7 @@ func InitializeRoutes(r *gin.Engine) {
 		requests.DELETE("/delete", controllers.DeleteFilteredRequests)
 
 	}
-	r.GET("/ws", controllers.HandleWebSocket)
+	r.POST("/batch", controllers.HandleBatchRequests)
 
 	// Notification Management
 	notifications := authorized.Group("/notifications")
@@ -122,10 +123,10 @@ func InitializeRoutes(r *gin.Engine) {
 	headers := authorized.Group("/security-headers")
 	{
 		headers.POST("/", controllers.AddSecurityHeader)
-		headers.GET("/", controllers.GetSecurityHeaders)
 		headers.PUT("/:header_id", controllers.UpdateSecurityHeader)
 		headers.DELETE("/:header_id", controllers.DeleteSecurityHeader)
 	}
+	r.GET("/security-headers/:application_id", controllers.GetSecurityHeaders)
 
 	generateCsv := authorized.Group("/generate-csv")
 	{
@@ -148,5 +149,7 @@ func InitializeRoutes(r *gin.Engine) {
 		notification_config.PUT("/:user_id", controllers.UpdateNotificationConfig)
 		notification_config.DELETE("/:user_id", controllers.DeleteNotificationConfig)
 	}
+
+	r.GET("/change", controllers.CheckForUpdate)
 
 }

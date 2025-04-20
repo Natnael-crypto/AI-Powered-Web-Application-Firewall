@@ -32,7 +32,7 @@ func InitializeRuleEngine(customRule string) (*WAF, error) {
 }
 
 // EvaluateRules processes incoming requests and applies WAF rules
-func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int) {
+func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int, string) {
 	tx := w.engine.NewTransaction() // Correct usage
 	defer tx.Close()
 
@@ -51,8 +51,10 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int) {
 	tx.ProcessRequestHeaders()
 	url := utils.RecursiveDecode(r.RequestURI, 3)
 	tx.ProcessURI(url, r.Method, r.Proto)
+	string_body := ""
 	if r.Body != nil {
 		body, err := io.ReadAll(r.Body)
+		string_body = string(body)
 		if err != nil {
 			log.Println("error while reading the request body", err)
 		}
@@ -99,8 +101,8 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int) {
 	}
 
 	if interruption != nil {
-		return true, interruption.RuleID, ruleMessage, interruption.Action, interruption.Status
+		return true, interruption.RuleID, ruleMessage, interruption.Action, interruption.Status, string_body
 	}
 
-	return false, 0, "", "", 0
+	return false, 0, "", "", 0, string_body
 }

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -19,12 +20,13 @@ type Config struct {
 }
 
 type AppConfig struct {
-	ID            string `json:"ID"`
-	RateLimit     int    `json: "rate_limit"`
-	DetectBot     bool   `json: "detect_bot"`
-	WindowSize    int    `json: "window_size"`
-	HostName      string `json: "host_name"`
-	ApplicationID string `json: "application_id"`
+	ID              string  `json:"id"`
+	RateLimit       int     `json:"rate_limit"`
+	DetectBot       bool    `json:"detect_bot"`
+	WindowSize      int     `json:"window_size"`
+	HostName        string  `json:"host_name"`
+	ApplicationID   string  `json:"application_id"`
+	MaxPostDataSize float64 `json:"max_post_data_size" `
 }
 
 type Application struct {
@@ -37,10 +39,20 @@ type Application struct {
 	Tls             bool   `json:tls`
 }
 
+type SecurityHeader struct {
+	ID            string    `gorm:"primaryKey" json:"id"`
+	ApplicationID string    `json:"application_id" gorm:"not null"`
+	HeaderName    string    `json:"header_name" gorm:"unique;not null"`
+	HeaderValue   string    `json:"header_value" gorm:"not null"`
+	CreatedBy     string    `json:"created_by"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
 type Cert struct {
 	HostName string `json:"hostname"`
 	CertPath string `json:"cert_path"`
-	KeyPath  string `json: key_path`
+	KeyPath  string `json:"key_path"`
 }
 
 var CertApp struct {
@@ -49,14 +61,15 @@ var CertApp struct {
 }
 
 var (
-	remoteLogServer    string
-	proxyPort          string
-	applications       map[string]string   // Maps hostname -> "IP:Port"
-	wafInstances       map[string]*waf.WAF // Maps hostname -> WAF instance
-	Apps               map[string]Application
-	application_config map[string]AppConfig
-	configLock         sync.RWMutex
-	appsLock           sync.RWMutex
+	remoteLogServer              string
+	proxyPort                    string
+	applications                 map[string]string   // Maps hostname -> "IP:Port"
+	wafInstances                 map[string]*waf.WAF // Maps hostname -> WAF instance
+	Apps                         map[string]Application
+	application_config           map[string]AppConfig
+	application_security_headers map[string][]SecurityHeader
+	configLock                   sync.RWMutex
+	appsLock                     sync.RWMutex
 )
 
 var WsKey string
@@ -147,6 +160,7 @@ func fetchApplications() error {
 	wafInstances = make(map[string]*waf.WAF)
 	Apps = make(map[string]Application)
 	application_config = make(map[string]AppConfig)
+	application_security_headers = make(map[string][]SecurityHeader)
 
 	appsLock.Unlock()
 
@@ -201,7 +215,7 @@ func fetchApplications() error {
 
 	for _, app := range Apps {
 		appConfigURL := fmt.Sprintf("http://%s:%s/config/get-app-config/%s", backendHost, backendPort, app.ApplicationID)
-
+		appSecurityHeaderURL := fmt.Sprintf("http://%s:%s/security-headers/%s", backendHost, backendPort, app.ApplicationID)
 		resp, err = http.Get(appConfigURL)
 
 		var appConfigResult struct {
@@ -211,7 +225,23 @@ func fetchApplications() error {
 		if err := json.NewDecoder(resp.Body).Decode(&appConfigResult); err != nil {
 			return fmt.Errorf("failed to decode config: %v", err)
 		}
+
 		application_config[app.Hostname] = appConfigResult.AppConfig
+
+		securityResp, err := http.Get(appSecurityHeaderURL)
+		if err != nil {
+			return fmt.Errorf("failed to fetch security headers for %s: %v", app.ApplicationID, err)
+		}
+		defer securityResp.Body.Close()
+
+		var securityHeadersResult struct {
+			Headers []SecurityHeader `json:"security_headers"`
+		}
+
+		if err := json.NewDecoder(securityResp.Body).Decode(&securityHeadersResult); err != nil {
+			return fmt.Errorf("failed to decode security headers: %v", err)
+		}
+		application_security_headers[app.Hostname] = securityHeadersResult.Headers
 
 	}
 

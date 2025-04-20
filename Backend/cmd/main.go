@@ -1,10 +1,10 @@
 package main
 
 import (
+	"backend/internal/background"
 	"backend/internal/config"
 	"backend/internal/routes"
 	"backend/internal/utils"
-	"backend/internal/background"
 	"fmt"
 	"log"
 

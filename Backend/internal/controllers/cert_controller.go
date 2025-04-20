@@ -84,6 +84,8 @@ func AddCert(c *gin.Context) {
 		return
 	}
 
+	config.Change = true
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Certificate uploaded successfully",
 		"cert_id": newCert.CertID,
@@ -169,6 +171,8 @@ func UpdateCert(c *gin.Context) {
 		return
 	}
 
+	config.Change = true
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": fmt.Sprintf("%s file updated successfully", fileType),
 		"cert_id": cert.CertID,
@@ -197,6 +201,8 @@ func DeleteCert(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete certificate from database"})
 		return
 	}
+
+	config.Change = true
 
 	c.JSON(http.StatusOK, gin.H{"message": "Certificate deleted successfully"})
 }

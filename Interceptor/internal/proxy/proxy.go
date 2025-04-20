@@ -2,10 +2,13 @@ package proxy
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
+	"encoding/hex"
 	"fmt"
 	"interceptor/internal/error_page"
 	"interceptor/internal/logger"
+	"interceptor/internal/utils"
 	"io"
 	"log"
 	"net/http"
@@ -26,6 +29,11 @@ var (
 	limiterLock     sync.Mutex
 )
 
+func hashSHA256(input string) string {
+	hash := sha256.Sum256([]byte(input))
+	return hex.EncodeToString(hash[:])
+}
+
 // getTargetRedirectIP gets the backend target URL based on request hostname
 func getTargetRedirectIP(hostname string) (string, bool) {
 	appsLock.RLock()
@@ -44,11 +52,12 @@ func getLimiter(ip string, hostname string) *rate.Limiter {
 	}
 
 	configLock.RLock()
-	fmt.Printf("Rate Limit: %d, Window Size: %d\n", application_config[hostname].RateLimit, application_config[hostname].WindowSize)
 
 	limiter := rate.NewLimiter(rate.Limit(application_config[hostname].RateLimit), application_config[hostname].WindowSize)
 	configLock.RUnlock()
 	ipRateLimiters[ip] = limiter
+
+	fmt.Println(hostname)
 
 	// Optional: clean up old entries periodically (could use a background go routine)
 	go func() {
@@ -59,38 +68,6 @@ func getLimiter(ip string, hostname string) *rate.Limiter {
 	}()
 
 	return limiter
-}
-
-func StartInterceptor(w http.ResponseWriter, r *http.Request) {
-	maintenanceLock.Lock()
-	maintenanceMode = false
-	maintenanceLock.Unlock()
-	fmt.Println("Starting interceptor")
-	w.WriteHeader(http.StatusOK)
-}
-
-func StopInterceptor(w http.ResponseWriter, r *http.Request) {
-	maintenanceLock.Lock()
-	maintenanceMode = true
-	maintenanceLock.Unlock()
-	fmt.Println("Stopping interceptor")
-	w.WriteHeader(http.StatusOK)
-}
-
-func RestartInterceptor(w http.ResponseWriter, r *http.Request) {
-	if err := fetchConfig(); err != nil {
-		log.Fatalf("Error fetching config: %v", err)
-	}
-
-	if err := fetchApplications(); err != nil {
-		log.Fatalf("Error fetching applications: %v", err)
-	}
-	err := InitializeWebSocket()
-	if err != nil {
-		log.Fatalf("Failed to initialize WebSocket: %v", err)
-	}
-	defer CloseWebSocket()
-	fmt.Println("Restarting interceptor")
 }
 
 // proxyRequest handles incoming requests and forwards them to the correct backend server
@@ -120,22 +97,20 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	if !limiter.Allow() {
 		// Respond with a 429 status code if the rate limit is exceeded
 		message := MessageModel{
-			ApplicationName:  r.Host,
-			ClientIP:         r.RemoteAddr,
-			RequestMethod:    r.Method,
-			RequestURL:       r.URL.String(),
-			Headers:          fmt.Sprintf("%v", r.Header),
-			ResponseCode:     http.StatusTooManyRequests,
-			Status:           "blocked",
-			MatchedRules:     "Rate Limit Exceeded",
-			ThreatDetected:   true,
-			ThreatType:       "Rate Limit Exceeded",
-			ActionTaken:      "Rate Limit Exceeded",
-			BotDetected:      false, // TODO Implement bot detection logic
-			GeoLocation:      "Unknown",
-			RateLimited:      true, // TODO Implement rate limiting logic
-			UserAgent:        r.UserAgent(),
-			AIAnalysisResult: "", // TODO Replace with actual AI analysis results
+			ApplicationName: r.Host,
+			ClientIP:        r.RemoteAddr,
+			RequestMethod:   r.Method,
+			RequestURL:      r.URL.String(),
+			Headers:         fmt.Sprintf("%v", r.Header),
+			ResponseCode:    http.StatusTooManyRequests,
+			Status:          "blocked",
+			ThreatDetected:  true,
+			ThreatType:      "Rate Limit Exceeded",
+			BotDetected:     false, // TODO Implement bot detection logic
+			GeoLocation:     "Unknown",
+			RateLimited:     true,
+			UserAgent:       r.UserAgent(),
+			Body:            "",
 		}
 		message.Token = WsKey
 		SendToBackend(message)
@@ -143,7 +118,10 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	request_body_size := utils.GetRequestBodySizeMB(r)
+
 	hostname := r.Host
+
 	targetRedirectIP, exists := getTargetRedirectIP(hostname)
 	if r.TLS != nil {
 		targetRedirectIP = "http://" + targetRedirectIP
@@ -163,25 +141,30 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Evaluate the request using the appropriate WAF instance
-	blockedByRule, ruleID, ruleMessage, action, status := wafInstance.EvaluateRules(r)
+	blockedByRule, ruleID, ruleMessage, action, status, body := wafInstance.EvaluateRules(r)
 
 	message := MessageModel{
-		ApplicationName:  hostname,
-		ClientIP:         r.RemoteAddr,
-		RequestMethod:    r.Method,
-		RequestURL:       r.URL.String(),
-		Headers:          fmt.Sprintf("%v", r.Header),
-		ResponseCode:     http.StatusOK,
-		Status:           fmt.Sprintf("%d", status),
-		MatchedRules:     ruleMessage,
-		ThreatDetected:   blockedByRule,
-		ThreatType:       "", // TODO Replace with actual threat detection logic
-		ActionTaken:      action,
-		BotDetected:      false, // TODO Implement bot detection logic
-		GeoLocation:      "Unknown",
-		RateLimited:      false, // TODO Implement rate limiting logic
-		UserAgent:        r.UserAgent(),
-		AIAnalysisResult: "", // TODO Replace with actual AI analysis results
+		ApplicationName: hostname,
+		ClientIP:        r.RemoteAddr,
+		RequestMethod:   r.Method,
+		RequestURL:      r.URL.String(),
+		Headers:         fmt.Sprintf("%v", r.Header),
+		ResponseCode:    http.StatusOK,
+		Status:          fmt.Sprintf("%d", status),
+		ThreatDetected:  blockedByRule,
+		ThreatType:      ruleMessage,
+		BotDetected:     false, // TODO Implement bot detection logic
+		GeoLocation:     "Unknown",
+		RateLimited:     false,
+		UserAgent:       r.UserAgent(),
+		Body:            body,
+	}
+
+	if request_body_size >= application_config[hostname].MaxPostDataSize {
+		if blockedByRule {
+			message.Body = hashSHA256(body)
+		}
+		message.Body = ""
 	}
 
 	if blockedByRule {
@@ -234,6 +217,13 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 			w.Header().Add(name, value)
 		}
 	}
+
+	if headers, ok := application_security_headers[hostname]; ok {
+		for _, h := range headers {
+			w.Header().Set(h.HeaderName, h.HeaderValue)
+		}
+	}
+
 	w.WriteHeader(resp.StatusCode)
 	_, err = io.Copy(w, resp.Body)
 	if err != nil {
@@ -254,11 +244,10 @@ func Starter() {
 		log.Fatalf("Failed to fetch applications: %v", err)
 	}
 
-	err = InitializeWebSocket()
+	err = InitHttpHandler()
 	if err != nil {
-		log.Fatalf("Failed to initialize WebSocket: %v", err)
+		log.Fatalf("Failed to initialize Http Handler: %v", err)
 	}
-	defer CloseWebSocket()
 
 	if remoteLogServer != "" {
 		err = logger.InitializeLogger(remoteLogServer)

@@ -60,12 +60,14 @@ func AddSecurityHeader(c *gin.Context) {
 		return
 	}
 
+	config.Change = true
+
 	c.JSON(http.StatusCreated, gin.H{"message": "security header added successfully"})
 }
 
 // GetSecurityHeaders retrieves security headers based on user role and application
 func GetSecurityHeaders(c *gin.Context) {
-	applicationID := c.Query("application_id")
+	applicationID := c.Param("application_id")
 
 	var securityHeaders []models.SecurityHeader
 	query := config.DB.Model(&models.SecurityHeader{})
@@ -75,6 +77,7 @@ func GetSecurityHeaders(c *gin.Context) {
 		query = query.Where("application_id = ?", applicationID)
 	} else {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "parameter application_id is empty"})
+		return
 	}
 
 	if err := query.Find(&securityHeaders).Error; err != nil {
@@ -138,6 +141,8 @@ func UpdateSecurityHeader(c *gin.Context) {
 		return
 	}
 
+	config.Change = true
+
 	c.JSON(http.StatusOK, gin.H{"message": "security header updated successfully"})
 }
 
@@ -153,7 +158,6 @@ func DeleteSecurityHeader(c *gin.Context) {
 		return
 	}
 
-	
 	if userRole != "super_admin" {
 		var userToApp models.UserToApplication
 		if err := config.DB.Where("user_id = ? AND application_id = ?", userID, securityHeader.ApplicationID).First(&userToApp).Error; err != nil {
@@ -166,6 +170,8 @@ func DeleteSecurityHeader(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete security header"})
 		return
 	}
+
+	config.Change = true
 
 	c.JSON(http.StatusOK, gin.H{"message": "security header deleted successfully"})
 }

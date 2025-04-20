@@ -1,26 +1,21 @@
 package models
 
-import "time"
-
 // Request represents a log of a web request
 type Request struct {
-	RequestID        string    `json:"request_id" gorm:"primaryKey"`
-	ApplicationName  string    `json:"application_name"`
-	ClientIP         string    `json:"client_ip"`
-	RequestMethod    string    `json:"request_method"`
-	RequestURL       string    `json:"request_url"`
-	Headers          string    `json:"headers"`
-	Body             string    `json:"body"`
-	Timestamp        time.Time `json:"timestamp"`
-	ResponseCode     int       `json:"response_code"`
-	Status           string    `json:"status"`
-	MatchedRules     string    `json:"matched_rules"`
-	ThreatDetected   bool      `json:"threat_detected"`
-	ThreatType       string    `json:"threat_type"`
-	// ActionTaken      string    `json:"action_taken"`
-	BotDetected      bool      `json:"bot_detected"`
-	GeoLocation      string    `json:"geo_location"`
-	RateLimited      bool      `json:"rate_limited"`
-	UserAgent        string    `json:"user_agent"`
-	AIAnalysisResult string    `json:"ai_analysis_result"`
+	RequestID       string  `json:"request_id" gorm:"primaryKey"`
+	ApplicationName string  `json:"application_name" gorm:"not null"`
+	ClientIP        string  `json:"client_ip" gorm:"not null"`
+	RequestMethod   string  `json:"request_method" gorm:"not null"`
+	RequestURL      string  `json:"request_url" gorm:"not null"`
+	Headers         string  `json:"headers" gorm:"not null"`
+	Body            string  `json:"body" gorm:"not null"`
+	Timestamp       float64 `json:"timestamp" gorm:"not null"`
+	ResponseCode    int     `json:"response_code" gorm:"not null"`
+	Status          string  `json:"status" gorm:"not null"`
+	ThreatDetected  bool    `json:"threat_detected" gorm:"not null"`
+	ThreatType      string  `json:"threat_type" gorm:"not null"`
+	BotDetected     bool    `json:"bot_detected" gorm:"not null"`
+	GeoLocation     string  `json:"geo_location" gorm:"not null"`
+	RateLimited     bool    `json:"rate_limited" gorm:"not null"`
+	UserAgent       string  `json:"user_agent" gorm:"not null"`
 }
