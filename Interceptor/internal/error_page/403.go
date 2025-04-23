@@ -5,7 +5,6 @@ import (
 	"net/http"
 )
 
-// Send403Response sends a styled 403 Forbidden page with a custom message.
 func Send403Response(w http.ResponseWriter, RuleID int, RuleMessage string, Action string, Status int) {
 	w.WriteHeader(http.StatusForbidden)
 	w.Header().Set("Content-Type", "text/html")

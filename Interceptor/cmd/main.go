@@ -13,10 +13,13 @@ import (
 )
 
 type ChangeResponse struct {
-	Change bool `json:"change"`
+	Change  bool `json:"change"`
+	Running bool `json:"running"`
 }
 
-func checkForChange() bool {
+var changed bool
+
+func checkForChange() (bool, bool) {
 
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: No .env file found, falling back to environment variables")
@@ -26,32 +29,31 @@ func checkForChange() bool {
 
 	backendPort := os.Getenv("BACKENDPORT")
 
-	changeURL := "http://" + backendHost + ":" + backendPort + "/change"
+	changeURL := "http://" + backendHost + ":" + backendPort + "/interceptor/is-running"
 
 	resp, err := http.Get(changeURL)
 	if err != nil {
 		log.Printf("Error checking for change: %v", err)
-		return false
+		return true, false
 	}
 	defer resp.Body.Close()
 
 	var changeResp ChangeResponse
 	if err := json.NewDecoder(resp.Body).Decode(&changeResp); err != nil {
 		log.Printf("Failed to decode change response: %v", err)
-		return false
+		return true, false
 	}
-	return changeResp.Change
+	return changeResp.Running, changeResp.Change
 }
 
 func main() {
 	go func() {
 		for {
-			time.Sleep(5 * time.Minute)
-			changed := checkForChange()
+			time.Sleep(1 * time.Minute)
+			proxy.MaintenanceMode, changed = checkForChange()
 			if changed {
 				log.Println("Change detected. Restarting proxy...")
 
-				// Restart the proxy by spawning new process
 				cmd := exec.Command("go", "run", "./cmd")
 				cmd.Stdout = os.Stdout
 				cmd.Stderr = os.Stderr
@@ -62,11 +64,10 @@ func main() {
 				}
 
 				log.Println("New proxy process started with PID:", cmd.Process.Pid)
-				os.Exit(0) // kill this one
+				os.Exit(0)
 			}
 		}
 	}()
 
-	// Continue normal proxy startup
 	proxy.Starter()
 }

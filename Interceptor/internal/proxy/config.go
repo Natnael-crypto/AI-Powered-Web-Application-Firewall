@@ -57,14 +57,14 @@ type Cert struct {
 
 var CertApp struct {
 	Certs []Cert     `json:"certs"`
-	mu    sync.Mutex // Ensures thread safety when modifying Certs
+	mu    sync.Mutex 
 }
 
 var (
 	remoteLogServer              string
 	proxyPort                    string
-	applications                 map[string]string   // Maps hostname -> "IP:Port"
-	wafInstances                 map[string]*waf.WAF // Maps hostname -> WAF instance
+	applications                 map[string]string   
+	wafInstances                 map[string]*waf.WAF
 	Apps                         map[string]Application
 	application_config           map[string]AppConfig
 	application_security_headers map[string][]SecurityHeader
@@ -74,7 +74,6 @@ var (
 
 var WsKey string
 
-// fetchConfig retrieves the configuration from the remote API
 func fetchConfig() error {
 
 	if err := godotenv.Load(); err != nil {
@@ -123,7 +122,6 @@ func fetchConfig() error {
 	return nil
 }
 
-// fetchApplications retrieves the list of applications and updates the hostname mapping
 func fetchApplications() error {
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: No .env file found, falling back to environment variables")

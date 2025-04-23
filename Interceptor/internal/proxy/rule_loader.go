@@ -8,7 +8,6 @@ import (
 	"os"
 )
 
-// Rule struct to map the rule data from the API response
 type Rule struct {
 	RuleID         string `json:"rule_id"`
 	RuleType       string `json:"rule_type"`
@@ -24,14 +23,11 @@ type Rule struct {
 	Category       string `json:"category"`
 }
 
-// RulesResponse struct to map the API response
 type RulesResponse struct {
 	Rules []Rule `json:"rules"`
 }
 
-// FetchRules function to make the API call and fetch rules for a given application ID
 func FetchRules(applicationID string) (*RulesResponse, error) {
-	// Get the backend host and port from environment variables
 	backendHost := os.Getenv("BACKENDHOST")
 	if backendHost == "" {
 		return nil, fmt.Errorf("BACKENDHOST environment variable is not set")
@@ -42,23 +38,19 @@ func FetchRules(applicationID string) (*RulesResponse, error) {
 		return nil, fmt.Errorf("BACKENDPORT environment variable is not set")
 	}
 
-	// Construct the URL
 	url := fmt.Sprintf("http://%s:%s/rule/%s",backendHost,backendPort, applicationID)
 
-	// Make the GET request
-	resp, err := http.Get(url) // #nosec G107 -- The url is constructed from an untainted sourcce
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("error making GET request: %v", err)
 	}
 	defer resp.Body.Close()
 
-	// Read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %v", err)
 	}
 
-	// Parse the response body into the RulesResponse struct
 	var rulesResponse RulesResponse
 	err = json.Unmarshal(body, &rulesResponse)
 	if err != nil {
@@ -68,19 +60,15 @@ func FetchRules(applicationID string) (*RulesResponse, error) {
 	return &rulesResponse, nil
 }
 
-// WriteRuleToFile function to write the rule string to a file
 func WriteRuleToFile(applicationID string, rules []Rule) (string, error) {
-	// Create the filename based on application ID
 	fileName := fmt.Sprintf("%s.conf", applicationID)
 
-	// Open the file for writing
-	file, err := os.Create("./internal/config/custom/" + fileName) // #nosec G304 -- The file path comes from an untainted source
+	file, err := os.Create("./internal/config/custom/" + fileName)
 	if err != nil {
 		return "", fmt.Errorf("error creating file: %v", err)
 	}
 	defer file.Close()
 
-	// Write the rule strings to the file
 	for _, rule := range rules {
 		_, err := file.WriteString(rule.RuleString + "\n")
 		if err != nil {
@@ -88,6 +76,5 @@ func WriteRuleToFile(applicationID string, rules []Rule) (string, error) {
 		}
 	}
 
-	// Return the file name
 	return fileName, nil
 }

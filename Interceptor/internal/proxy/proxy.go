@@ -23,7 +23,7 @@ import (
 )
 
 var (
-	maintenanceMode bool
+	MaintenanceMode bool
 	maintenanceLock sync.RWMutex
 	ipRateLimiters  = make(map[string]*rate.Limiter)
 	limiterLock     sync.Mutex
@@ -34,7 +34,6 @@ func hashSHA256(input string) string {
 	return hex.EncodeToString(hash[:])
 }
 
-// getTargetRedirectIP gets the backend target URL based on request hostname
 func getTargetRedirectIP(hostname string) (string, bool) {
 	appsLock.RLock()
 	defer appsLock.RUnlock()
@@ -42,7 +41,6 @@ func getTargetRedirectIP(hostname string) (string, bool) {
 	return target, exists
 }
 
-// getLimiter retrieves or creates a new rate limiter for each client IP
 func getLimiter(ip string, hostname string) *rate.Limiter {
 	limiterLock.Lock()
 	defer limiterLock.Unlock()
@@ -59,7 +57,6 @@ func getLimiter(ip string, hostname string) *rate.Limiter {
 
 	fmt.Println(hostname)
 
-	// Optional: clean up old entries periodically (could use a background go routine)
 	go func() {
 		time.Sleep(5 * time.Minute)
 		limiterLock.Lock()
@@ -70,10 +67,9 @@ func getLimiter(ip string, hostname string) *rate.Limiter {
 	return limiter
 }
 
-// proxyRequest handles incoming requests and forwards them to the correct backend server
 func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	maintenanceLock.RLock()
-	if maintenanceMode {
+	if MaintenanceMode {
 		maintenanceLock.RUnlock()
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusServiceUnavailable)
@@ -89,13 +85,11 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Apply rate limiting here
 	ip := r.RemoteAddr
 	ip = strings.Split(ip, ":")[0]
-	limiter := getLimiter(ip, r.Host)
+	limiter := getLimiter(ip, r.Host) // TODO check the rate limiting
 
 	if !limiter.Allow() {
-		// Respond with a 429 status code if the rate limit is exceeded
 		message := MessageModel{
 			ApplicationName: r.Host,
 			ClientIP:        r.RemoteAddr,
@@ -123,7 +117,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	hostname := r.Host
 
 	targetRedirectIP, exists := getTargetRedirectIP(hostname)
-	if r.TLS != nil {
+	if r.TLS != nil { // TODO targetRedirectIP = "https://" + targetRedirectIP
 		targetRedirectIP = "http://" + targetRedirectIP
 	} else {
 		targetRedirectIP = "http://" + targetRedirectIP
@@ -133,14 +127,12 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Retrieve the WAF instance for the application based on the hostname
 	wafInstance, exists := wafInstances[hostname]
 	if !exists {
 		http.Error(w, "WAF instance not found for the application", http.StatusInternalServerError)
 		return
 	}
 
-	// Evaluate the request using the appropriate WAF instance
 	blockedByRule, ruleID, ruleMessage, action, status, body := wafInstance.EvaluateRules(r)
 
 	message := MessageModel{
@@ -174,13 +166,12 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		message.Status = "blocked"
 		message.Token = WsKey
 
-		SendToBackend(message) // Send log to backend
+		SendToBackend(message)
 		return
 	}
 
 	logger.LogRequest(r, "allow", "")
 	message.Status = "allowed"
-	// Send log to backend
 
 	client := &http.Client{}
 	targetURL := fmt.Sprintf("%s%s", targetRedirectIP, r.URL.Path)
@@ -232,13 +223,11 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func Starter() {
-	// Load configuration
 	err := fetchConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// Fetch applications and configure proxy
 	err = fetchApplications()
 	if err != nil {
 		log.Fatalf("Failed to fetch applications: %v", err)
@@ -262,7 +251,6 @@ func Starter() {
 		Handler: http.HandlerFunc(proxyRequest),
 	}
 
-	// Load TLS certificates into a map
 	certMap := make(map[string]tls.Certificate)
 	CertApp.mu.Lock()
 	for _, cert := range CertApp.Certs {
@@ -277,14 +265,13 @@ func Starter() {
 	}
 	CertApp.mu.Unlock()
 
-	// Custom certificate selection function
 	getCertificate := func(chi *tls.ClientHelloInfo) (*tls.Certificate, error) {
 		if cert, exists := certMap[chi.ServerName]; exists {
 			return &cert, nil
 		}
 		log.Printf("No certificate found for %s, serving default certificate", chi.ServerName)
 		for _, cert := range certMap {
-			return &cert, nil // Return the first available cert as a fallback
+			return &cert, nil
 		}
 		return nil, fmt.Errorf("no valid certificate found")
 	}
@@ -302,7 +289,6 @@ func Starter() {
 		Handler: http.HandlerFunc(proxyRequest),
 	}
 
-	// Start HTTP and HTTPS servers concurrently
 	go func() {
 		log.Printf("Starting HTTP server on port %s", proxyPort)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -317,7 +303,6 @@ func Starter() {
 		}
 	}()
 
-	// Graceful shutdown handling
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 

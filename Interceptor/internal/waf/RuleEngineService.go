@@ -11,12 +11,10 @@ import (
 	"github.com/corazawaf/coraza/v3"
 )
 
-// WAF structure to hold Coraza WAF instance
 type WAF struct {
-	engine coraza.WAF // Directly store coraza.WAF instead of a pointer
+	engine coraza.WAF 
 }
 
-// InitializeRuleEngine initializes a new WAF instance with custom rules
 func InitializeRuleEngine(customRule string) (*WAF, error) {
 	cfg := coraza.NewWAFConfig().
 		WithDirectivesFromFile("./internal/config/crs-setup.conf").
@@ -28,12 +26,11 @@ func InitializeRuleEngine(customRule string) (*WAF, error) {
 		return nil, fmt.Errorf("failed to initialize WAF: %v", err)
 	}
 
-	return &WAF{engine: engine}, nil // Wrap it in a struct
+	return &WAF{engine: engine}, nil
 }
 
-// EvaluateRules processes incoming requests and applies WAF rules
 func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int, string) {
-	tx := w.engine.NewTransaction() // Correct usage
+	tx := w.engine.NewTransaction()
 	defer tx.Close()
 
 	for name, values := range r.Header {

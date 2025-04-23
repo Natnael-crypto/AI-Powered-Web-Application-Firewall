@@ -14,17 +14,14 @@ var (
 	syslogWriter *srslog.Writer
 )
 
-// InitializeLogger initializes both file and Syslog logging
 func InitializeLogger(syslogAddr string) error {
 	var err error
 
-	// Open local file for logging
 	logFile, err = os.OpenFile("waf.log", os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to initialize file logger: %v", err)
 	}
 
-	// Initialize Syslog writer
 	syslogWriter, err = srslog.Dial("udp", syslogAddr, srslog.LOG_INFO, "WAF")
 	fmt.Print(syslogAddr)
 	if err != nil {
@@ -35,13 +32,10 @@ func InitializeLogger(syslogAddr string) error {
 	return nil
 }
 
-// LogRequest logs HTTP requests to both Syslog and a local file
 func LogRequest(r *http.Request, decision, reason string) {
-	// Format log message
 	message := fmt.Sprintf("Method: %s, URL: %s, Decision: %s, Reason: %s",
 		r.Method, r.URL.String(), decision, reason)
 
-	// Log to Syslog
 	if syslogWriter != nil {
 		err := syslogWriter.Info(message)
 		if err != nil {
@@ -51,7 +45,6 @@ func LogRequest(r *http.Request, decision, reason string) {
 		log.Println("Syslog writer not initialized. Skipping Syslog logging.")
 	}
 
-	// Log to local file
 	if logFile != nil {
 		log.SetOutput(logFile)
 		log.Println(message)
@@ -60,7 +53,6 @@ func LogRequest(r *http.Request, decision, reason string) {
 	}
 }
 
-// CloseLogger closes the file and Syslog connections
 func CloseLogger() {
 	if logFile != nil {
 		err := logFile.Close()

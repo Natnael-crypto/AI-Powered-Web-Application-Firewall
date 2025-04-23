@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-// ParseRequest extracts metadata from an HTTP request
 func ParseRequest(r *http.Request) map[string]string {
 	metadata := make(map[string]string)
 	metadata["Method"] = r.Method
@@ -16,7 +15,6 @@ func ParseRequest(r *http.Request) map[string]string {
 	return metadata
 }
 
-// parseRequestBody extracts and parses the request body
 func parseRequestBody(r *http.Request) string {
 	body, _ := io.ReadAll(r.Body)
 	defer r.Body.Close()

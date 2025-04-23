@@ -39,7 +39,6 @@ var (
 )
 
 func InitHttpHandler() error {
-	// Read backend host and port once
 	backendHost := os.Getenv("BACKENDHOST")
 	if backendHost == "" {
 		return fmt.Errorf("BACKENDHOST environment variable is not set")
@@ -55,7 +54,6 @@ func InitHttpHandler() error {
 	return nil
 }
 
-// SendToBackend queues the message for batched delivery
 func SendToBackend(message MessageModel) {
 	queueMutex.Lock()
 	messageQueue = append(messageQueue, message)
@@ -67,7 +65,6 @@ func SendToBackend(message MessageModel) {
 	}
 }
 
-// flushQueue sends the current queue to the backend and clears it
 func flushQueue() {
 	queueMutex.Lock()
 	batch := messageQueue
@@ -101,7 +98,6 @@ func flushQueue() {
 	log.Printf("Batch sent to backend, status: %s", resp.Status)
 }
 
-// startBatchSender runs a ticker that flushes the queue every 60s
 func startBatchSender() {
 	ticker := time.NewTicker(sendInterval)
 	defer ticker.Stop()
