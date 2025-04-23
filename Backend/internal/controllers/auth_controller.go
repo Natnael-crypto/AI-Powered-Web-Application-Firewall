@@ -73,10 +73,8 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	// Update last login time using Updates with WHERE condition on UserID
 	user.LastLogin = time.Now()
 
-	// Ensure the correct user is updated by including the WHERE condition
 	if err := config.DB.Model(&user).Where("user_id = ?", user.UserID).Updates(map[string]interface{}{
 		"last_login": user.LastLogin,
 		"updated_at": time.Now(),
@@ -86,7 +84,6 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	// Generate JWT token
 	token, err := utils.GenerateJWT(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})

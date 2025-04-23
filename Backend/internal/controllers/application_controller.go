@@ -13,7 +13,6 @@ import (
 )
 
 func AddApplication(c *gin.Context) {
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
@@ -35,7 +34,6 @@ func AddApplication(c *gin.Context) {
 		return
 	}
 
-	// Check if the application name or hostname already exists
 	var existingApp models.Application
 	if err := config.DB.Where("application_name = ?", input.ApplicationName).First(&existingApp).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "application name already exists"})
@@ -47,7 +45,6 @@ func AddApplication(c *gin.Context) {
 		return
 	}
 
-	// Create the new application
 	application := models.Application{
 		ApplicationID:   utils.GenerateUUID(),
 		ApplicationName: input.ApplicationName,
@@ -61,7 +58,6 @@ func AddApplication(c *gin.Context) {
 		UpdatedAt:       time.Now(),
 	}
 
-	// Save the application to the PostgreSQL database
 	if err := config.DB.Create(&application).Error; err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "failed to create application"})
 		return
@@ -87,9 +83,7 @@ func AddApplication(c *gin.Context) {
 
 }
 
-// GetApplication retrieves a specific application by ID
 func GetApplication(c *gin.Context) {
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
@@ -106,7 +100,6 @@ func GetApplication(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"application": application})
 }
 
-// GetAllApplications retrieves all applications
 func GetAllApplications(c *gin.Context) {
 
 	var applications []models.Application
@@ -118,9 +111,7 @@ func GetAllApplications(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"applications": applications})
 }
 
-// UpdateApplication updates an existing application
 func UpdateApplication(c *gin.Context) {
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
@@ -138,9 +129,7 @@ func UpdateApplication(c *gin.Context) {
 
 	applicationID := c.Param("application_id")
 
-	// Check if the request body is empty
 	if err := c.ShouldBindJSON(&input); err != nil {
-		// Log the error for debugging purposes
 		log.Printf("Error binding JSON for application update: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format"})
 		return
@@ -152,7 +141,6 @@ func UpdateApplication(c *gin.Context) {
 		return
 	}
 
-	// Update fields in the application struct
 	application.ApplicationName = input.ApplicationName
 	application.Description = input.Description
 	application.HostName = input.HostName
@@ -162,7 +150,6 @@ func UpdateApplication(c *gin.Context) {
 	application.Tls = input.Tls
 	application.UpdatedAt = time.Now()
 
-	// Explicitly update the application using WHERE condition
 	if err := config.DB.Model(&application).Where("application_id = ?", applicationID).Updates(map[string]interface{}{
 		"application_name": application.ApplicationName,
 		"description":      application.Description,
@@ -173,7 +160,6 @@ func UpdateApplication(c *gin.Context) {
 		"tls":              application.Tls,
 		"updated_at":       application.UpdatedAt,
 	}).Error; err != nil {
-		// Log the error for debugging purposes
 		log.Printf("Error updating application: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update application"})
 		return
@@ -182,9 +168,7 @@ func UpdateApplication(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "application updated successfully"})
 }
 
-// DeleteApplication deletes an application by ID
 func DeleteApplication(c *gin.Context) {
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return

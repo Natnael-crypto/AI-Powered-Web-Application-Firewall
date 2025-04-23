@@ -8,7 +8,7 @@ type Conf struct {
 
 type AppConf struct {
 	ID              string  `json:"id" gorm:"primaryKey"`
-	ApplicationID   string  `json:"application_id" gorm:"unique;not null"` // One-to-one with Application
+	ApplicationID   string  `json:"application_id" gorm:"unique;not null"`
 	RateLimit       int     `json:"rate_limit" binding:"default=50"`
 	WindowSize      int     `json:"window_size" binding:"default=10"`
 	DetectBot       bool    `json:"detect_bot" binding:"default=false"`

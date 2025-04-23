@@ -11,7 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// GetConfig retrieves a configuration by ID
 func GetConfig(c *gin.Context) {
 	var conf models.Conf
 	if err := config.DB.First(&conf).Error; err != nil {
@@ -37,7 +36,6 @@ func GetAppConfig(c *gin.Context) {
 
 func CreateAppConfig(c *gin.Context) {
 
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
@@ -99,10 +97,8 @@ func CreateAppConfigLocal(conf models.AppConf) error {
 	return nil
 }
 
-// CreateConfig handles the creation of a new config entry
 func CreateConfig(c *gin.Context) {
 
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
@@ -118,14 +114,12 @@ func CreateConfig(c *gin.Context) {
 		return
 	}
 
-	// Check if a config entry already exists
 	var existingConfig models.Conf
 	if err := config.DB.First(&existingConfig).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "A configuration entry already exists"})
 		return
 	}
 
-	// Create a new config entry
 	newConf := models.Conf{
 		ID:              uuid.New().String(),
 		ListeningPort:   input.ListeningPort,
@@ -140,7 +134,6 @@ func CreateConfig(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Configuration created successfully", "config": newConf})
 }
 
-// UpdateConfig updates an existing configuration
 func UpdateListeningPort(c *gin.Context) {
 
 	if c.GetString("role") != "super_admin" {
@@ -153,7 +146,6 @@ func UpdateListeningPort(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		// Log the error for debugging purposes
 		log.Printf("Error binding JSON for application update: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format"})
 		return
@@ -256,7 +248,6 @@ func UpdateRemoteLogServer(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		// Log the error for debugging purposes
 		log.Printf("Error binding JSON for application update: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format"})
 		return

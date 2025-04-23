@@ -15,8 +15,7 @@ import (
 
 func generateRuleID() string {
 	rand.Seed(time.Now().UnixNano())
-	// Generate a random 19-digit number (within int64 limits)
-	number := rand.Int63n(1000000000000000000) // 19 digits
+	number := rand.Int63n(1000000000000000000)
 	return strconv.FormatInt(number, 10)
 }
 
@@ -36,20 +35,17 @@ func AddRule(c *gin.Context) {
 
 	var input models.RuleInput
 
-	// Parse the input
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Check if the application exists
 	var app models.Application
 	if err := config.DB.Where("application_id = ?", input.ApplicationID).First(&app).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
 		return
 	}
 
-	// Check if the user has permission
 	userRole := c.GetString("role")
 	userID := c.GetString("user_id")
 	if userRole != "super_admin" {
@@ -60,18 +56,15 @@ func AddRule(c *gin.Context) {
 		}
 	}
 
-	// Generate RuleID
 	ruleID := generateRuleID()
-	input.RuleID = ruleID // assign to input for rule generator
+	input.RuleID = ruleID
 
-	// Generate Rule String
 	ruleString, err := utils.GenerateRule(input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate rule"})
 		return
 	}
 
-	// Save the rule
 	rule := models.Rule{
 		RuleID:         ruleID,
 		RuleDefinition: marshalConditions(input.Conditions),
@@ -96,7 +89,6 @@ func AddRule(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "rule added successfully", "rule": rule})
 }
 
-// GetRules fetches all rules for a given application
 func GetRules(c *gin.Context) {
 
 	applicationID := c.Param("application_id")
@@ -130,7 +122,6 @@ func UpdateRule(c *gin.Context) {
 		return
 	}
 
-	// Regenerate the rule string
 	input.RuleID = ruleID
 	ruleString, err := utils.GenerateRule(input)
 	if err != nil {
@@ -138,7 +129,6 @@ func UpdateRule(c *gin.Context) {
 		return
 	}
 
-	// Update rule fields
 	rule.RuleDefinition = marshalConditions(input.Conditions)
 	rule.Action = input.Action
 	rule.IsActive = input.IsActive
@@ -158,7 +148,6 @@ func UpdateRule(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "rule updated successfully", "rule": rule})
 }
 
-// DeleteRule deletes a rule by its ID
 func DeleteRule(c *gin.Context) {
 
 	if c.GetString("role") != "super_admin" {
@@ -199,7 +188,6 @@ var validActions = map[string]bool{
 }
 
 func GetRuleMetadata(c *gin.Context) {
-	// Convert maps to string slices
 	actions := make([]string, 0, len(validActions))
 	for k := range validActions {
 		actions = append(actions, k)

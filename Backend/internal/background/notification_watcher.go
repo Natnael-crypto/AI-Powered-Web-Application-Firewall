@@ -71,7 +71,6 @@ func shouldTriggerNotification(rule models.NotificationRule) (map[string]int64, 
 	for _, res := range results {
 		threat := strings.ToLower(res.ThreatType)
 
-		// Check if threat matches rule's ThreatType
 		if ruleThreat == "*" || strings.Contains(threat, ruleThreat) {
 			totalCount += res.Count
 
@@ -79,7 +78,6 @@ func shouldTriggerNotification(rule models.NotificationRule) (map[string]int64, 
 				triggeredIPs[res.IPAddress] += res.Count
 			}
 
-			// Collect all matched threats (optional usage)
 			if !contains(matchingThreats, threat) {
 				matchingThreats = append(matchingThreats, threat)
 			}
@@ -101,7 +99,6 @@ func contains(slice []string, item string) bool {
 func createNotification(rule models.NotificationRule, message string) {
 	var userIDs []string
 
-	// Unmarshal JSON array of user IDs
 	if err := json.Unmarshal(rule.UsersID, &userIDs); err != nil {
 		log.Printf("Error decoding user IDs for rule %s: %v", rule.Name, err)
 		return
@@ -113,7 +110,7 @@ func createNotification(rule models.NotificationRule, message string) {
 			UserID:         userID,
 			Message:        message,
 			Timestamp:      time.Now(),
-			Status:         false, // false = unread
+			Status:         false,
 		}
 
 		if err := config.DB.Create(&notification).Error; err != nil {
@@ -126,7 +123,6 @@ func sendEmail(rule models.NotificationRule, message string) {
 
 	var userIDs []string
 
-	// Unmarshal JSON array of user IDs
 	if err := json.Unmarshal(rule.UsersID, &userIDs); err != nil {
 		log.Printf("Error decoding user IDs for rule %s: %v", rule.Name, err)
 		return

@@ -35,7 +35,6 @@ func safeBool(val interface{}) bool {
 	return false
 }
 
-// HandleBatchRequests handles batched logs from interceptor via HTTP/2
 func HandleBatchRequests(c *gin.Context) {
 	var rawRequests []map[string]interface{}
 
@@ -48,7 +47,6 @@ func HandleBatchRequests(c *gin.Context) {
 	var requests []models.Request
 
 	for _, requestData := range rawRequests {
-		// Validate token
 		token, ok := requestData["token"].(string)
 		if !ok || token != config.WsKey {
 			log.Println("Unauthorized or missing token in batch item")
@@ -87,7 +85,6 @@ func HandleBatchRequests(c *gin.Context) {
 		requests = append(requests, request)
 	}
 
-	// Perform bulk insert
 	if len(requests) > 0 {
 		if err := config.DB.Create(&requests).Error; err != nil {
 			log.Printf("Bulk DB insert error: %v", err)

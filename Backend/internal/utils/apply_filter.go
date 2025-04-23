@@ -11,14 +11,12 @@ import (
 )
 
 func ApplyRequestFilters(c *gin.Context) *gorm.DB {
-	// Initialize query
 	query := config.DB.Model(&models.Request{})
 
 	userRole := c.GetString("role")
 	userID := c.GetString("user_id")
 	var allowedApps []string
 
-	// 🔹 Role-based Application Filtering
 	if userRole != "super_admin" {
 		var userApps []models.UserToApplication
 		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
@@ -34,7 +32,6 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 		}
 	}
 
-	// 🔹 Handle application_name filter
 	if appFilter := c.QueryArray("application_name"); len(appFilter) > 0 {
 		if userRole == "super_admin" {
 			query = query.Where("application_name IN ?", appFilter)
@@ -62,7 +59,6 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 		}
 	}
 
-	// 🔹 Additional Filtering
 	if clientIP := c.Query("client_ip"); clientIP != "" {
 		query = query.Where("client_ip ILIKE ?", "%"+clientIP+"%")
 	}
@@ -94,7 +90,6 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 		query = query.Where("rate_limited = ?", rateLimited)
 	}
 
-	// 🔹 Date Range Filtering with float-based UNIX timestamps
 	if startDate := c.Query("start_date"); startDate != "" {
 		startTs, err := strconv.ParseFloat(startDate, 64)
 		if err != nil {
@@ -110,7 +105,6 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 		query = query.Where("timestamp <= ?", endTs)
 	}
 
-	// 🔹 Specific Date with Time Filtering (expects float UNIX timestamps)
 	if date := c.Query("date"); date != "" {
 		if startTime := c.Query("start_time"); startTime != "" {
 			startTs, err := strconv.ParseFloat(startTime, 64)
@@ -128,7 +122,6 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 		}
 	}
 
-	// 🔹 Last X Hours Filtering (based on current UNIX time in float)
 	if lastHours := c.Query("last_hours"); lastHours != "" {
 		hours, err := strconv.Atoi(lastHours)
 		if err != nil {
@@ -139,7 +132,6 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 		query = query.Where("timestamp >= ?", past)
 	}
 
-	// 🔹 Full-Text Search
 	if searchQuery := c.Query("search"); searchQuery != "" {
 		query = query.Where("to_tsvector('english', headers || ' ' || body || ' ' || request_url) @@ plainto_tsquery(?)", searchQuery)
 	}

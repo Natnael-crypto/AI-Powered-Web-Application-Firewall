@@ -13,9 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// AddCert handles uploading a certificate and key file
 func AddCert(c *gin.Context) {
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient privileges"})
 		return
@@ -33,14 +31,12 @@ func AddCert(c *gin.Context) {
 		return
 	}
 
-	// Check if a certificate already exists for this application
 	var existingCert models.Cert
 	if err := config.DB.Where("application_id = ?", applicationID).First(&existingCert).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Certificate already exists for this application"})
 		return
 	}
 
-	// Parse files
 	certFile, _, err := c.Request.FormFile("cert")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get cert file"})
@@ -55,25 +51,22 @@ func AddCert(c *gin.Context) {
 	}
 	defer keyFile.Close()
 
-	// Read the contents of the cert file
 	certContent, err := io.ReadAll(certFile)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read cert file"})
 		return
 	}
 
-	// Read the contents of the key file
 	keyContent, err := io.ReadAll(keyFile)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read key file"})
 		return
 	}
 
-	// Save to DB (store the contents as BLOB)
 	newCert := models.Cert{
 		CertID:        uuid.New().String(),
-		Cert:          certContent, // Store cert content as BLOB
-		Key:           keyContent,  // Store key content as BLOB
+		Cert:          certContent,
+		Key:           keyContent,
 		ApplicationID: applicationID,
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
@@ -92,7 +85,6 @@ func AddCert(c *gin.Context) {
 	})
 }
 
-// GetCert retrieves a certificate or key file
 func GetCert(c *gin.Context) {
 	applicationID := c.Query("application_id")
 	fileType := c.Query("type")
@@ -110,12 +102,12 @@ func GetCert(c *gin.Context) {
 
 	var file []byte
 	if fileType == "key" {
-		file = cert.Key // No need to convert to string, since it's []byte
+		file = cert.Key
 	} else {
-		file = cert.Cert // No need to convert to string, since it's []byte
+		file = cert.Cert
 	}
 
-	c.Data(http.StatusOK, "application/octet-stream", file) // Pass []byte directly
+	c.Data(http.StatusOK, "application/octet-stream", file)
 }
 
 func UpdateCert(c *gin.Context) {
@@ -124,7 +116,7 @@ func UpdateCert(c *gin.Context) {
 		return
 	}
 	applicationID := c.Param("application_id")
-	fileType := c.PostForm("type") // Expected values: "cert" or "key"
+	fileType := c.PostForm("type")
 
 	if fileType != "cert" && fileType != "key" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid type. Must be 'cert' or 'key'"})
@@ -136,14 +128,12 @@ func UpdateCert(c *gin.Context) {
 		return
 	}
 
-	// Fetch the certificate record using ApplicationID
 	var cert models.Cert
 	if err := config.DB.Where("application_id = ?", applicationID).First(&cert).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Certificate not found for this application"})
 		return
 	}
 
-	// Get the uploaded file
 	file, _, err := c.Request.FormFile(fileType)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to get %s file", fileType)})
@@ -151,21 +141,18 @@ func UpdateCert(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Read the contents of the file into []byte
 	fileContent, err := io.ReadAll(file)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to read %s file", fileType)})
 		return
 	}
 
-	// Update the certificate content
 	if fileType == "cert" {
-		cert.Cert = fileContent // Store the certificate content as []byte
+		cert.Cert = fileContent
 	} else {
-		cert.Key = fileContent // Store the private key content as []byte
+		cert.Key = fileContent
 	}
 
-	// Update the database record
 	if err := config.DB.Save(&cert).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update certificate in database"})
 		return
@@ -180,7 +167,6 @@ func UpdateCert(c *gin.Context) {
 	})
 }
 
-// DeleteCert deletes a certificate
 func DeleteCert(c *gin.Context) {
 
 	if c.GetString("role") != "super_admin" {
@@ -196,7 +182,6 @@ func DeleteCert(c *gin.Context) {
 		return
 	}
 
-	// Delete from DB
 	if err := config.DB.Delete(&cert).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete certificate from database"})
 		return

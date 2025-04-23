@@ -1,7 +1,7 @@
 package config
 
 import (
-	"backend/internal/models" // Adjust the import path to where your models are located
+	"backend/internal/models"
 	"fmt"
 	"log"
 	"os"
@@ -14,14 +14,11 @@ import (
 
 var DB *gorm.DB
 
-// InitDB initializes the PostgreSQL database connection using GORM
 func InitDB() {
-	// Load environment variables from .env file
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: No .env file found, falling back to environment variables")
 	}
 
-	// Read database credentials from environment variables
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")
@@ -29,23 +26,19 @@ func InitDB() {
 	dbname := os.Getenv("DB_NAME")
 	sslmode := os.Getenv("DB_SSLMODE")
 
-	// Ensure required variables are set
 	if host == "" || port == "" || user == "" || password == "" || dbname == "" {
 		log.Fatalf("Missing required database environment variables")
 	}
 
-	// Construct the connection string
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		host, port, user, password, dbname, sslmode)
 
-	// Open the database connection using GORM
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to open database: %v", err)
 	}
 
-	// Verify the connection
 	sqlDB, err := DB.DB()
 	if err != nil {
 		log.Fatalf("Failed to get database object: %v", err)
@@ -56,7 +49,6 @@ func InitDB() {
 
 	log.Println("Successfully connected to PostgreSQL using GORM!")
 
-	// Run migrations to create the tables if they don't exist
 	err = DB.AutoMigrate(
 		&models.Application{},
 		&models.User{},
@@ -77,7 +69,6 @@ func InitDB() {
 
 	log.Println("Database migration completed successfully.")
 
-	// Create indexes to optimize queries
 
 	newConf := models.Conf{
 		ID:              uuid.New().String(),
@@ -101,7 +92,6 @@ func CreateConfigLocal(conf models.Conf) error {
 	return nil
 }
 
-// CloseDB closes the GORM database connection
 func CloseDB() {
 	if DB != nil {
 		sqlDB, err := DB.DB()

@@ -8,7 +8,6 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-// AuthRequired is a middleware to validate the JWT token
 func AuthRequired(c *gin.Context) {
 	tokenString := c.GetHeader("Authorization")
 	if tokenString == "" {
@@ -24,7 +23,6 @@ func AuthRequired(c *gin.Context) {
 		return
 	}
 
-	// You can set user info from token claims if needed
 	claims := token.Claims.(jwt.MapClaims)
 	c.Set("user_id", claims["user_id"])
 	c.Set("role", claims["role"])

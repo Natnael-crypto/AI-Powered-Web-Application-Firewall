@@ -34,7 +34,7 @@ type RuleCondition struct {
 }
 
 type RuleInput struct {
-	Conditions    []RuleCondition `json:"conditions" ` // list of conditions for chaining
+	Conditions    []RuleCondition `json:"conditions" `
 	Action        string          `json:"action" `
 	ApplicationID string          `json:"application_id" `
 	IsActive      bool            `json:"is_active" `

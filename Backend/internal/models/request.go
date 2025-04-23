@@ -1,6 +1,5 @@
 package models
 
-// Request represents a log of a web request
 type Request struct {
 	RequestID       string  `json:"request_id" gorm:"primaryKey"`
 	ApplicationName string  `json:"application_name" gorm:"not null"`

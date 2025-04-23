@@ -32,7 +32,6 @@ func GenerateRule(ruleData models.RuleInput) (string, error) {
 		"severity:2": true, "severity:3": true, "status:403": true,
 	}
 
-	// Validate actions
 	actionTokens := strings.Split(ruleData.Action, ",")
 	for _, token := range actionTokens {
 		t := strings.TrimSpace(token)
@@ -51,7 +50,6 @@ func GenerateRule(ruleData models.RuleInput) (string, error) {
 			return "", fmt.Errorf("invalid rule type '%s'", cond.RuleType)
 		}
 
-		// Only add "chain" if there's more than one condition
 		if i == 0 {
 			if len(ruleData.Conditions) > 1 {
 				ruleBuilder.WriteString(fmt.Sprintf(

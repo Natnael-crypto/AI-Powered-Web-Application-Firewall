@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-	// Initialize database
 	config.InitDB()
 	config.LoadConfig()
 	err := utils.LoadIPRanges("./internal/static/iptogeo.csv")
@@ -21,17 +20,13 @@ func main() {
 		return
 	}
 
-	// Start the notification watcher
 	background.StartNotificationWatcher()
 	log.Println("Notification watcher started")
 
-	// Initialize the Gin router
 	r := gin.Default()
 
-	// Initialize the routes
 	routes.InitializeRoutes(r)
 
-	// Start the server on port 8000
 	log.Printf("Starting server on port 8080")
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("Server failed to start: %v", err)

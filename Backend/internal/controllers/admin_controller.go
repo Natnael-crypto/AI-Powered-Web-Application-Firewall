@@ -12,7 +12,6 @@ import (
 )
 
 func AddAdmin(c *gin.Context) {
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
@@ -27,14 +26,12 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
-	// Check if the username already exists
 	var existingAdmin models.User
 	if err := config.DB.Where("username = ?", input.Username).First(&existingAdmin).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "username already exists"})
 		return
 	}
 
-	// Hash the password
 	hashedPassword, err := utils.HashPassword(input.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
@@ -60,7 +57,6 @@ func AddAdmin(c *gin.Context) {
 }
 
 func GetAdmin(c *gin.Context) {
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
@@ -74,13 +70,12 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	admin.PasswordHash = "" // Do not expose password hash
+	admin.PasswordHash = ""
 
 	c.JSON(http.StatusOK, gin.H{"admin": admin})
 }
 
 func GetAllAdmins(c *gin.Context) {
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
@@ -93,14 +88,13 @@ func GetAllAdmins(c *gin.Context) {
 	}
 
 	for i := range admins {
-		admins[i].PasswordHash = "" // Do not expose password hash
+		admins[i].PasswordHash = ""
 	}
 
 	c.JSON(http.StatusOK, gin.H{"admins": admins})
 }
 
 func UpdateAdmin(c *gin.Context) {
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
@@ -140,7 +134,6 @@ func UpdateAdmin(c *gin.Context) {
 
 	admin.UpdatedAt = time.Now()
 
-	// Use Updates with WHERE condition on admin.UserID
 	if err := config.DB.Model(&admin).Where("user_id = ?", admin.UserID).Updates(map[string]interface{}{
 		"password_hash": admin.PasswordHash,
 		"updated_at":    admin.UpdatedAt,
@@ -153,7 +146,6 @@ func UpdateAdmin(c *gin.Context) {
 }
 
 func DeleteAdmin(c *gin.Context) {
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
@@ -170,7 +162,6 @@ func DeleteAdmin(c *gin.Context) {
 }
 
 func InactiveAdmin(c *gin.Context) {
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
@@ -187,7 +178,6 @@ func InactiveAdmin(c *gin.Context) {
 }
 
 func ActiveAdmin(c *gin.Context) {
-	// Check if the user is a super admin
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return

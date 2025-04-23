@@ -7,10 +7,8 @@ import (
 )
 
 func ParseHeaders(input string) string {
-	// Regular expression to match keys and values in the format: Key:[Value]
 	re := regexp.MustCompile(`(\w[\w-]*):\[(.*?)\]`)
 
-	// Find all matches
 	matches := re.FindAllStringSubmatch(input, -1)
 
 	var headers []string

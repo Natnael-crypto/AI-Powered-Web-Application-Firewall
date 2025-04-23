@@ -2,7 +2,6 @@ package models
 
 import "time"
 
-// Application represents the structure of an application in the system.
 type Application struct {
 	ApplicationID   string    `json:"application_id" gorm:"primaryKey"`
 	ApplicationName string    `json:"application_name"`
@@ -26,6 +25,6 @@ type Application struct {
 type UserToApplication struct {
 	ID              string `json:"id" gorm:"primaryKey"`
 	UserID          string `json:"user_id" gorm:"unique;not null;index"`
-	ApplicationID   string `json:"application_id" gorm:"not null"` // Foreign key back to Application
+	ApplicationID   string `json:"application_id" gorm:"not null"`
 	ApplicationName string `json:"application_name"`
 }

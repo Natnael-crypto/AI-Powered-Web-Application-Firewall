@@ -11,7 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GenerateRequestsCSV handles the generation and download of requests data as a CSV file
 func GenerateRequestsCSV(c *gin.Context) {
 
 	var requests []models.Request
@@ -26,20 +25,16 @@ func GenerateRequestsCSV(c *gin.Context) {
 		return
 	}
 
-	// Set headers for CSV download
 	filename := fmt.Sprintf("requests_%s.csv", time.Now().Format("2006-01-02"))
 	c.Header("Content-Description", "File Transfer")
 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
 	c.Header("Content-Type", "text/csv")
 
-	// Create a CSV writer
 	writer := csv.NewWriter(c.Writer)
 	defer writer.Flush()
 
-	// Write CSV header
 	headers := []string{
 		"ID", "Application Name", "Client IP", "Request Method", "Request URL", "Headers", "Body", "Timestamp", "ResponseCode", "Status", "ThreatType", "BotDetected", "GeoLocation", "RateLimited", "UserAgent",
-		// Add more fields as needed based on your request structure
 	}
 	if err := writer.Write(headers); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -48,7 +43,6 @@ func GenerateRequestsCSV(c *gin.Context) {
 		return
 	}
 
-	// Write request data rows
 	for _, req := range requests {
 		row := []string{
 			req.RequestID,
@@ -66,12 +60,9 @@ func GenerateRequestsCSV(c *gin.Context) {
 			req.GeoLocation,
 			fmt.Sprintf("%t", req.RateLimited),
 			req.UserAgent,
-			// Add more fields as needed
 		}
 		if err := writer.Write(row); err != nil {
-			// Log the error but continue processing
 			fmt.Printf("Error writing request %s to CSV: %v\n", req.RequestID, err)
 		}
 	}
-	// The writer will write to the response when Flush() is called
 }

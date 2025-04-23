@@ -23,7 +23,7 @@ type NotificationRule struct {
 	Threshold  int            `json:"threshold" gorm:"not null" `
 	TimeWindow int            `json:"time_window" gorm:"not null" `
 	IsActive   bool           `json:"is_active" gorm:"not null" `
-	UsersID    datatypes.JSON `gorm:"type:jsonb" json:"users_id" ` // List of users to notify
+	UsersID    datatypes.JSON `gorm:"type:jsonb" json:"users_id" `
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
 }

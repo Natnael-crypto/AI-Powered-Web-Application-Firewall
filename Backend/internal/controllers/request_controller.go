@@ -33,20 +33,17 @@ func AddRequest(c *gin.Context) {
 		UserAgent       string `json:"user_agent"`
 	}
 
-	// Parse the input
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Check if the application exists
 	var app models.Application
 	if err := config.DB.Where("application_name = ?", input.ApplicationName).First(&app).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
 		return
 	}
 
-	// Create the request
 	request := models.Request{
 		RequestID:       uuid.New().String(),
 		ApplicationName: input.ApplicationName,
@@ -66,7 +63,6 @@ func AddRequest(c *gin.Context) {
 		UserAgent:       input.UserAgent,
 	}
 
-	// Save the request to the database
 	if err := config.DB.Create(&request).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create request"})
 		return
@@ -75,16 +71,12 @@ func AddRequest(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "request added successfully", "request": request})
 }
 
-// GetRequests retrieves requests based on user role
 func GetRequests(c *gin.Context) {
-	// Apply filters using the helper function
 	apps := c.QueryArray("application_name")
-	// Split apps string by comma if provided as single string
 	if len(apps) == 1 {
 		apps = strings.Split(apps[0], ",")
 	}
 
-	// Initialize query builder
 	query := utils.ApplyRequestFilters(c)
 
 	if query == nil {
@@ -92,7 +84,6 @@ func GetRequests(c *gin.Context) {
 		return
 	}
 
-	// 🔹 Pagination
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize := 50
 	offset := (page - 1) * pageSize
@@ -141,10 +132,8 @@ func GetRequestByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"request": request})
 }
 
-// GetRequestStats returns request count and unique IP addresses for specified applications
 func GetRequestStats(c *gin.Context) {
 
-	// Initialize query builder
 	query := utils.ApplyRequestFilters(c)
 
 	if query == nil {
@@ -152,28 +141,24 @@ func GetRequestStats(c *gin.Context) {
 		return
 	}
 
-	// Get total request count
 	var requestCount int64
 	if err := query.Count(&requestCount).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count requests"})
 		return
 	}
 
-	// Get unique IP count
 	var uniqueIPs []string
 	if err := query.Distinct("client_ip").Pluck("client_ip", &uniqueIPs).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count unique IPs"})
 		return
 	}
 
-	// Return stats
 	c.JSON(http.StatusOK, gin.H{
 		"total_requests": requestCount,
 		"unique_ips":     len(uniqueIPs),
 	})
 }
 
-// GetBlockedStats retrieves statistics about blocked requests
 func GetBlockedStats(c *gin.Context) {
 
 	query := utils.ApplyRequestFilters(c)
@@ -182,33 +167,27 @@ func GetBlockedStats(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
 		return
 	}
-	// Initialize query
 	query = query.Where("status = ?", "blocked")
 
-	// Get total blocked request count
 	var blockedCount int64
 	if err := query.Count(&blockedCount).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count blocked requests"})
 		return
 	}
 
-	// Get unique blocked IP count
 	var uniqueBlockedIPs []string
 	if err := query.Distinct("client_ip").Pluck("client_ip", &uniqueBlockedIPs).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count unique blocked IPs"})
 		return
 	}
 
-	// Return stats
 	c.JSON(http.StatusOK, gin.H{
 		"total_blocked_requests": blockedCount,
 		"unique_blocked_ips":     len(uniqueBlockedIPs),
 	})
 }
 
-// GetTopBlockedCountries returns the top 5 countries with the most blocked requests
 func GetTopBlockedCountries(c *gin.Context) {
-	// Initialize query
 
 	query := utils.ApplyRequestFilters(c)
 
@@ -240,9 +219,7 @@ func GetTopBlockedCountries(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"top_blocked_countries": stats})
 }
 
-// GetAllBlockedCountries returns all countries and their blocked request counts
 func GetAllBlockedCountries(c *gin.Context) {
-	// Initialize query
 
 	query := utils.ApplyRequestFilters(c)
 
@@ -273,9 +250,7 @@ func GetAllBlockedCountries(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"blocked_countries": stats})
 }
 
-// GetRequestsPerMinute returns the number of requests per minute for different time intervals
 func GetRequestsPerMinute(c *gin.Context) {
-	// Parse `blocked` query parameter
 	blocked := c.Query("blocked")
 	var isBlocked bool
 	if blocked != "" {
@@ -287,7 +262,6 @@ func GetRequestsPerMinute(c *gin.Context) {
 		}
 	}
 
-	// Parse `timerange` (e.g. "2H", "1D")
 	timeRange := c.DefaultQuery("timerange", "1H")
 	rangeValue := timeRange[:len(timeRange)-1]
 	rangeUnit := strings.ToUpper(timeRange[len(timeRange)-1:])
@@ -309,7 +283,6 @@ func GetRequestsPerMinute(c *gin.Context) {
 		return
 	}
 
-	// Parse interval in minutes
 	intervalStr := c.DefaultQuery("interval", "1")
 	intervalMin, err := strconv.Atoi(intervalStr)
 	if err != nil || intervalMin <= 0 {
@@ -319,11 +292,9 @@ func GetRequestsPerMinute(c *gin.Context) {
 	intervalDuration := time.Duration(intervalMin) * time.Minute
 	intervalSeconds := float64(intervalDuration.Seconds())
 
-	// Get the current UNIX time and calculate start time
 	nowUnix := float64(time.Now().Unix())
 	startUnix := nowUnix - duration.Seconds()
 
-	// Apply filters
 	query := utils.ApplyRequestFilters(c)
 	if query == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
@@ -341,7 +312,6 @@ func GetRequestsPerMinute(c *gin.Context) {
 
 	var results []CountResult
 
-	// Get all raw timestamps in the range
 	err = query.
 		Where("timestamp >= ?", startUnix).
 		Where("timestamp < ?", nowUnix).
@@ -355,7 +325,6 @@ func GetRequestsPerMinute(c *gin.Context) {
 		return
 	}
 
-	// Aggregate timestamps into intervals
 	buckets := make(map[int64]int64)
 
 	for _, r := range results {
@@ -363,7 +332,6 @@ func GetRequestsPerMinute(c *gin.Context) {
 		buckets[bucketStart] += r.Count
 	}
 
-	// Build time series with 0s for missing intervals
 	timeSeriesData := make([]map[string]interface{}, 0)
 	for ts := int64(startUnix); ts < int64(nowUnix); ts += int64(intervalSeconds) {
 		start := ts
@@ -383,7 +351,6 @@ func GetRequestsPerMinute(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"range": timeSeriesData})
 }
 
-// GetClientOSStats retrieves statistics about client operating systems from request headers
 func GetClientOSStats(c *gin.Context) {
 
 	query := utils.ApplyRequestFilters(c)
@@ -410,7 +377,6 @@ func GetClientOSStats(c *gin.Context) {
 		return
 	}
 
-	// Categorize OS
 	osStats := map[string]int64{
 		"Windows": 0,
 		"Linux":   0,
@@ -441,7 +407,6 @@ func GetClientOSStats(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"os_statistics": osStats})
 }
 
-// GetResponseStatusStats returns the top 5 response status codes and their counts
 type StatusStats struct {
 	ResponseCode int   `json:"response_code"`
 	Count        int64 `json:"count"`
@@ -456,7 +421,6 @@ func GetResponseStatusStats(c *gin.Context) {
 		return
 	}
 
-	// Filter out null or empty response_code
 	query = query.Where("response_code IS NOT NULL")
 
 	var stats []StatusStats
@@ -475,7 +439,6 @@ func GetResponseStatusStats(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"response_status_stats": stats})
 }
 
-// GetMostTargetedEndpoints returns the most frequently targeted endpoints across applications
 func GetMostTargetedEndpoints(c *gin.Context) {
 	query := utils.ApplyRequestFilters(c)
 
@@ -484,7 +447,6 @@ func GetMostTargetedEndpoints(c *gin.Context) {
 		return
 	}
 
-	// Filter out empty or null request_url values
 	query = query.Where("request_url IS NOT NULL AND request_url != ''")
 
 	type EndpointStats struct {
@@ -510,7 +472,6 @@ func GetMostTargetedEndpoints(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"most_targeted_endpoints": stats})
 }
 
-// GetTopThreatTypes returns the top 5 attack types and their counts
 func GetTopThreatTypes(c *gin.Context) {
 	query := utils.ApplyRequestFilters(c)
 
@@ -521,7 +482,6 @@ func GetTopThreatTypes(c *gin.Context) {
 
 	query = query.Where("threat_detected = ?", true)
 
-	// Struct with field name matching DB column
 	type AttackStats struct {
 		ThreatType string `json:"threat_type"`
 		Count      int64  `json:"count"`
@@ -545,14 +505,12 @@ func GetTopThreatTypes(c *gin.Context) {
 }
 
 func DeleteFilteredRequests(c *gin.Context) {
-	// Get the query with filters applied
 	query := utils.ApplyRequestFilters(c)
 	if query == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to apply filters"})
 		return
 	}
 
-	// Perform deletion of the filtered records in batch
 	result := query.Delete(&models.Request{})
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete requests"})

@@ -7,20 +7,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// InitializeRoutes initializes all the routes for the application
 func InitializeRoutes(r *gin.Engine) {
-	// Public routes
 	r.POST("/register", controllers.RegisterUser)
 	r.POST("/login", controllers.LoginUser)
 
-	// Protected routes
 	authorized := r.Group("/")
 	authorized.Use(middleware.AuthRequired)
 
-	// User Management
 	authorized.PUT("/updatePassword", controllers.UpdatePassword)
 
-	// Admin Management
 	admin := authorized.Group("/users")
 	{
 		admin.POST("/add", controllers.AddAdmin)
@@ -32,7 +27,6 @@ func InitializeRoutes(r *gin.Engine) {
 		admin.PUT("/active/:username", controllers.ActiveAdmin)
 	}
 
-	// Application Management
 	r.GET("/application", controllers.GetAllApplications)
 	application := authorized.Group("/application")
 	{
@@ -40,7 +34,6 @@ func InitializeRoutes(r *gin.Engine) {
 		application.PUT("/:application_id", controllers.UpdateApplication)
 		application.DELETE("/:application_id", controllers.DeleteApplication)
 
-		// User to Application Assignment
 		application.POST("/assign", controllers.AddUserToApplication)
 		application.PUT("/assign/:assignment_id", controllers.UpdateUserToApplication)
 		application.GET("/assignments", controllers.GetAllUserToApplications)
@@ -49,22 +42,18 @@ func InitializeRoutes(r *gin.Engine) {
 
 	}
 
-	// Configuration Management
 	config := authorized.Group("/config")
 	{
-		// config.POST("/add", controllers.CreateConfig)
 		config.PUT("/update/listening-port", controllers.UpdateListeningPort)
 		config.PUT("/update/rate-limit/:application_id", controllers.UpdateRateLimit)
 		config.PUT("/update/remote-log-server", controllers.UpdateRemoteLogServer)
 		config.PUT("/update/detect-bot/:application_id", controllers.UpdateDetectBot)
 		config.PUT("/update/post-data-size/:application_id", controllers.UpdateMaxPosyDataSize)
-		// config.POST("/add-app-config", controllers.CreateAppConfig)
 
 	}
 	r.GET("/config/get-app-config/:application_id", controllers.GetAppConfig)
 	r.GET("/config", controllers.GetConfig)
 
-	// Rule Management
 	rules := authorized.Group("/rule")
 	{
 		rules.POST("/add", controllers.AddRule)
@@ -74,11 +63,9 @@ func InitializeRoutes(r *gin.Engine) {
 	r.GET("/rule/:application_id", controllers.GetRules)
 	r.GET("/rule/metadata", controllers.GetRuleMetadata)
 
-	// Request Management with WebSocket Support
 	requests := authorized.Group("/requests")
 	{
-		requests.GET("/", controllers.GetRequests) // Existing HTTP route to get requests
-		// requests.POST("/add", controllers.AddRequest) // Existing HTTP route to add requests
+		requests.GET("/", controllers.GetRequests)
 		requests.GET("/stats", controllers.GetRequestStats)
 		requests.GET("/blocked-stats", controllers.GetBlockedStats)
 		requests.GET("/requests-per-minute", controllers.GetRequestsPerMinute)
@@ -93,7 +80,6 @@ func InitializeRoutes(r *gin.Engine) {
 	}
 	r.POST("/batch", controllers.HandleBatchRequests)
 
-	// Notification Management
 	notifications := authorized.Group("/notifications")
 	{
 		notifications.PUT("/update/:notification_id", controllers.UpdateNotification)
@@ -101,24 +87,21 @@ func InitializeRoutes(r *gin.Engine) {
 		notifications.DELETE("/delete/:notification_id", controllers.DeleteNotification)
 	}
 
-	// Certificate Management
 	certs := authorized.Group("/certs")
 	{
-		certs.POST("/:application_id", controllers.AddCert) // Add a certificate
-		// certs.GET("/", controllers.GetCert)               // Get certificate/key file (expects application_id & type=cert/key)
-		certs.PUT("/:application_id", controllers.UpdateCert)    // Update an existing certificate
-		certs.DELETE("/:application_id", controllers.DeleteCert) // Delete a certificate
+		certs.POST("/:application_id", controllers.AddCert)
+		certs.PUT("/:application_id", controllers.UpdateCert)
+		certs.DELETE("/:application_id", controllers.DeleteCert)
 	}
 	r.GET("/certs", controllers.GetCert)
 
-	// interceptor := authorized.Group("/interceptor")
-	// {
-	// 	// Docker Management
-	// 	interceptor.GET("/start", controllers.StartInterceptor)
-	// 	interceptor.GET("/stop", controllers.StopInterceptor)
-	// 	interceptor.GET("/restart", controllers.ScaleInterceptor)
-	// 	interceptor.GET("/repull", controllers.ScaleInterceptor)
-	// }
+	interceptor := authorized.Group("/interceptor")
+	{
+		interceptor.GET("/start", controllers.StartInterceptor)
+		interceptor.GET("/stop", controllers.StopInterceptor)
+		interceptor.GET("/restart", controllers.RestartInterceptor)
+	}
+	r.GET("/interceptor/is-running", controllers.InterceptorCheckState)
 
 	headers := authorized.Group("/security-headers")
 	{
@@ -141,7 +124,6 @@ func InitializeRoutes(r *gin.Engine) {
 		notification_rule.DELETE("/:rule_id", controllers.DeleteNotificationRule)
 	}
 
-	//NotificationConfig
 	notification_config := authorized.Group("/notification-config")
 	{
 		notification_config.POST("/", controllers.AddNotificationConfig)
@@ -149,7 +131,5 @@ func InitializeRoutes(r *gin.Engine) {
 		notification_config.PUT("/:user_id", controllers.UpdateNotificationConfig)
 		notification_config.DELETE("/:user_id", controllers.DeleteNotificationConfig)
 	}
-
-	r.GET("/change", controllers.CheckForUpdate)
 
 }
