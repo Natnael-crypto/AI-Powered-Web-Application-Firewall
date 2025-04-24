@@ -21,7 +21,7 @@ const data2 = [
 ]
 const RequestStatus = () => (
   <>
-    <div className="w-2/6 flex flex-col  gap-5 bg-gray-50 p-3">
+    <div className="w-2/6 h-full flex flex-col  gap-5 bg-gray-50 p-3">
       <CustomLineChart data={data} title="Blocking Status" max={4000} />
       <CustomLineChart data={data2} title="Request Status" max={5000} />
     </div>

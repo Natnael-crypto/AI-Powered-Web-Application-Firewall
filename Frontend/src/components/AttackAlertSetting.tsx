@@ -1,5 +1,5 @@
 import {useState} from 'react'
-import {Info} from 'lucide-react' // optional icon lib
+import {Info} from 'lucide-react'
 
 const AttackAlertSettings = () => {
   const [alertType, setAlertType] = useState<'Telegram' | 'Email'>('Email')

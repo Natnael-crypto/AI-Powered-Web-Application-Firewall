@@ -31,8 +31,8 @@ function Dashboard() {
           </div>
         </div>
       </div>
-      <div className="flex min-h-[550px] gap-8 ">
-        <Card className="bg-white">
+      <div className="flex h-full gap-8 ">
+        <Card className="h-full bg-white">
           <GlobeMap />
         </Card>
         <RequestStatus />
@@ -45,6 +45,5 @@ function Dashboard() {
     </div>
   )
 }
-;[]
 
 export default Dashboard

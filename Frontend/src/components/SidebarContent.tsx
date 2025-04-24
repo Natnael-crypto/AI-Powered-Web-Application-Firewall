@@ -22,17 +22,26 @@ function SidebarContent({title, href, children, changeOpenItem}: SidebarItemProp
   const [isOpen, setOpen] = useState(false)
   const [_, setActive] = useState(false)
 
+  // Helper function to normalize strings
+  const normalizeString = (str: string) => {
+    return str
+      .toLowerCase()
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/[^a-z0-9-]/g, '') // Remove non-alphanumeric characters except hyphens
+  }
+
   useEffect(() => {
     const currentSection = location.pathname.split('/')[1]?.toLowerCase()
-    const titleLower = title.toLowerCase()
-    const active = currentSection === titleLower
-    console.log('test', currentSection, titleLower)
-
+    const normalizedTitle = normalizeString(title)
+    const normalizedHref = normalizeString(href)
+    const active = currentSection === normalizedTitle || currentSection === normalizedHref
     setActive(active)
     setOpen(active)
-  }, [location.pathname, title])
+  }, [location.pathname, title, href])
 
   const hasChildren = children && children.length > 0
+
+  console.log(children, location.pathname)
 
   return (
     <div className="transition-all duration-200 ease-in-out w-full">
@@ -65,8 +74,8 @@ function SidebarContent({title, href, children, changeOpenItem}: SidebarItemProp
               href={child.href}
               isActive={location.pathname === child.href}
               className={`text-sm py-2 px-4 rounded-xl transition-colors duration-200 ${
-                location.pathname === child.href
-                  ? 'bg-green-100 text-green-700'
+                location.pathname.replace(/^\/+/, '') === child.href.replace(/^\/+/, '')
+                  ? 'bg-green-200 text-green-700'
                   : 'hover:bg-green-50 hover:text-green-600 text-gray-600'
               }`}
             />

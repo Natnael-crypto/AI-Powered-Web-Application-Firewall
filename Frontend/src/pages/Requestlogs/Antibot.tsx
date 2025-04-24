@@ -61,7 +61,6 @@ function AntiBot() {
       duration: '1 minutes',
       startAt: '2025-01-02 07:56:11',
     },
-    // add other entries as needed...
   ]
 
   return (
