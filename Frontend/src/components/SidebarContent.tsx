@@ -1,61 +1,74 @@
 import {AiOutlineRight} from 'react-icons/ai'
 import {Link, useLocation} from 'react-router-dom'
 import SidebarItem from './SidebarItem'
+import {useEffect, useState} from 'react'
 
-interface sidebarItem {
+interface SidebarItemType {
   title: string
   href: string
 }
 
-interface sidebarItemProps {
+interface SidebarItemProps {
   title: string
   href: string
-  children?: sidebarItem[]
+  children?: SidebarItemType[]
   className?: string
-  openItem?: sidebarItem
-  changeOpenItem?: (item: sidebarItem) => void
+  openItem?: SidebarItemType
+  changeOpenItem?: (item: SidebarItemType) => void
 }
 
-function SidebarContent({
-  title,
-  href,
-  children,
-  className,
-  openItem,
-  changeOpenItem,
-}: sidebarItemProps) {
-  const isOpen = openItem?.title === title
-  const url = useLocation()
+function SidebarContent({title, href, children, changeOpenItem}: SidebarItemProps) {
+  const location = useLocation()
+  const [isOpen, setOpen] = useState(false)
+  const [_, setActive] = useState(false)
 
-  const isActive = url.pathname.split('/')[-1] === href.split('/')[-1]
+  useEffect(() => {
+    const currentSection = location.pathname.split('/')[1]?.toLowerCase()
+    const titleLower = title.toLowerCase()
+    const active = currentSection === titleLower
+    console.log('test', currentSection, titleLower)
+
+    setActive(active)
+    setOpen(active)
+  }, [location.pathname, title])
+
+  const hasChildren = children && children.length > 0
 
   return (
-    <div className="transition-all duration-200 ease-in-out w-full ">
+    <div className="transition-all duration-200 ease-in-out w-full">
       <Link
         to={href}
-        onClick={() => changeOpenItem && changeOpenItem({title, href})}
-        className={`flex w-full justify-between items-center gap-4 ${children?.length ? 'py-3 ' : ''} px-7 py-4 hover:bg-green-50 hover:text-green-600 rounded-xl transition-colors duration-200 ${
-          isOpen ? 'bg-green-50 text-green-600 mb-3' : 'text-gray-700'
-        }`}
+        onClick={() => changeOpenItem?.({title, href})}
+        className={`group flex w-full justify-between items-center gap-3 px-5 ${
+          hasChildren ? 'py-3' : 'py-3.5'
+        } rounded-2xl transition-all duration-300 cursor-pointer 
+    ${isOpen ? 'bg-green-200 text-green-800 shadow-md' : 'text-gray-700 hover:bg-green-100 hover:text-green-600'}
+  `}
       >
-        <h2 className={`text-lg font-semibold ${className}`}>{title}</h2>
-        {children && children.length > 0 && (
+        <h2
+          className={`text-[15px] font-semibold transition duration-300 group-hover:scale-[1.02]`}
+        >
+          {title}
+        </h2>
+        {hasChildren && (
           <AiOutlineRight
-            className={`w-5 h-5 transition-transform duration-200 ${
-              isOpen ? 'transform rotate-90' : ''
-            }`}
+            className={`w-4 h-4 transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-90' : ''}`}
           />
         )}
       </Link>
-      {isOpen && children && (
-        <div className={`flex flex-col gap-1 `}>
+      {isOpen && hasChildren && (
+        <div className="flex flex-col gap-1 mt-1 pl-4 border-l-2 border-green-300 ml-2">
           {children.map(child => (
             <SidebarItem
-              isActive={isActive}
               key={child.title}
-              href={child.href}
               title={child.title}
-              className={`font-light px-8 py-4 text-gray-600`}
+              href={child.href}
+              isActive={location.pathname === child.href}
+              className={`text-sm py-2 px-4 rounded-xl transition-colors duration-200 ${
+                location.pathname === child.href
+                  ? 'bg-green-100 text-green-700'
+                  : 'hover:bg-green-50 hover:text-green-600 text-gray-600'
+              }`}
             />
           ))}
         </div>

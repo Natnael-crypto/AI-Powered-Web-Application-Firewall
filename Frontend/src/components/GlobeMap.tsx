@@ -1,20 +1,8 @@
 import React from 'react'
-import {scaleSequential} from 'd3-scale'
-import {interpolateRgb} from 'd3-interpolate'
 import {VectorMap} from '@react-jvectormap/core'
 import {worldMill} from '@react-jvectormap/world'
 import {requestData} from '../lib/Constants'
 import RequestStat from './RequestStat'
-
-const maxRequests = Math.max(...Object.values(requestData), 1)
-
-const getColor = (requests: number) => {
-  const scale = scaleSequential(interpolateRgb('#D3D3D3', '#006400')).domain([
-    0,
-    maxRequests,
-  ])
-  return scale(requests)
-}
 
 const GlobeMap: React.FC = () => {
   return (
@@ -30,17 +18,14 @@ const GlobeMap: React.FC = () => {
         series={{
           regions: [
             {
-              values: Object.fromEntries(
-                Object.entries(requestData).map(([country, requests]) => [
-                  country,
-                  getColor(requests),
-                ]),
-              ),
+              values: requestData, // { [countryCode]: number }
+              scale: ['#D3D3D3', '#006400'], // from light gray to dark green
+              normalizeFunction: 'linear', // or 'polynomial', 'log'
               attribute: 'fill',
             },
           ],
         }}
-        onRegionTipShow={(e, el: any, code) => {
+        onRegionTipShow={(_, el: any, code) => {
           const requests = requestData[code] || 0
           el.html(
             `<strong>${el.html()}</strong><br>

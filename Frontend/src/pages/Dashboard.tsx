@@ -2,7 +2,9 @@ import Card from '../components/Card'
 import StatisticCard from '../components/StatisticCard'
 import StatisticGroup from '../components/StatisticGroup'
 import GlobeMap from '../components/GlobeMap'
-import TodaySummary from '../components/TodaySummary'
+import UserClientsCard from '../components/Devices-stat'
+import ResponseStatus from '../components/ResponseStatus'
+import RequestStatus from '../components/RequestStatus'
 
 function Dashboard() {
   return (
@@ -28,16 +30,21 @@ function Dashboard() {
             </Card>
           </div>
         </div>
-        <Card className="h-full w-[55%] shadow-lg bg-white">Query per second</Card>
       </div>
-      <div className="flex min-h-[550px] gap-8">
+      <div className="flex min-h-[550px] gap-8 ">
         <Card className="bg-white">
           <GlobeMap />
         </Card>
-        <TodaySummary />
+        <RequestStatus />
+      </div>
+
+      <div className="flex w-full gap-5 bg-white">
+        <UserClientsCard />
+        <ResponseStatus />
       </div>
     </div>
   )
 }
+;[]
 
 export default Dashboard

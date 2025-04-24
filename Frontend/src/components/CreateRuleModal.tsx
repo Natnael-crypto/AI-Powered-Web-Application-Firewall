@@ -57,91 +57,55 @@ const CreateRuleModal: React.FC<ModalProps> = ({ruleId, onClose, isModalOpen}) =
 
   return (
     <Modal isOpen={isModalOpen} onClose={onClose}>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div className="bg-white p-6 rounded-lg w-1/3">
-          <h2 className="text-xl font-bold mb-4">Update Rule</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Rule Type</label>
+      <div className="space-y-6 animate-fade-in">
+        <h2 className="text-2xl font-semibold text-gray-800 text-center">Update Rule</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {[
+            {label: 'Rule Type', name: 'rule_type'},
+            {label: 'Rule Definition', name: 'rule_definition'},
+            {label: 'Action', name: 'action'},
+            {label: 'Application ID', name: 'application_id'},
+            {label: 'Category', name: 'category'},
+          ].map(({label, name}) => (
+            <div key={name}>
+              <label className="block text-sm font-medium text-gray-600">{label}</label>
               <input
                 type="text"
-                name="rule_type"
-                value={payload.rule_type}
+                name={name}
+                value={payload[name as keyof RuleUpdatePayload] as string}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 mt-1 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
               />
             </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Rule Definition
-              </label>
-              <input
-                type="text"
-                name="rule_definition"
-                value={payload.rule_definition}
-                onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Action</label>
-              <input
-                type="text"
-                name="action"
-                value={payload.action}
-                onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Application ID
-              </label>
-              <input
-                type="text"
-                name="application_id"
-                value={payload.application_id}
-                onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Is Active</label>
-              <input
-                type="checkbox"
-                name="is_active"
-                checked={payload.is_active}
-                onChange={handleChange}
-                className="mt-1 block"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Category</label>
-              <input
-                type="text"
-                name="category"
-                value={payload.category}
-                onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={onClose}
-                className="mr-2 px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-              >
-                Update
-              </button>
-            </div>
-          </form>
-        </div>
+          ))}
+
+          <div className="flex items-center gap-3">
+            <label className="text-sm font-medium text-gray-600">Is Active</label>
+            <input
+              type="checkbox"
+              name="is_active"
+              checked={payload.is_active}
+              onChange={handleChange}
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t mt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 bg-gray-200 hover:bg-gray-300 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg"
+            >
+              Update Rule
+            </button>
+          </div>
+        </form>
       </div>
     </Modal>
   )

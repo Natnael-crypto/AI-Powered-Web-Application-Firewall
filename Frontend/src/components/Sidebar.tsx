@@ -1,6 +1,7 @@
 import {useState} from 'react'
 import {SiderbarContentItems} from '../lib/Constants'
 import SidebarContent from './SidebarContent'
+import logo from '../assets/waf-Logo.png'
 
 function Sidebar() {
   const [openItem, setOpenItem] = useState({
@@ -13,9 +14,11 @@ function Sidebar() {
   }
 
   return (
-    <div className="h-full hidden lg:flex flex-col items-center py-7 w-[15%]">
-      <div className=" text-3xl text-black font-semibold">Logo</div>
-      <div className="flex flex-col justify-center py-10 gap-3 overflow-y-scroll w-[80%]">
+    <div className="h-full hidden lg:flex flex-col items-center w-[16%] bg-gradient-to-b from-green-100 via-white to-green-50 shadow-xl rounded-r-3xl py-6">
+      <div className="mb-6 w-[70%]">
+        <img src={logo} alt="Logo" className="h-20 w-full object-contain" />
+      </div>
+      <div className="flex flex-col gap-4 w-full px-4 overflow-y-auto scrollbar-thin scrollbar-thumb-green-300 scrollbar-track-transparent">
         {SiderbarContentItems.map(item => (
           <SidebarContent
             key={item.title}

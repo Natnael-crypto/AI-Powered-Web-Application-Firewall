@@ -1,6 +1,9 @@
 import {ColumnDef} from '@tanstack/react-table'
 import ManageUser from '../components/ManageUser'
 import Table from '../components/Table'
+import CleanDataSettings from '../components/CleanDataSettings'
+import AttackAlertSettings from '../components/AttackAlertSetting'
+import SyslogSettings from '../components/SyslogSetting'
 type UserAccount = {
   name: string
   role: string
@@ -50,9 +53,12 @@ function System() {
     },
   ]
   return (
-    <div className="flex flex-col justify-start items-center gap-2">
+    <div className="flex flex-col justify-start items-center gap-2 overflow-scroll ">
       <ManageUser />
-      <Table columns={columns} data={mockUserData} />
+      <Table columns={columns} data={mockUserData} className="" />
+      <CleanDataSettings />
+      <AttackAlertSettings />
+      <SyslogSettings />
     </div>
   )
 }

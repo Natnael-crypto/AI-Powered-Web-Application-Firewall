@@ -21,3 +21,17 @@ export type LogTable = {
   ipAddress: string
   time: string
 }
+
+export enum logFilterType {
+  CLIENTIP,
+  COUNTRY,
+  METHOD,
+  PROTOCOL,
+}
+
+export enum filterOperations {
+  EQUALS_TO,
+  GREATER_THAN,
+  LESS_THAN,
+  NOT_EQUAL,
+}
