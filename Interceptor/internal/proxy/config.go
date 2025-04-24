@@ -3,6 +3,7 @@ package proxy
 import (
 	"encoding/json"
 	"fmt"
+	"interceptor/internal/utils"
 	"interceptor/internal/waf"
 	"log"
 	"net/http"
@@ -56,14 +57,14 @@ type Cert struct {
 }
 
 var CertApp struct {
-	Certs []Cert     `json:"certs"`
-	mu    sync.Mutex 
+	Certs []Cert `json:"certs"`
+	mu    sync.Mutex
 }
 
 var (
 	remoteLogServer              string
 	proxyPort                    string
-	applications                 map[string]string   
+	applications                 map[string]string
 	wafInstances                 map[string]*waf.WAF
 	Apps                         map[string]Application
 	application_config           map[string]AppConfig
@@ -172,7 +173,7 @@ func fetchApplications() error {
 			appsLock.Unlock()
 
 			if app.Tls {
-				certPath, keyPath, err := fetchCert(app.ApplicationID)
+				certPath, keyPath, err := utils.FetchCert(app.ApplicationID)
 				if err != nil {
 					log.Printf("Failed to get cert: %v", err)
 					continue
@@ -187,13 +188,13 @@ func fetchApplications() error {
 				CertApp.mu.Unlock()
 			}
 
-			rulesResponse, err := FetchRules(app.ApplicationID)
+			rulesResponse, err := utils.FetchRules(app.ApplicationID)
 			if err != nil {
 				log.Printf("Error fetching rules: %v", err)
 				continue
 			}
 
-			fileName, err := WriteRuleToFile(app.ApplicationID, rulesResponse.Rules)
+			fileName, err := utils.WriteRuleToFile(app.ApplicationID, rulesResponse.Rules)
 			if err != nil {
 				log.Printf("Error writing rules to file: %v", err)
 				continue

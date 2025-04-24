@@ -2,9 +2,7 @@ package proxy
 
 import (
 	"context"
-	"crypto/sha256"
 	"crypto/tls"
-	"encoding/hex"
 	"fmt"
 	"interceptor/internal/error_page"
 	"interceptor/internal/logger"
@@ -28,11 +26,6 @@ var (
 	ipRateLimiters  = make(map[string]*rate.Limiter)
 	limiterLock     sync.Mutex
 )
-
-func hashSHA256(input string) string {
-	hash := sha256.Sum256([]byte(input))
-	return hex.EncodeToString(hash[:])
-}
 
 func getTargetRedirectIP(hostname string) (string, bool) {
 	appsLock.RLock()
@@ -90,7 +83,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	limiter := getLimiter(ip, r.Host) // TODO check the rate limiting
 
 	if !limiter.Allow() {
-		message := MessageModel{
+		message := utils.MessageModel{
 			ApplicationName: r.Host,
 			ClientIP:        r.RemoteAddr,
 			RequestMethod:   r.Method,
@@ -107,7 +100,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 			Body:            "",
 		}
 		message.Token = WsKey
-		SendToBackend(message)
+		utils.SendToBackend(message)
 		http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
 		return
 	}
@@ -135,7 +128,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 
 	blockedByRule, ruleID, ruleMessage, action, status, body := wafInstance.EvaluateRules(r)
 
-	message := MessageModel{
+	message := utils.MessageModel{
 		ApplicationName: hostname,
 		ClientIP:        r.RemoteAddr,
 		RequestMethod:   r.Method,
@@ -154,7 +147,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 
 	if request_body_size >= application_config[hostname].MaxPostDataSize {
 		if blockedByRule {
-			message.Body = hashSHA256(body)
+			message.Body = utils.HashSHA256(body)
 		}
 		message.Body = ""
 	}
@@ -166,7 +159,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		message.Status = "blocked"
 		message.Token = WsKey
 
-		SendToBackend(message)
+		utils.SendToBackend(message)
 		return
 	}
 
@@ -200,7 +193,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	message.ResponseCode = resp.StatusCode
 	message.Token = WsKey
-	SendToBackend(message)
+	utils.SendToBackend(message)
 	defer resp.Body.Close()
 
 	for name, values := range resp.Header {
@@ -233,7 +226,7 @@ func Starter() {
 		log.Fatalf("Failed to fetch applications: %v", err)
 	}
 
-	err = InitHttpHandler()
+	err = utils.InitHttpHandler()
 	if err != nil {
 		log.Fatalf("Failed to initialize Http Handler: %v", err)
 	}

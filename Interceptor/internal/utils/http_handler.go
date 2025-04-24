@@ -1,4 +1,4 @@
-package proxy
+package utils
 
 import (
 	"bytes"
@@ -50,7 +50,7 @@ func InitHttpHandler() error {
 	}
 	backendEndpoint = fmt.Sprintf("http://%s:%s/batch", backendHost, backendPort)
 
-	go startBatchSender()
+	go StartBatchSender()
 	return nil
 }
 
@@ -98,7 +98,7 @@ func flushQueue() {
 	log.Printf("Batch sent to backend, status: %s", resp.Status)
 }
 
-func startBatchSender() {
+func StartBatchSender() {
 	ticker := time.NewTicker(sendInterval)
 	defer ticker.Stop()
 

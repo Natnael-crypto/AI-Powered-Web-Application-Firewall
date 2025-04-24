@@ -1,4 +1,4 @@
-package proxy
+package utils
 
 import (
 	"encoding/json"
@@ -38,7 +38,7 @@ func FetchRules(applicationID string) (*RulesResponse, error) {
 		return nil, fmt.Errorf("BACKENDPORT environment variable is not set")
 	}
 
-	url := fmt.Sprintf("http://%s:%s/rule/%s",backendHost,backendPort, applicationID)
+	url := fmt.Sprintf("http://%s:%s/rule/%s", backendHost, backendPort, applicationID)
 
 	resp, err := http.Get(url)
 	if err != nil {

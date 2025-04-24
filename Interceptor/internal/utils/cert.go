@@ -1,4 +1,4 @@
-package proxy
+package utils
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 )
 
 
-func fetchCert(applicationID string) (string, string, error) {
+func FetchCert(applicationID string) (string, string, error) {
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: No .env file found, falling back to environment variables")
 	}
