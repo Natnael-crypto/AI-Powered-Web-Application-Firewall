@@ -27,7 +27,7 @@ function AttackLogFilter() {
   )
 
   return (
-    <div className="w-full bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4 md:flex-row md:items-center">
+    <div className="w-full bg-white p-6 rounded-xl  flex flex-col gap-4 md:flex-row md:items-center">
       {/* Filter Type */}
       <div className="flex-1">
         <label className="block mb-1 text-sm font-medium text-gray-700">

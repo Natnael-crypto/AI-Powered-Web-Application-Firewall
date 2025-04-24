@@ -1,4 +1,3 @@
-import React from 'react'
 import {requestData} from '../lib/Constants'
 import Card from './Card'
 import countries from 'i18n-iso-countries'

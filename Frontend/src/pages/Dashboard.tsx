@@ -32,9 +32,7 @@ function Dashboard() {
         </div>
       </div>
       <div className="flex h-full gap-8 ">
-        <Card className="h-full bg-white">
-          <GlobeMap />
-        </Card>
+        <GlobeMap />
         <RequestStatus />
       </div>
 
