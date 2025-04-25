@@ -24,6 +24,7 @@ var (
 	MaintenanceMode bool
 	maintenanceLock sync.RWMutex
 	ipRateLimiters  = make(map[string]*rate.Limiter)
+	blockedIPs      = make(map[string]time.Time)
 	limiterLock     sync.Mutex
 )
 
@@ -34,7 +35,7 @@ func getTargetRedirectIP(hostname string) (string, bool) {
 	return target, exists
 }
 
-func getLimiter(ip string, hostname string) *rate.Limiter {
+func getLimiter(ip, hostname string) *rate.Limiter {
 	limiterLock.Lock()
 	defer limiterLock.Unlock()
 
@@ -43,19 +44,9 @@ func getLimiter(ip string, hostname string) *rate.Limiter {
 	}
 
 	configLock.RLock()
-
 	limiter := rate.NewLimiter(rate.Limit(application_config[hostname].RateLimit), application_config[hostname].WindowSize)
 	configLock.RUnlock()
 	ipRateLimiters[ip] = limiter
-
-	fmt.Println(hostname)
-
-	go func() {
-		time.Sleep(5 * time.Minute)
-		limiterLock.Lock()
-		delete(ipRateLimiters, ip)
-		limiterLock.Unlock()
-	}()
 
 	return limiter
 }
@@ -64,11 +55,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	maintenanceLock.RLock()
 	if MaintenanceMode {
 		maintenanceLock.RUnlock()
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.WriteHeader(http.StatusServiceUnavailable)
-		fmt.Fprintf(w, `<!DOCTYPE html>
-			<html><head><title>Under Maintenance</title></head>
-			<body><h1>Site Under Maintenance</h1><p>We're currently performing maintenance. Please check back soon.</p></body></html>`)
+		error_page.SendMaintenanceResponse(w)
 		return
 	}
 	maintenanceLock.RUnlock()
@@ -78,13 +65,28 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ip := r.RemoteAddr
-	ip = strings.Split(ip, ":")[0]
-	limiter := getLimiter(ip, r.Host) // TODO check the rate limiting
+	ip := strings.Split(r.RemoteAddr, ":")[0]
+	hostname := r.Host
 
+	limiterLock.Lock()
+	if unblockTime, blocked := blockedIPs[ip]; blocked {
+		if time.Now().Before(unblockTime) {
+			limiterLock.Unlock()
+			http.Error(w, "Too Many Requests (Blocked)", http.StatusTooManyRequests)
+			return
+		}
+		delete(blockedIPs, ip)
+	}
+	limiterLock.Unlock()
+
+	limiter := getLimiter(ip, hostname)
 	if !limiter.Allow() {
+		limiterLock.Lock()
+		blockedIPs[ip] = time.Now().Add(time.Duration(application_config[hostname].BlockTime) * time.Minute)
+		limiterLock.Unlock()
+
 		message := utils.MessageModel{
-			ApplicationName: r.Host,
+			ApplicationName: hostname,
 			ClientIP:        r.RemoteAddr,
 			RequestMethod:   r.Method,
 			RequestURL:      r.URL.String(),
@@ -93,25 +95,24 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 			Status:          "blocked",
 			ThreatDetected:  true,
 			ThreatType:      "Rate Limit Exceeded",
-			BotDetected:     false, // TODO Implement bot detection logic
+			BotDetected:     false,
 			GeoLocation:     "Unknown",
 			RateLimited:     true,
 			UserAgent:       r.UserAgent(),
 			Body:            "",
+			Token:           WsKey,
 		}
-		message.Token = WsKey
 		utils.SendToBackend(message)
+
 		http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
 		return
 	}
 
 	request_body_size := utils.GetRequestBodySizeMB(r)
 
-	hostname := r.Host
-
 	targetRedirectIP, exists := getTargetRedirectIP(hostname)
-	if r.TLS != nil { // TODO targetRedirectIP = "https://" + targetRedirectIP
-		targetRedirectIP = "http://" + targetRedirectIP
+	if application_config[hostname].Tls {
+		targetRedirectIP = "https://" + targetRedirectIP
 	} else {
 		targetRedirectIP = "http://" + targetRedirectIP
 	}
@@ -138,7 +139,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		Status:          fmt.Sprintf("%d", status),
 		ThreatDetected:  blockedByRule,
 		ThreatType:      ruleMessage,
-		BotDetected:     false, // TODO Implement bot detection logic
+		BotDetected:     false,
 		GeoLocation:     "Unknown",
 		RateLimited:     false,
 		UserAgent:       r.UserAgent(),
@@ -154,28 +155,23 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 
 	if blockedByRule {
 		error_page.Send403Response(w, ruleID, ruleMessage, action, status)
-		logger.LogRequest(r, action, ruleMessage)
 		message.ResponseCode = http.StatusForbidden
 		message.Status = "blocked"
 		message.Token = WsKey
-
 		utils.SendToBackend(message)
 		return
 	}
 
-	logger.LogRequest(r, "allow", "")
 	message.Status = "allowed"
 
 	client := &http.Client{}
 	targetURL := fmt.Sprintf("%s%s", targetRedirectIP, r.URL.Path)
-	fmt.Println(targetURL)
 	if r.URL.RawQuery != "" {
 		targetURL = fmt.Sprintf("%s?%s", targetURL, r.URL.RawQuery)
 	}
 
 	req, err := http.NewRequest(r.Method, targetURL, r.Body)
 	if err != nil {
-		fmt.Printf("Failed to create request: %v", err)
 		http.Error(w, "Failed to create request", http.StatusInternalServerError)
 		return
 	}

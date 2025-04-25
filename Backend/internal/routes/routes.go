@@ -15,6 +15,7 @@ func InitializeRoutes(r *gin.Engine) {
 	authorized.Use(middleware.AuthRequired)
 
 	authorized.PUT("/updatePassword", controllers.UpdatePassword)
+	authorized.GET("/is-logged-in", controllers.IsLoggedIN)
 
 	admin := authorized.Group("/users")
 	{
@@ -49,7 +50,7 @@ func InitializeRoutes(r *gin.Engine) {
 		config.PUT("/update/remote-log-server", controllers.UpdateRemoteLogServer)
 		config.PUT("/update/detect-bot/:application_id", controllers.UpdateDetectBot)
 		config.PUT("/update/post-data-size/:application_id", controllers.UpdateMaxPosyDataSize)
-
+		config.PUT("/update/tls/:application_id", controllers.UpdateTls)
 	}
 	r.GET("/config/get-app-config/:application_id", controllers.GetAppConfig)
 	r.GET("/config", controllers.GetConfig)

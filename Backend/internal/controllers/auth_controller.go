@@ -133,3 +133,15 @@ func UpdatePassword(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "password updated successfully"})
 }
+
+func IsLoggedIN(c *gin.Context) {
+
+	currentUserID := c.GetString("user_id")
+	var admin models.User
+	if err := config.DB.Where("user_id = ?", currentUserID).First(&admin).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not logged in"})
+		return
+	}
+	admin.PasswordHash = ""
+	c.JSON(http.StatusOK, gin.H{"user": admin})
+}

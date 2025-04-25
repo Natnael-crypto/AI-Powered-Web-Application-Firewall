@@ -11,7 +11,9 @@ type AppConf struct {
 	ApplicationID   string  `json:"application_id" gorm:"unique;not null"`
 	RateLimit       int     `json:"rate_limit" binding:"default=50"`
 	WindowSize      int     `json:"window_size" binding:"default=10"`
+	BlockTime       int     `json:"block_time" binding:"default=10"`
 	DetectBot       bool    `json:"detect_bot" binding:"default=false"`
 	HostName        string  `json:"hostname"`
 	MaxPostDataSize float64 `json:"max_post_data_size" binding:"default=5"`
+	Tls             bool    `json:"tls"`
 }

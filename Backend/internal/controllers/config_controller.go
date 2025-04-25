@@ -45,9 +45,11 @@ func CreateAppConfig(c *gin.Context) {
 		ApplicationID   string  `json:application_id`
 		RateLimit       int     `json:"rate_limit" binding:"numeric"`
 		WindowSize      int     `json:"window_size" binding:"numeric"`
+		BlockTime       int     `json:"block_time" binding:"numeric"`
 		DetectBot       bool    `json:detect_bot`
 		HostName        string  `json:"hostname" binding:"required,max=40"`
 		MaxPostDataSize float64 `json:"max_post_data_size" `
+		Tls             bool    `json:"tls" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -74,9 +76,11 @@ func CreateAppConfig(c *gin.Context) {
 		ApplicationID:   input.ApplicationID,
 		RateLimit:       input.RateLimit,
 		WindowSize:      input.WindowSize,
+		BlockTime:       input.BlockTime,
 		DetectBot:       input.DetectBot,
 		HostName:        input.HostName,
 		MaxPostDataSize: input.MaxPostDataSize,
+		Tls:             input.Tls,
 	}
 
 	if err := config.DB.Create(&newAppConf).Error; err != nil {
@@ -163,6 +167,7 @@ func UpdateListeningPort(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update configuration"})
 		return
 	}
+	config.Change = true
 
 	c.JSON(http.StatusOK, gin.H{"message": "configuration updated successfully", "data": conf})
 }
@@ -176,6 +181,7 @@ func UpdateRateLimit(c *gin.Context) {
 	var input struct {
 		RateLimit  int `json:"rate_limit" binding:"required,min=1"`
 		WindowSize int `json:"window_size" binding:"required,min=1"`
+		BlockTime  int `json:"block_time" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -194,11 +200,50 @@ func UpdateRateLimit(c *gin.Context) {
 
 	conf.RateLimit = input.RateLimit
 	conf.WindowSize = input.WindowSize
+	conf.BlockTime = input.BlockTime
 
 	if err := config.DB.Save(&conf).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update configuration"})
 		return
 	}
+
+	config.Change = true
+
+	c.JSON(http.StatusOK, gin.H{"message": "Configuration updated successfully", "data": conf})
+}
+
+func UpdateTls(c *gin.Context) {
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	var input struct {
+		Tls bool `json:"tls"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Error binding JSON: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format or missing fields"})
+		return
+	}
+
+	appId := c.Param("application_id")
+
+	var conf models.AppConf
+	if err := config.DB.Where("application_id = ?", appId).First(&conf).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "App configuration not found"})
+		return
+	}
+
+	conf.Tls = input.Tls
+
+	if err := config.DB.Save(&conf).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update configuration"})
+		return
+	}
+
+	config.Change = true
 
 	c.JSON(http.StatusOK, gin.H{"message": "Configuration updated successfully", "data": conf})
 }
@@ -234,6 +279,8 @@ func UpdateDetectBot(c *gin.Context) {
 		return
 	}
 
+	config.Change = true
+
 	c.JSON(http.StatusOK, gin.H{"message": "Configuration updated successfully", "data": conf})
 }
 
@@ -265,6 +312,8 @@ func UpdateRemoteLogServer(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update configuration"})
 		return
 	}
+
+	config.Change = true
 
 	c.JSON(http.StatusOK, gin.H{"message": "configuration updated successfully", "data": conf})
 }
@@ -298,6 +347,8 @@ func UpdateMaxPosyDataSize(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update configuration"})
 		return
 	}
+
+	config.Change = true
 
 	c.JSON(http.StatusOK, gin.H{"message": "Configuration updated successfully", "data": conf})
 }
