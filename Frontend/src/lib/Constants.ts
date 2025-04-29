@@ -22,10 +22,14 @@ export const SiderbarContentItems = [
       },
     ],
   },
-
   {
     title: 'Custom Rules',
     href: 'custom-rules',
+    children: [],
+  },
+  {
+    title: 'Web Services',
+    href: 'web-services',
     children: [],
   },
   {

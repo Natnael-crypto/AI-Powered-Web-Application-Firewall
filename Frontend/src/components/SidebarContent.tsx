@@ -41,8 +41,6 @@ function SidebarContent({title, href, children, changeOpenItem}: SidebarItemProp
 
   const hasChildren = children && children.length > 0
 
-  console.log(children, location.pathname)
-
   return (
     <div className="transition-all duration-200 ease-in-out w-full">
       <Link
@@ -50,12 +48,12 @@ function SidebarContent({title, href, children, changeOpenItem}: SidebarItemProp
         onClick={() => changeOpenItem?.({title, href})}
         className={`group flex w-full justify-between items-center gap-3 px-5 ${
           hasChildren ? 'py-3' : 'py-3.5'
-        } rounded-2xl transition-all duration-300 cursor-pointer 
-    ${isOpen ? 'bg-green-200 text-green-800 shadow-md' : 'text-gray-700 hover:bg-green-100 hover:text-green-600'}
+        } rounded-md transition-all duration-300 cursor-pointer 
+    ${isOpen ? 'bg-green-900 text-green-800 shadow-md' : 'text-gray-700 hover:bg-green-500 hover:text-green-600'}
   `}
       >
         <h2
-          className={`text-[15px] font-semibold transition duration-300 group-hover:scale-[1.02]`}
+          className={`text-[17px] font-semibold transition duration-300 group-hover:scale-[1.02] text-white`}
         >
           {title}
         </h2>

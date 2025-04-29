@@ -8,6 +8,7 @@ function RootLayout() {
   const navigate = useNavigate()
 
   useEffect(() => {
+    console.log('got you')
     if (!localStorage.getItem('token')) {
       navigate('/login')
     }

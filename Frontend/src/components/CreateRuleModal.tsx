@@ -14,7 +14,7 @@ interface RuleUpdatePayload {
 interface ModalProps {
   ruleId?: string
   onClose: () => void
-  isModalOpen?: boolean
+  isModalOpen: boolean
 }
 
 const CreateRuleModal: React.FC<ModalProps> = ({ruleId, onClose, isModalOpen}) => {

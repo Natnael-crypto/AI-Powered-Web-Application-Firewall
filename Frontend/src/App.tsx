@@ -13,6 +13,7 @@ import System from './pages/System'
 import AttackLog from './pages/Requestlogs/AttackLog'
 import RateLimiting from './pages/Requestlogs/RateLimiting'
 import AntiBot from './pages/Requestlogs/Antibot'
+import WebServices from './pages/WebServices'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -27,6 +28,7 @@ const router = createBrowserRouter(
           <Route path="captcha" element={<AntiBot />} />
         </Route>
         <Route path="custom-rules" element={<CustomeRules />} />
+        <Route path="web-services" element={<WebServices />} />
         <Route path="system" element={<System />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>

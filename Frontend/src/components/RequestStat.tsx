@@ -11,7 +11,7 @@ function RequestStat({className}: {className?: string}) {
       label: countries.getName(key, 'en'),
       value,
     }))
-    .sort((a, b) => b.value - a.value) // Sort by value descending
+    .sort((a, b) => b.value - a.value)
 
   const maxValue = Math.max(...formattedData.map(item => item.value))
 

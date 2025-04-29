@@ -14,7 +14,7 @@ function Sidebar() {
   }
 
   return (
-    <div className="h-full hidden lg:flex flex-col items-center w-[16%] bg-gradient-to-b from-green-100 via-white to-green-50 shadow-xl rounded-r-3xl py-6">
+    <div className="h-full hidden lg:flex flex-col items-center w-[16%] bg-gradient-to-b from-green-800  to-green-300 shadow-xl py-6">
       <div className="mb-6 w-[70%]">
         <img src={logo} alt="Logo" className="h-20 w-full object-contain" />
       </div>
