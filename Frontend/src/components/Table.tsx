@@ -4,23 +4,23 @@ import {
   useReactTable,
   flexRender,
 } from '@tanstack/react-table'
+import clsx from 'clsx'
 
 interface TableProps<T> {
   columns: ColumnDef<T>[]
   data: T[]
+  className?: string
 }
 
-function Table<T extends object>({columns, data}: TableProps<T>) {
+function Table<T extends object>({columns, data, className}: TableProps<T>) {
   const table = useReactTable({
     columns,
     data,
     getCoreRowModel: getCoreRowModel(),
   })
 
-  console.log('data: ', data)
-
   return (
-    <div className="w-full overflow-x-auto shadow-md rounded-lg">
+    <div className={clsx('w-full  shadow-md rounded-lg', className)}>
       <table className="min-w-full table-auto border-collapse bg-white">
         <thead>
           {table.getHeaderGroups().map(headerGroup => (

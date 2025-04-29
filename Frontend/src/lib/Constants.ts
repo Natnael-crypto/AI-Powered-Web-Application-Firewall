@@ -5,66 +5,32 @@ export const SiderbarContentItems = [
     children: [],
   },
   {
-    title: 'Logs',
-    href: 'logs/attacks',
+    title: 'Log',
+    href: 'log/attacks',
     children: [
       {
         title: 'Attacks',
-        href: 'logs/attacks',
+        href: 'log/attacks',
       },
       {
         title: 'Rate Limiting',
-        href: '/limits',
+        href: 'log/limits',
       },
       {
         title: 'Anti-Bot',
-        href: '/captcha',
-      },
-      {
-        title: 'Waiting Room',
-        href: '/waiting_room',
+        href: 'log/captcha',
       },
     ],
   },
   {
-    title: 'Application',
-    href: 'application/applications',
-    children: [
-      {
-        title: 'applications',
-        href: 'application/applications',
-      },
-      {
-        title: 'SSL Cert',
-        href: '/cert',
-      },
-      {
-        title: 'Global Settings',
-        href: '/config',
-      },
-    ],
+    title: 'Custom Rules',
+    href: 'custom-rules',
+    children: [],
   },
   {
-    title: 'Protections',
-    href: 'protection/custom_rules',
-    children: [
-      {
-        title: 'Rate Limiting',
-        href: '/limits',
-      },
-      {
-        title: 'Custom Rules',
-        href: 'protection/custom_rules',
-      },
-      {
-        title: 'Detection Mod',
-        href: '/semantics',
-      },
-      {
-        title: 'Settings',
-        href: '/settings',
-      },
-    ],
+    title: 'Web Services',
+    href: 'web-services',
+    children: [],
   },
   {
     title: 'System',

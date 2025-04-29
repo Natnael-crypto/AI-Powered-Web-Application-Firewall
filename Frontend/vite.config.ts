@@ -12,7 +12,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://waf-backend-latest.onrender.com',
+        target: 'https://waf-backend-latest.onrender.com/',
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, ''),
       },

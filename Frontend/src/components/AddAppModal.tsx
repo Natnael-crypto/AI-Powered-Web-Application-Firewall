@@ -1,7 +1,6 @@
 import React, {useState} from 'react'
 import {Info, Tag, Save, X} from 'lucide-react'
 import {useAddApplication} from '../hooks/useApplication'
-import {data} from 'react-router-dom'
 import {QueryClient} from '@tanstack/react-query'
 
 interface AddAppModalProps {
@@ -37,14 +36,16 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
-    const {name, value, type, checked} = e.target
+    const {name, value, type} = e.target as HTMLInputElement
+    const checked =
+      type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined
     setPayload({
       ...payload,
       [name]: type === 'checkbox' ? checked : value,
     })
   }
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [_, setErrors] = useState<Record<string, string>>({})
 
   const validate = () => {
     const newErrors: Record<string, string> = {}

@@ -6,17 +6,22 @@ import {useEffect} from 'react'
 function RootLayout() {
   const {pathname} = useLocation()
   const navigate = useNavigate()
+
   useEffect(() => {
+    console.log('got you')
     if (!localStorage.getItem('token')) {
       navigate('/login')
     }
   }, [pathname])
+
   return (
-    <div className="h-screen w-full flex bg-slate-100">
+    <div className="h-screen w-full flex bg-gradient-to-r from-slate-100 to-slate-50">
       <Sidebar />
-      <div className="flex flex-col w-[85%]">
+      <div className="flex flex-col w-full overflow-hidden">
         <Navbar />
-        <Outlet />
+        <main className="flex-1 overflow-y-auto p-6">
+          <Outlet />
+        </main>
       </div>
     </div>
   )

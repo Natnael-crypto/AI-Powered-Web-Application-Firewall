@@ -12,46 +12,35 @@ function Navbar() {
   }
 
   return (
-    <div className="w-full h-max ">
-      <div className="flex justify-between items-center py-4 px-8 ">
+    <header className="w-full border-b border-gray-200 bg-white shadow-sm">
+      <div className="flex justify-between items-center py-4 px-6">
         {/* Breadcrumbs */}
-        <div className="flex gap-2 items-center">
+        <nav className="flex gap-2 items-center text-gray-600 text-sm font-medium">
           {urls.map((url, index) => (
             <div key={index} className="flex items-center">
-              <p className="text-lg font-medium text-gray-700 capitalize hover:text-blue-600 transition-colors duration-200">
-                {url}
-              </p>
-              {index !== urls.length - 1 && <span className="mx-2 text-gray-400">/</span>}
+              <span className="capitalize hover:text-blue-600 transition-colors duration-200">
+                {url.replace(/-/g, ' ')}
+              </span>
+              {index !== urls.length - 1 && (
+                <span className="mx-2 text-gray-300 font-light">/</span>
+              )}
             </div>
           ))}
-        </div>
+        </nav>
 
-        {/* Right Section */}
-        <div className="flex items-center gap-5">
-          {/* Pro Badge */}
-          {/* <div className="flex items-center overflow-hidden rounded-lg shadow-sm">
-            <div className="flex gap-2 items-center text-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2">
-              <BsLightning className="text-yellow-400" />
-              <span>Pro</span>
-            </div>
-            <div className="bg-gray-100 text-gray-700 px-4 py-2 text-lg font-medium">
-              233 days left
-            </div>
-          </div> */}
-
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-          >
-            <LuLogOut
-              size={25}
-              className="text-gray-700 hover:text-red-600 transition-colors duration-200"
-            />
-          </button>
-        </div>
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className="p-2 rounded-full hover:bg-red-50 transition-colors duration-200"
+          title="Logout"
+        >
+          <LuLogOut
+            size={22}
+            className="text-gray-600 hover:text-red-600 transition-colors duration-200"
+          />
+        </button>
       </div>
-    </div>
+    </header>
   )
 }
 
