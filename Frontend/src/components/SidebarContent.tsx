@@ -1,7 +1,7 @@
-import {AiOutlineRight} from 'react-icons/ai'
-import {Link, useLocation} from 'react-router-dom'
+import { AiOutlineRight } from 'react-icons/ai'
+import { Link, useLocation } from 'react-router-dom'
 import SidebarItem from './SidebarItem'
-import {useEffect, useState} from 'react'
+import { useEffect, useState } from 'react'
 
 interface SidebarItemType {
   title: string
@@ -15,19 +15,19 @@ interface SidebarItemProps {
   className?: string
   openItem?: SidebarItemType
   changeOpenItem?: (item: SidebarItemType) => void
+  Icon?: React.ComponentType<{ className?: string }>
 }
 
-function SidebarContent({title, href, children, changeOpenItem}: SidebarItemProps) {
+function SidebarContent({ title, href, children, changeOpenItem, Icon }: SidebarItemProps) {
   const location = useLocation()
   const [isOpen, setOpen] = useState(false)
   const [_, setActive] = useState(false)
 
-  // Helper function to normalize strings
   const normalizeString = (str: string) => {
     return str
       .toLowerCase()
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/[^a-z0-9-]/g, '') // Remove non-alphanumeric characters except hyphens
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
   }
 
   useEffect(() => {
@@ -45,36 +45,49 @@ function SidebarContent({title, href, children, changeOpenItem}: SidebarItemProp
     <div className="transition-all duration-200 ease-in-out w-full">
       <Link
         to={href}
-        onClick={() => changeOpenItem?.({title, href})}
-        className={`group flex w-full justify-between items-center gap-3 px-5 ${
-          hasChildren ? 'py-3' : 'py-3.5'
-        } rounded-md transition-all duration-300 cursor-pointer 
-    ${isOpen ? 'bg-green-900 text-green-800 shadow-md' : 'text-gray-700 hover:bg-green-500 hover:text-green-600'}
-  `}
+        onClick={() => changeOpenItem?.({ title, href })}
+        className={`group flex w-full items-center justify-between gap-x-3 px-6 py-3 rounded-md transition-all duration-300 cursor-pointer
+          ${isOpen ? 'bg-[#303750] text-white shadow-md' : 'text-gray-500 hover:bg-gray-600 hover:text-white'}
+        `}
       >
-        <h2
-          className={`text-[17px] font-semibold transition duration-300 group-hover:scale-[1.02] text-white`}
-        >
-          {title}
-        </h2>
+        <div className={`flex items-center gap-x-3 `}>
+        {Icon && (
+            <Icon
+              className={`w-5 h-5 shrink-0 transition-colors duration-300 ${
+                isOpen ? 'text-white' : 'text-gray-400 group-hover:text-white'
+              }`}
+            />
+          )}
+          <h2
+            className={`text-[15px] font-normal truncate ${
+              isOpen ? 'text-white' : 'text-gray-400'
+            }`}
+          >
+            {title}
+          </h2>
+        </div>
+
         {hasChildren && (
           <AiOutlineRight
-            className={`w-4 h-4 transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-90' : ''}`}
+            className={`w-4 h-4 transition-transform duration-300 ease-in-out ${
+              isOpen ? 'rotate-90 text-white' : 'text-gray-400'
+            }`}
           />
         )}
       </Link>
+
       {isOpen && hasChildren && (
-        <div className="flex flex-col gap-1 mt-1 pl-4 border-l-2 border-green-300 ml-2">
+        <div className="flex flex-col gap-1 mt-2 pl-9 border-l-2 border-green-300">
           {children.map(child => (
             <SidebarItem
               key={child.title}
               title={child.title}
               href={child.href}
               isActive={location.pathname === child.href}
-              className={`text-sm py-2 px-4 rounded-xl transition-colors duration-200 ${
+              className={`text-sm py-2 px-3 rounded-md transition-colors duration-200 ${
                 location.pathname.replace(/^\/+/, '') === child.href.replace(/^\/+/, '')
-                  ? 'bg-green-200 text-green-700'
-                  : 'hover:bg-green-50 hover:text-green-600 text-gray-600'
+                  ? 'bg-[#303750] text-white'
+                  : 'text-gray-500 hover:bg-gray-600 hover:text-white'
               }`}
             />
           ))}

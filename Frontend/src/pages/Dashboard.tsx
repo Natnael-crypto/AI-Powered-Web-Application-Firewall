@@ -8,7 +8,7 @@ import RequestStatus from '../components/RequestStatus'
 
 function Dashboard() {
   return (
-    <div className="px-5 h-screen flex flex-col gap-5 w-full overflow-y-scroll">
+    <div className="px-5 h-screen flex flex-col gap-5 w-full" >
       <div className="flex gap-5">
         <div className="flex flex-col gap-5 w-full">
           <div className="flex gap-3">

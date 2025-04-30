@@ -1,12 +1,18 @@
+import { MdDashboard, MdWeb } from 'react-icons/md'
+import { FaRegFileAlt } from 'react-icons/fa'
+import { AiOutlineTool, AiOutlineSetting } from 'react-icons/ai'
+
 export const SiderbarContentItems = [
   {
     title: 'Dashboard',
     href: 'dashboard',
+    icon: MdDashboard,
     children: [],
   },
   {
     title: 'Log',
     href: 'log/attacks',
+    icon: FaRegFileAlt,
     children: [
       {
         title: 'Attacks',
@@ -25,16 +31,19 @@ export const SiderbarContentItems = [
   {
     title: 'Custom Rules',
     href: 'custom-rules',
+    icon: AiOutlineTool,
     children: [],
   },
   {
     title: 'Web Services',
     href: 'web-services',
+    icon: MdWeb,
     children: [],
   },
   {
     title: 'System',
     href: '/system',
+    icon: AiOutlineSetting,
     children: [],
   },
 ]
