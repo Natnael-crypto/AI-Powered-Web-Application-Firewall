@@ -2,25 +2,31 @@ import React from 'react'
 import {VectorMap} from '@react-jvectormap/core'
 import {worldMill} from '@react-jvectormap/world'
 import {requestData} from '../lib/Constants'
-import RequestStat from './RequestStat'
 
 const GlobeMap: React.FC = () => {
   return (
-    <div className="w-full  flex flex-col bg-white shadow-lg rounded-xl p-6 gap-6">
-      <div className="w-full  h-96 rounded-lg shadow-xl overflow-hidden">
+    <div className="h-full flex flex-col">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-gray-800">Global Traffic Map</h2>
+        <div className="text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+          Live Data
+        </div>
+      </div>
+      
+      <div className="flex-1 rounded-lg overflow-hidden">
         <VectorMap
-          backgroundColor="#f4f4f4"
+          backgroundColor="#f8fafc"
           className="h-full w-full"
           zoomOnScroll={false}
           regionStyle={{
-            initial: {fill: '#D3D3D3', stroke: '#fff', strokeWidth: 1},
-            hover: {fill: '#228B22', cursor: 'pointer'},
+            initial: {fill: '#E2E8F0', stroke: '#fff', strokeWidth: 1},
+            hover: {fill: '#3B82F6', cursor: 'pointer'},
           }}
           series={{
             regions: [
               {
                 values: requestData,
-                scale: ['#D3D3D3', '#006400'],
+                scale: ['#E2E8F0', '#1E40AF'],
                 normalizeFunction: 'linear',
                 attribute: 'fill',
               },
@@ -29,15 +35,16 @@ const GlobeMap: React.FC = () => {
           onRegionTipShow={(_, el: any, code) => {
             const requests = requestData[code] || 0
             el.html(
-              `<strong>${el.html()}</strong><br>
-              Requests: <b>${requests.toLocaleString()}</b>`,
+              `<div style="font-family: 'Oxygen', sans-serif; padding: 6px;">
+                <div style="font-weight: 600; color: #1F2937; margin-bottom: 4px;">${el.html()}</div>
+                <div style="font-size: 12px; color: #4B5563;">
+                  Requests: <span style="font-weight: 600; color: #1E40AF;">${requests.toLocaleString()}</span>
+                </div>
+              </div>`,
             )
           }}
           map={worldMill}
         />
-      </div>
-      <div className="w-full flex flex-col gap-6">
-        <RequestStat className="w-full" />
       </div>
     </div>
   )

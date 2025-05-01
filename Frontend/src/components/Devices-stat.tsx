@@ -18,7 +18,7 @@ const BROWSER_DATA = [
 
 export default function UserClientsCard() {
   return (
-    <div className="w-2/3 bg-white rounded-2xl shadow-md p-6">
+    <div className="w-full bg-white rounded-2xl shadow-md p-6">
       <div className="flex justify-between items-center p-3">
         <p className="text-lg">User clients</p>
         <button className="text-xs text-blue-600 font-semibold hover:text-blue-700">
