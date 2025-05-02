@@ -3,6 +3,7 @@ package controllers
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+	"backend/internal/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,6 +17,18 @@ import (
 )
 
 func AddNotificationRule(c *gin.Context) {
+
+	applicationID := c.Param("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
+	}
+
 	currentUserID := c.GetString("user_id")
 
 	var input struct {
@@ -34,13 +47,18 @@ func AddNotificationRule(c *gin.Context) {
 	}
 
 	var app models.Application
-	if err := config.DB.Where("host_name = ?", input.HostName).First(&app).Error; err != nil {
+	if err := config.DB.Where("hostname = ?", input.HostName).First(&app).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "hostname does not exist in the application list"})
 		return
 	}
 
+	if app.ApplicationID != applicationID {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Incorrect hostname for the applicationID"})
+		return
+	}
+
 	var existingRule models.NotificationRule
-	if err := config.DB.Where("host_name = ? AND threat_type = ?", input.HostName, input.ThreatType).First(&existingRule).Error; err != gorm.ErrRecordNotFound {
+	if err := config.DB.Where("hostname = ? AND threat_type = ?", input.HostName, input.ThreatType).First(&existingRule).Error; err != gorm.ErrRecordNotFound {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "notification rule already exists for this hostname and threat type"})
 		return
 	}
@@ -90,7 +108,42 @@ func AddNotificationRule(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "notification rule added successfully"})
 }
 
+func GetNotificationRule(c *gin.Context) {
+
+	applicationID := c.Param("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
+	}
+
+	var app models.Application
+	if err := config.DB.Where("application_id = ?", applicationID).First(&app).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to fetch notification rules"})
+		return
+	}
+
+	var rules []models.NotificationRule
+
+	if err := config.DB.Where("hostname = ?", app.HostName).Find(&rules).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch notification rules"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"notification_rules": rules})
+}
+
 func GetNotificationRules(c *gin.Context) {
+
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
 	var rules []models.NotificationRule
 
 	if err := config.DB.Find(&rules).Error; err != nil {
@@ -109,6 +162,21 @@ func UpdateNotificationRule(c *gin.Context) {
 	if err := config.DB.Where("id = ?", ruleID).First(&rule).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "notification rule not found"})
 		return
+	}
+
+	var app models.Application
+	if err := config.DB.Where("hostname = ?", rule.HostName).First(&app).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to fetch notification rules"})
+		return
+	}
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, app.ApplicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
 	}
 
 	if currentUserID != rule.CreatedBy {
@@ -152,7 +220,7 @@ func UpdateNotificationRule(c *gin.Context) {
 	if input.TimeWindow != 0 {
 		rule.TimeWindow = input.TimeWindow
 	}
-	if input.IsActive != false {
+	if input.IsActive {
 		rule.IsActive = input.IsActive
 	}
 	if input.UsersID != nil {
@@ -180,6 +248,21 @@ func DeleteNotificationRule(c *gin.Context) {
 		return
 	}
 
+	var app models.Application
+	if err := config.DB.Where("hostname = ?", existingRule.HostName).First(&app).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to fetch notification rules"})
+		return
+	}
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, app.ApplicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
+	}
+
 	if currentUserID != existingRule.CreatedBy {
 		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
 		return
@@ -202,6 +285,21 @@ func ToggleNotificationRuleStatus(c *gin.Context) {
 	if err := config.DB.Where("id = ?", ruleID).First(&existingRule).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "notification rule not found"})
 		return
+	}
+
+	var app models.Application
+	if err := config.DB.Where("hostname = ?", existingRule.HostName).First(&app).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to fetch notification rules"})
+		return
+	}
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, app.ApplicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
 	}
 
 	if currentUserID != existingRule.CreatedBy {
@@ -231,6 +329,11 @@ func AddNotificationConfig(c *gin.Context) {
 		Email  string `json:"email" binding:"required,email"`
 	}
 
+	if input.UserID != c.GetString("user_id") {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -250,7 +353,7 @@ func AddNotificationConfig(c *gin.Context) {
 }
 
 func GetNotificationConfig(c *gin.Context) {
-	userID := c.Param("user_id")
+	userID := c.GetString("user_id")
 
 	var configEntry models.NotificationConfig
 	if err := config.DB.Where("user_id = ?", userID).First(&configEntry).Error; err != nil {
@@ -283,8 +386,8 @@ func GetNotificationConfig_local(c *gin.Context) (string, error) {
 }
 
 func UpdateNotificationConfig(c *gin.Context) {
-	userID := c.Param("user_id")
-	currentUserID := c.GetString("user_id")
+
+	userID := c.GetString("user_id")
 
 	var input struct {
 		Email string `json:"email" binding:"required,email"`
@@ -301,11 +404,6 @@ func UpdateNotificationConfig(c *gin.Context) {
 		return
 	}
 
-	if currentUserID != configEntry.UserID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
-		return
-	}
-
 	configEntry.Email = input.Email
 
 	if err := config.DB.Save(&configEntry).Error; err != nil {
@@ -317,15 +415,9 @@ func UpdateNotificationConfig(c *gin.Context) {
 }
 
 func DeleteNotificationConfig(c *gin.Context) {
-	UserID := c.Param("user_id")
-	currentUserID := c.GetString("user_id")
+	userID := c.GetString("user_id")
 
-	if currentUserID != UserID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
-		return
-	}
-
-	if err := config.DB.Where("user_id = ?", UserID).Delete(&models.NotificationConfig{}).Error; err != nil {
+	if err := config.DB.Where("user_id = ?", userID).Delete(&models.NotificationConfig{}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete notification config"})
 		return
 	}

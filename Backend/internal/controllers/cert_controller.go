@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -8,21 +11,56 @@ import (
 
 	"backend/internal/config"
 	"backend/internal/models"
+	"backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
-func AddCert(c *gin.Context) {
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient privileges"})
-		return
+// Validation functions
+func validateCertificate(certPEM []byte) error {
+	block, _ := pem.Decode(certPEM)
+	if block == nil {
+		return errors.New("failed to parse PEM block from certificate")
 	}
+	_, err := x509.ParseCertificate(block.Bytes)
+	return err
+}
+
+func validatePrivateKey(keyPEM []byte) error {
+	block, _ := pem.Decode(keyPEM)
+	if block == nil {
+		return errors.New("failed to parse PEM block from key")
+	}
+
+	if _, err := x509.ParsePKCS1PrivateKey(block.Bytes); err == nil {
+		return nil
+	}
+	if _, err := x509.ParsePKCS8PrivateKey(block.Bytes); err == nil {
+		return nil
+	}
+	if _, err := x509.ParseECPrivateKey(block.Bytes); err == nil {
+		return nil
+	}
+
+	return errors.New("unsupported or invalid private key format")
+}
+
+func AddCert(c *gin.Context) {
 
 	applicationID := c.Param("application_id")
 	if applicationID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "application_id is required"})
 		return
+	}
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
 	}
 
 	var application models.Application
@@ -63,6 +101,17 @@ func AddCert(c *gin.Context) {
 		return
 	}
 
+	// Validate certificate and key files
+	if err := validateCertificate(certContent); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid certificate file: " + err.Error()})
+		return
+	}
+
+	if err := validatePrivateKey(keyContent); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid key file: " + err.Error()})
+		return
+	}
+
 	newCert := models.Cert{
 		CertID:        uuid.New().String(),
 		Cert:          certContent,
@@ -85,6 +134,7 @@ func AddCert(c *gin.Context) {
 	})
 }
 
+// TODO add intercptor auth
 func GetCert(c *gin.Context) {
 	applicationID := c.Query("application_id")
 	fileType := c.Query("type")
@@ -111,17 +161,24 @@ func GetCert(c *gin.Context) {
 }
 
 func UpdateCert(c *gin.Context) {
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
-	}
+
 	applicationID := c.Param("application_id")
 	fileType := c.PostForm("type")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
+	}
 
 	if fileType != "cert" && fileType != "key" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid type. Must be 'cert' or 'key'"})
 		return
 	}
+
 	var application models.Application
 	if err := config.DB.Where("application_id = ?", applicationID).First(&application).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Application not found"})
@@ -148,8 +205,16 @@ func UpdateCert(c *gin.Context) {
 	}
 
 	if fileType == "cert" {
+		if err := validateCertificate(fileContent); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid certificate file: " + err.Error()})
+			return
+		}
 		cert.Cert = fileContent
 	} else {
+		if err := validatePrivateKey(fileContent); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid key file: " + err.Error()})
+			return
+		}
 		cert.Key = fileContent
 	}
 
@@ -168,16 +233,20 @@ func UpdateCert(c *gin.Context) {
 }
 
 func DeleteCert(c *gin.Context) {
+	applicationID := c.Param("application_id")
 
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
 	}
 
-	certID := c.Param("application_id")
 	var cert models.Cert
 
-	if err := config.DB.Where("application_id = ?", certID).First(&cert).Error; err != nil {
+	if err := config.DB.Where("application_id = ?", applicationID).First(&cert).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Certificate not found"})
 		return
 	}

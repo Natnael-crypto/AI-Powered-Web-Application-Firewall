@@ -26,7 +26,7 @@ type AppConfig struct {
 	DetectBot       bool    `json:"detect_bot"`
 	WindowSize      int     `json:"window_size"`
 	BlockTime       int     `json:"block_time"`
-	HostName        string  `json:"host_name"`
+	HostName        string  `json:"hostname"`
 	ApplicationID   string  `json:"application_id"`
 	MaxPostDataSize float64 `json:"max_post_data_size" `
 	Tls             bool    `json:"tls"`

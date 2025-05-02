@@ -71,6 +71,7 @@ func AddApplication(c *gin.Context) {
 		DetectBot:       false,
 		HostName:        application.HostName,
 		MaxPostDataSize: 5.0,
+		Tls:             true,
 	}
 
 	if err := CreateAppConfigLocal(newAppConf); err != nil {
@@ -79,27 +80,39 @@ func AddApplication(c *gin.Context) {
 
 	config.Change = true
 
-	c.JSON(http.StatusCreated, gin.H{"message": "application created successfully"})
+	c.JSON(http.StatusCreated, gin.H{"message": "application created successfully", "application": application})
 
 }
 
 func GetApplication(c *gin.Context) {
-	if c.GetString("role") != "super_admin" {
+	applicationID := c.Param("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if len(appIds) == 0 {
+			c.JSON(http.StatusForbidden, gin.H{"error": "No applications assigned to user"})
+			return
+		}
+		for _, id := range appIds {
+			if id == applicationID {
+				var application models.Application
+
+				if err := config.DB.Where("application_id = ?", applicationID).First(&application).Error; err != nil {
+					c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
+					return
+				}
+
+				c.JSON(http.StatusOK, gin.H{"application": application})
+				return
+			}
+		}
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
 	}
-
-	applicationID := c.Param("application_id")
-	var application models.Application
-
-	if err := config.DB.Where("application_id = ?", applicationID).First(&application).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"application": application})
 }
 
+// TODO Add Auth for the intercptor
 func GetAllApplications(c *gin.Context) {
 
 	var applications []models.Application
@@ -112,9 +125,15 @@ func GetAllApplications(c *gin.Context) {
 }
 
 func UpdateApplication(c *gin.Context) {
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
+	applicationID := c.Param("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
 	}
 
 	var input struct {
@@ -126,8 +145,6 @@ func UpdateApplication(c *gin.Context) {
 		Status          bool   `json:"status" binding:"required"`
 		Tls             bool   `json:"tls"`
 	}
-
-	applicationID := c.Param("application_id")
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		log.Printf("Error binding JSON for application update: %v", err)
@@ -153,7 +170,7 @@ func UpdateApplication(c *gin.Context) {
 	if err := config.DB.Model(&application).Where("application_id = ?", applicationID).Updates(map[string]interface{}{
 		"application_name": application.ApplicationName,
 		"description":      application.Description,
-		"host_name":        application.HostName,
+		"hostname":         application.HostName,
 		"ip_address":       application.IpAddress,
 		"port":             application.Port,
 		"status":           application.Status,

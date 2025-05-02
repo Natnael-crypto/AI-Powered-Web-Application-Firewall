@@ -94,57 +94,6 @@ func GetAllAdmins(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"admins": admins})
 }
 
-func UpdateAdmin(c *gin.Context) {
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
-	}
-
-	var input struct {
-		Username    string `json:"username" binding:"required,min=4,max=12"`
-		NewPassword string `json:"new_password" binding:"required,min=8,max=25"`
-	}
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	var admin models.User
-	if err := config.DB.Where("username = ?", input.Username).First(&admin).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "admin not found"})
-		return
-	}
-
-	if admin.Role == "super_admin" && c.GetString("user_id") != admin.UserID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "super admin cannot be updated by this user"})
-		return
-	}
-
-	var hashedPassword string
-	var err error
-
-	if input.NewPassword != "" {
-		hashedPassword, err = utils.HashPassword(input.NewPassword)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash new password"})
-			return
-		}
-		admin.PasswordHash = hashedPassword
-	}
-
-	admin.UpdatedAt = time.Now()
-
-	if err := config.DB.Model(&admin).Where("user_id = ?", admin.UserID).Updates(map[string]interface{}{
-		"password_hash": admin.PasswordHash,
-		"updated_at":    admin.UpdatedAt,
-	}).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update admin"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "admin updated successfully"})
-}
-
 func DeleteAdmin(c *gin.Context) {
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})

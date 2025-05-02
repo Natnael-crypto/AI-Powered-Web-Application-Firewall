@@ -3,6 +3,7 @@ package controllers
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+	"backend/internal/utils"
 	"fmt"
 	"log"
 	"net/http"
@@ -32,65 +33,6 @@ func GetAppConfig(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": appConf})
 
-}
-
-func CreateAppConfig(c *gin.Context) {
-
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
-	}
-
-	var input struct {
-		ApplicationID   string  `json:application_id`
-		RateLimit       int     `json:"rate_limit" binding:"numeric"`
-		WindowSize      int     `json:"window_size" binding:"numeric"`
-		BlockTime       int     `json:"block_time" binding:"numeric"`
-		DetectBot       bool    `json:detect_bot`
-		HostName        string  `json:"hostname" binding:"required,max=40"`
-		MaxPostDataSize float64 `json:"max_post_data_size" `
-		Tls             bool    `json:"tls" binding:"required"`
-	}
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	var existingAppConfig models.AppConf
-
-	if err := config.DB.Where("application_id=?", input.ApplicationID).First(&existingAppConfig).Error; err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "A configuration entry already exists for this Application"})
-		return
-	}
-
-	var existingApplication models.Application
-
-	if err := config.DB.Where("application_id=?", input.ApplicationID).First(&existingApplication).Error; err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Application does not exist"})
-		return
-	}
-
-	newAppConf := models.AppConf{
-		ID:              uuid.New().String(),
-		ApplicationID:   input.ApplicationID,
-		RateLimit:       input.RateLimit,
-		WindowSize:      input.WindowSize,
-		BlockTime:       input.BlockTime,
-		DetectBot:       input.DetectBot,
-		HostName:        input.HostName,
-		MaxPostDataSize: input.MaxPostDataSize,
-		Tls:             input.Tls,
-	}
-
-	if err := config.DB.Create(&newAppConf).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create configuration"})
-		return
-	}
-
-	config.Change = true
-
-	c.JSON(http.StatusCreated, gin.H{"message": "Configuration created successfully", "config": newAppConf})
 }
 
 func CreateAppConfigLocal(conf models.AppConf) error {
@@ -173,9 +115,15 @@ func UpdateListeningPort(c *gin.Context) {
 }
 
 func UpdateRateLimit(c *gin.Context) {
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
+	applicationID := c.Param("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
 	}
 
 	var input struct {
@@ -190,10 +138,8 @@ func UpdateRateLimit(c *gin.Context) {
 		return
 	}
 
-	appId := c.Param("application_id")
-
 	var conf models.AppConf
-	if err := config.DB.Where("application_id = ?", appId).First(&conf).Error; err != nil {
+	if err := config.DB.Where("application_id = ?", applicationID).First(&conf).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "App configuration not found"})
 		return
 	}
@@ -213,9 +159,15 @@ func UpdateRateLimit(c *gin.Context) {
 }
 
 func UpdateTls(c *gin.Context) {
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
+	applicationID := c.Param("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
 	}
 
 	var input struct {
@@ -228,10 +180,8 @@ func UpdateTls(c *gin.Context) {
 		return
 	}
 
-	appId := c.Param("application_id")
-
 	var conf models.AppConf
-	if err := config.DB.Where("application_id = ?", appId).First(&conf).Error; err != nil {
+	if err := config.DB.Where("application_id = ?", applicationID).First(&conf).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "App configuration not found"})
 		return
 	}
@@ -249,9 +199,16 @@ func UpdateTls(c *gin.Context) {
 }
 
 func UpdateDetectBot(c *gin.Context) {
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
+
+	applicationID := c.Param("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
 	}
 
 	var input struct {
@@ -264,10 +221,8 @@ func UpdateDetectBot(c *gin.Context) {
 		return
 	}
 
-	appId := c.Param("application_id")
-
 	var conf models.AppConf
-	if err := config.DB.Where("application_id = ?", appId).First(&conf).Error; err != nil {
+	if err := config.DB.Where("application_id = ?", applicationID).First(&conf).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "App configuration not found"})
 		return
 	}
@@ -319,9 +274,16 @@ func UpdateRemoteLogServer(c *gin.Context) {
 }
 
 func UpdateMaxPosyDataSize(c *gin.Context) {
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
+
+	applicationID := c.Param("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
 	}
 
 	var input struct {
@@ -333,10 +295,8 @@ func UpdateMaxPosyDataSize(c *gin.Context) {
 		return
 	}
 
-	appId := c.Param("application_id")
-
 	var conf models.AppConf
-	if err := config.DB.Where("application_id = ?", appId).First(&conf).Error; err != nil {
+	if err := config.DB.Where("application_id = ?", applicationID).First(&conf).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "App configuration not found"})
 		return
 	}
