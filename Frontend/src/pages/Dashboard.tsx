@@ -5,7 +5,6 @@ import GlobeMap from '../components/GlobeMap'
 import UserClientsCard from '../components/Devices-stat'
 import ResponseStatus from '../components/ResponseStatus'
 import RequestStatus from '../components/RequestStatus'
-import RequestStat from '../components/RequestStat'
 
 const cardStyles = "bg-white shadow-lg rounded-xl transition-shadow duration-300 border border-gray-100 hover:shadow-xl";
 
@@ -41,15 +40,6 @@ function Dashboard() {
           </div>
         </Card>
       </section>
-
-      {/* Request Statistics
-      <section>
-        <Card className={cardStyles}>
-          <div className="h-[500px] w-full p-4">
-            <RequestStat />
-          </div>
-        </Card>
-      </section> */}
 
       {/* Charts */}
       <section className="">
