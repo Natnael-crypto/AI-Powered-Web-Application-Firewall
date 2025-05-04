@@ -1,7 +1,7 @@
-import { AiOutlineRight } from 'react-icons/ai'
-import { Link, useLocation } from 'react-router-dom'
+import {AiOutlineRight} from 'react-icons/ai'
+import {Link, useLocation} from 'react-router-dom'
 import SidebarItem from './SidebarItem'
-import { useEffect, useState } from 'react'
+import {useEffect, useState} from 'react'
 
 interface SidebarItemType {
   title: string
@@ -15,10 +15,10 @@ interface SidebarItemProps {
   className?: string
   openItem?: SidebarItemType
   changeOpenItem?: (item: SidebarItemType) => void
-  Icon?: React.ComponentType<{ className?: string }>
+  Icon?: React.ComponentType<{className?: string}>
 }
 
-function SidebarContent({ title, href, children, changeOpenItem, Icon }: SidebarItemProps) {
+function SidebarContent({title, href, children, changeOpenItem, Icon}: SidebarItemProps) {
   const location = useLocation()
   const [isOpen, setOpen] = useState(false)
   const [_, setActive] = useState(false)
@@ -45,13 +45,13 @@ function SidebarContent({ title, href, children, changeOpenItem, Icon }: Sidebar
     <div className="transition-all duration-200 ease-in-out w-full">
       <Link
         to={href}
-        onClick={() => changeOpenItem?.({ title, href })}
-        className={`group flex w-full items-center justify-between gap-x-3 px-6 py-3 rounded-md transition-all duration-300 cursor-pointer
+        onClick={() => changeOpenItem?.({title, href})}
+        className={`group flex w-full items-center justify-between gap-x-3 px-6 py-3  transition-all duration-300 cursor-pointer
           ${isOpen ? 'bg-[#303750] text-white shadow-md' : 'text-gray-500 hover:bg-gray-600 hover:text-white'}
         `}
       >
         <div className={`flex items-center gap-x-3 `}>
-        {Icon && (
+          {Icon && (
             <Icon
               className={`w-5 h-5 shrink-0 transition-colors duration-300 ${
                 isOpen ? 'text-white' : 'text-gray-400 group-hover:text-white'
@@ -84,7 +84,7 @@ function SidebarContent({ title, href, children, changeOpenItem, Icon }: Sidebar
               title={child.title}
               href={child.href}
               isActive={location.pathname === child.href}
-              className={`text-sm py-2 px-3 rounded-md transition-colors duration-200 ${
+              className={`text-sm py-2 px-3  transition-colors duration-200 ${
                 location.pathname.replace(/^\/+/, '') === child.href.replace(/^\/+/, '')
                   ? 'bg-[#303750] text-white'
                   : 'text-gray-500 hover:bg-gray-600 hover:text-white'

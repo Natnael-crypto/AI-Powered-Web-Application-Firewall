@@ -58,31 +58,31 @@ function System() {
   return (
     <div className="flex flex-col gap-8 px-6 py-10 bg-gradient-to-br from-slate-100 to-white min-h-screen">
       <div className="max-w-7xl w-full mx-auto space-y-8">
-        <section className="bg-white border border-slate-200 rounded-2xl shadow-lg p-8">
+        <section className="bg-white border border-slate-200 xl shadow-lg p-8">
           <h2 className="text-xl font-semibold text-slate-800 mb-4">Manage Users</h2>
           <ManageUser />
         </section>
 
-        <section className="bg-white border border-slate-200 rounded-2xl shadow-lg p-8">
+        <section className="bg-white border border-slate-200 xl shadow-lg p-8">
           <h2 className="text-xl font-semibold text-slate-800 mb-4">User Table</h2>
           <Table columns={columns} data={mockUserData} />
         </section>
 
-        <section className="bg-white border border-slate-200 rounded-2xl shadow-lg p-8">
+        <section className="bg-white border border-slate-200 xl shadow-lg p-8">
           <h2 className="text-xl font-semibold text-slate-800 mb-4">
             Clean Data Settings
           </h2>
           <CleanDataSettings />
         </section>
 
-        <section className="bg-white border border-slate-200 rounded-2xl shadow-lg p-8">
+        <section className="bg-white border border-slate-200 xl shadow-lg p-8">
           <h2 className="text-xl font-semibold text-slate-800 mb-4">
             Attack Alert Settings
           </h2>
           <AttackAlertSettings />
         </section>
 
-        <section className="bg-white border border-slate-200 rounded-2xl shadow-lg p-8">
+        <section className="bg-white border border-slate-200 xl shadow-lg p-8">
           <h2 className="text-xl font-semibold text-slate-800 mb-4">Syslog Settings</h2>
           <SyslogSettings />
         </section>

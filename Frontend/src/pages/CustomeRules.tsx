@@ -27,7 +27,7 @@ const columns: ColumnDef<Rule>[] = [
     accessorKey: 'is_active',
     cell: ({row}) => (
       <span
-        className={`px-3 py-1 rounded-full text-sm font-medium ${
+        className={`px-3 py-1 ull text-sm font-medium ${
           row.original.is_active
             ? 'bg-green-100 text-green-800'
             : 'bg-red-100 text-red-800'
@@ -95,7 +95,7 @@ function CustomRules() {
   return (
     <div className="space-y-4">
       <CreateRuleModal isModalOpen={isModalOpen} onClose={toggleModal} />
-      <Card className="flex justify-between items-center py-4 px-6 shadow-md bg-white rounded-lg">
+      <Card className="flex justify-between items-center py-4 px-6 shadow-md bg-white ">
         <h2 className="text-lg font-semibold">Custom Rules</h2>
         <Button
           classname="text-white uppercase"
@@ -106,7 +106,7 @@ function CustomRules() {
           Add Rule
         </Button>
       </Card>
-      <Card className="shadow-md p-4 bg-white rounded-lg">
+      <Card className="shadow-md p-4 bg-white ">
         <Table columns={columns} data={mockData} />
       </Card>
     </div>

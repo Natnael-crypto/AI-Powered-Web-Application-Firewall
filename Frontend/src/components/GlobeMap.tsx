@@ -8,12 +8,12 @@ const GlobeMap: React.FC = () => {
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-800">Global Traffic Map</h2>
-        <div className="text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+        <div className="text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1 ull">
           Live Data
         </div>
       </div>
-      
-      <div className="flex-1 rounded-lg overflow-hidden">
+
+      <div className="flex-1  overflow-hidden">
         <VectorMap
           backgroundColor="#f8fafc"
           className="h-full w-full"

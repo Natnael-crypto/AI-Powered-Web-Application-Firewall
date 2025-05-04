@@ -38,7 +38,7 @@ const Modal: React.FC<ModalProps> = ({isOpen, onClose, children, title}) => {
       role="dialog"
       aria-modal="true"
     >
-      <div className="bg-white rounded-xl shadow-2xl w-11/12 max-w-2xl p-6 animate-scaleFadeIn">
+      <div className="bg-white  shadow-2xl w-11/12 max-w-2xl p-6 animate-scaleFadeIn">
         <div className="flex items-start justify-between">
           {title && <h3 className="text-lg font-semibold text-gray-800">{title}</h3>}
           <button

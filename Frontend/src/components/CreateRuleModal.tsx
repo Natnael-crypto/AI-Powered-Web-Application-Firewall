@@ -74,7 +74,7 @@ const CreateRuleModal: React.FC<ModalProps> = ({ruleId, onClose, isModalOpen}) =
                 name={name}
                 value={payload[name as keyof RuleUpdatePayload] as string}
                 onChange={handleChange}
-                className="w-full px-4 py-2 mt-1 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+                className="w-full px-4 py-2 mt-1 border  shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
               />
             </div>
           ))}
@@ -94,13 +94,13 @@ const CreateRuleModal: React.FC<ModalProps> = ({ruleId, onClose, isModalOpen}) =
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 bg-gray-200 hover:bg-gray-300 rounded-lg"
+              className="px-4 py-2 text-gray-600 bg-gray-200 hover:bg-gray-300 "
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg"
+              className="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 "
             >
               Update Rule
             </button>

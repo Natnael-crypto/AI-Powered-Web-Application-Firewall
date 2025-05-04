@@ -43,14 +43,14 @@ const LoginPage = () => {
       <motion.div
         initial={{opacity: 0, y: 20}}
         animate={{opacity: 1, y: 0}}
-        className="bg-white p-12 rounded-3xl shadow-xl w-full max-w-2xl mx-4"
+        className="bg-white p-12  shadow-xl w-full max-w-2xl mx-4"
       >
         <motion.div
           initial={{scale: 0.95}}
           animate={{scale: 1}}
           className="flex justify-center mb-12"
         >
-          <div className="h-24 w-24 bg-gray-900 rounded-2xl flex items-center justify-center shadow-lg">
+          <div className="h-24 w-24 bg-gray-900 xl flex items-center justify-center shadow-lg">
             <LogInIcon className="h-12 w-12 text-white" />
           </div>
         </motion.div>
@@ -63,7 +63,7 @@ const LoginPage = () => {
           <motion.p
             initial={{opacity: 0}}
             animate={{opacity: 1}}
-            className="text-red-500 text-center mb-6 p-4 bg-red-50 rounded-xl text-lg"
+            className="text-red-500 text-center mb-6 p-4 bg-red-50  text-lg"
           >
             {errorMessage}
           </motion.p>
@@ -78,7 +78,7 @@ const LoginPage = () => {
               type="text"
               value={formData.username}
               onChange={e => setFormData({...formData, username: e.target.value})}
-              className="pl-12 w-full px-6 py-4 text-lg border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all"
+              className="pl-12 w-full px-6 py-4 text-lg border border-gray-200  bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all"
               placeholder="Username"
             />
             {errors.username && (
@@ -100,7 +100,7 @@ const LoginPage = () => {
               type="password"
               value={formData.password}
               onChange={e => setFormData({...formData, password: e.target.value})}
-              className="pl-12 w-full px-6 py-4 text-lg border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all"
+              className="pl-12 w-full px-6 py-4 text-lg border border-gray-200  bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all"
               placeholder="Password"
             />
             {errors.password && (
@@ -119,7 +119,7 @@ const LoginPage = () => {
               whileHover={{scale: 1.01}}
               whileTap={{scale: 0.99}}
               type="submit"
-              className="w-full bg-gray-900 text-white py-4 rounded-xl text-lg font-medium shadow-lg hover:bg-gray-800 transition-all flex items-center justify-center gap-3"
+              className="w-full bg-gray-900 text-white py-4  text-lg font-medium shadow-lg hover:bg-gray-800 transition-all flex items-center justify-center gap-3"
             >
               <>
                 <LogInIcon className="h-6 w-6" />

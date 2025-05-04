@@ -24,7 +24,7 @@ const columns: ColumnDef<Application>[] = [
     accessorKey: 'status',
     cell: ({row}) => (
       <span
-        className={`px-3 py-1 rounded-full text-sm font-medium ${
+        className={`px-3 py-1 ull text-sm font-medium ${
           row.original.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
         }`}
       >
@@ -37,7 +37,7 @@ const columns: ColumnDef<Application>[] = [
     accessorKey: 'tls',
     cell: ({row}) => (
       <span
-        className={`px-3 py-1 rounded-full text-sm font-medium ${
+        className={`px-3 py-1 ull text-sm font-medium ${
           row.original.tls ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
         }`}
       >
@@ -147,7 +147,7 @@ function WebService() {
           Add Service
         </Button>
       </Card>
-      <Card className="shadow-md p-4 bg-white rounded-lg">
+      <Card className="shadow-md p-4 bg-white ">
         <Table columns={columns} data={mockData} />
       </Card>
     </div>

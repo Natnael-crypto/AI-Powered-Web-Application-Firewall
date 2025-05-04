@@ -31,7 +31,7 @@ function Navbar() {
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="p-2 rounded-full hover:bg-red-50 transition-colors duration-200"
+          className="p-2 ull hover:bg-red-50 transition-colors duration-200"
           title="Logout"
         >
           <LuLogOut

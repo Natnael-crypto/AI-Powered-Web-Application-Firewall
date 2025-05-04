@@ -21,7 +21,7 @@ const data2 = [
 ]
 
 const RequestStatus = () => (
-  <div className="h-full flex flex-col gap-4 bg-white rounded-xl shadow-md p-4">
+  <div className="h-full flex flex-col gap-4 bg-white  shadow-md p-4">
     <h2 className="text-lg font-semibold text-gray-800 px-2">Traffic Analysis</h2>
     <div className="flex-1 flex flex-col gap-4">
       <CustomLineChart data={data} title="Blocking Status" max={4000} />

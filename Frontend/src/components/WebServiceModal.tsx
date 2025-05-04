@@ -55,7 +55,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({isOpen, onClose, onSub
               name="application_name"
               value={form.application_name}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="w-full  border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               placeholder="Enter application name"
             />
           </div>
@@ -69,7 +69,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({isOpen, onClose, onSub
               value={form.description}
               onChange={handleChange}
               rows={3}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+              className="w-full  border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
               placeholder="Enter description"
             />
           </div>
@@ -84,7 +84,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({isOpen, onClose, onSub
                 name="hostname"
                 value={form.hostname}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-full  border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 placeholder="example.com"
               />
             </div>
@@ -98,7 +98,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({isOpen, onClose, onSub
                 name="ip_address"
                 value={form.ip_address}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-full  border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 placeholder="192.168.1.1"
               />
             </div>
@@ -111,7 +111,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({isOpen, onClose, onSub
               name="port"
               value={form.port}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="w-full  border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               placeholder="8080"
             />
           </div>

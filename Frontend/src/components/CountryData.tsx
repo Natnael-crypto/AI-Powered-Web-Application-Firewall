@@ -15,7 +15,7 @@ const CountryData = () => {
   ]
 
   return (
-    <div className="px-5 py-3 rounded-lg w-max space-y-10">
+    <div className="px-5 py-3  w-max space-y-10">
       <div className="border border-1 p-1 border-gray-300 flex self-end">
         <Button
           size="s"
@@ -35,10 +35,7 @@ const CountryData = () => {
       <h2 className="text-2xl font-bold mb-4 text-gray-800">Country Data</h2>
       <ul className="space-y-2">
         {data.map((item, index) => (
-          <li
-            key={index}
-            className="p-3 space-y-2  rounded-lg  hover:shadow-md transition-shadow"
-          >
+          <li key={index} className="p-3 space-y-2    hover:shadow-md transition-shadow">
             <div className="flex justify-between items-center gap-16">
               <span className="text-gray-700 font-medium">{item.country}</span>
               <span className="text-gray-600">{item.value}</span>

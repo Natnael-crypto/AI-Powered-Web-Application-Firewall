@@ -10,7 +10,7 @@ const OS_DATA = [
 
 export default function ResponseStatus() {
   return (
-    <div className="w-full bg-white rounded-2xl shadow-md p-6">
+    <div className="w-full bg-white xl shadow-md p-6">
       <div className="flex justify-between items-center p-3">
         <p className="text-lg">User clients</p>
         <button className=" text-xs text-blue-600 font-semibold hover:text-blue-700">
@@ -44,7 +44,7 @@ export default function ResponseStatus() {
             <div key={os.name} className="flex items-center  gap-32">
               <div className="flex items-center gap-2">
                 <span
-                  className="w-2.5 h-2.5 rounded-full flex-shrink-0 "
+                  className="w-2.5 h-2.5 ull flex-shrink-0 "
                   style={{backgroundColor: os.color}}
                 />
                 <span className="truncate max-w-[8rem]">{os.name}</span>

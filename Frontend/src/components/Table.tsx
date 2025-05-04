@@ -20,7 +20,7 @@ function Table<T extends object>({columns, data, className}: TableProps<T>) {
   })
 
   return (
-    <div className={clsx('w-full  shadow-md rounded-lg', className)}>
+    <div className={clsx('w-full  shadow-md ', className)}>
       <table className="min-w-full table-auto border-collapse bg-white">
         <thead>
           {table.getHeaderGroups().map(headerGroup => (

@@ -32,7 +32,7 @@ function AttackLogTable() {
       accessorKey: 'status',
       cell: ({getValue}: CellContext<RequestLog, unknown>) => (
         <div
-          className={`rounded-full py-1 px-3 text-white text-xs font-medium shadow-sm inline-block ${
+          className={`ull py-1 px-3 text-white text-xs font-medium shadow-sm inline-block ${
             (getValue() as string).toLowerCase() === 'blocked'
               ? 'bg-red-600'
               : 'bg-yellow-500 text-gray-900'
@@ -101,7 +101,7 @@ function AttackLogTable() {
     )
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200">
+    <div className="bg-white p-6 xl shadow-xl border border-gray-200">
       <h2 className="text-2xl font-bold text-green-800 mb-4">Request Logs</h2>
       <Table data={data || []} columns={columns} />
     </div>
