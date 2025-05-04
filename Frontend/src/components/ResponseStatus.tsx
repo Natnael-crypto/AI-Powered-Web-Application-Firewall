@@ -10,12 +10,9 @@ const OS_DATA = [
 
 export default function ResponseStatus() {
   return (
-    <div className="w-full bg-white rounded-2xl shadow-md p-6">
+    <div className="w-full bg-white rounded-md shadow-md p-6">
       <div className="flex justify-between items-center p-3">
-        <p className="text-lg">User clients</p>
-        <button className=" text-xs text-blue-600 font-semibold hover:text-blue-700">
-          MORE
-        </button>
+        <p className="text-lg">Response Status Code</p>
       </div>
       <div className="flex  items-center gap-6">
         <div className="w-full sm:w-60 h-60 ">

@@ -66,17 +66,15 @@ func InitializeRoutes(r *gin.Engine) {
 	requests := authorized.Group("/requests")
 	{
 		requests.GET("/", controllers.GetRequests)
-		requests.GET("/stats", controllers.GetRequestStats)
-		requests.GET("/blocked-stats", controllers.GetBlockedStats)
+		requests.GET("/overall-stat", controllers.GetOverallStats)
+		requests.GET("/:request_id", controllers.GetRequestByID)
 		requests.GET("/requests-per-minute", controllers.GetRequestsPerMinute)
-		requests.GET("/top-blocked-countries", controllers.GetTopBlockedCountries)
-		requests.GET("/all-blocked-countries", controllers.GetAllBlockedCountries)
+		requests.GET("/all-countries-stat", controllers.GetAllCountriesStat)
 		requests.GET("/os-stats", controllers.GetClientOSStats)
-		requests.GET("/response-status-stats", controllers.GetResponseStatusStats)
+		requests.GET("/response-status-stat", controllers.GetResponseStatusStats)
 		requests.GET("/most-targeted-endpoints", controllers.GetMostTargetedEndpoints)
 		requests.GET("/top-attack-types", controllers.GetTopThreatTypes)
 		requests.DELETE("/delete", controllers.DeleteFilteredRequests)
-
 	}
 	r.POST("/batch", controllers.HandleBatchRequests)
 
@@ -132,5 +130,19 @@ func InitializeRoutes(r *gin.Engine) {
 		notification_config.PUT("/", controllers.UpdateNotificationConfig)
 		notification_config.DELETE("/", controllers.DeleteNotificationConfig)
 	}
+
+	ai_analysis := authorized.Group("/")
+	{
+		ai_analysis.POST("queue-analysis", controllers.QueueRequestForAnalysis)
+		r.POST("/model/train", controllers.CreateModelTrainingRequest)
+		r.POST("/model/select", controllers.SelectActiveModel)
+		r.GET("/models", controllers.GetModels)
+	}
+
+	r.GET("/ml/fetch-analysis", controllers.FetchAndAnalyzeRequests)
+	r.POST("/ml/submit-analysis", controllers.SubmitAnalysisResults)
+	r.GET("/ml/model/untrained", controllers.GetUntrainedModelForML)
+	r.POST("/ml/model/results", controllers.SubmitModelResults)
+	r.GET("/ml/model/selected", controllers.GetSelectedModel)
 
 }

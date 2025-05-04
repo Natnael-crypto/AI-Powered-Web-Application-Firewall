@@ -58,3 +58,14 @@ export const requestData: Record<string, number> = {
   AU: 150000,
   RU: 200000,
 }
+
+export const blockedRequestData: Record<string, number> = {
+  US: 1200,
+  IN: 8000,
+  FR: 300,
+  CN: 7000,
+  DE: 50000,
+  BR: 4000,
+  AU: 150000,
+  RU: 2000,
+}

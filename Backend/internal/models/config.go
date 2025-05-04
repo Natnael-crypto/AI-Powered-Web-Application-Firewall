@@ -1,7 +1,7 @@
 package models
 
 type Conf struct {
-	ID              string `json:id gorm:"primaryKey"`
+	ID              string `json:"id" gorm:"primaryKey"`
 	ListeningPort   string `json:"listening_port"  binding:"default=80"`
 	RemoteLogServer string `json:"remote_logServer" `
 }

@@ -58,6 +58,8 @@ func AddUserToApplication(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "user assigned to application successfully"})
 }
 
+
+
 func UpdateUserToApplication(c *gin.Context) {
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
@@ -130,3 +132,4 @@ func DeleteUserToApplication(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "user to application assignment deleted successfully"})
 }
+

@@ -15,7 +15,7 @@ type LineChartProps = {
 
 const CustomLineChart: React.FC<LineChartProps> = ({data, title = 'Line Chart', max}) => {
   return (
-    <Card className="flex flex-col w-full h-1/2 p-4 space-y-3 bg-white rounded-lg shadow-md">
+    <Card className="flex flex-col w-full h-1/2 p-4 space-y-3 bg-white rounded-md shadow-sm border-2">
       <div className="flex justify-between items-center">
         <h3 className="text-base font-medium text-gray-700">{title}</h3>
         {max !== undefined && (

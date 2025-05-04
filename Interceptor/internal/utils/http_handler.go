@@ -27,6 +27,9 @@ type MessageModel struct {
 	RateLimited     bool   `json:"rate_limited"`
 	UserAgent       string `json:"user_agent"`
 	Token           string `json:"token"`
+	AIResult        bool   `json:"ai_result"`
+	AIThreatType    string `json:"ai_threat_type"`
+	RuleDetected    bool   `json:"rule_detected"`
 }
 
 var (

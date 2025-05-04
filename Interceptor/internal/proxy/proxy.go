@@ -60,11 +60,6 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	maintenanceLock.RUnlock()
 
-	if r.URL.Path == "/favicon.ico" {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-
 	ip := strings.Split(r.RemoteAddr, ":")[0]
 	hostname := r.Host
 
@@ -101,6 +96,9 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 			UserAgent:       r.UserAgent(),
 			Body:            "",
 			Token:           WsKey,
+			AIResult:        false,
+			RuleDetected:    false,
+			AIThreatType:    "",
 		}
 		utils.SendToBackend(message)
 
@@ -144,6 +142,9 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		RateLimited:     false,
 		UserAgent:       r.UserAgent(),
 		Body:            body,
+		AIResult:        false,
+		RuleDetected:    false,
+		AIThreatType:    "",
 	}
 
 	if request_body_size >= application_config[hostname].MaxPostDataSize {
@@ -158,6 +159,8 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		message.ResponseCode = http.StatusForbidden
 		message.Status = "blocked"
 		message.Token = WsKey
+		message.RuleDetected = true
+
 		utils.SendToBackend(message)
 		return
 	}

@@ -17,4 +17,7 @@ type Request struct {
 	GeoLocation     string  `json:"geo_location" gorm:"not null"`
 	RateLimited     bool    `json:"rate_limited" gorm:"not null"`
 	UserAgent       string  `json:"user_agent" gorm:"not null"`
+	AIResult        bool    `json:"ai_result" grom:"not null"`
+	AIThreatType    string  `json:"ai_threat_type" grom:"not null"`
+	RuleDetected    bool    `json:"rule_detected" grom:"not null"`
 }

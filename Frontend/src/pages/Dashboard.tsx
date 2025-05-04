@@ -5,32 +5,73 @@ import GlobeMap from '../components/GlobeMap'
 import UserClientsCard from '../components/Devices-stat'
 import ResponseStatus from '../components/ResponseStatus'
 import RequestStatus from '../components/RequestStatus'
+import TopEndpointsChart from '../components/TopEndpointsChart'
+import TopThreatsChart from '../components/TopThreatsChart'
+import { useState } from 'react'
+import FilterBar from '../components/FilterBar'
 
-const cardStyles = "bg-white shadow-lg rounded-xl transition-shadow duration-300 border border-gray-100 hover:shadow-xl";
+const cardStyles = "bg-white shadow-md rounded-md transition-shadow duration-300 border border-gray-100 hover:shadow-lg";
 
 function Dashboard() {
+
+  const [selectedApp, setSelectedApp] = useState('All')
+  const [timeRange, setTimeRange] = useState('24h')
+  
   return (
     <main className="flex flex-col gap-6 w-full">
+
+      <FilterBar
+        selectedApp={selectedApp}
+        setSelectedApp={setSelectedApp}
+        timeRange={timeRange}
+        setTimeRange={setTimeRange}
+      />
       
-      {/* Top Statistics */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className={`flex flex-col justify-center ${cardStyles}`}>
+      {/* Top Security Overview */}
+      <section className="grid grid-cols-1 md:grid-cols-6 gap-7">
+        {/* Total Requests */}
+        <Card className={`col-span-1 flex flex-col justify-center ${cardStyles}`}>
           <StatisticCard
-            className="h-full w-full p-6 hover:bg-gray-50 transition-colors duration-300"
+            className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300"
             label="Total Requests"
-            value={700}
+            value="254320"
           />
         </Card>
-        <Card className={`items-center ${cardStyles}`}>
+
+        {/* Today's Security Summary */}
+        <Card className={`col-span-2 items-center ${cardStyles}`}>
           <StatisticGroup
             stats={[
-              { label: 'Today Blocked', value: 700 },
-              { label: 'Today Attack IP', value: 20 },
+              { label: 'Blocked Requests', value: '1024' },
+              { label: 'Malicious IPs Blocked', value: 36 },
             ]}
-            className="h-full w-full p-6 hover:bg-gray-50 transition-colors duration-300"
+            className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300"
+          />
+        </Card>
+
+        {/* Detection Method Breakdown */}
+        <Card className={`col-span-2 items-center ${cardStyles}`}>
+          <StatisticGroup
+            stats={[
+              { label: 'AI-Based Detections', value: 718 },
+              { label: 'Rule-Based Detections', value: 306 },
+            ]}
+            className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300"
+          />
+        </Card>
+
+        {/* Live Traffic Rate */}
+        <Card className={`col-span-1 flex flex-col justify-center ${cardStyles}`}>
+          <StatisticCard
+            className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300"
+            label="Live Traffic Rate"
+            value="122"
           />
         </Card>
       </section>
+
+
+
 
       {/* Globe Map */}
       <section>
@@ -41,18 +82,32 @@ function Dashboard() {
         </Card>
       </section>
 
+       
+
       {/* Charts */}
       <section className="">
-          <div className="h-[500px] w-full">
+          <div className="w-full h-[500px]">
             <RequestStatus />
           </div>
       </section>
+
+      {/* Endpoint & Threat Charts */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className={cardStyles}>
+          <TopEndpointsChart  />
+        </Card>
+        <Card className={cardStyles}>
+          <TopThreatsChart/>
+        </Card>
+      </section>
+
+
       <section className="">
         <div className="grid grid-cols-2 gap-4">
-            <div className=" w-full p-4">
+            <div className=" w-full">
               <UserClientsCard />
             </div>
-            <div className=" w-full p-4">
+            <div className=" w-full">
               <ResponseStatus />
             </div>
         </div>

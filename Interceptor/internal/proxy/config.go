@@ -39,7 +39,7 @@ type Application struct {
 	IPAddress       string `json:"ip_address"`
 	Port            string `json:"port"`
 	Status          bool   `json:"status"`
-	Tls             bool   `json:tls`
+	Tls             bool   `json:"tls"`
 }
 
 type SecurityHeader struct {
@@ -218,6 +218,10 @@ func fetchApplications() error {
 		appConfigURL := fmt.Sprintf("http://%s:%s/config/get-app-config/%s", backendHost, backendPort, app.ApplicationID)
 		appSecurityHeaderURL := fmt.Sprintf("http://%s:%s/security-headers/%s", backendHost, backendPort, app.ApplicationID)
 		resp, err = http.Get(appConfigURL)
+
+		if err != nil {
+			return fmt.Errorf("failed to fetch app config for %s: %v", app.ApplicationID, err)
+		}
 
 		var appConfigResult struct {
 			AppConfig AppConfig `json:"data"`
