@@ -14,13 +14,8 @@ type RuleInput = {
   applications: string[];
 };
 
-const availableApps = [
-  "App-One",
-  "App-Two",
-  "App-Three",
-  "Customer-Portal",
-  "Internal-API",
-];
+const backendUrl = import.meta.env.VITE_BACKEND_URL
+
 
 const validRuleTypes = [
   "REQUEST_HEADERS", "REQUEST_URI", "ARGS", "ARGS_GET", "ARGS_POST",
@@ -43,11 +38,11 @@ const CreateRuleModal: React.FC = () => {
   const [ruleInput, setRuleInput] = useState<RuleInput>({
     ruleID: "1001",
     action: "deny",
-    category: "SQL Injection",
+    category: "Message",
     conditions: [{
       ruleType: "ARGS",
-      ruleMethod: "contains",
-      ruleDefinition: "SELECT",
+      ruleMethod: "regex",
+      ruleDefinition: "value like *select*",
     }],
     applications: [],
   });
@@ -57,6 +52,43 @@ const CreateRuleModal: React.FC = () => {
   useEffect(() => {
     generateRule(ruleInput);
   }, [ruleInput]);
+
+  const [availableApps,setAvailableApps]=useState([])
+
+  const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY1NjU2MTgsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.bmGqOlhKhxD4IsMKsomGpa04uExS6l_q5YvrPa2dMCc"
+
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        const res = await fetch(`${backendUrl}/application`, {
+          method: "GET",
+          headers: {
+            "Authorization": `${token}`
+          },
+        });
+
+        console.log("passed")
+  
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+  
+        const data = await res.json();
+  
+        const apps = data.applications.map((app: any) => ({
+          application_id: app.application_id,
+          application_name: app.application_name,
+        }));
+  
+        setAvailableApps(apps);
+      } catch (err) {
+        console.error("Failed to load applications:", err);
+      }
+    };
+  
+    fetchApplications();
+  }, []);
+  
 
   const updateCondition = (index: number, field: keyof Condition, value: string) => {
     const updatedConditions = [...ruleInput.conditions];
@@ -104,6 +136,53 @@ const CreateRuleModal: React.FC = () => {
     });
   };
 
+
+  const saveRule = async () => {
+    if (ruleInput.applications.length === 0) {
+      alert("Please select at least one application.");
+      return;
+    }
+  
+    const payloadTemplate = {
+      action: ruleInput.action,
+      category: ruleInput.category,
+      is_active: true,
+      conditions: ruleInput.conditions.map((cond) => ({
+        rule_type: cond.ruleType,
+        rule_method: cond.ruleMethod,
+        rule_definition: cond.ruleDefinition,
+      })),
+    };
+  
+    try {
+      for (const app of ruleInput.applications) {
+        const response = await fetch(`${backendUrl}/rule/add`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...payloadTemplate,
+            application_id: app, // app should be the UUID
+          }),
+        });
+  
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Failed to save rule for", app, errorData);
+          alert(`Failed to save rule for application: ${app}`);
+          return;
+        }
+      }
+  
+      alert("Rule saved successfully for all selected applications!");
+    } catch (error) {
+      console.error("Error saving rule:", error);
+      alert("An error occurred while saving the rule.");
+    }
+  };
+  
+
   const removeCondition = (index: number) => {
     const updated = [...ruleInput.conditions];
     updated.splice(index, 1);
@@ -116,13 +195,7 @@ const CreateRuleModal: React.FC = () => {
     <div className="p-4 space-y-4 max-w-4xl mx-auto">
       <h2 className="text-xl font-bold">WAF Rule Generator</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input
-          className="border p-2"
-          placeholder="Rule ID"
-          value={ruleInput.ruleID}
-          onChange={(e) => setRuleInput({ ...ruleInput, ruleID: e.target.value })}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
         <select
           className="border p-2"
@@ -218,12 +291,23 @@ const CreateRuleModal: React.FC = () => {
         </div>
       ))}
 
-      <button
-        className="bg-blue-500 text-white px-4 py-2 rounded"
-        onClick={addCondition}
-      >
-        ➕ Add Condition
-      </button>
+      <div className="flex justify-between items-center mt-4">
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+          onClick={addCondition}
+        >
+          ➕ Add Condition
+        </button>
+
+        <button
+          className="bg-green-500 text-white px-4 py-2 rounded"
+          onClick={saveRule}
+        >
+          Save Rule
+        </button>
+
+      </div>
+     
 
       {/* Preview */}
       <pre className="bg-gray-100 p-4 rounded border whitespace-pre-wrap mt-4">

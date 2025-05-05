@@ -5,7 +5,9 @@ import (
 	"crypto/tls"
 	"fmt"
 	"interceptor/internal/error_page"
+	"interceptor/internal/fusionService"
 	"interceptor/internal/logger"
+	"interceptor/internal/ml"
 	"interceptor/internal/utils"
 	"io"
 	"log"
@@ -127,6 +129,21 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 
 	blockedByRule, ruleID, ruleMessage, action, status, body := wafInstance.EvaluateRules(r)
 
+	headers := utils.ParseHeaders(fmt.Sprintf("%v", r.Header))
+	requestData := ml.RequestData{
+		Url:     r.URL.String(),
+		Headers: headers,
+		Body:    body,
+	}
+
+	blockedByMl, percent, err := ml.EvaluateML(requestData)
+
+	if err != nil {
+		http.Error(w, "Error evaluating ML model", http.StatusInternalServerError)
+	}
+
+	result := fusionService.FusionAlgorithm(blockedByRule, blockedByMl, percent)
+
 	message := utils.MessageModel{
 		ApplicationName: hostname,
 		ClientIP:        r.RemoteAddr,
@@ -148,13 +165,13 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if request_body_size >= application_config[hostname].MaxPostDataSize {
-		if blockedByRule {
+		if result {
 			message.Body = utils.HashSHA256(body)
 		}
 		message.Body = ""
 	}
 
-	if blockedByRule {
+	if result {
 		error_page.Send403Response(w, ruleID, ruleMessage, action, status)
 		message.ResponseCode = http.StatusForbidden
 		message.Status = "blocked"
@@ -218,16 +235,23 @@ func Starter() {
 	err := fetchConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
+		return
 	}
 
-	err = fetchApplications()
+	err = fetchApplicationConfig()
 	if err != nil {
 		log.Fatalf("Failed to fetch applications: %v", err)
+		return
 	}
 
 	err = utils.InitHttpHandler()
 	if err != nil {
 		log.Fatalf("Failed to initialize Http Handler: %v", err)
+	}
+
+	err = utils.InitMlService()
+	if err != nil {
+		log.Fatalf("Failed to initialize Ml Handler: %v", err)
 	}
 
 	if remoteLogServer != "" {

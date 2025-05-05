@@ -31,7 +31,16 @@ func checkForChange() (bool, bool) {
 
 	changeURL := "http://" + backendHost + ":" + backendPort + "/interceptor/is-running"
 
-	resp, err := http.Get(changeURL)
+	req, err := http.NewRequest("GET", changeURL, nil)
+	if err != nil {
+		return true, false
+	}
+
+	req.Header.Set("X-Service", "I")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
 	if err != nil {
 		log.Printf("Error checking for change: %v", err)
 		return true, false

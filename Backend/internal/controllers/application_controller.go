@@ -113,11 +113,6 @@ func GetApplication(c *gin.Context) {
 }
 
 func GetAllApplications(c *gin.Context) {
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
-	}
-
 	var applications []models.Application
 	if err := config.DB.Find(&applications).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch applications"})

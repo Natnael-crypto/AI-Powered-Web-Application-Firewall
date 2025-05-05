@@ -215,6 +215,8 @@ const mockData: Rule[] = [
   },
 ]
 
+
+
 const applications = [
   { id: '16d3f539-6c7b-45ac-b977-6a51c3582d29', name: 'MyApp 1' },
   { id: 'app-2', name: 'Dashboard' },
@@ -223,12 +225,13 @@ const applications = [
 
 function CustomRules() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedApp, setSelectedApp] = useState<string | null>(null)
   const [selectedRows, setSelectedRows] = useState<Row<Rule>[]>([])
   const [isEditMode, setIsEditMode] = useState(false)
   const [currentRule, setCurrentRule] = useState<Rule | null>(null)
 
-  const toggleModal = () => setIsModalOpen(!isModalOpen)
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen)
+  }
 
   const handleEdit = (rule: Rule) => {
     setIsEditMode(true)
@@ -244,22 +247,17 @@ function CustomRules() {
 
   return (
     <div className="space-y-4">
-      <CreateRuleModal
-        isModalOpen={isModalOpen}
-        onClose={toggleModal}
-        rule={currentRule} // Pass current rule for editing
-        isEditMode={isEditMode} // Indicate whether it's edit mode
-      />
-
+      {isModalOpen?<CreateRuleModal/>:null}
+      
       <Card className="flex justify-between items-center py-4 px-6 shadow-md bg-white rounded-lg">
         <h2 className="text-lg font-semibold">Custom Rules</h2>
         <Button
-          classname="text-white uppercase"
+          classname={`text-white uppercase ${isModalOpen?"bg-red-500 text":"" }`}
           size="l"
           variant="primary"
           onClick={toggleModal}
         >
-          {isEditMode ? 'Edit Rule' : 'Add Rule'}
+          {isModalOpen ? 'Back' : 'Add Rule'}
         </Button>
       </Card>
 

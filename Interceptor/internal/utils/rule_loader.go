@@ -38,9 +38,18 @@ func FetchRules(applicationID string) (*RulesResponse, error) {
 		return nil, fmt.Errorf("BACKENDPORT environment variable is not set")
 	}
 
-	url := fmt.Sprintf("http://%s:%s/rule/%s", backendHost, backendPort, applicationID)
+	url := fmt.Sprintf("http://%s:%s/interceptor/rule/%s", backendHost, backendPort, applicationID)
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %v", err)
+	}
+
+	req.Header.Set("X-Service", "I")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
 	if err != nil {
 		return nil, fmt.Errorf("error making GET request: %v", err)
 	}

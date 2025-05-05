@@ -54,7 +54,7 @@ func InitializeRoutes(r *gin.Engine) {
 		config.GET("/config", controllers.GetConfigAdmin)
 	}
 
-	rules := authorized.Group("/rule")
+	rules := authorized.Group("/")
 	{
 		rules.POST("/add", controllers.AddRule)
 		rules.PUT("/update/:rule_id", controllers.UpdateRule)
@@ -157,6 +157,14 @@ func InitializeRoutes(r *gin.Engine) {
 		interceptor_services.GET("/certs", controllers.GetCert)
 		interceptor_services.GET("/is-running", controllers.InterceptorCheckState)
 		interceptor_services.GET("/security-headers/:application_id", controllers.GetSecurityHeaders)
+	}
+
+	services := authorized.Group("/service")
+	{
+		services.GET("/", controllers.GetAllowedIps)
+		services.POST("/", controllers.AddAllowedIp)
+		services.PUT("/:id", controllers.UpdateAllowedIp)
+		services.DELETE("/:id", controllers.DeleteAllowedIp)
 	}
 
 }

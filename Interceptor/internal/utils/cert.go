@@ -11,7 +11,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-
 func FetchCert(applicationID string) (string, string, error) {
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: No .env file found, falling back to environment variables")
@@ -41,7 +40,16 @@ func FetchCert(applicationID string) (string, string, error) {
 }
 
 func fetchAndSaveFile(url, applicationID, ext string) (string, error) {
-	resp, err := http.Get(url)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %v", err)
+	}
+
+	req.Header.Set("X-Service", "I")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch file: %v", err)
 	}

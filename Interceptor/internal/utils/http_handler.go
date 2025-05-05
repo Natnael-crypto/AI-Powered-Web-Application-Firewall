@@ -51,7 +51,7 @@ func InitHttpHandler() error {
 	if backendPort == "" {
 		return fmt.Errorf("BACKENDPORT environment variable is not set")
 	}
-	backendEndpoint = fmt.Sprintf("http://%s:%s/batch", backendHost, backendPort)
+	backendEndpoint = fmt.Sprintf("http://%s:%s/interceptor/batch", backendHost, backendPort)
 
 	go StartBatchSender()
 	return nil
@@ -91,6 +91,7 @@ func flushQueue() {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Service", "I")
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		log.Printf("Failed to send batch to backend: %v", err)
