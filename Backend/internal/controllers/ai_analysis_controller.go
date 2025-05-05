@@ -7,6 +7,7 @@ import (
 
 	"backend/internal/config"
 	"backend/internal/models"
+	"backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,26 +17,47 @@ var (
 	queueMutex    sync.Mutex
 )
 
+// TODO add authorization
 func QueueRequestForAnalysis(c *gin.Context) {
+
 	var input struct {
-		RequestIDs []string `json:"request_ids"`
+		RequestID string `json:"request_ids"`
 	}
 
-	if err := c.ShouldBindJSON(&input); err != nil || len(input.RequestIDs) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "request_ids are required"})
+	var request models.Request
+
+	if err := config.DB.Where("request_id = ?", input.RequestID).First(&request).Error; err != nil {
+		c.JSON(http.StatusFound, gin.H{"error": "request not found"})
+		return
+	}
+
+	var application models.Application
+
+	if err := config.DB.Where("request_id = ?", request.ApplicationName).First(&application).Error; err != nil {
+		c.JSON(http.StatusFound, gin.H{"error": "Application not found"})
+		return
+	}
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, application.ApplicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "request_id are required"})
 		return
 	}
 
 	queueMutex.Lock()
-	for _, reqID := range input.RequestIDs {
-		analysisQueue[reqID] = true
-	}
+	analysisQueue[input.RequestID] = true
 	queueMutex.Unlock()
-
-	c.JSON(http.StatusOK, gin.H{"message": "Requests queued for AI analysis"})
+	c.JSON(http.StatusOK, gin.H{"message": "Request queued for AI analysis"})
 }
 
-// ML server fetches all queued requests and clears the queue
 func FetchAndAnalyzeRequests(c *gin.Context) {
 	queueMutex.Lock()
 	var requestIDs []string
@@ -85,14 +107,20 @@ func SubmitAnalysisResults(c *gin.Context) {
 }
 
 func CreateModelTrainingRequest(c *gin.Context) {
+
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
 	var input struct {
-		ID                 string  `json:"id" binding:"required"`
-		NumberRequestsUsed int     `json:"number_requests_used" binding:"required"`
-		PercentTrainData   float32 `json:"percent_train_data" binding:"required"`
-		NumTrees           int     `json:"num_trees" binding:"required"`
-		MaxDepth           int     `json:"max_depth" binding:"required"`
-		MinSamplesSplit    int     `json:"min_samples_split" binding:"required"`
-		Criterion          string  `json:"criterion" binding:"required"` // "gini" or "entropy"
+		ID                    string  `json:"id" binding:"required"`
+		NumberRequestsUsed    int     `json:"number_requests_used" binding:"required"`
+		PercentTrainData      float32 `json:"percent_train_data" binding:"required"`
+		PercentNormalRequests float32 `json:"percent_normal_requests" gorm:"not null"`
+		NumTrees              int     `json:"num_trees" binding:"required"`
+		MaxDepth              int     `json:"max_depth" binding:"required"`
+		MinSamplesSplit       int     `json:"min_samples_split" binding:"required"`
+		Criterion             string  `json:"criterion" binding:"required"` // "gini" or "entropy"
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -101,21 +129,22 @@ func CreateModelTrainingRequest(c *gin.Context) {
 	}
 
 	ai_model := models.AIModel{
-		ID:                 input.ID,
-		NumberRequestsUsed: input.NumberRequestsUsed,
-		PercentTrainData:   input.PercentTrainData,
-		NumTrees:           input.NumTrees,
-		MaxDepth:           input.MaxDepth,
-		MinSamplesSplit:    input.MinSamplesSplit,
-		Criterion:          input.Criterion,
-		Accuracy:           0,
-		Precision:          0,
-		Recall:             0,
-		F1:                 0,
-		Selected:           false,
-		Modeled:            false,
-		CreatedAt:          time.Now(),
-		UpdatedAt:          time.Now(),
+		ID:                    input.ID,
+		NumberRequestsUsed:    input.NumberRequestsUsed,
+		PercentTrainData:      input.PercentTrainData,
+		PercentNormalRequests: input.PercentNormalRequests,
+		NumTrees:              input.NumTrees,
+		MaxDepth:              input.MaxDepth,
+		MinSamplesSplit:       input.MinSamplesSplit,
+		Criterion:             input.Criterion,
+		Accuracy:              0,
+		Precision:             0,
+		Recall:                0,
+		F1:                    0,
+		Selected:              false,
+		Modeled:               false,
+		CreatedAt:             time.Now(),
+		UpdatedAt:             time.Now(),
 	}
 
 	if err := config.DB.Create(&ai_model).Error; err != nil {
@@ -134,7 +163,52 @@ func GetUntrainedModelForML(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"model": model})
+	totalRequests := model.NumberRequestsUsed
+	normalCount := int(float32(totalRequests) * model.PercentNormalRequests / 100)
+	maliciousCount := totalRequests - normalCount
+
+	type RequestData struct {
+		ApplicationName string `json:"application_name"`
+		RequestMethod   string `json:"request_method"`
+		RequestURL      string `json:"request_url"`
+		Headers         string `json:"headers"`
+		Body            string `json:"body"`
+	}
+
+	var normalRequests []RequestData
+	if err := config.DB.
+		Model(&models.Request{}).
+		Select("application_name, request_method, request_url, headers, body").
+		Where("threat_detected = ?", false).
+		Limit(normalCount).
+		Scan(&normalRequests).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch normal requests"})
+		return
+	}
+
+	var maliciousRequests []RequestData
+	if err := config.DB.
+		Model(&models.Request{}).
+		Select("application_name, request_method, request_url, headers, body").
+		Where("threat_detected = ?", true).
+		Limit(maliciousCount).
+		Scan(&maliciousRequests).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch malicious requests"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":                      model.ID,
+		"number_requests_used":    model.NumberRequestsUsed,
+		"percent_train_data":      model.PercentTrainData,
+		"percent_normal_requests": model.PercentNormalRequests,
+		"num_trees":               model.NumTrees,
+		"max_depth":               model.MaxDepth,
+		"min_samples_split":       model.MinSamplesSplit,
+		"criterion":               model.Criterion,
+		"normal_requests":         normalRequests,
+		"malisous_request":        maliciousRequests,
+	})
 }
 
 func SubmitModelResults(c *gin.Context) {
@@ -166,6 +240,12 @@ func SubmitModelResults(c *gin.Context) {
 }
 
 func SelectActiveModel(c *gin.Context) {
+
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
 	var input struct {
 		ID string `json:"id"`
 	}
@@ -200,6 +280,12 @@ func GetSelectedModel(c *gin.Context) {
 }
 
 func GetModels(c *gin.Context) {
+
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
 	var model models.AIModel
 
 	if err := config.DB.Find(&model).Error; err != nil {

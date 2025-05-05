@@ -28,9 +28,15 @@ func marshalConditions(conditions []models.RuleCondition) string {
 }
 
 func AddRule(c *gin.Context) {
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
+	applicationID := c.Query("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
 	}
 
 	var input models.RuleInput
@@ -102,10 +108,38 @@ func GetRules(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"rules": rules})
 }
 
-func UpdateRule(c *gin.Context) {
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+func GetRulesAdmin(c *gin.Context) {
+
+	applicationID := c.Param("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
+	}
+
+	var rules []models.Rule
+	if err := config.DB.Where("application_id = ?", applicationID).Find(&rules).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "rules not found"})
 		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"rules": rules})
+}
+
+func UpdateRule(c *gin.Context) {
+	applicationID := c.Query("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
 	}
 
 	ruleID := c.Param("rule_id")
@@ -148,11 +182,82 @@ func UpdateRule(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "rule updated successfully", "rule": rule})
 }
 
+func DeactivateRule(c *gin.Context) {
+	applicationID := c.Query("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
+	}
+
+	ruleID := c.Param("rule_id")
+
+	var rule models.Rule
+	if err := config.DB.Where("rule_id = ?", ruleID).First(&rule).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "rule not found"})
+		return
+	}
+
+	rule.IsActive = false
+
+	if err := config.DB.Model(&models.Rule{}).Where("rule_id = ?", ruleID).Updates(rule).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update rule"})
+		return
+	}
+
+	config.Change = true
+
+	c.JSON(http.StatusOK, gin.H{"message": "rule updated successfully", "rule": rule})
+}
+
+func ActivateRule(c *gin.Context) {
+
+	applicationID := c.Query("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
+	}
+
+	ruleID := c.Param("rule_id")
+
+	var rule models.Rule
+	if err := config.DB.Where("rule_id = ?", ruleID).First(&rule).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "rule not found"})
+		return
+	}
+
+	rule.IsActive = true
+
+	if err := config.DB.Model(&models.Rule{}).Where("rule_id = ?", ruleID).Updates(rule).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update rule"})
+		return
+	}
+
+	config.Change = true
+
+	c.JSON(http.StatusOK, gin.H{"message": "rule updated successfully", "rule": rule})
+}
+
 func DeleteRule(c *gin.Context) {
 
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
+	applicationID := c.Query("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
 	}
 
 	ruleID := c.Param("rule_id")

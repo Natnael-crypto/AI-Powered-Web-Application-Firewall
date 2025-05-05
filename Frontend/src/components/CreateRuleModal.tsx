@@ -1,114 +1,237 @@
-import React, {useState} from 'react'
-import axios from 'axios'
-import Modal from './Modal'
+import React, { useState, useEffect } from "react";
 
-interface RuleUpdatePayload {
-  rule_type: string
-  rule_definition: string
-  action: string
-  application_id: string
-  is_active: boolean
-  category: string
-}
+type Condition = {
+  ruleType: string;
+  ruleMethod: string;
+  ruleDefinition: string;
+};
 
-interface ModalProps {
-  ruleId?: string
-  onClose: () => void
-  isModalOpen: boolean
-}
+type RuleInput = {
+  ruleID: string;
+  action: string;
+  category: string;
+  conditions: Condition[];
+  applications: string[];
+};
 
-const CreateRuleModal: React.FC<ModalProps> = ({ruleId, onClose, isModalOpen}) => {
-  const [payload, setPayload] = useState<RuleUpdatePayload>({
-    rule_type: 'REQUEST_URI',
-    rule_definition: '@rx ^/admin',
-    action: 'Block access to admin',
-    application_id: 'b028fd26-fd2c-4486-8a1f-d1b510b652f0',
-    is_active: false,
-    category: 'Access Control',
-  })
+const availableApps = [
+  "App-One",
+  "App-Two",
+  "App-Three",
+  "Customer-Portal",
+  "Internal-API",
+];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const {name, value, type} = e.target
-    setPayload({
-      ...payload,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
-    })
-  }
+const validRuleTypes = [
+  "REQUEST_HEADERS", "REQUEST_URI", "ARGS", "ARGS_GET", "ARGS_POST",
+  "REQUEST_COOKIES", "REQUEST_BODY", "XML", "JSON", "REQUEST_METHOD",
+  "REQUEST_PROTOCOL", "REMOTE_ADDR",
+];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      const response = await axios.put(
-        `http://localhost:8080/rule/update/${ruleId}`,
-        payload,
-        {
-          headers: {
-            Authorization:
-              'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzQyNTQxMjksInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiIyYTY2OGJmNy02ZGEwLTRiYjEtYTIzZS1kYzI2NTNiYjZmMmYifQ.uzuC7ehu9KjL4hdaxmHFamkctValYb6WEf_XCWAR2-k',
-          },
-        },
-      )
-      console.log('Rule updated successfully:', response.data)
-      onClose()
-    } catch (error) {
-      console.error('Error updating rule:', error)
+const validRuleMethods = [
+  "regex", "streq", "contains", "ipMatch", "rx", "beginsWith",
+  "endsWith", "eq", "pm",
+];
+
+const validActions = [
+  "deny", "log", "nolog", "pass", "drop", "redirect", "capture",
+  "t:none", "t:lowercase", "t:normalizePath", "t:urlDecode",
+  "t:compressWhitespace", "severity:2", "severity:3", "status:403",
+];
+
+const CreateRuleModal: React.FC = () => {
+  const [ruleInput, setRuleInput] = useState<RuleInput>({
+    ruleID: "1001",
+    action: "deny",
+    category: "SQL Injection",
+    conditions: [{
+      ruleType: "ARGS",
+      ruleMethod: "contains",
+      ruleDefinition: "SELECT",
+    }],
+    applications: [],
+  });
+
+  const [preview, setPreview] = useState<string>("");
+
+  useEffect(() => {
+    generateRule(ruleInput);
+  }, [ruleInput]);
+
+  const updateCondition = (index: number, field: keyof Condition, value: string) => {
+    const updatedConditions = [...ruleInput.conditions];
+    updatedConditions[index][field] = value;
+    setRuleInput({ ...ruleInput, conditions: updatedConditions });
+  };
+
+  const handleAppAdd = (app: string) => {
+    if (!ruleInput.applications.includes(app)) {
+      setRuleInput({ ...ruleInput, applications: [...ruleInput.applications, app] });
     }
-  }
+  };
+
+  const handleAppRemove = (app: string) => {
+    setRuleInput({
+      ...ruleInput,
+      applications: ruleInput.applications.filter(a => a !== app),
+    });
+  };
+
+  const generateRule = (input: RuleInput) => {
+    const { ruleID, action, category, conditions } = input;
+    if (conditions.length === 0) return;
+
+    let ruleText = "";
+    conditions.forEach((cond, i) => {
+      const prefix = i === 0 ? "SecRule" : "    SecRule";
+      const chain = i < conditions.length - 1 ? `"chain"` : "";
+      const firstLine = i === 0
+        ? `"id:${ruleID},phase:2,${action},msg:'${category}'${conditions.length > 1 ? ",chain" : ""}"`
+        : chain;
+      ruleText += `${prefix} ${cond.ruleType} "@${cond.ruleMethod} ${cond.ruleDefinition}" ${firstLine}\n`;
+    });
+
+    setPreview(ruleText.trim());
+  };
+
+  const addCondition = () => {
+    setRuleInput({
+      ...ruleInput,
+      conditions: [
+        ...ruleInput.conditions,
+        { ruleType: "", ruleMethod: "", ruleDefinition: "" },
+      ],
+    });
+  };
+
+  const removeCondition = (index: number) => {
+    const updated = [...ruleInput.conditions];
+    updated.splice(index, 1);
+    setRuleInput({ ...ruleInput, conditions: updated });
+  };
+
+  const unselectedApps = availableApps.filter(app => !ruleInput.applications.includes(app));
 
   return (
-    <Modal isOpen={isModalOpen} onClose={onClose}>
-      <div className="space-y-6 animate-fade-in">
-        <h2 className="text-2xl font-semibold text-gray-800 text-center">Update Rule</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {[
-            {label: 'Rule Type', name: 'rule_type'},
-            {label: 'Rule Definition', name: 'rule_definition'},
-            {label: 'Action', name: 'action'},
-            {label: 'Application ID', name: 'application_id'},
-            {label: 'Category', name: 'category'},
-          ].map(({label, name}) => (
-            <div key={name}>
-              <label className="block text-sm font-medium text-gray-600">{label}</label>
-              <input
-                type="text"
-                name={name}
-                value={payload[name as keyof RuleUpdatePayload] as string}
-                onChange={handleChange}
-                className="w-full px-4 py-2 mt-1 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-              />
+    <div className="p-4 space-y-4 max-w-4xl mx-auto">
+      <h2 className="text-xl font-bold">WAF Rule Generator</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input
+          className="border p-2"
+          placeholder="Rule ID"
+          value={ruleInput.ruleID}
+          onChange={(e) => setRuleInput({ ...ruleInput, ruleID: e.target.value })}
+        />
+
+        <select
+          className="border p-2"
+          value={ruleInput.action}
+          onChange={(e) => setRuleInput({ ...ruleInput, action: e.target.value })}
+        >
+          <option value="">Select Action</option>
+          {validActions.map(action => (
+            <option key={action} value={action}>{action}</option>
+          ))}
+        </select>
+
+        <input
+          className="border p-2"
+          placeholder="Category"
+          value={ruleInput.category}
+          onChange={(e) => setRuleInput({ ...ruleInput, category: e.target.value })}
+        />
+      </div>
+
+      {/* Application Dropdown */}
+      <div>
+        <label className="block font-semibold mb-2">Select Application</label>
+        <select
+          className="border p-2 w-full"
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value) handleAppAdd(value);
+            e.target.value = "";
+          }}
+        >
+          <option value="">-- Select Application --</option>
+          {unselectedApps.map(app => (
+            <option key={app} value={app}>{app}</option>
+          ))}
+        </select>
+
+        <div className="flex flex-wrap gap-2 mt-3">
+          {ruleInput.applications.map(app => (
+            <div
+              key={app}
+              className="bg-green-200 text-green-900 px-3 py-1 rounded-full cursor-pointer transition duration-200 hover:bg-red-200 hover:text-red-900"
+              onClick={() => handleAppRemove(app)}
+              title="Click to remove"
+            >
+              {app}
             </div>
           ))}
-
-          <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-gray-600">Is Active</label>
-            <input
-              type="checkbox"
-              name="is_active"
-              checked={payload.is_active}
-              onChange={handleChange}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t mt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 bg-gray-200 hover:bg-gray-300 rounded-lg"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg"
-            >
-              Update Rule
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
-    </Modal>
-  )
-}
 
-export default CreateRuleModal
+      {/* Conditions */}
+      {ruleInput.conditions.map((cond, index) => (
+        <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center mb-2">
+          <select
+            className="border p-2"
+            value={cond.ruleType}
+            onChange={(e) => updateCondition(index, "ruleType", e.target.value)}
+          >
+            <option value="">Select Rule Type</option>
+            {validRuleTypes.map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+
+          <select
+            className="border p-2"
+            value={cond.ruleMethod}
+            onChange={(e) => updateCondition(index, "ruleMethod", e.target.value)}
+          >
+            <option value="">Select Method</option>
+            {validRuleMethods.map(method => (
+              <option key={method} value={method}>{method}</option>
+            ))}
+          </select>
+
+          <div className="flex gap-2">
+            <input
+              className="border p-2 flex-1"
+              placeholder="Definition"
+              value={cond.ruleDefinition}
+              onChange={(e) => updateCondition(index, "ruleDefinition", e.target.value)}
+            />
+            {index > 0 && (
+              <button
+                className="bg-red-500 text-white px-2 py-1 rounded"
+                onClick={() => removeCondition(index)}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+      ))}
+
+      <button
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+        onClick={addCondition}
+      >
+        ➕ Add Condition
+      </button>
+
+      {/* Preview */}
+      <pre className="bg-gray-100 p-4 rounded border whitespace-pre-wrap mt-4">
+        {preview || "// Rule preview will appear here..."}
+        {"\n\n"}// Applications: {ruleInput.applications.join(", ") || "None"}
+      </pre>
+    </div>
+  );
+};
+
+export default CreateRuleModal;

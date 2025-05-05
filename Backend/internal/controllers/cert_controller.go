@@ -134,10 +134,43 @@ func AddCert(c *gin.Context) {
 	})
 }
 
-// TODO add intercptor auth
 func GetCert(c *gin.Context) {
 	applicationID := c.Query("application_id")
 	fileType := c.Query("type")
+
+	if applicationID == "" || (fileType != "cert" && fileType != "key") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request parameters"})
+		return
+	}
+
+	var cert models.Cert
+	if err := config.DB.Where("application_id = ?", applicationID).First(&cert).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Certificate not found"})
+		return
+	}
+
+	var file []byte
+	if fileType == "key" {
+		file = cert.Key
+	} else {
+		file = cert.Cert
+	}
+
+	c.Data(http.StatusOK, "application/octet-stream", file)
+}
+
+func GetCertAdmin(c *gin.Context) {
+	applicationID := c.Query("application_id")
+	fileType := c.Query("type")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
+	}
 
 	if applicationID == "" || (fileType != "cert" && fileType != "key") {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request parameters"})

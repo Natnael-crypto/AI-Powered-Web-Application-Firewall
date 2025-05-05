@@ -112,8 +112,11 @@ func GetApplication(c *gin.Context) {
 	}
 }
 
-// TODO Add Auth for the intercptor
 func GetAllApplications(c *gin.Context) {
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
 
 	var applications []models.Application
 	if err := config.DB.Find(&applications).Error; err != nil {
@@ -121,7 +124,76 @@ func GetAllApplications(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"applications": applications})
+	// Merge each application with its config
+	var result []map[string]interface{}
+
+	for _, app := range applications {
+		appMap := map[string]interface{}{
+			"application_id":   app.ApplicationID,
+			"application_name": app.ApplicationName,
+			"description":      app.Description,
+			"hostname":         app.HostName,
+			"ip_address":       app.IpAddress,
+			"port":             app.Port,
+			"status":           app.Status,
+			"tls":              app.Tls,
+			"created_at":       app.CreatedAt,
+			"updated_at":       app.UpdatedAt,
+		}
+
+		var appConf models.AppConf
+		if err := config.DB.Where("application_id = ?", app.ApplicationID).First(&appConf).Error; err == nil {
+			appMap["config"] = appConf
+		} else {
+			appMap["config"] = gin.H{} // empty config if not found
+		}
+
+		result = append(result, appMap)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"applications": result})
+}
+
+func GetAllApplicationsAdmin(c *gin.Context) {
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	var applications []models.Application
+	if err := config.DB.Find(&applications).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch applications"})
+		return
+	}
+
+	// Merge each application with its config
+	var result []map[string]interface{}
+
+	for _, app := range applications {
+		appMap := map[string]interface{}{
+			"application_id":   app.ApplicationID,
+			"application_name": app.ApplicationName,
+			"description":      app.Description,
+			"hostname":         app.HostName,
+			"ip_address":       app.IpAddress,
+			"port":             app.Port,
+			"status":           app.Status,
+			"tls":              app.Tls,
+			"created_at":       app.CreatedAt,
+			"updated_at":       app.UpdatedAt,
+		}
+
+		var appConf models.AppConf
+		if err := config.DB.Where("application_id = ?", app.ApplicationID).First(&appConf).Error; err == nil {
+			appMap["config"] = appConf
+		} else {
+			appMap["config"] = gin.H{} // empty config if not found
+		}
+
+		result = append(result, appMap)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"applications": result})
 }
 
 func UpdateApplication(c *gin.Context) {
