@@ -6,6 +6,7 @@ import (
 	"backend/internal/utils"
 	"log"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,14 +20,13 @@ func AddApplication(c *gin.Context) {
 	}
 
 	var input struct {
-		ApplicationName string  `json:"application_name" binding:"required,max=20"`
-		Description     string  `json:"description" binding:"required,max=200"`
-		HostName        string  `json:"hostname" binding:"required,max=40"`
-		IpAddress       string  `json:"ip_address" binding:"required,ip"`
-		Port            string  `json:"port" binding:"required,max=5"`
-		Status          bool    `json:"status"`
-		Tls             bool    `json:"tls"`
-		MaxPostDataSize float64 `json:"max_post_data_size" binding:"required"`
+		ApplicationName string `json:"application_name" binding:"required,max=20"`
+		Description     string `json:"description" binding:"required,max=200"`
+		HostName        string `json:"hostname" binding:"required,max=40"`
+		IpAddress       string `json:"ip_address" binding:"required,ip"`
+		Port            string `json:"port" binding:"required,max=5"`
+		Status          bool   `json:"status"`
+		Tls             bool   `json:"tls"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -78,6 +78,18 @@ func AddApplication(c *gin.Context) {
 		c.JSON(http.StatusConflict, gin.H{"error": "failed to create app config"})
 	}
 
+	userToApp := models.UserToApplication{
+		ID:              utils.GenerateUUID(),
+		UserID:          c.GetString("user_id"),
+		ApplicationName: application.ApplicationName,
+		ApplicationID:   application.ApplicationID,
+	}
+
+	if err := config.DB.Create(&userToApp).Error; err != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "failed to assign user to application"})
+		return
+	}
+
 	config.Change = true
 
 	c.JSON(http.StatusCreated, gin.H{"message": "application created successfully", "application": application})
@@ -86,30 +98,19 @@ func AddApplication(c *gin.Context) {
 
 func GetApplication(c *gin.Context) {
 	applicationID := c.Param("application_id")
+	appIDs := utils.GetAssignedApplicationIDs(c)
 
-	if c.GetString("role") == "super_admin" {
-	} else {
-		appIds := utils.GetAssignedApplicationIDs(c)
-		if len(appIds) == 0 {
-			c.JSON(http.StatusForbidden, gin.H{"error": "No applications assigned to user"})
-			return
-		}
-		for _, id := range appIds {
-			if id == applicationID {
-				var application models.Application
-
-				if err := config.DB.Where("application_id = ?", applicationID).First(&application).Error; err != nil {
-					c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
-					return
-				}
-
-				c.JSON(http.StatusOK, gin.H{"application": application})
-				return
-			}
-		}
+	if !slices.Contains(appIDs, applicationID) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
 	}
+	var application models.Application
+	if err := config.DB.Where("application_id = ? ", applicationID).Find(&application).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch applications"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"application": application})
+
 }
 
 func GetAllApplications(c *gin.Context) {
@@ -119,7 +120,6 @@ func GetAllApplications(c *gin.Context) {
 		return
 	}
 
-	// Merge each application with its config
 	var result []map[string]interface{}
 
 	for _, app := range applications {
@@ -150,13 +150,10 @@ func GetAllApplications(c *gin.Context) {
 }
 
 func GetAllApplicationsAdmin(c *gin.Context) {
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
-	}
+	appIDs := utils.GetAssignedApplicationIDs(c)
 
 	var applications []models.Application
-	if err := config.DB.Find(&applications).Error; err != nil {
+	if err := config.DB.Where("application_id In ? ", appIDs).Find(&applications).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch applications"})
 		return
 	}
@@ -261,6 +258,11 @@ func DeleteApplication(c *gin.Context) {
 	applicationID := c.Param("application_id")
 
 	if err := config.DB.Where("application_id = ?", applicationID).Delete(&models.Application{}).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
+		return
+	}
+
+	if err := config.DB.Where("application_id = ?", applicationID).Delete(&models.UserToApplication{}).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
 		return
 	}

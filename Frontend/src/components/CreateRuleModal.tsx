@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useState, useEffect } from "react";
 
 type Condition = {
@@ -14,8 +15,7 @@ type RuleInput = {
   applications: string[];
 };
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const validRuleTypes = [
   "REQUEST_HEADERS", "REQUEST_URI", "ARGS", "ARGS_GET", "ARGS_POST",
@@ -34,6 +34,11 @@ const validActions = [
   "t:compressWhitespace", "severity:2", "severity:3", "status:403",
 ];
 
+type AppOption = {
+  application_id: string;
+  application_name: string;
+};
+
 const CreateRuleModal: React.FC = () => {
   const [ruleInput, setRuleInput] = useState<RuleInput>({
     ruleID: "1001",
@@ -48,47 +53,36 @@ const CreateRuleModal: React.FC = () => {
   });
 
   const [preview, setPreview] = useState<string>("");
+  const [availableApps, setAvailableApps] = useState<AppOption[]>([]);
 
-  useEffect(() => {
-    generateRule(ruleInput);
-  }, [ruleInput]);
-
-  const [availableApps,setAvailableApps]=useState([])
-
-  const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY1NjU2MTgsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.bmGqOlhKhxD4IsMKsomGpa04uExS6l_q5YvrPa2dMCc"
+  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY1NjU2MTgsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.bmGqOlhKhxD4IsMKsomGpa04uExS6l_q5YvrPa2dMCc";
 
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const res = await fetch(`${backendUrl}/application`, {
-          method: "GET",
+        const res = await axios.get(`${backendUrl}/application`, {
           headers: {
-            "Authorization": `${token}`
+            Authorization: `${token}`,
           },
         });
 
-        console.log("passed")
-  
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-  
-        const data = await res.json();
-  
-        const apps = data.applications.map((app: any) => ({
+        const apps = res.data.applications.map((app: any) => ({
           application_id: app.application_id,
           application_name: app.application_name,
         }));
-  
+
         setAvailableApps(apps);
       } catch (err) {
         console.error("Failed to load applications:", err);
       }
     };
-  
+
     fetchApplications();
   }, []);
-  
+
+  useEffect(() => {
+    generateRule(ruleInput);
+  }, [ruleInput]);
 
   const updateCondition = (index: number, field: keyof Condition, value: string) => {
     const updatedConditions = [...ruleInput.conditions];
@@ -96,16 +90,16 @@ const CreateRuleModal: React.FC = () => {
     setRuleInput({ ...ruleInput, conditions: updatedConditions });
   };
 
-  const handleAppAdd = (app: string) => {
-    if (!ruleInput.applications.includes(app)) {
-      setRuleInput({ ...ruleInput, applications: [...ruleInput.applications, app] });
+  const handleAppAdd = (appId: string) => {
+    if (!ruleInput.applications.includes(appId)) {
+      setRuleInput({ ...ruleInput, applications: [...ruleInput.applications, appId] });
     }
   };
 
-  const handleAppRemove = (app: string) => {
+  const handleAppRemove = (appId: string) => {
     setRuleInput({
       ...ruleInput,
-      applications: ruleInput.applications.filter(a => a !== app),
+      applications: ruleInput.applications.filter(a => a !== appId),
     });
   };
 
@@ -136,13 +130,12 @@ const CreateRuleModal: React.FC = () => {
     });
   };
 
-
   const saveRule = async () => {
     if (ruleInput.applications.length === 0) {
       alert("Please select at least one application.");
       return;
     }
-  
+
     const payloadTemplate = {
       action: ruleInput.action,
       category: ruleInput.category,
@@ -153,20 +146,21 @@ const CreateRuleModal: React.FC = () => {
         rule_definition: cond.ruleDefinition,
       })),
     };
-  
+
     try {
       for (const app of ruleInput.applications) {
         const response = await fetch(`${backendUrl}/rule/add`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `${token}`,
           },
           body: JSON.stringify({
             ...payloadTemplate,
-            application_id: app, // app should be the UUID
+            application_id: app,
           }),
         });
-  
+
         if (!response.ok) {
           const errorData = await response.json();
           console.error("Failed to save rule for", app, errorData);
@@ -174,29 +168,21 @@ const CreateRuleModal: React.FC = () => {
           return;
         }
       }
-  
+
       alert("Rule saved successfully for all selected applications!");
     } catch (error) {
       console.error("Error saving rule:", error);
       alert("An error occurred while saving the rule.");
     }
   };
-  
 
-  const removeCondition = (index: number) => {
-    const updated = [...ruleInput.conditions];
-    updated.splice(index, 1);
-    setRuleInput({ ...ruleInput, conditions: updated });
-  };
-
-  const unselectedApps = availableApps.filter(app => !ruleInput.applications.includes(app));
+  const unselectedApps = availableApps.filter(app => !ruleInput.applications.includes(app.application_id));
 
   return (
     <div className="p-4 space-y-4 max-w-4xl mx-auto">
       <h2 className="text-xl font-bold">WAF Rule Generator</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
         <select
           className="border p-2"
           value={ruleInput.action}
@@ -229,21 +215,26 @@ const CreateRuleModal: React.FC = () => {
         >
           <option value="">-- Select Application --</option>
           {unselectedApps.map(app => (
-            <option key={app} value={app}>{app}</option>
+            <option key={app.application_id} value={app.application_id}>
+              {app.application_name}
+            </option>
           ))}
         </select>
 
         <div className="flex flex-wrap gap-2 mt-3">
-          {ruleInput.applications.map(app => (
-            <div
-              key={app}
-              className="bg-green-200 text-green-900 px-3 py-1 rounded-full cursor-pointer transition duration-200 hover:bg-red-200 hover:text-red-900"
-              onClick={() => handleAppRemove(app)}
-              title="Click to remove"
-            >
-              {app}
-            </div>
-          ))}
+          {ruleInput.applications.map(appId => {
+            const app = availableApps.find(a => a.application_id === appId);
+            return (
+              <div
+                key={appId}
+                className="bg-green-200 text-green-900 px-3 py-1 rounded-full cursor-pointer hover:bg-red-200 hover:text-red-900"
+                onClick={() => handleAppRemove(appId)}
+                title="Click to remove"
+              >
+                {app?.application_name || appId}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -282,7 +273,11 @@ const CreateRuleModal: React.FC = () => {
             {index > 0 && (
               <button
                 className="bg-red-500 text-white px-2 py-1 rounded"
-                onClick={() => removeCondition(index)}
+                onClick={() => {
+                  const updated = [...ruleInput.conditions];
+                  updated.splice(index, 1);
+                  setRuleInput({ ...ruleInput, conditions: updated });
+                }}
               >
                 ✕
               </button>
@@ -305,11 +300,8 @@ const CreateRuleModal: React.FC = () => {
         >
           Save Rule
         </button>
-
       </div>
-     
 
-      {/* Preview */}
       <pre className="bg-gray-100 p-4 rounded border whitespace-pre-wrap mt-4">
         {preview || "// Rule preview will appear here..."}
         {"\n\n"}// Applications: {ruleInput.applications.join(", ") || "None"}

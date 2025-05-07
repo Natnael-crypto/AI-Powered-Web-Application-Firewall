@@ -14,7 +14,6 @@ type Rule struct {
 	RuleMethod     string `json:"rule_method"`
 	RuleDefinition string `json:"rule_definition"`
 	Action         string `json:"action"`
-	ApplicationID  string `json:"application_id"`
 	RuleString     string `json:"rule_string"`
 	CreatedBy      string `json:"created_by"`
 	CreatedAt      string `json:"created_at"`

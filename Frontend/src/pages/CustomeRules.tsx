@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   ColumnDef,
   Row,
@@ -18,6 +18,8 @@ import {
   HiOutlineThumbDown,
   HiOutlinePencilAlt,
 } from 'react-icons/hi'
+import axios from 'axios'
+import EditRuleModal from '../components/EditRuleModal'
 
 export interface Rule {
   rule_id: string
@@ -33,8 +35,9 @@ export interface Rule {
   is_active: boolean
   category: string
 }
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY1NjU2MTgsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.bmGqOlhKhxD4IsMKsomGpa04uExS6l_q5YvrPa2dMCc";
 
-// Local Table component
 function truncateString(value: unknown, maxLength = 60): string {
   if (typeof value === 'string' && value.length > maxLength) {
     return value.substring(0, maxLength) + '...'
@@ -61,7 +64,6 @@ function Table<T extends object>({
     getCoreRowModel: getCoreRowModel(),
   })
 
-  // Notify parent of selected rows
   const selectedRows = table.getSelectedRowModel().rows
   if (onSelectionChange) onSelectionChange(selectedRows)
 
@@ -108,154 +110,179 @@ function Table<T extends object>({
   )
 }
 
-const columns: ColumnDef<Rule>[] = [
-  {
-    id: 'select',
-    header: ({ table }) => (
-      <input
-        type="checkbox"
-        checked={table.getIsAllPageRowsSelected()}
-        onChange={table.getToggleAllPageRowsSelectedHandler()}
-      />
-    ),
-    cell: ({ row }) => (
-      <input
-        type="checkbox"
-        checked={row.getIsSelected()}
-        onChange={row.getToggleSelectedHandler()}
-      />
-    ),
-  },
-  {
-    header: 'Status',
-    accessorKey: 'is_active',
-    cell: ({ row }) => (
-      <span
-        className={`px-3 py-1 rounded-full text-sm font-medium ${
-          row.original.is_active
-            ? 'bg-green-100 text-green-800'
-            : 'bg-red-100 text-red-800'
-        }`}
-      >
-        {row.original.is_active ? 'Active' : 'Inactive'}
-      </span>
-    ),
-  },
-  {
-    header: 'Definition',
-    accessorKey: 'rule_definition',
-    cell: ({ row }) => {
-      const value = row.original.rule_definition
-      return <span>{value.length > 60 ? `${value.slice(0, 60)}...` : value}</span>
-    },
-  },
-  {
-    header: 'Action',
-    accessorKey: 'action',
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        {row.original.action.toLowerCase().includes('deny') ? (
-          <HiOutlineBan className="text-red-600" size={20} />
-        ) : (
-          <HiOutlineCheckCircle className="text-green-600" size={20} />
-        )}
-        {row.original.action}
-      </div>
-    ),
-  },
-  {
-    header: 'Message',
-    accessorKey: 'category',
-  },
-  {
-    header: 'Updated At',
-    accessorKey: 'updated_at',
-  },
-  {
-    header: 'Edit',
-    cell: ({ row }) => (
-      <button onClick={() => handleEdit(row.original)}>
-        <HiOutlinePencilAlt size={20} className="text-blue-600" />
-      </button>
-    ),
-  },
-]
-
-const mockData: Rule[] = [
-  {
-    rule_id: '592249559871523992',
-    rule_type: 'multiple',
-    rule_method: 'chained',
-    rule_definition:
-      '[{\"rule_type\":\"REQUEST_URI\",\"rule_method\":\"streq\",\"rule_definition\":\"admin\"},{\"rule_type\":\"REQUEST_URI\",\"rule_method\":\"contains\",\"rule_definition\":\"test\"}]',
-    action: 'deny',
-    application_id: '16d3f539-6c7b-45ac-b977-6a51c3582d29',
-    rule_string:
-      'SecRule REQUEST_URI "@streq admin" "id:592249559871523992,phase:2,deny,msg:\'blocked path\'"',
-    created_by: 'user',
-    created_at: '',
-    updated_at: '',
-    is_active: true,
-    category: 'blocked path',
-  },
-  {
-    rule_id: '592249559871523993',
-    rule_type: 'multiple',
-    rule_method: 'chained',
-    rule_definition:
-      '[{\"rule_type\":\"REQUEST_URI\",\"rule_method\":\"streq\",\"rule_definition\":\"admin\"}]',
-    action: 'allow',
-    application_id: '16d3f539-6c7b-45ac-b977-6a51c3582d29',
-    rule_string: '',
-    created_by: 'user',
-    created_at: '',
-    updated_at: '',
-    is_active: false,
-    category: 'allowed path',
-  },
-]
 
 
-
-const applications = [
-  { id: '16d3f539-6c7b-45ac-b977-6a51c3582d29', name: 'MyApp 1' },
-  { id: 'app-2', name: 'Dashboard' },
-  { id: 'app-3', name: 'API Service' },
-]
-
+// 🟢 Main Component
 function CustomRules() {
+  const [rules, setRules] = useState<Rule[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedRows, setSelectedRows] = useState<Row<Rule>[]>([])
   const [isEditMode, setIsEditMode] = useState(false)
-  const [currentRule, setCurrentRule] = useState<Rule | null>(null)
+  const [currentRuleID, setCurrentRuleID] = useState("")
+
+  const columns: ColumnDef<Rule>[] = [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <input
+          type="checkbox"
+          checked={table.getIsAllPageRowsSelected()}
+          onChange={table.getToggleAllPageRowsSelectedHandler()}
+        />
+      ),
+      cell: ({ row }) => (
+        <input
+          type="checkbox"
+          checked={row.getIsSelected()}
+          onChange={row.getToggleSelectedHandler()}
+        />
+      ),
+    },
+    {
+      header: 'Status',
+      accessorKey: 'is_active',
+      cell: ({ row }) => (
+        <span
+          className={`px-3 py-1 rounded-full text-sm font-medium ${
+            row.original.is_active
+              ? 'bg-green-100 text-green-800'
+              : 'bg-red-100 text-red-800'
+          }`}
+        >
+          {row.original.is_active ? 'Active' : 'Inactive'}
+        </span>
+      ),
+    },
+    {
+      header: 'Definition',
+      accessorKey: 'rule_definition',
+      cell: ({ row }) => {
+        const value = row.original.rule_definition
+        return <span>{value.length > 60 ? `${value.slice(0, 60)}...` : value}</span>
+      },
+    },
+    {
+      header: 'Action',
+      accessorKey: 'action',
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          {row.original.action.toLowerCase().includes('deny') ? (
+            <HiOutlineBan className="text-red-600" size={20} />
+          ) : (
+            <HiOutlineCheckCircle className="text-green-600" size={20} />
+          )}
+          {row.original.action}
+        </div>
+      ),
+    },
+    {
+      header: 'Message',
+      accessorKey: 'category',
+    },
+    {
+      header: 'Updated At',
+      accessorKey: 'updated_at',
+    },
+    {
+      header: 'Edit',
+      cell: ({ row }) => (
+        <button onClick={() => {
+          setCurrentRuleID(row.original.rule_id)
+          setIsEditMode(true)
+          console.log(isEditMode)
+          // setIsModalOpen(true)
+        }}>
+          <HiOutlinePencilAlt size={20} className="text-blue-600" />
+        </button>
+      ),
+    }
+    
+  ]
+
+  const fetchRules = async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/rule`, {
+        headers: {
+          Authorization: token,
+        },
+      })
+      setRules(res.data.rules)
+    } catch (error) {
+      console.error('Failed to fetch rules:', error)
+    }
+  }
+
+  useEffect(() => {
+   fetchRules()
+  }, [])
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen)
   }
 
-  const handleEdit = (rule: Rule) => {
-    setIsEditMode(true)
-    setCurrentRule(rule)
-    toggleModal() // open modal to edit
-  }
-
-  const handleAction = (action: 'delete' | 'activate' | 'deactivate') => {
+  const handleAction = async (action: 'delete' | 'activate' | 'deactivate') => {
     const selectedIds = selectedRows.map((r) => r.original.rule_id)
-    console.log(`Performing ${action} on`, selectedIds)
-    // Implement logic to delete or update status
+  
+    try {
+      for (const ruleId of selectedIds) {
+        if (action === 'delete') {
+          await axios.delete(`${backendUrl}/rule/delete/${ruleId}`, {
+            headers: {
+              Authorization: token,
+            },
+          })
+        } else if (action === 'activate') {
+          await axios.get(`${backendUrl}/rule/activate/${ruleId}`, {
+            headers: {
+              Authorization: token,
+            },
+          })
+        } else if (action === 'deactivate') {
+          await axios.get(`${backendUrl}/rule/deactivate/${ruleId}`, {
+            headers: {
+              Authorization: token,
+            },
+          })
+        }
+      }
+  
+      // Refresh data after performing actions
+      await fetchRules()
+      setSelectedRows([]) // clear selection
+    } catch (error) {
+      console.error(`Failed to ${action} rules:`, error)
+    }
   }
+  
 
   return (
     <div className="space-y-4">
-      {isModalOpen?<CreateRuleModal/>:null}
-      
+      {isModalOpen ? (
+        <CreateRuleModal/>
+      ) : null}
+
+      {isEditMode ? 
+        (<EditRuleModal
+          ruleID={currentRuleID}
+          onClose={() => {
+            setCurrentRuleID("")
+            setIsEditMode(false)
+          }}
+          onSuccess={fetchRules}
+        />) : null
+      }
+
       <Card className="flex justify-between items-center py-4 px-6 shadow-md bg-white rounded-lg">
         <h2 className="text-lg font-semibold">Custom Rules</h2>
         <Button
-          classname={`text-white uppercase ${isModalOpen?"bg-red-500 text":"" }`}
+          classname={`text-white uppercase ${isModalOpen ? 'bg-red-500' : ''}`}
           size="l"
           variant="primary"
-          onClick={toggleModal}
+          onClick={() => {
+            setIsEditMode(false)
+            setCurrentRule(null)
+            toggleModal()
+          }}
         >
           {isModalOpen ? 'Back' : 'Add Rule'}
         </Button>
@@ -290,7 +317,7 @@ function CustomRules() {
 
       <Table<Rule>
         columns={columns}
-        data={mockData}
+        data={rules}
         onSelectionChange={setSelectedRows}
       />
     </div>
@@ -298,3 +325,5 @@ function CustomRules() {
 }
 
 export default CustomRules
+
+

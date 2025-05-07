@@ -5,6 +5,7 @@ import (
 	"backend/internal/models"
 
 	"github.com/gin-gonic/gin"
+	"slices"
 )
 
 func GetAssignedApplicationIDs(c *gin.Context) []string {
@@ -27,10 +28,5 @@ func GetAssignedApplicationIDs(c *gin.Context) []string {
 }
 
 func HasAccessToApplication(userAppIDs []string, targetAppID string) bool {
-	for _, id := range userAppIDs {
-		if id == targetAppID {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(userAppIDs, targetAppID)
 }

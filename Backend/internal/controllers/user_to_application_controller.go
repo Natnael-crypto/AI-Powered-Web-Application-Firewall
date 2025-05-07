@@ -48,6 +48,7 @@ func AddUserToApplication(c *gin.Context) {
 		ID:              utils.GenerateUUID(),
 		UserID:          input.UserID,
 		ApplicationName: input.ApplicationName,
+		ApplicationID:   application.ApplicationID,
 	}
 
 	if err := config.DB.Create(&userToApp).Error; err != nil {
@@ -57,8 +58,6 @@ func AddUserToApplication(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"message": "user assigned to application successfully"})
 }
-
-
 
 func UpdateUserToApplication(c *gin.Context) {
 	if c.GetString("role") != "super_admin" {
@@ -132,4 +131,3 @@ func DeleteUserToApplication(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "user to application assignment deleted successfully"})
 }
-

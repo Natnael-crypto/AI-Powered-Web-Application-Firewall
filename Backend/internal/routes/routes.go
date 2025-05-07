@@ -35,7 +35,7 @@ func InitializeRoutes(r *gin.Engine) {
 		application.POST("/add", controllers.AddApplication)
 		application.PUT("/:application_id", controllers.UpdateApplication)
 		application.DELETE("/:application_id", controllers.DeleteApplication)
-		application.GET("/", controllers.GetAllApplicationsAdmin)
+		application.GET("", controllers.GetAllApplicationsAdmin)
 		application.POST("/assign", controllers.AddUserToApplication)
 		application.PUT("/assign/:assignment_id", controllers.UpdateUserToApplication)
 		application.GET("/assignments", controllers.GetAllUserToApplications)
@@ -54,19 +54,21 @@ func InitializeRoutes(r *gin.Engine) {
 		config.GET("/config", controllers.GetConfigAdmin)
 	}
 
-	rules := authorized.Group("/")
+	rules := authorized.Group("/rule")
 	{
 		rules.POST("/add", controllers.AddRule)
 		rules.PUT("/update/:rule_id", controllers.UpdateRule)
 		rules.DELETE("/delete/:rule_id", controllers.DeleteRule)
 		rules.GET("/deactivate/:rule_id", controllers.DeactivateRule)
 		rules.GET("/activate/:rule_id", controllers.ActivateRule)
-		rules.GET("/rule/:application_id", controllers.GetRulesAdmin)
+		rules.GET("", controllers.GetAllRulesAdmin)
+		rules.GET("/:rule_id", controllers.GetOneRule)
+
 	}
 
 	requests := authorized.Group("/requests")
 	{
-		requests.GET("/", controllers.GetRequests)
+		requests.GET("", controllers.GetRequests)
 		requests.GET("/overall-stat", controllers.GetOverallStats)
 		requests.GET("/:request_id", controllers.GetRequestByID)
 		requests.GET("/requests-per-minute", controllers.GetRequestsPerMinute)
@@ -102,7 +104,7 @@ func InitializeRoutes(r *gin.Engine) {
 
 	headers := authorized.Group("/security-headers")
 	{
-		headers.POST("/", controllers.AddSecurityHeader)
+		headers.POST("", controllers.AddSecurityHeader)
 		headers.PUT("/:header_id", controllers.UpdateSecurityHeader)
 		headers.DELETE("/:header_id", controllers.DeleteSecurityHeader)
 		headers.GET("/security-headers/:application_id", controllers.GetSecurityHeadersAdmin)
@@ -111,24 +113,24 @@ func InitializeRoutes(r *gin.Engine) {
 
 	generateCsv := authorized.Group("/generate-csv")
 	{
-		generateCsv.GET("/", controllers.GenerateRequestsCSV)
+		generateCsv.GET("", controllers.GenerateRequestsCSV)
 	}
 
 	notification_rule := authorized.Group("/notification-rule")
 	{
 		notification_rule.POST("/:application_id", controllers.AddNotificationRule)
 		notification_rule.GET("/:application_id", controllers.GetNotificationRule)
-		notification_rule.GET("/", controllers.GetNotificationRules)
+		notification_rule.GET("", controllers.GetNotificationRules)
 		notification_rule.PUT("/:rule_id", controllers.UpdateNotificationRule)
 		notification_rule.DELETE("/:rule_id", controllers.DeleteNotificationRule)
 	}
 
 	notification_config := authorized.Group("/notification-config")
 	{
-		notification_config.POST("/", controllers.AddNotificationConfig)
-		notification_config.GET("/", controllers.GetNotificationConfig)
-		notification_config.PUT("/", controllers.UpdateNotificationConfig)
-		notification_config.DELETE("/", controllers.DeleteNotificationConfig)
+		notification_config.POST("", controllers.AddNotificationConfig)
+		notification_config.GET("", controllers.GetNotificationConfig)
+		notification_config.PUT("", controllers.UpdateNotificationConfig)
+		notification_config.DELETE("", controllers.DeleteNotificationConfig)
 	}
 
 	ai_analysis := authorized.Group("/")
@@ -161,8 +163,8 @@ func InitializeRoutes(r *gin.Engine) {
 
 	services := authorized.Group("/service")
 	{
-		services.GET("/", controllers.GetAllowedIps)
-		services.POST("/", controllers.AddAllowedIp)
+		services.GET("", controllers.GetAllowedIps)
+		services.POST("", controllers.AddAllowedIp)
 		services.PUT("/:id", controllers.UpdateAllowedIp)
 		services.DELETE("/:id", controllers.DeleteAllowedIp)
 	}
