@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 type Rule struct {
@@ -69,14 +70,31 @@ func FetchRules(applicationID string) (*RulesResponse, error) {
 }
 
 func WriteRuleToFile(applicationID string, rules []Rule) (string, error) {
+	dirPath := "./internal/config/custom/"
 	fileName := fmt.Sprintf("%s.conf", applicationID)
+	fullPath := filepath.Join(dirPath, fileName)
 
-	file, err := os.Create("./internal/config/custom/" + fileName)
+	// Check if folder exists
+	if _, err := os.Stat(dirPath); err == nil {
+		// Folder exists, remove it
+		if err := os.RemoveAll(dirPath); err != nil {
+			return "", fmt.Errorf("failed to remove existing directory: %v", err)
+		}
+	}
+
+	// Recreate the folder
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return "", fmt.Errorf("failed to create directory: %v", err)
+	}
+
+	// Create the rule file
+	file, err := os.Create(fullPath)
 	if err != nil {
 		return "", fmt.Errorf("error creating file: %v", err)
 	}
 	defer file.Close()
 
+	// Write rules to file
 	for _, rule := range rules {
 		_, err := file.WriteString(rule.RuleString + "\n")
 		if err != nil {

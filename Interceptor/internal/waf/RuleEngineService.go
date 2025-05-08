@@ -12,7 +12,7 @@ import (
 )
 
 type WAF struct {
-	engine coraza.WAF 
+	engine coraza.WAF
 }
 
 func InitializeRuleEngine(customRule string) (*WAF, error) {
@@ -47,6 +47,7 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int, st
 
 	tx.ProcessRequestHeaders()
 	url := utils.RecursiveDecode(r.RequestURI, 3)
+	fmt.Print(url)
 	tx.ProcessURI(url, r.Method, r.Proto)
 	string_body := ""
 	if r.Body != nil {
@@ -62,42 +63,16 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int, st
 
 	interruption := tx.Interruption()
 
-	ignoredMessages := map[string]bool{
-		"Enabling body inspection":      true,
-		"Invalid HTTP Request Line":     true,
-		"Request Missing a Host Header": true,
-	}
-
-	matchedRules := tx.MatchedRules()
-	totalRules := len(matchedRules)
 	ruleMessage := ""
 
-	if totalRules > 1 {
-		fmt.Println("Matched Rules:")
-		ruleIDPrinted := false
-
-		for i, rule := range matchedRules {
-			if i == totalRules-1 {
-				continue
-			}
-
-			if ignoredMessages[rule.Message()] {
-				continue
-			}
-
-			if !ruleIDPrinted {
-				fmt.Printf("Rule ID: %s\n", rule.TransactionID())
-				ruleIDPrinted = true
-			}
-
-			if len(rule.Message()) > 0 {
+	if interruption != nil {
+		for _, rule := range tx.MatchedRules() {
+			if rule.Rule().ID() == interruption.RuleID {
 				ruleMessage = rule.Message()
-				fmt.Println(rule.Message())
+				break
 			}
 		}
-	}
-
-	if interruption != nil {
+		log.Printf("[WAF] Request blocked by rule ID %d Message: %s (action: %s, status: %d)", interruption.RuleID, ruleMessage, interruption.Action, interruption.Status)
 		return true, interruption.RuleID, ruleMessage, interruption.Action, interruption.Status, string_body
 	}
 

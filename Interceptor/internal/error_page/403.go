@@ -1,6 +1,7 @@
 package error_page
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -8,59 +9,85 @@ import (
 func Send403Response(w http.ResponseWriter, RuleID int, RuleMessage string, Action string, Status int) {
 	w.WriteHeader(http.StatusForbidden)
 	w.Header().Set("Content-Type", "text/html")
-	_, err := w.Write([]byte(`
-		<!DOCTYPE html>
-		<html lang="en">
-		<head>
-			<meta charset="UTF-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<title>403 Forbidden</title>
-			<style>
-				body {
-					font-family: Arial, sans-serif;
-					text-align: center;
-					background-color: #f4f4f4;
-					color: #333;
-					margin: 0;
-					padding: 0;
-					display: flex;
-					justify-content: center;
-					align-items: center;
-					height: 100vh;
-				}
-				.container {
-					max-width: 600px;
-					background: #fff;
-					padding: 30px;
-					box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-					border-radius: 8px;
-				}
+
+	page := fmt.Sprintf(`
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>403 Forbidden</title>
+		<style>
+			body {
+				font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+				background-color: #f9fafb;
+				color: #1f2937;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 100vh;
+				margin: 0;
+			}
+			.container {
+				text-align: center;
+				background-color: #ffffff;
+				padding: 40px;
+				border-radius: 10px;
+				box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+				max-width: 500px;
+				width: 90%%;
+			}
+			h1 {
+				font-size: 3rem;
+				color: #dc2626;
+				margin-bottom: 10px;
+			}
+			p {
+				font-size: 1.1rem;
+				margin: 15px 0;
+			}
+			.code-box {
+				background-color: #f3f4f6;
+				padding: 15px;
+				border-radius: 8px;
+				text-align: left;
+				margin-top: 20px;
+				font-family: monospace;
+				font-size: 0.95rem;
+			}
+			a {
+				color: #2563eb;
+				text-decoration: none;
+				font-weight: 500;
+			}
+			a:hover {
+				text-decoration: underline;
+			}
+			@media (max-width: 600px) {
 				h1 {
-					font-size: 3em;
-					color: #e74c3c;
+					font-size: 2.2rem;
 				}
-				p {
-					font-size: 1.2em;
-					margin: 20px 0;
-				}
-				a {
-					color: #3498db;
-					text-decoration: none;
-				}
-				a:hover {
-					text-decoration: underline;
-				}
-			</style>
-		</head>
-		<body>
-			<div class="container">
-				<h1>403 Forbidden</h1>
-				<p>Your request has been blocked.</p>
-				<p><a href="/">Go back to Home</a></p>
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>403 Forbidden</h1>
+			<p>Access to this resource has been denied for security reasons.</p>
+			<p>If you believe this is an error, please contact the administrator.</p>
+			<div class="code-box">
+				<strong>Rule ID:</strong> %d<br>
+				<strong>Message:</strong> %s<br>
+				<strong>Action Taken:</strong> %s<br>
+				<strong>Status Code:</strong> %d
 			</div>
-		</body>
-		</html>
-	`))
+			<p><a href="/">← Return to Home</a></p>
+		</div>
+	</body>
+	</html>
+	`, RuleID, RuleMessage, Action, Status)
+
+	_, err := w.Write([]byte(page))
 	if err != nil {
 		log.Printf("Failed to write custom 403 page: %v", err)
 	}
