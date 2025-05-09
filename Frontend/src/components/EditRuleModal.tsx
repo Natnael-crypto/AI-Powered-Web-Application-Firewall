@@ -27,7 +27,7 @@ interface EditRuleModalProps {
 }
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY3OTM2ODgsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.72S_RB-PCbC7oqwKDfgN1ufJBxK70j6KIKPvzya6y4I";
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY4NTMyMTMsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.PfJJkKGbHXHQ9xTirmBoE-VHM3Zp8xkZKIfdYWI8QWI";
 
 const validRuleTypes = ["REQUEST_HEADERS", "ARGS", "REQUEST_METHOD", "REMOTE_ADDR"];
 const validRuleMethods = ["regex", "contains", "ipMatch"];

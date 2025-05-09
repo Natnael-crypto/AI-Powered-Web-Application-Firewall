@@ -63,9 +63,16 @@ func HandleBatchRequests(c *gin.Context) {
 		country := utils.GetCountryName(ipParts[0])
 		headers := utils.ParseHeaders(safeString(requestData["headers"]))
 
+		var application models.Application
+
+		if err := config.DB.Where("application_name = ?", safeString(requestData["application_name"])).First(&application).Error; err != nil {
+			log.Println("Application not found")
+		}
+
 		request := models.Request{
 			RequestID:       uuid.New().String(),
 			ApplicationName: safeString(requestData["application_name"]),
+			ApplicationID:   application.ApplicationID,
 			ClientIP:        ipParts[0],
 			RequestMethod:   safeString(requestData["request_method"]),
 			RequestURL:      safeString(requestData["request_url"]),
