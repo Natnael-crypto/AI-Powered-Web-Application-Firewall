@@ -1,5 +1,6 @@
 import {LuLogOut} from 'react-icons/lu'
 import {useLocation, useNavigate} from 'react-router-dom'
+import ToastExample from './ToastExample'
 
 function Navbar() {
   const location = useLocation()

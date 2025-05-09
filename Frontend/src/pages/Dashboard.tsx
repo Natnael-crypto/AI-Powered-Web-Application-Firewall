@@ -42,17 +42,17 @@ function Dashboard() {
       </section>
 
       {/* Charts */}
-      <section className="">
+      <section className="w-full">
         <div className="h-[500px] w-full">
           <RequestStatus />
         </div>
       </section>
       <section className="">
-        <div className="grid grid-cols-2 gap-4">
-          <div className=" w-full p-4">
+        <div className="grid grid-cols-2 space-x-5 w-full">
+          <div className="w-full ">
             <UserClientsCard />
           </div>
-          <div className=" w-full p-4">
+          <div className="w-full ">
             <ResponseStatus />
           </div>
         </div>

@@ -2,7 +2,7 @@ import {useState} from 'react'
 import {motion} from 'framer-motion'
 import {UserIcon, LockIcon, LogInIcon} from 'lucide-react'
 import {useNavigate} from 'react-router-dom'
-import {useLogin} from '../hooks/useUser'
+import {useLogin} from '../hooks/api/useUser'
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({username: '', password: ''})

@@ -1,6 +1,6 @@
 import {CellContext, ColumnDef} from '@tanstack/react-table'
 import Table from '../Table'
-import {useGetRequests} from '../../hooks/useRequests'
+import {useGetRequests} from '../../hooks/api/useRequests'
 
 interface RequestLog {
   request_id: string

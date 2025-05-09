@@ -14,6 +14,7 @@ import AttackLog from './pages/Requestlogs/AttackLog'
 import RateLimiting from './pages/Requestlogs/RateLimiting'
 import AntiBot from './pages/Requestlogs/Antibot'
 import WebServices from './pages/WebServices'
+import {ToastProvider} from './providers/ToastProvider'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -37,7 +38,11 @@ const router = createBrowserRouter(
 )
 
 function App() {
-  return <RouterProvider router={router} />
+  return (
+    <ToastProvider>
+      <RouterProvider router={router} />
+    </ToastProvider>
+  )
 }
 
 export default App

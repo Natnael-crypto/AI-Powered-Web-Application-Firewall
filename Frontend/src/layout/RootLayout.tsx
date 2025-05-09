@@ -9,9 +9,9 @@ function RootLayout() {
 
   useEffect(() => {
     console.log('got you')
-    // if (!localStorage.getItem('token')) {
-    //   navigate('/login')
-    // }
+    if (!localStorage.getItem('token')) {
+      navigate('/login')
+    }
   }, [pathname])
 
   return (
@@ -19,7 +19,7 @@ function RootLayout() {
       <Sidebar />
       <div className="flex flex-col w-full overflow-hidden">
         <Navbar />
-        <main className="flex-1 overflow-y-auto p-6" style={{backgroundColor:"#F3F6FE"}}>
+        <main className="flex-1 overflow-y-auto p-6" style={{backgroundColor: '#F3F6FE'}}>
           <Outlet />
         </main>
       </div>
