@@ -275,7 +275,7 @@ function CustomRules() {
           variant="primary"
           onClick={() => {
             setIsEditMode(false)
-            setCurrentRule(null)
+            setCurrentRuleID('')
             toggleModal()
           }}
         >

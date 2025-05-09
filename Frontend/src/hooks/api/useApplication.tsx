@@ -3,7 +3,7 @@ import {
   createApplication,
   getApplication,
   getApplications,
-  updateApplication, // renamed
+  updateApplication,
 } from '../../services/applicationApi'
 
 export function useGetApplications() {

@@ -1,7 +1,7 @@
 import axios from '../lib/axios'
 
 export const loginUser = async (userData: {username: string; password: string}) => {
-  const response = await axios.post('/api/login', userData)
+  const response = await axios.post('/login', userData)
   if (!response) throw new Error('Failed to get users')
 
   return await response.data

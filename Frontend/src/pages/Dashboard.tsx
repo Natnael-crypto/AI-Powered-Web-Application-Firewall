@@ -8,7 +8,6 @@ import RequestStatus from '../components/RequestStatus'
 import TopEndpointsChart from '../components/TopEndpointsChart'
 import TopThreatsChart from '../components/TopThreatsChart'
 import {useState} from 'react'
-import FilterBar from '../components/FilterBar'
 
 const cardStyles =
   'bg-white shadow-lg rounded-xl transition-shadow duration-300 border border-gray-100 hover:shadow-xl'
@@ -20,12 +19,12 @@ function Dashboard() {
   return (
     <main className="flex flex-col gap-6 w-full">
       {/* Top Statistics */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className={`flex flex-col justify-center ${cardStyles}`}>
+      <section className="grid  md:grid-cols-2 gap-6">
+        <Card className={`flex justify-center ${cardStyles}`}>
           <StatisticCard
             className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300"
             label="Total Requests"
-            value="254320"
+            value={254320}
           />
         </Card>
 
@@ -33,7 +32,7 @@ function Dashboard() {
         <Card className={`col-span-2 items-center ${cardStyles}`}>
           <StatisticGroup
             stats={[
-              {label: 'Blocked Requests', value: '1024'},
+              {label: 'Blocked Requests', value: 1024},
               {label: 'Malicious IPs Blocked', value: 36},
             ]}
             className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300"
@@ -56,7 +55,7 @@ function Dashboard() {
           <StatisticCard
             className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300"
             label="Live Traffic Rate"
-            value="122"
+            value={122}
           />
         </Card>
       </section>
