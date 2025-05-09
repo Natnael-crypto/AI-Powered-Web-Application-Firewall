@@ -97,7 +97,7 @@ func GetRules(c *gin.Context) {
 	applicationID := c.Param("application_id")
 
 	var rule_to_app []models.RuleToApp
-	if err := config.DB.Where("app_id = ?", applicationID).Find(&rule_to_app).Error; err != nil {
+	if err := config.DB.Where("application_id = ?", applicationID).Find(&rule_to_app).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "rules not found"})
 		return
 	}
@@ -120,8 +120,19 @@ func GetAllRulesAdmin(c *gin.Context) {
 
 	appIDs := utils.GetAssignedApplicationIDs(c)
 
+	var ruleApp []models.RuleToApp
+	if err := config.DB.Where("application_id IN ?", appIDs).Find(&ruleApp).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch rules"})
+		return
+	}
+
+	ruleAppIDs := make([]string, 0, len(ruleApp))
+	for _, mapping := range ruleApp {
+		ruleAppIDs = append(ruleAppIDs, mapping.RuleID)
+	}
+
 	var rules []models.Rule
-	if err := config.DB.Where("application_id IN ?", appIDs).Find(&rules).Error; err != nil {
+	if err := config.DB.Where("rule_id IN ?", ruleAppIDs).Find(&rules).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch rules"})
 		return
 	}
@@ -151,9 +162,28 @@ func GetOneRule(c *gin.Context) {
 		return
 	}
 
+	var ruleApp []models.RuleToApp
+	if err := config.DB.Where("rule_id = ?", ruleID).Find(&ruleApp).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch rules"})
+		return
+	}
+
+	ruleAppIDs := make([]string, 0, len(ruleApp))
+	for _, mapping := range ruleApp {
+		ruleAppIDs = append(ruleAppIDs, mapping.ApplicationID)
+	}
+
+	var applications []models.Application
+
+	if err := config.DB.Where("application_id IN ?", ruleAppIDs).Find(&applications).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch applications"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"rule":            rule,
 		"rule_definition": parsedDefs,
+		"applications":    applications,
 	})
 }
 
@@ -175,18 +205,30 @@ func UpdateRule(c *gin.Context) {
 
 	appIds := utils.GetAssignedApplicationIDs(c)
 
+	if err := config.DB.Where("rule_id = ?", rule.RuleID).Delete(&models.RuleToApp{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete rule to app mappings"})
+		return
+	}
+
 	for _, id := range input.ApplicationIDs {
 		if !slices.Contains(appIds, id) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 			return
 		} else {
-			var existing_rule_to_app models.RuleToApp
-			if err := config.DB.Where("rule_id = ? And app_id = ?", rule.RuleID, id).First(&existing_rule_to_app).Error; err != nil {
-				rule_to_app := models.RuleToApp{
+			var count int64
+			if err := config.DB.Model(&models.RuleToApp{}).
+				Where("rule_id = ? AND application_id = ?", rule.RuleID, id).
+				Count(&count).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to check rule to app mapping"})
+				return
+			}
+
+			if count < 1 {
+				ruleToApp := models.RuleToApp{
 					RuleID:        rule.RuleID,
 					ApplicationID: id,
 				}
-				if err := config.DB.Create(&rule_to_app).Error; err != nil {
+				if err := config.DB.Create(&ruleToApp).Error; err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create rule to app"})
 					return
 				}
@@ -277,12 +319,6 @@ func DeleteRule(c *gin.Context) {
 	}
 
 	config.Change = true
-
-	var rule_to_app models.RuleToApp
-	if err := config.DB.Where("rule_id = ?", ruleID, user_id).Delete(&rule_to_app).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "rule to application"})
-		return
-	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "rule deleted successfully"})
 }

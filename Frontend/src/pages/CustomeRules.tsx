@@ -36,7 +36,7 @@ export interface Rule {
   category: string
 }
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY1NjU2MTgsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.bmGqOlhKhxD4IsMKsomGpa04uExS6l_q5YvrPa2dMCc";
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY4NTMyMTMsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.PfJJkKGbHXHQ9xTirmBoE-VHM3Zp8xkZKIfdYWI8QWI";
 
 function truncateString(value: unknown, maxLength = 60): string {
   if (typeof value === 'string' && value.length > maxLength) {
@@ -280,7 +280,6 @@ function CustomRules() {
           variant="primary"
           onClick={() => {
             setIsEditMode(false)
-            setCurrentRule(null)
             toggleModal()
           }}
         >

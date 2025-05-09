@@ -13,51 +13,8 @@ import (
 func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 	query := config.DB.Model(&models.Request{})
 
-	userRole := c.GetString("role")
-	userID := c.GetString("user_id")
-	var allowedApps []string
-
-	if userRole != "super_admin" {
-		var userApps []models.UserToApplication
-		if err := config.DB.Where("user_id = ?", userID).Find(&userApps).Error; err != nil {
-			return nil
-		}
-
-		for _, app := range userApps {
-			allowedApps = append(allowedApps, app.ApplicationName)
-		}
-
-		if len(allowedApps) == 0 {
-			return nil
-		}
-	}
-
-	if appFilter := c.QueryArray("application_name"); len(appFilter) > 0 {
-		if userRole == "super_admin" {
-			query = query.Where("application_name IN ?", appFilter)
-		} else {
-			var filtered []string
-			allowedSet := make(map[string]struct{})
-			for _, a := range allowedApps {
-				allowedSet[a] = struct{}{}
-			}
-			for _, a := range appFilter {
-				if _, ok := allowedSet[a]; ok {
-					filtered = append(filtered, a)
-				}
-			}
-
-			if len(filtered) == 0 {
-				return nil
-			}
-
-			query = query.Where("application_name IN ?", filtered)
-		}
-	} else {
-		if userRole != "super_admin" {
-			query = query.Where("application_name IN ?", allowedApps)
-		}
-	}
+	appIDs := GetAssignedApplicationIDs(c)
+	query = query.Where("application_id IN ?", appIDs)
 
 	if clientIP := c.Query("client_ip"); clientIP != "" {
 		query = query.Where("client_ip ILIKE ?", "%"+clientIP+"%")

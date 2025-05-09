@@ -55,7 +55,7 @@ const CreateRuleModal: React.FC = () => {
   const [preview, setPreview] = useState<string>("");
   const [availableApps, setAvailableApps] = useState<AppOption[]>([]);
 
-  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY1NjU2MTgsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.bmGqOlhKhxD4IsMKsomGpa04uExS6l_q5YvrPa2dMCc";
+  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY3OTM2ODgsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.72S_RB-PCbC7oqwKDfgN1ufJBxK70j6KIKPvzya6y4I";
 
   useEffect(() => {
     const fetchApplications = async () => {
@@ -148,7 +148,7 @@ const CreateRuleModal: React.FC = () => {
     };
 
     try {
-      for (const app of ruleInput.applications) {
+      
         const response = await fetch(`${backendUrl}/rule/add`, {
           method: "POST",
           headers: {
@@ -157,17 +157,15 @@ const CreateRuleModal: React.FC = () => {
           },
           body: JSON.stringify({
             ...payloadTemplate,
-            application_id: app,
+            application_ids: ruleInput.applications,
           }),
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Failed to save rule for", app, errorData);
-          alert(`Failed to save rule for application: ${app}`);
+          alert(`Failed to save rule`);
           return;
         }
-      }
+      
 
       alert("Rule saved successfully for all selected applications!");
     } catch (error) {
