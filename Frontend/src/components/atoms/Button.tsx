@@ -38,7 +38,7 @@ function Button({
     classname,
   )
   return (
-    <button className={finalClassName} onClick={onClick} disabled={disabled}>
+    <button  className={finalClassName} onClick={onClick} disabled={disabled}>
       {children}
     </button>
   )

@@ -3,6 +3,7 @@ package controllers
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+	"backend/internal/utils"
 	"log"
 	"net/http"
 	"time"
@@ -64,6 +65,36 @@ func AddSecurityHeader(c *gin.Context) {
 
 func GetSecurityHeaders(c *gin.Context) {
 	applicationID := c.Param("application_id")
+
+	var securityHeaders []models.SecurityHeader
+	query := config.DB.Model(&models.SecurityHeader{})
+
+	if applicationID != "" {
+		query = query.Where("application_id = ?", applicationID)
+	} else {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "parameter application_id is empty"})
+		return
+	}
+
+	if err := query.Find(&securityHeaders).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch security headers"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"security_headers": securityHeaders})
+}
+
+func GetSecurityHeadersAdmin(c *gin.Context) {
+	applicationID := c.Param("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
+	}
 
 	var securityHeaders []models.SecurityHeader
 	query := config.DB.Model(&models.SecurityHeader{})

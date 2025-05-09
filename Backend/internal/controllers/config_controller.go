@@ -22,11 +22,37 @@ func GetConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": conf})
 }
 
-func GetAppConfig(c *gin.Context) {
-	var appConf models.AppConf
-	application_id := c.Param("application_id")
+func GetConfigAdmin(c *gin.Context) {
 
-	if err := config.DB.Where("application_id=?", application_id).First(&appConf).Error; err != nil {
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	var conf models.Conf
+	if err := config.DB.First(&conf).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "configuration not found"})
+		return
+	}
+	fmt.Println(conf)
+	c.JSON(http.StatusOK, gin.H{"data": conf})
+}
+
+func GetAppConfig(c *gin.Context) {
+
+	var appConf models.AppConf
+	applicationID := c.Param("application_id")
+
+	if c.GetString("role") == "super_admin" {
+	} else {
+		appIds := utils.GetAssignedApplicationIDs(c)
+		if !utils.HasAccessToApplication(appIds, applicationID) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
+	}
+
+	if err := config.DB.Where("application_id=?", applicationID).First(&appConf).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "App configuration not found"})
 		return
 	}

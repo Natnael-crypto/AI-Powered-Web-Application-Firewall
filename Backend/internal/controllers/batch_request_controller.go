@@ -80,6 +80,9 @@ func HandleBatchRequests(c *gin.Context) {
 			GeoLocation:     country,
 			RateLimited:     safeBool(requestData["rate_limited"]),
 			UserAgent:       safeString(requestData["user_agent"]),
+			AIResult:        safeBool(requestData["ai_result"]),
+			AIThreatType:    safeString(requestData["ai_threat_type"]),
+			RuleDetected:    safeBool(requestData["rule_detected"]),
 		}
 
 		requests = append(requests, request)

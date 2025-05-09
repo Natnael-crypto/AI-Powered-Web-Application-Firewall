@@ -14,6 +14,9 @@ func InitializeRoutes(r *gin.Engine) {
 	authorized := r.Group("/")
 	authorized.Use(middleware.AuthRequired)
 
+	allowed_ip := r.Group("/")
+	allowed_ip.Use(middleware.AllowlistMiddleware)
+
 	authorized.PUT("/updatePassword", controllers.UpdatePassword)
 	authorized.GET("/is-logged-in", controllers.IsLoggedIN)
 
@@ -27,19 +30,17 @@ func InitializeRoutes(r *gin.Engine) {
 		admin.PUT("/active/:username", controllers.ActiveAdmin)
 	}
 
-	r.GET("/application", controllers.GetAllApplications)
 	application := authorized.Group("/application")
 	{
 		application.POST("/add", controllers.AddApplication)
 		application.PUT("/:application_id", controllers.UpdateApplication)
 		application.DELETE("/:application_id", controllers.DeleteApplication)
-
+		application.GET("", controllers.GetAllApplicationsAdmin)
 		application.POST("/assign", controllers.AddUserToApplication)
 		application.PUT("/assign/:assignment_id", controllers.UpdateUserToApplication)
 		application.GET("/assignments", controllers.GetAllUserToApplications)
 		application.DELETE("/assign/:assignment_id", controllers.DeleteUserToApplication)
 		application.GET("/:application_id", controllers.GetApplication)
-
 	}
 
 	config := authorized.Group("/config")
@@ -50,35 +51,34 @@ func InitializeRoutes(r *gin.Engine) {
 		config.PUT("/update/detect-bot/:application_id", controllers.UpdateDetectBot)
 		config.PUT("/update/post-data-size/:application_id", controllers.UpdateMaxPosyDataSize)
 		config.PUT("/update/tls/:application_id", controllers.UpdateTls)
+		config.GET("/config", controllers.GetConfigAdmin)
 	}
-	r.GET("/config/get-app-config/:application_id", controllers.GetAppConfig)
-	r.GET("/config", controllers.GetConfig)
 
 	rules := authorized.Group("/rule")
 	{
 		rules.POST("/add", controllers.AddRule)
 		rules.PUT("/update/:rule_id", controllers.UpdateRule)
 		rules.DELETE("/delete/:rule_id", controllers.DeleteRule)
+		rules.GET("/deactivate/:rule_id", controllers.DeactivateRule)
+		rules.GET("/activate/:rule_id", controllers.ActivateRule)
+		rules.GET("", controllers.GetAllRulesAdmin)
+		rules.GET("/:rule_id", controllers.GetOneRule)
+
 	}
-	r.GET("/rule/:application_id", controllers.GetRules)
-	r.GET("/rule/metadata", controllers.GetRuleMetadata)
 
 	requests := authorized.Group("/requests")
 	{
-		requests.GET("/", controllers.GetRequests)
-		requests.GET("/stats", controllers.GetRequestStats)
-		requests.GET("/blocked-stats", controllers.GetBlockedStats)
+		requests.GET("", controllers.GetRequests)
+		requests.GET("/overall-stat", controllers.GetOverallStats)
+		requests.GET("/:request_id", controllers.GetRequestByID)
 		requests.GET("/requests-per-minute", controllers.GetRequestsPerMinute)
-		requests.GET("/top-blocked-countries", controllers.GetTopBlockedCountries)
-		requests.GET("/all-blocked-countries", controllers.GetAllBlockedCountries)
+		requests.GET("/all-countries-stat", controllers.GetAllCountriesStat)
 		requests.GET("/os-stats", controllers.GetClientOSStats)
-		requests.GET("/response-status-stats", controllers.GetResponseStatusStats)
+		requests.GET("/response-status-stat", controllers.GetResponseStatusStats)
 		requests.GET("/most-targeted-endpoints", controllers.GetMostTargetedEndpoints)
 		requests.GET("/top-attack-types", controllers.GetTopThreatTypes)
 		requests.DELETE("/delete", controllers.DeleteFilteredRequests)
-
 	}
-	r.POST("/batch", controllers.HandleBatchRequests)
 
 	notifications := authorized.Group("/notifications")
 	{
@@ -89,11 +89,11 @@ func InitializeRoutes(r *gin.Engine) {
 
 	certs := authorized.Group("/certs")
 	{
+		certs.GET("/certs", controllers.GetCertAdmin)
 		certs.POST("/:application_id", controllers.AddCert)
 		certs.PUT("/:application_id", controllers.UpdateCert)
 		certs.DELETE("/:application_id", controllers.DeleteCert)
 	}
-	r.GET("/certs", controllers.GetCert)
 
 	interceptor := authorized.Group("/interceptor")
 	{
@@ -101,36 +101,72 @@ func InitializeRoutes(r *gin.Engine) {
 		interceptor.GET("/stop", controllers.StopInterceptor)
 		interceptor.GET("/restart", controllers.RestartInterceptor)
 	}
-	r.GET("/interceptor/is-running", controllers.InterceptorCheckState)
 
 	headers := authorized.Group("/security-headers")
 	{
-		headers.POST("/", controllers.AddSecurityHeader)
+		headers.POST("", controllers.AddSecurityHeader)
 		headers.PUT("/:header_id", controllers.UpdateSecurityHeader)
 		headers.DELETE("/:header_id", controllers.DeleteSecurityHeader)
+		headers.GET("/security-headers/:application_id", controllers.GetSecurityHeadersAdmin)
+
 	}
-	r.GET("/security-headers/:application_id", controllers.GetSecurityHeaders)
 
 	generateCsv := authorized.Group("/generate-csv")
 	{
-		generateCsv.GET("/", controllers.GenerateRequestsCSV)
+		generateCsv.GET("", controllers.GenerateRequestsCSV)
 	}
 
 	notification_rule := authorized.Group("/notification-rule")
 	{
 		notification_rule.POST("/:application_id", controllers.AddNotificationRule)
 		notification_rule.GET("/:application_id", controllers.GetNotificationRule)
-		notification_rule.GET("/", controllers.GetNotificationRules)
+		notification_rule.GET("", controllers.GetNotificationRules)
 		notification_rule.PUT("/:rule_id", controllers.UpdateNotificationRule)
 		notification_rule.DELETE("/:rule_id", controllers.DeleteNotificationRule)
 	}
 
 	notification_config := authorized.Group("/notification-config")
 	{
-		notification_config.POST("/", controllers.AddNotificationConfig)
-		notification_config.GET("/", controllers.GetNotificationConfig)
-		notification_config.PUT("/", controllers.UpdateNotificationConfig)
-		notification_config.DELETE("/", controllers.DeleteNotificationConfig)
+		notification_config.POST("", controllers.AddNotificationConfig)
+		notification_config.GET("", controllers.GetNotificationConfig)
+		notification_config.PUT("", controllers.UpdateNotificationConfig)
+		notification_config.DELETE("", controllers.DeleteNotificationConfig)
+	}
+
+	ai_analysis := authorized.Group("/")
+	{
+		ai_analysis.POST("/queue-analysis", controllers.QueueRequestForAnalysis)
+		ai_analysis.POST("/model/train", controllers.CreateModelTrainingRequest)
+		ai_analysis.POST("/model/select", controllers.SelectActiveModel)
+		ai_analysis.GET("/models", controllers.GetModels)
+	}
+
+	ms_services := allowed_ip.Group("/ml")
+	{
+		ms_services.GET("/fetch-analysis", controllers.FetchAndAnalyzeRequests)
+		ms_services.POST("/submit-analysis", controllers.SubmitAnalysisResults)
+		ms_services.GET("/model/untrained", controllers.GetUntrainedModelForML)
+		ms_services.POST("/model/results", controllers.SubmitModelResults)
+		ms_services.GET("/model/selected", controllers.GetSelectedModel)
+	}
+
+	interceptor_services := allowed_ip.Group("/interceptor")
+	{
+		interceptor_services.GET("/application", controllers.GetAllApplications)
+		interceptor_services.POST("/batch", controllers.HandleBatchRequests)
+		interceptor_services.GET("/config", controllers.GetConfig)
+		interceptor_services.GET("/rule/:application_id", controllers.GetRules)
+		interceptor_services.GET("/certs", controllers.GetCert)
+		interceptor_services.GET("/is-running", controllers.InterceptorCheckState)
+		interceptor_services.GET("/security-headers/:application_id", controllers.GetSecurityHeaders)
+	}
+
+	services := authorized.Group("/service")
+	{
+		services.GET("", controllers.GetAllowedIps)
+		services.POST("", controllers.AddAllowedIp)
+		services.PUT("/:id", controllers.UpdateAllowedIp)
+		services.DELETE("/:id", controllers.DeleteAllowedIp)
 	}
 
 }

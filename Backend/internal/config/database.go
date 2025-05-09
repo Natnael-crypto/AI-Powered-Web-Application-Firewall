@@ -62,13 +62,15 @@ func InitDB() {
 		&models.NotificationRule{},
 		&models.NotificationConfig{},
 		&models.SecurityHeader{},
+		&models.AIModel{},
+		&models.AllowedIp{},
+		&models.RuleToApp{},
 	)
 	if err != nil {
 		log.Fatalf("Migration failed: %v", err)
 	}
 
 	log.Println("Database migration completed successfully.")
-
 
 	newConf := models.Conf{
 		ID:              uuid.New().String(),

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 type Rule struct {
@@ -14,7 +15,6 @@ type Rule struct {
 	RuleMethod     string `json:"rule_method"`
 	RuleDefinition string `json:"rule_definition"`
 	Action         string `json:"action"`
-	ApplicationID  string `json:"application_id"`
 	RuleString     string `json:"rule_string"`
 	CreatedBy      string `json:"created_by"`
 	CreatedAt      string `json:"created_at"`
@@ -38,9 +38,18 @@ func FetchRules(applicationID string) (*RulesResponse, error) {
 		return nil, fmt.Errorf("BACKENDPORT environment variable is not set")
 	}
 
-	url := fmt.Sprintf("http://%s:%s/rule/%s", backendHost, backendPort, applicationID)
+	url := fmt.Sprintf("http://%s:%s/interceptor/rule/%s", backendHost, backendPort, applicationID)
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %v", err)
+	}
+
+	req.Header.Set("X-Service", "I")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
 	if err != nil {
 		return nil, fmt.Errorf("error making GET request: %v", err)
 	}
@@ -61,14 +70,31 @@ func FetchRules(applicationID string) (*RulesResponse, error) {
 }
 
 func WriteRuleToFile(applicationID string, rules []Rule) (string, error) {
+	dirPath := "./internal/config/custom/"
 	fileName := fmt.Sprintf("%s.conf", applicationID)
+	fullPath := filepath.Join(dirPath, fileName)
 
-	file, err := os.Create("./internal/config/custom/" + fileName)
+	// Check if folder exists
+	if _, err := os.Stat(dirPath); err == nil {
+		// Folder exists, remove it
+		if err := os.RemoveAll(dirPath); err != nil {
+			return "", fmt.Errorf("failed to remove existing directory: %v", err)
+		}
+	}
+
+	// Recreate the folder
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return "", fmt.Errorf("failed to create directory: %v", err)
+	}
+
+	// Create the rule file
+	file, err := os.Create(fullPath)
 	if err != nil {
 		return "", fmt.Errorf("error creating file: %v", err)
 	}
 	defer file.Close()
 
+	// Write rules to file
 	for _, rule := range rules {
 		_, err := file.WriteString(rule.RuleString + "\n")
 		if err != nil {

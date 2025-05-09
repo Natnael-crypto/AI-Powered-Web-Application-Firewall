@@ -12,71 +12,10 @@ import (
 	"backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
-func AddRequest(c *gin.Context) {
-	var input struct {
-		ApplicationName string `json:"application_name" binding:"required"`
-		ClientIP        string `json:"client_ip" binding:"required"`
-		RequestMethod   string `json:"request_method" binding:"required"`
-		RequestURL      string `json:"request_url" binding:"required"`
-		Headers         string `json:"headers"`
-		Body            string `json:"body"`
-		ResponseCode    int    `json:"response_code" binding:"required"`
-		Status          string `json:"status" binding:"required"`
-		ThreatDetected  bool   `json:"threat_detected"`
-		ThreatType      string `json:"threat_type"`
-		BotDetected     bool   `json:"bot_detected"`
-		GeoLocation     string `json:"geo_location"`
-		RateLimited     bool   `json:"rate_limited"`
-		UserAgent       string `json:"user_agent"`
-	}
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	var app models.Application
-	if err := config.DB.Where("application_name = ?", input.ApplicationName).First(&app).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
-		return
-	}
-
-	request := models.Request{
-		RequestID:       uuid.New().String(),
-		ApplicationName: input.ApplicationName,
-		ClientIP:        input.ClientIP,
-		RequestMethod:   input.RequestMethod,
-		RequestURL:      input.RequestURL,
-		Headers:         input.Headers,
-		Body:            input.Body,
-		Timestamp:       float64(time.Now().UnixMilli()),
-		ResponseCode:    input.ResponseCode,
-		Status:          input.Status,
-		ThreatDetected:  input.ThreatDetected,
-		ThreatType:      input.ThreatType,
-		BotDetected:     input.BotDetected,
-		GeoLocation:     input.GeoLocation,
-		RateLimited:     input.RateLimited,
-		UserAgent:       input.UserAgent,
-	}
-
-	if err := config.DB.Create(&request).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create request"})
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{"message": "request added successfully", "request": request})
-}
-
 func GetRequests(c *gin.Context) {
-	apps := c.QueryArray("application_name")
-	if len(apps) == 1 {
-		apps = strings.Split(apps[0], ",")
-	}
-
 	query := utils.ApplyRequestFilters(c)
 
 	if query == nil {
@@ -132,103 +71,17 @@ func GetRequestByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"request": request})
 }
 
-func GetRequestStats(c *gin.Context) {
+func GetAllCountriesStat(c *gin.Context) {
 
 	query := utils.ApplyRequestFilters(c)
+	blocked := c.Query("status")
 
 	if query == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
 		return
 	}
 
-	var requestCount int64
-	if err := query.Count(&requestCount).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count requests"})
-		return
-	}
-
-	var uniqueIPs []string
-	if err := query.Distinct("client_ip").Pluck("client_ip", &uniqueIPs).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count unique IPs"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"total_requests": requestCount,
-		"unique_ips":     len(uniqueIPs),
-	})
-}
-
-func GetBlockedStats(c *gin.Context) {
-
-	query := utils.ApplyRequestFilters(c)
-
-	if query == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
-		return
-	}
-	query = query.Where("status = ?", "blocked")
-
-	var blockedCount int64
-	if err := query.Count(&blockedCount).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count blocked requests"})
-		return
-	}
-
-	var uniqueBlockedIPs []string
-	if err := query.Distinct("client_ip").Pluck("client_ip", &uniqueBlockedIPs).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count unique blocked IPs"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"total_blocked_requests": blockedCount,
-		"unique_blocked_ips":     len(uniqueBlockedIPs),
-	})
-}
-
-func GetTopBlockedCountries(c *gin.Context) {
-
-	query := utils.ApplyRequestFilters(c)
-
-	if query == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
-		return
-	}
-
-	query = query.Where("status = ?", "blocked")
-
-	type CountryStats struct {
-		Country string `json:"country"`
-		Count   int64  `json:"count"`
-	}
-
-	var stats []CountryStats
-
-	err := query.Select("geo_location as country, count(*) as count").
-		Group("geo_location").
-		Order("count DESC").
-		Limit(5).
-		Find(&stats).Error
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch country statistics"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"top_blocked_countries": stats})
-}
-
-func GetAllBlockedCountries(c *gin.Context) {
-
-	query := utils.ApplyRequestFilters(c)
-
-	if query == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
-		return
-	}
-
-	query = query.Where("status = ?", "blocked")
+	query = query.Where("status = ?", blocked)
 
 	type CountryStats struct {
 		Country string `json:"country"`
@@ -461,7 +314,7 @@ func GetMostTargetedEndpoints(c *gin.Context) {
 		Select("application_name, request_url, count(*) as count").
 		Group("application_name, request_url").
 		Order("count DESC").
-		Limit(10).
+		Limit(5).
 		Find(&stats).Error
 
 	if err != nil {
@@ -520,5 +373,59 @@ func DeleteFilteredRequests(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Filtered requests deleted successfully",
 		"count":   result.RowsAffected,
+	})
+}
+
+func GetOverallStats(c *gin.Context) {
+	query := utils.ApplyRequestFilters(c)
+
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	// ====== Total Requests ======
+	var totalRequests int64
+	if err := query.Model(&models.Request{}).Count(&totalRequests).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count total requests"})
+		return
+	}
+
+	// ====== Blocked Requests & Malicious IPs ======
+	blockedQuery := query.Session(&gorm.Session{}) // Clone the query to avoid reuse issues
+	blockedQuery = blockedQuery.Where("status = ?", "blocked")
+
+	var blockedRequests int64
+	if err := blockedQuery.Count(&blockedRequests).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count blocked requests"})
+		return
+	}
+
+	var maliciousIPs []string
+	if err := blockedQuery.Distinct("client_ip").Pluck("client_ip", &maliciousIPs).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count unique malicious IPs"})
+		return
+	}
+
+	// ====== AI-Based Detections ======
+	var aiDetected int64
+	if err := blockedQuery.Where("ai_result = ?", true).Count(&aiDetected).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count AI detections"})
+		return
+	}
+
+	// ====== Rule-Based Detections ======
+	var ruleDetected int64
+	if err := blockedQuery.Where("rule_detected = ?", true).Count(&ruleDetected).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count rule-based detections"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"total_requests":        totalRequests,
+		"blocked_requests":      blockedRequests,
+		"malicious_ips_blocked": len(maliciousIPs),
+		"ai_based_detections":   aiDetected,
+		"rule_based_detections": ruleDetected,
 	})
 }

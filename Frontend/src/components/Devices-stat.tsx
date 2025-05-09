@@ -21,9 +21,6 @@ export default function UserClientsCard() {
     <div className="w-full bg-white xl shadow-md p-6">
       <div className="flex justify-between items-center p-3">
         <p className="text-lg">User clients</p>
-        <button className="text-xs text-blue-600 font-semibold hover:text-blue-700">
-          MORE
-        </button>
       </div>
       <div className="flex items-center gap-6">
         {/* Chart */}

@@ -7,7 +7,9 @@ import (
 	"backend/internal/utils"
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,9 +23,16 @@ func main() {
 	}
 
 	background.StartNotificationWatcher()
-	log.Println("Notification watcher started")
 
 	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowAllOrigins: true, // allow all domains
+		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		AllowHeaders:    []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:   []string{"Content-Length"},
+		MaxAge:          12 * time.Hour,
+	}))
 
 	routes.InitializeRoutes(r)
 

@@ -5,7 +5,9 @@ import (
 	"crypto/tls"
 	"fmt"
 	"interceptor/internal/error_page"
+	"interceptor/internal/fusionService"
 	"interceptor/internal/logger"
+	"interceptor/internal/ml"
 	"interceptor/internal/utils"
 	"io"
 	"log"
@@ -52,6 +54,7 @@ func getLimiter(ip, hostname string) *rate.Limiter {
 }
 
 func proxyRequest(w http.ResponseWriter, r *http.Request) {
+	// Maintenance mode check
 	maintenanceLock.RLock()
 	if MaintenanceMode {
 		maintenanceLock.RUnlock()
@@ -60,14 +63,10 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	maintenanceLock.RUnlock()
 
-	if r.URL.Path == "/favicon.ico" {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-
 	ip := strings.Split(r.RemoteAddr, ":")[0]
 	hostname := r.Host
 
+	// Rate limiter check
 	limiterLock.Lock()
 	if unblockTime, blocked := blockedIPs[ip]; blocked {
 		if time.Now().Before(unblockTime) {
@@ -101,6 +100,9 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 			UserAgent:       r.UserAgent(),
 			Body:            "",
 			Token:           WsKey,
+			AIResult:        false,
+			RuleDetected:    false,
+			AIThreatType:    "",
 		}
 		utils.SendToBackend(message)
 
@@ -108,17 +110,17 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	request_body_size := utils.GetRequestBodySizeMB(r)
-
+	// Target redirect IP resolution
 	targetRedirectIP, exists := getTargetRedirectIP(hostname)
+	if !exists {
+		http.Error(w, "Unknown host", http.StatusBadGateway)
+		return
+	}
+
 	if application_config[hostname].Tls {
 		targetRedirectIP = "https://" + targetRedirectIP
 	} else {
 		targetRedirectIP = "http://" + targetRedirectIP
-	}
-	if !exists {
-		http.Error(w, "Unknown host", http.StatusBadGateway)
-		return
 	}
 
 	wafInstance, exists := wafInstances[hostname]
@@ -127,8 +129,12 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// WAF rule evaluation
 	blockedByRule, ruleID, ruleMessage, action, status, body := wafInstance.EvaluateRules(r)
+	headers := utils.ParseHeaders(fmt.Sprintf("%v", r.Header))
+	requestBodySize := utils.GetRequestBodySizeMB(r)
 
+	// Prepare message
 	message := utils.MessageModel{
 		ApplicationName: hostname,
 		ClientIP:        r.RemoteAddr,
@@ -144,26 +150,64 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		RateLimited:     false,
 		UserAgent:       r.UserAgent(),
 		Body:            body,
+		AIResult:        false,
+		RuleDetected:    false,
+		AIThreatType:    "",
 	}
 
-	if request_body_size >= application_config[hostname].MaxPostDataSize {
-		if blockedByRule {
+	// Special WAF Rule ID - Skip ML & Fusion
+	if blockedByRule && ruleID >= 1000000000000000000 {
+		if requestBodySize >= application_config[hostname].MaxPostDataSize {
+			message.Body = ""
+		} else {
+			message.Body = utils.HashSHA256(body)
+		}
+
+		error_page.Send403Response(w, ruleID, ruleMessage, action, status)
+		message.ResponseCode = http.StatusForbidden
+		message.Status = "blocked"
+		message.Token = WsKey
+		message.RuleDetected = true
+
+		utils.SendToBackend(message)
+		return
+	}
+
+	// ML and Fusion Evaluation
+	requestData := ml.RequestData{
+		Url:     r.URL.String(),
+		Headers: headers,
+		Body:    body,
+	}
+
+	blockedByMl, percent, err := ml.EvaluateML(requestData)
+	if err != nil {
+		http.Error(w, "Error evaluating ML model", http.StatusInternalServerError)
+		return
+	}
+
+	result := fusionService.FusionAlgorithm(blockedByRule, blockedByMl, percent)
+
+	if requestBodySize >= application_config[hostname].MaxPostDataSize {
+		if result {
 			message.Body = utils.HashSHA256(body)
 		}
 		message.Body = ""
 	}
 
-	if blockedByRule {
+	if result {
 		error_page.Send403Response(w, ruleID, ruleMessage, action, status)
 		message.ResponseCode = http.StatusForbidden
 		message.Status = "blocked"
 		message.Token = WsKey
+		message.RuleDetected = true
+
 		utils.SendToBackend(message)
 		return
 	}
 
+	// Proxy forwarding
 	message.Status = "allowed"
-
 	client := &http.Client{}
 	targetURL := fmt.Sprintf("%s%s", targetRedirectIP, r.URL.Path)
 	if r.URL.RawQuery != "" {
@@ -184,13 +228,15 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := client.Do(req)
 	if err != nil {
+		log.Printf("Proxy error: %v", err)
 		http.Error(w, "Failed to reach target server", http.StatusBadGateway)
 		return
 	}
+	defer resp.Body.Close()
+
 	message.ResponseCode = resp.StatusCode
 	message.Token = WsKey
 	utils.SendToBackend(message)
-	defer resp.Body.Close()
 
 	for name, values := range resp.Header {
 		for _, value := range values {
@@ -205,8 +251,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(resp.StatusCode)
-	_, err = io.Copy(w, resp.Body)
-	if err != nil {
+	if _, err := io.Copy(w, resp.Body); err != nil {
 		log.Printf("Failed to copy response body: %v", err)
 	}
 }
@@ -215,16 +260,23 @@ func Starter() {
 	err := fetchConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
+		return
 	}
 
-	err = fetchApplications()
+	err = fetchApplicationConfig()
 	if err != nil {
 		log.Fatalf("Failed to fetch applications: %v", err)
+		return
 	}
 
 	err = utils.InitHttpHandler()
 	if err != nil {
 		log.Fatalf("Failed to initialize Http Handler: %v", err)
+	}
+
+	err = utils.InitMlService()
+	if err != nil {
+		log.Fatalf("Failed to initialize Ml Handler: %v", err)
 	}
 
 	if remoteLogServer != "" {

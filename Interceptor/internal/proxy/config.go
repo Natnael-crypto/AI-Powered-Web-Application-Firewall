@@ -33,13 +33,17 @@ type AppConfig struct {
 }
 
 type Application struct {
-	ApplicationID   string `json:"application_id"`
-	ApplicationName string `json:"application_name"`
-	Hostname        string `json:"hostname"`
-	IPAddress       string `json:"ip_address"`
-	Port            string `json:"port"`
-	Status          bool   `json:"status"`
-	Tls             bool   `json:tls`
+	ApplicationID   string    `json:"application_id"`
+	ApplicationName string    `json:"application_name"`
+	Hostname        string    `json:"hostname"`
+	IPAddress       string    `json:"ip_address"`
+	Port            string    `json:"port"`
+	Status          bool      `json:"status"`
+	Tls             bool      `json:"tls"`
+	Description     string    `json:"description"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+	Config          AppConfig `json:"config"`
 }
 
 type SecurityHeader struct {
@@ -99,9 +103,18 @@ func fetchConfig() error {
 		return fmt.Errorf("BACKENDPORT environment variable is not set")
 	}
 
-	configURL := fmt.Sprintf("http://%s:%s/config", backendHost, backendPort)
+	configURL := fmt.Sprintf("http://%s:%s/interceptor/config", backendHost, backendPort)
 
-	resp, err := http.Get(configURL)
+	req, err := http.NewRequest("GET", configURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %v", err)
+	}
+
+	req.Header.Set("X-Service", "I")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
 	if err != nil {
 		return fmt.Errorf("failed to fetch config: %v", err)
 	}
@@ -125,7 +138,7 @@ func fetchConfig() error {
 	return nil
 }
 
-func fetchApplications() error {
+func fetchApplicationConfig() error {
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: No .env file found, falling back to environment variables")
 	}
@@ -140,9 +153,18 @@ func fetchApplications() error {
 		return fmt.Errorf("BACKENDPORT environment variable is not set")
 	}
 
-	applicationsURL := fmt.Sprintf("http://%s:%s/application/", backendHost, backendPort)
+	applicationsURL := fmt.Sprintf("http://%s:%s/interceptor/application/", backendHost, backendPort)
 
-	resp, err := http.Get(applicationsURL)
+	req, err := http.NewRequest("GET", applicationsURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %v", err)
+	}
+
+	req.Header.Set("X-Service", "I")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
 	if err != nil {
 		return fmt.Errorf("failed to fetch applications: %v", err)
 	}
@@ -162,7 +184,6 @@ func fetchApplications() error {
 	Apps = make(map[string]Application)
 	application_config = make(map[string]AppConfig)
 	application_security_headers = make(map[string][]SecurityHeader)
-
 	appsLock.Unlock()
 
 	for _, app := range result.Applications {
@@ -172,6 +193,7 @@ func fetchApplications() error {
 			appsLock.Lock()
 			applications[app.Hostname] = address
 			Apps[app.Hostname] = app
+			application_config[app.Hostname] = app.Config // set config directly
 			appsLock.Unlock()
 
 			if app.Tls {
@@ -211,39 +233,36 @@ func fetchApplications() error {
 			appsLock.Lock()
 			wafInstances[app.Hostname] = wafInstance
 			appsLock.Unlock()
+
+			// Fetch security headers
+			appSecurityHeaderURL := fmt.Sprintf("http://%s:%s/interceptor/security-headers/%s", backendHost, backendPort, app.ApplicationID)
+
+			req, err := http.NewRequest("GET", appSecurityHeaderURL, nil)
+			if err != nil {
+				return fmt.Errorf("failed to create request: %v", err)
+			}
+
+			req.Header.Set("X-Service", "I")
+
+			client := &http.Client{}
+			securityResp, err := client.Do(req)
+
+			if err != nil {
+				log.Printf("Failed to fetch security headers for %s: %v", app.ApplicationID, err)
+				continue
+			}
+			defer securityResp.Body.Close()
+
+			var securityHeadersResult struct {
+				Headers []SecurityHeader `json:"security_headers"`
+			}
+
+			if err := json.NewDecoder(securityResp.Body).Decode(&securityHeadersResult); err != nil {
+				log.Printf("Failed to decode security headers: %v", err)
+				continue
+			}
+			application_security_headers[app.Hostname] = securityHeadersResult.Headers
 		}
-	}
-
-	for _, app := range Apps {
-		appConfigURL := fmt.Sprintf("http://%s:%s/config/get-app-config/%s", backendHost, backendPort, app.ApplicationID)
-		appSecurityHeaderURL := fmt.Sprintf("http://%s:%s/security-headers/%s", backendHost, backendPort, app.ApplicationID)
-		resp, err = http.Get(appConfigURL)
-
-		var appConfigResult struct {
-			AppConfig AppConfig `json:"data"`
-		}
-
-		if err := json.NewDecoder(resp.Body).Decode(&appConfigResult); err != nil {
-			return fmt.Errorf("failed to decode config: %v", err)
-		}
-
-		application_config[app.Hostname] = appConfigResult.AppConfig
-
-		securityResp, err := http.Get(appSecurityHeaderURL)
-		if err != nil {
-			return fmt.Errorf("failed to fetch security headers for %s: %v", app.ApplicationID, err)
-		}
-		defer securityResp.Body.Close()
-
-		var securityHeadersResult struct {
-			Headers []SecurityHeader `json:"security_headers"`
-		}
-
-		if err := json.NewDecoder(securityResp.Body).Decode(&securityHeadersResult); err != nil {
-			return fmt.Errorf("failed to decode security headers: %v", err)
-		}
-		application_security_headers[app.Hostname] = securityHeadersResult.Headers
-
 	}
 
 	fmt.Println("Loaded applications:", applications)

@@ -27,6 +27,9 @@ type MessageModel struct {
 	RateLimited     bool   `json:"rate_limited"`
 	UserAgent       string `json:"user_agent"`
 	Token           string `json:"token"`
+	AIResult        bool   `json:"ai_result"`
+	AIThreatType    string `json:"ai_threat_type"`
+	RuleDetected    bool   `json:"rule_detected"`
 }
 
 var (
@@ -48,7 +51,7 @@ func InitHttpHandler() error {
 	if backendPort == "" {
 		return fmt.Errorf("BACKENDPORT environment variable is not set")
 	}
-	backendEndpoint = fmt.Sprintf("http://%s:%s/batch", backendHost, backendPort)
+	backendEndpoint = fmt.Sprintf("http://%s:%s/interceptor/batch", backendHost, backendPort)
 
 	go StartBatchSender()
 	return nil
@@ -88,6 +91,7 @@ func flushQueue() {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Service", "I")
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		log.Printf("Failed to send batch to backend: %v", err)

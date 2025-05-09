@@ -3,24 +3,43 @@ package ml
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"interceptor/internal/utils"
 	"net/http"
 )
 
-func EvaluateML(requestData map[string]string) (bool, string) {
-	mlServerURL := "http://127.0.0.1:5001/predict"
+type RequestData struct {
+	Url     string `json:"url"`
+	Headers string `json:"headers"`
+	Body    string `json:"body"`
+}
+
+func EvaluateML(requestData RequestData) (bool, float64, error) {
+	mlServerURL := utils.MLEndpoint + "predict"
 
 	jsonData, _ := json.Marshal(requestData)
-	resp, err := http.Post(mlServerURL, "application/json", bytes.NewBuffer(jsonData))
+
+	req, err := http.NewRequest("POST", mlServerURL, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return false, "Failed to connect to ML server"
+		return false, 0.0, fmt.Errorf("failed to create request: %v", err)
 	}
+
+	req.Header.Set("X-Service", "I")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return false, 0.0, err
+	}
+
 	defer resp.Body.Close()
 
 	var result struct {
-		Block bool   `json:"block"`
-		Reason string `json:"reason"`
+		Block   bool    `json:"block"`
+		Percent float64 `json:"percent"`
 	}
 	_ = json.NewDecoder(resp.Body).Decode(&result)
 
-	return result.Block, result.Reason
+	return result.Block, result.Percent, nil
 }

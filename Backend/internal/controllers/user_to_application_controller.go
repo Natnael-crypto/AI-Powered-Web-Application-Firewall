@@ -48,6 +48,7 @@ func AddUserToApplication(c *gin.Context) {
 		ID:              utils.GenerateUUID(),
 		UserID:          input.UserID,
 		ApplicationName: input.ApplicationName,
+		ApplicationID:   application.ApplicationID,
 	}
 
 	if err := config.DB.Create(&userToApp).Error; err != nil {
