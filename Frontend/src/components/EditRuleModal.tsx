@@ -27,7 +27,7 @@ interface EditRuleModalProps {
 }
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY1NjU2MTgsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.bmGqOlhKhxD4IsMKsomGpa04uExS6l_q5YvrPa2dMCc";
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY3OTM2ODgsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.72S_RB-PCbC7oqwKDfgN1ufJBxK70j6KIKPvzya6y4I";
 
 const validRuleTypes = ["REQUEST_HEADERS", "ARGS", "REQUEST_METHOD", "REMOTE_ADDR"];
 const validRuleMethods = ["regex", "contains", "ipMatch"];
@@ -46,6 +46,10 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ ruleID, onClose, onSucces
         });
         const rule = res.data.rule;
         const rule_def= res.data.rule_definition
+        const applications = res.data.applications.map((app: any) => ({
+          application_id: app.application_id,
+          application_name: app.application_name,
+        }));
         setRuleInput({
           ruleID: rule.rule_id,
           action: rule.action,
@@ -55,8 +59,9 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ ruleID, onClose, onSucces
             ruleMethod: c.rule_method,
             ruleDefinition: c.rule_definition,
           })),
-          applications: rule.application_id,
+          applications: applications.map((app: any) => app.application_id),
         });
+        console.log(ruleInput)
       } catch (err) {
         console.error("Failed to fetch rule", err);
         alert("Could not load rule.");
@@ -134,6 +139,7 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ ruleID, onClose, onSucces
 
   const saveRule = async () => {
     if (!ruleInput) return;
+    console.log(ruleInput.applications)
     try {
       await axios.put(`${backendUrl}/rule/update/${ruleInput.ruleID}`, {
         action: ruleInput.action,
@@ -255,11 +261,11 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ ruleID, onClose, onSucces
         </div>
       </div>
 
-      {/* Preview & Save */}
+      {/* Preview & Save
       <div>
         <label className="font-semibold block mb-1">Rule Preview</label>
         <textarea readOnly className="w-full border p-2 h-40 bg-gray-100">{preview}</textarea>
-      </div>
+      </div> */}
 
       <div className="flex gap-4">
         <button className="bg-green-600 text-white px-4 py-2 rounded" onClick={saveRule}>Save Changes</button>

@@ -110,7 +110,6 @@ func GetApplication(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"application": application})
-
 }
 
 func GetAllApplications(c *gin.Context) {
@@ -158,7 +157,6 @@ func GetAllApplicationsAdmin(c *gin.Context) {
 		return
 	}
 
-	// Merge each application with its config
 	var result []map[string]interface{}
 
 	for _, app := range applications {

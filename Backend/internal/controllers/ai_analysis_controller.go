@@ -17,7 +17,6 @@ var (
 	queueMutex    sync.Mutex
 )
 
-// TODO add authorization
 func QueueRequestForAnalysis(c *gin.Context) {
 
 	var input struct {
@@ -82,7 +81,7 @@ func FetchAndAnalyzeRequests(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"requests": requests})
 }
 
-// ML server submits analysis results
+
 func SubmitAnalysisResults(c *gin.Context) {
 	var results []struct {
 		RequestID  string `json:"request_id"`
@@ -120,7 +119,7 @@ func CreateModelTrainingRequest(c *gin.Context) {
 		NumTrees              int     `json:"num_trees" binding:"required"`
 		MaxDepth              int     `json:"max_depth" binding:"required"`
 		MinSamplesSplit       int     `json:"min_samples_split" binding:"required"`
-		Criterion             string  `json:"criterion" binding:"required"` // "gini" or "entropy"
+		Criterion             string  `json:"criterion" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {

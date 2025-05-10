@@ -52,6 +52,7 @@ func InitializeRoutes(r *gin.Engine) {
 		config.PUT("/update/post-data-size/:application_id", controllers.UpdateMaxPosyDataSize)
 		config.PUT("/update/tls/:application_id", controllers.UpdateTls)
 		config.GET("/config", controllers.GetConfigAdmin)
+		config.GET("/:application_id", controllers.GetAppConfig)
 	}
 
 	rules := authorized.Group("/rule")

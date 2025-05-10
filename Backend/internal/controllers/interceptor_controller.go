@@ -44,7 +44,6 @@ func RestartInterceptor(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Interceptor will restart soon."})
 }
 
-// Interceptor will call this to check if any change happened
 func InterceptorCheckState(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"running": config.InterceptorRunning,
