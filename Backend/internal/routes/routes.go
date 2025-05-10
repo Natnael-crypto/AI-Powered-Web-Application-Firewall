@@ -60,8 +60,8 @@ func InitializeRoutes(r *gin.Engine) {
 		rules.POST("/add", controllers.AddRule)
 		rules.PUT("/update/:rule_id", controllers.UpdateRule)
 		rules.DELETE("/delete/:rule_id", controllers.DeleteRule)
-		rules.GET("/deactivate/:rule_id", controllers.DeactivateRule)
-		rules.GET("/activate/:rule_id", controllers.ActivateRule)
+		rules.POST("/deactivate/:rule_id", controllers.DeactivateRule)
+		rules.POST("/activate/:rule_id", controllers.ActivateRule)
 		rules.GET("", controllers.GetAllRulesAdmin)
 		rules.GET("/:rule_id", controllers.GetOneRule)
 
@@ -119,7 +119,7 @@ func InitializeRoutes(r *gin.Engine) {
 
 	notification_rule := authorized.Group("/notification-rule")
 	{
-		notification_rule.POST("/:application_id", controllers.AddNotificationRule)
+		notification_rule.POST("/", controllers.AddNotificationRule)
 		notification_rule.GET("/:application_id", controllers.GetNotificationRule)
 		notification_rule.GET("", controllers.GetNotificationRules)
 		notification_rule.PUT("/:rule_id", controllers.UpdateNotificationRule)

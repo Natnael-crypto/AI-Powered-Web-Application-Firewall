@@ -46,6 +46,18 @@ func HandleBatchRequests(c *gin.Context) {
 
 	var requests []models.Request
 
+	var list_of_apps = make(map[string]string)
+
+	var applications []models.Application
+
+	if err := config.DB.Find(&applications).Error; err != nil {
+		log.Println("Application not found")
+	}
+
+	for _, app := range applications {
+		list_of_apps[app.HostName] = app.ApplicationID
+	}
+
 	for _, requestData := range rawRequests {
 		token, ok := requestData["token"].(string)
 		if !ok || token != config.WsKey {
@@ -63,16 +75,10 @@ func HandleBatchRequests(c *gin.Context) {
 		country := utils.GetCountryName(ipParts[0])
 		headers := utils.ParseHeaders(safeString(requestData["headers"]))
 
-		var application models.Application
-
-		if err := config.DB.Where("application_name = ?", safeString(requestData["application_name"])).First(&application).Error; err != nil {
-			log.Println("Application not found")
-		}
-
 		request := models.Request{
 			RequestID:       uuid.New().String(),
 			ApplicationName: safeString(requestData["application_name"]),
-			ApplicationID:   application.ApplicationID,
+			ApplicationID:   list_of_apps[safeString(requestData["application_name"])],
 			ClientIP:        ipParts[0],
 			RequestMethod:   safeString(requestData["request_method"]),
 			RequestURL:      safeString(requestData["request_url"]),

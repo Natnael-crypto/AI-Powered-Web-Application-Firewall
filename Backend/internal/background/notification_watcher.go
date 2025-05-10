@@ -3,7 +3,7 @@ package background
 import (
 	"backend/internal/config"
 	"backend/internal/models"
-	"encoding/json"
+	// "encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -60,7 +60,7 @@ func shouldTriggerNotification(rule models.NotificationRule) (map[string]int64, 
 		GROUP BY client_ip, threat_type
 	`
 
-	err := config.DB.Raw(query, rule.HostName, timeWindowStart).Scan(&results).Error
+	err := config.DB.Raw(query, timeWindowStart).Scan(&results).Error
 	if err != nil {
 		log.Printf("Error fetching request data for rule %s: %v", rule.Name, err)
 		return triggeredIPs, totalCount, matchingThreats
@@ -99,10 +99,10 @@ func contains(slice []string, item string) bool {
 func createNotification(rule models.NotificationRule, message string) {
 	var userIDs []string
 
-	if err := json.Unmarshal(rule.UsersID, &userIDs); err != nil {
-		log.Printf("Error decoding user IDs for rule %s: %v", rule.Name, err)
-		return
-	}
+	// if err := json.Unmarshal( &userIDs); err != nil {
+	// 	log.Printf("Error decoding user IDs for rule %s: %v", rule.Name, err)
+	// 	return
+	// }
 
 	for _, userID := range userIDs {
 		notification := models.Notification{
@@ -123,10 +123,10 @@ func sendEmail(rule models.NotificationRule, message string) {
 
 	var userIDs []string
 
-	if err := json.Unmarshal(rule.UsersID, &userIDs); err != nil {
-		log.Printf("Error decoding user IDs for rule %s: %v", rule.Name, err)
-		return
-	}
+	// if err := json.Unmarshal(rule.UsersID, &userIDs); err != nil {
+	// 	log.Printf("Error decoding user IDs for rule %s: %v", rule.Name, err)
+	// 	return
+	// }
 
 	for _, userID := range userIDs {
 		var user models.NotificationConfig
