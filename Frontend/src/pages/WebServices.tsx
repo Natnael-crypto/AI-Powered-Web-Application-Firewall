@@ -3,7 +3,8 @@ import Card from '../components/Card'
 import Button from '../components/atoms/Button'
 import WebServiceModal from '../components/WebServiceModal'
 import WebserviceTable from '../components/WebserviceTable'
-import {useUpdateApplication} from '../hooks/api/useApplication'
+import {useGetApplications, useUpdateApplication} from '../hooks/api/useApplication'
+import React from 'react'
 
 export interface Application {
   application_id: string
@@ -23,6 +24,7 @@ function WebService() {
   const toggleModal = () => setIsModalOpen(!isModalOpen)
   const [selectedApp, setSelectedApp] = useState<Application>()
   const {mutate} = useUpdateApplication()
+  const {data: applications = [], isLoading, error} = useGetApplications()
 
   const handleUpdateApplication = async (
     e: {preventDefault: () => void},
@@ -67,7 +69,7 @@ function WebService() {
       </Card>
       <Card className="shadow-md p-4 bg-white ">
         <WebserviceTable
-          data={[]}
+          data={applications}
           openModal={toggleModal}
           setSelectedApp={setSelectedApp}
         />

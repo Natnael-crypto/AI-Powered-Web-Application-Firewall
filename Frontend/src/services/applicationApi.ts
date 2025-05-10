@@ -25,7 +25,7 @@ export async function createApplication(data: Partial<Application>) {
   return response.status
 }
 export async function updateApplication(data: Partial<Application>) {
-  const response = await axios.put(`/application/${data.application_id}`, data)
+  const response = await axios.put(`/api/application/${data.application_id}`, data)
 
   if (!response) throw new Error('Something went wrong!')
 

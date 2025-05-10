@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react'
+import {useState} from 'react'
 import {
   ColumnDef,
   Row,
@@ -18,8 +18,13 @@ import {
   HiOutlineThumbDown,
   HiOutlinePencilAlt,
 } from 'react-icons/hi'
-import axios from 'axios'
 import EditRuleModal from '../components/EditRuleModal'
+import {
+  useGetRules,
+  useActivateRule,
+  useDeactivateRule,
+  useUpdateApplication,
+} from '../hooks/api/useRules'
 
 export interface Rule {
   rule_id: string
@@ -35,9 +40,6 @@ export interface Rule {
   is_active: boolean
   category: string
 }
-const backendUrl = import.meta.env.VITE_BACKEND_URL
-const token =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY1NjU2MTgsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.bmGqOlhKhxD4IsMKsomGpa04uExS6l_q5YvrPa2dMCc'
 
 function truncateString(value: unknown, maxLength = 60): string {
   if (typeof value === 'string' && value.length > maxLength) {
@@ -109,13 +111,16 @@ function Table<T extends object>({
   )
 }
 
-// 🟢 Main Component
 function CustomRules() {
-  const [rules, setRules] = useState<Rule[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedRows, setSelectedRows] = useState<Row<Rule>[]>([])
   const [isEditMode, setIsEditMode] = useState(false)
   const [currentRuleID, setCurrentRuleID] = useState('')
+
+  const {data: rules = [], refetch} = useGetRules()
+  const {mutate: deleteRule} = useUpdateApplication()
+  const {data: refetchActivate} = useActivateRule('')
+  const {refetch: refetchDeactivate} = useDeactivateRule('')
 
   const columns: ColumnDef<Rule>[] = [
     {
@@ -187,8 +192,6 @@ function CustomRules() {
           onClick={() => {
             setCurrentRuleID(row.original.rule_id)
             setIsEditMode(true)
-            console.log(isEditMode)
-            // setIsModalOpen(true)
           }}
         >
           <HiOutlinePencilAlt size={20} className="text-blue-600" />
@@ -196,23 +199,6 @@ function CustomRules() {
       ),
     },
   ]
-
-  const fetchRules = async () => {
-    try {
-      const res = await axios.get(`${backendUrl}/rule`, {
-        headers: {
-          Authorization: token,
-        },
-      })
-      setRules(res.data.rules)
-    } catch (error) {
-      console.error('Failed to fetch rules:', error)
-    }
-  }
-
-  useEffect(() => {
-    fetchRules()
-  }, [])
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen)
@@ -224,28 +210,16 @@ function CustomRules() {
     try {
       for (const ruleId of selectedIds) {
         if (action === 'delete') {
-          await axios.delete(`${backendUrl}/rule/delete/${ruleId}`, {
-            headers: {
-              Authorization: token,
-            },
-          })
+          await deleteRule(ruleId)
         } else if (action === 'activate') {
-          await axios.get(`${backendUrl}/rule/activate/${ruleId}`, {
-            headers: {
-              Authorization: token,
-            },
-          })
+          await refetchActivate(ruleId)
         } else if (action === 'deactivate') {
-          await axios.get(`${backendUrl}/rule/deactivate/${ruleId}`, {
-            headers: {
-              Authorization: token,
-            },
-          })
+          await refetchDeactivate(ruleId)
         }
       }
 
       // Refresh data after performing actions
-      await fetchRules()
+      await refetch()
       setSelectedRows([]) // clear selection
     } catch (error) {
       console.error(`Failed to ${action} rules:`, error)
@@ -254,18 +228,18 @@ function CustomRules() {
 
   return (
     <div className="space-y-4">
-      {isModalOpen ? <CreateRuleModal /> : null}
+      {isModalOpen && <CreateRuleModal onSuccess={refetch} onClose={toggleModal} />}
 
-      {isEditMode ? (
+      {isEditMode && (
         <EditRuleModal
           ruleID={currentRuleID}
           onClose={() => {
             setCurrentRuleID('')
             setIsEditMode(false)
           }}
-          onSuccess={fetchRules}
+          onSuccess={refetch}
         />
-      ) : null}
+      )}
 
       <Card className="flex justify-between items-center py-4 px-6 shadow-md bg-white rounded-lg">
         <h2 className="text-lg font-semibold">Custom Rules</h2>

@@ -6,10 +6,19 @@ import SyslogSettings from '../components/SyslogSetting'
 import UserTable from '../components/UserTable'
 import {useState} from 'react'
 import AddUserModal from '../components/AddUserModal'
+import {useAddAdmin} from '../hooks/api/useUser'
+import {QueryClient} from '@tanstack/react-query'
 
 function System() {
   const [isAddUser, setAddUser] = useState(false)
   const toggleAddUser = () => setAddUser(prev => !prev)
+
+  const {mutate} = useAddAdmin()
+
+  const handleAddAdmin = (data: any) => {
+    mutate(data)
+  }
+
   return (
     <div className="flex flex-col gap-8 px-6 py-10 bg-gradient-to-br from-slate-100 to-white min-h-screen">
       <div className="max-w-7xl w-full mx-auto space-y-8">
@@ -19,7 +28,7 @@ function System() {
           <AddUserModal
             isOpen={isAddUser}
             onClose={toggleAddUser}
-            onSubmit={data => console.log(data)}
+            onSubmit={data => handleAddAdmin(data)}
           />
         </section>
 
