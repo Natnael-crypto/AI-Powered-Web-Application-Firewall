@@ -2,7 +2,9 @@ import axios from '../lib/axios'
 import {Application, ApplicationsResponse} from '../lib/types'
 
 export async function getApplications() {
-  const response: {data: ApplicationsResponse} = await axios.get('/application')
+  const response: {data: ApplicationsResponse} = await axios.get('/api/application', {
+    withCredentials: true,
+  })
   if (!response) throw new Error('Something went wrong!')
 
   return response.data.applications

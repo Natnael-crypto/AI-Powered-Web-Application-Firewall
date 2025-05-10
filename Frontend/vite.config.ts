@@ -9,4 +9,19 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://waf-backend-latest.onrender.com',
+        changeOrigin: true,
+        secure: false,
+        rewrite: path => path.replace(/^\/api/, ''),
+        // Add these:
+        headers: {
+          Connection: 'keep-alive',
+        },
+        cookieDomainRewrite: '',
+      },
+    },
+  },
 })

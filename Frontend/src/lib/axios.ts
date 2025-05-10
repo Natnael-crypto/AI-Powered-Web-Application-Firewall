@@ -1,8 +1,6 @@
 import axios from 'axios'
 
-const axiosInstance = axios.create({
-  baseURL: 'https://waf-backend-latest.onrender.com',
-})
+const axiosInstance = axios.create()
 
 const excludedEndpoints = ['/login', '/register']
 
@@ -21,13 +19,11 @@ axiosInstance.interceptors.request.use(
   },
 )
 
-// Add response interceptor to handle errors
 axiosInstance.interceptors.response.use(
   response => response,
   error => {
     if (error.response?.status === 403) {
       console.error('Forbidden - check your authentication')
-      // Handle token expiration or invalid tokens here
     }
     return Promise.reject(error)
   },

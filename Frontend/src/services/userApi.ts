@@ -1,12 +1,12 @@
 import axios from '../lib/axios'
 
 export const loginUser = async (userData: {username: string; password: string}) => {
-  const response = await axios.post('/login', userData)
+  const response = await axios.post('/api/login', userData, {
+    withCredentials: true, // This is crucial
+  })
   if (!response) throw new Error('Failed to get users')
-
-  return await response.data
+  return response.data
 }
-
 export const getUsers = async () => {
   const response = await axios.get('/api/users')
 
@@ -23,7 +23,7 @@ export const getuser = async (username: string) => {
 }
 
 export const addUser = async (userData: {username: string; password: string}) => {
-  const response = await axios.post('/users/add', userData)
+  const response = await axios.post('/api/users/add', userData)
 
   if (!response) throw new Error('Failed to add user')
 
@@ -32,4 +32,12 @@ export const addUser = async (userData: {username: string; password: string}) =>
 
 export const updateUsers = async (_userId: string) => {
   // Todo: Implement
+}
+
+export const isLoggedIn = async () => {
+  const response = await axios.get('/api/is-logged-in')
+
+  if (!response) throw new Error('Failed to add user')
+
+  return await response.data.user
 }
