@@ -1,31 +1,31 @@
 import axios from '../lib/axios'
-
-type applicationBody = {
-  application_name: string
-  description: string
-  hostname: string
-  ip_address: string
-  port: string
-  status: boolean
-  tls: boolean
-}
+import {Application, ApplicationsResponse} from '../lib/types'
 
 export async function getApplications() {
-  const response = await axios.get('/api/application')
+  const response: {data: ApplicationsResponse} = await axios.get('/api/application', {
+    withCredentials: true,
+  })
   if (!response) throw new Error('Something went wrong!')
 
   return response.data.applications
 }
 
 export async function getApplication(applicationId: string) {
-  const response = await axios.get(`/api/application/${applicationId}`)
+  const response = await axios.get(`/application/${applicationId}`)
   if (!response) throw new Error('Something went wrong!')
 
   return response.data.application
 }
 
-export async function createApplication(data: applicationBody) {
-  const response = await axios.post('/api/application/add', data)
+export async function createApplication(data: Partial<Application>) {
+  const response = await axios.post('/application/add', data)
+
+  if (!response) throw new Error('Something went wrong!')
+
+  return response.status
+}
+export async function updateApplication(data: Partial<Application>) {
+  const response = await axios.put(`/api/application/${data.application_id}`, data)
 
   if (!response) throw new Error('Something went wrong!')
 

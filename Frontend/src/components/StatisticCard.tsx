@@ -1,6 +1,6 @@
 interface StatisticCardProps {
   label: string
-  value: number
+  value: number | undefined
   className?: string
 }
 function StatisticCard({label, value, className}: StatisticCardProps) {

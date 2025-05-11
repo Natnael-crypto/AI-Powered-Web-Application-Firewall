@@ -7,71 +7,76 @@ import ResponseStatus from '../components/ResponseStatus'
 import RequestStatus from '../components/RequestStatus'
 import TopEndpointsChart from '../components/TopEndpointsChart'
 import TopThreatsChart from '../components/TopThreatsChart'
-import { useState } from 'react'
+import {useState} from 'react'
 import FilterBar from '../components/FilterBar'
+import {useGetOverAllStat} from '../hooks/api/useDashboardStat'
+import {DashboardOverAllStats} from '../lib/types'
 
-const cardStyles = "bg-white shadow-md rounded-md transition-shadow duration-300 border border-gray-100 hover:shadow-lg";
+const cardStyles =
+  'bg-white shadow-md rounded-md transition-shadow duration-300 border border-gray-100 hover:shadow-lg'
 
 function Dashboard() {
-
   const [selectedApp, setSelectedApp] = useState('All')
   const [timeRange, setTimeRange] = useState('24h')
-  
+
+  const {data, isLoading, isError} = useGetOverAllStat('waf.local')
   return (
     <main className="flex flex-col gap-6 w-full">
-
       <FilterBar
         selectedApp={selectedApp}
         setSelectedApp={setSelectedApp}
         timeRange={timeRange}
         setTimeRange={setTimeRange}
       />
-      
+
       {/* Top Security Overview */}
-      <section className="grid grid-cols-1 md:grid-cols-6 gap-7">
+      <section className="grid grid-cols-6 gap-7">
         {/* Total Requests */}
-        <Card className={`col-span-1 flex flex-col justify-center ${cardStyles}`}>
-          <StatisticCard
-            className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300"
-            label="Total Requests"
-            value="254320"
-          />
-        </Card>
+        <div
+          className={`col-span-1 flex flex-col justify-center rounded-lg border bg-white shadow-sm`}
+        >
+          <div className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300">
+            <StatisticCard label="Total Requests" value={data?.total_requests} />
+          </div>
+        </div>
 
         {/* Today's Security Summary */}
-        <Card className={`col-span-2 items-center ${cardStyles}`}>
-          <StatisticGroup
-            stats={[
-              { label: 'Blocked Requests', value: '1024' },
-              { label: 'Malicious IPs Blocked', value: 36 },
-            ]}
-            className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300"
-          />
-        </Card>
+        <div
+          className={`col-span-2 rounded-lg border bg-white shadow-sm flex items-center`}
+        >
+          <div className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300">
+            <StatisticGroup
+              stats={[
+                {label: 'Blocked Requests', value: data?.blocked_requests},
+                {label: 'Malicious IPs Blocked', value: data?.malicious_ips_blocked},
+              ]}
+            />
+          </div>
+        </div>
 
         {/* Detection Method Breakdown */}
-        <Card className={`col-span-2 items-center ${cardStyles}`}>
-          <StatisticGroup
-            stats={[
-              { label: 'AI-Based Detections', value: 718 },
-              { label: 'Rule-Based Detections', value: 306 },
-            ]}
-            className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300"
-          />
-        </Card>
+        <div
+          className={`col-span-2 rounded-lg border bg-white shadow-sm flex items-center`}
+        >
+          <div className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300">
+            <StatisticGroup
+              stats={[
+                {label: 'AI-Based Detections', value: data?.ai_based_detections},
+                {label: 'Rule-Based Detections', value: data?.rule_based_detections},
+              ]}
+            />
+          </div>
+        </div>
 
         {/* Live Traffic Rate */}
-        <Card className={`col-span-1 flex flex-col justify-center ${cardStyles}`}>
-          <StatisticCard
-            className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300"
-            label="Live Traffic Rate"
-            value="122"
-          />
-        </Card>
+        <div
+          className={`col-span-1 flex flex-col justify-center rounded-lg border bg-white shadow-sm`}
+        >
+          <div className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300">
+            <StatisticCard label="Live Traffic Rate" value={122} />
+          </div>
+        </div>
       </section>
-
-
-
 
       {/* Globe Map */}
       <section>
@@ -82,39 +87,38 @@ function Dashboard() {
         </Card>
       </section>
 
-       
-
       {/* Charts */}
       <section className="">
-          <div className="w-full h-[500px]">
-            <RequestStatus />
-          </div>
+        <div className="w-full h-[500px]">
+          <RequestStatus />
+        </div>
       </section>
 
       {/* Endpoint & Threat Charts */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className={cardStyles}>
-          <TopEndpointsChart  />
-        </Card>
-        <Card className={cardStyles}>
-          <TopThreatsChart/>
-        </Card>
-      </section>
+        {/* Top Endpoints Card */}
+        <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+          <TopEndpointsChart />
+        </div>
 
+        {/* Top Threats Card */}
+        <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+          <TopThreatsChart />
+        </div>
+      </section>
 
       <section className="">
         <div className="grid grid-cols-2 gap-4">
-            <div className=" w-full">
-              <UserClientsCard />
-            </div>
-            <div className=" w-full">
-              <ResponseStatus />
-            </div>
+          <div className=" w-full">
+            <UserClientsCard />
+          </div>
+          <div className=" w-full">
+            <ResponseStatus />
+          </div>
         </div>
       </section>
-      
     </main>
-  );
+  )
 }
 
-export default Dashboard;
+export default Dashboard

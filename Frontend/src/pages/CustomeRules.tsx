@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import {useState} from 'react'
 import {
   ColumnDef,
   Row,
@@ -18,8 +18,13 @@ import {
   HiOutlineThumbDown,
   HiOutlinePencilAlt,
 } from 'react-icons/hi'
-import axios from 'axios'
 import EditRuleModal from '../components/EditRuleModal'
+import {
+  useGetRules,
+  useActivateRule,
+  useDeactivateRule,
+  useUpdateApplication,
+} from '../hooks/api/useRules'
 
 export interface Rule {
   rule_id: string
@@ -35,8 +40,6 @@ export interface Rule {
   is_active: boolean
   category: string
 }
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDY4NTMyMTMsInJvbGUiOiJzdXBlcl9hZG1pbiIsInVzZXJfaWQiOiJiNGM1ZjI0OC1iOTE3LTQyNDMtYjE0ZS1kNmI4NWQ2NzZjODgifQ.PfJJkKGbHXHQ9xTirmBoE-VHM3Zp8xkZKIfdYWI8QWI";
 
 function truncateString(value: unknown, maxLength = 60): string {
   if (typeof value === 'string' && value.length > maxLength) {
@@ -71,9 +74,9 @@ function Table<T extends object>({
     <div className={clsx('w-full shadow-md rounded-lg', className)}>
       <table className="min-w-full table-auto border-collapse bg-white">
         <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
+          {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
+              {headerGroup.headers.map(header => (
                 <th
                   key={header.id}
                   className="px-6 py-4 text-left text-sm font-semibold text-gray-900 bg-gray-50 border-b"
@@ -85,9 +88,9 @@ function Table<T extends object>({
           ))}
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {table.getRowModel().rows.map((row) => (
+          {table.getRowModel().rows.map(row => (
             <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-              {row.getVisibleCells().map((cell) => {
+              {row.getVisibleCells().map(cell => {
                 const rendered = flexRender(cell.column.columnDef.cell, cell.getContext())
 
                 return (
@@ -96,9 +99,7 @@ function Table<T extends object>({
                     className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap max-w-xs truncate"
                     title={typeof rendered === 'string' ? rendered : undefined}
                   >
-                    {typeof rendered === 'string'
-                      ? truncateString(rendered)
-                      : rendered}
+                    {typeof rendered === 'string' ? truncateString(rendered) : rendered}
                   </td>
                 )
               })}
@@ -110,27 +111,28 @@ function Table<T extends object>({
   )
 }
 
-
-
-// 🟢 Main Component
 function CustomRules() {
-  const [rules, setRules] = useState<Rule[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedRows, setSelectedRows] = useState<Row<Rule>[]>([])
   const [isEditMode, setIsEditMode] = useState(false)
-  const [currentRuleID, setCurrentRuleID] = useState("")
+  const [currentRuleID, setCurrentRuleID] = useState('')
+
+  const {data: rules = [], refetch} = useGetRules()
+  const {mutate: deleteRule} = useUpdateApplication()
+  const {data: refetchActivate} = useActivateRule('')
+  const {refetch: refetchDeactivate} = useDeactivateRule('')
 
   const columns: ColumnDef<Rule>[] = [
     {
       id: 'select',
-      header: ({ table }) => (
+      header: ({table}) => (
         <input
           type="checkbox"
           checked={table.getIsAllPageRowsSelected()}
           onChange={table.getToggleAllPageRowsSelectedHandler()}
         />
       ),
-      cell: ({ row }) => (
+      cell: ({row}) => (
         <input
           type="checkbox"
           checked={row.getIsSelected()}
@@ -141,7 +143,7 @@ function CustomRules() {
     {
       header: 'Status',
       accessorKey: 'is_active',
-      cell: ({ row }) => (
+      cell: ({row}) => (
         <span
           className={`px-3 py-1 rounded-full text-sm font-medium ${
             row.original.is_active
@@ -156,7 +158,7 @@ function CustomRules() {
     {
       header: 'Definition',
       accessorKey: 'rule_definition',
-      cell: ({ row }) => {
+      cell: ({row}) => {
         const value = row.original.rule_definition
         return <span>{value.length > 60 ? `${value.slice(0, 60)}...` : value}</span>
       },
@@ -164,7 +166,7 @@ function CustomRules() {
     {
       header: 'Action',
       accessorKey: 'action',
-      cell: ({ row }) => (
+      cell: ({row}) => (
         <div className="flex items-center gap-2">
           {row.original.action.toLowerCase().includes('deny') ? (
             <HiOutlineBan className="text-red-600" size={20} />
@@ -185,92 +187,59 @@ function CustomRules() {
     },
     {
       header: 'Edit',
-      cell: ({ row }) => (
-        <button onClick={() => {
-          setCurrentRuleID(row.original.rule_id)
-          setIsEditMode(true)
-          console.log(isEditMode)
-          // setIsModalOpen(true)
-        }}>
+      cell: ({row}) => (
+        <button
+          onClick={() => {
+            setCurrentRuleID(row.original.rule_id)
+            setIsEditMode(true)
+          }}
+        >
           <HiOutlinePencilAlt size={20} className="text-blue-600" />
         </button>
       ),
-    }
-    
+    },
   ]
-
-  const fetchRules = async () => {
-    try {
-      const res = await axios.get(`${backendUrl}/rule`, {
-        headers: {
-          Authorization: token,
-        },
-      })
-      setRules(res.data.rules)
-    } catch (error) {
-      console.error('Failed to fetch rules:', error)
-    }
-  }
-
-  useEffect(() => {
-   fetchRules()
-  }, [])
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen)
   }
 
   const handleAction = async (action: 'delete' | 'activate' | 'deactivate') => {
-    const selectedIds = selectedRows.map((r) => r.original.rule_id)
-  
+    const selectedIds = selectedRows.map(r => r.original.rule_id)
+
     try {
       for (const ruleId of selectedIds) {
         if (action === 'delete') {
-          await axios.delete(`${backendUrl}/rule/delete/${ruleId}`, {
-            headers: {
-              Authorization: token,
-            },
-          })
+          await deleteRule(ruleId)
         } else if (action === 'activate') {
-          await axios.get(`${backendUrl}/rule/activate/${ruleId}`, {
-            headers: {
-              Authorization: token,
-            },
-          })
+          await refetchActivate(ruleId)
         } else if (action === 'deactivate') {
-          await axios.get(`${backendUrl}/rule/deactivate/${ruleId}`, {
-            headers: {
-              Authorization: token,
-            },
-          })
+          await refetchDeactivate(ruleId)
         }
       }
-  
+
       // Refresh data after performing actions
-      await fetchRules()
+      await refetch()
       setSelectedRows([]) // clear selection
     } catch (error) {
       console.error(`Failed to ${action} rules:`, error)
     }
   }
-  
 
   return (
     <div className="space-y-4">
-      {isModalOpen ? (
-        <CreateRuleModal/>
-      ) : null}
+      {isModalOpen && <CreateRuleModal onSuccess={refetch} onClose={toggleModal} />}
 
-      {isEditMode ? 
-        (<EditRuleModal
+      {isEditMode && (
+        <EditRuleModal
           ruleID={currentRuleID}
           onClose={() => {
-            setCurrentRuleID("")
+            setCurrentRuleID('')
             setIsEditMode(false)
           }}
-          onSuccess={fetchRules}
-        />) : null
-      }
+          onSuccess={refetch}
+        />
+      )}
 
       <Card className="flex justify-between items-center py-4 px-6 shadow-md bg-white rounded-lg">
         <h2 className="text-lg font-semibold">Custom Rules</h2>
@@ -280,6 +249,7 @@ function CustomRules() {
           variant="primary"
           onClick={() => {
             setIsEditMode(false)
+            setCurrentRuleID('')
             toggleModal()
           }}
         >
@@ -314,15 +284,9 @@ function CustomRules() {
         </Card>
       )}
 
-      <Table<Rule>
-        columns={columns}
-        data={rules}
-        onSelectionChange={setSelectedRows}
-      />
+      <Table<Rule> columns={columns} data={rules} onSelectionChange={setSelectedRows} />
     </div>
   )
 }
 
 export default CustomRules
-
-

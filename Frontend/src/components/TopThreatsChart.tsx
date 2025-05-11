@@ -1,15 +1,18 @@
-import { PieChart, Pie, Tooltip, Cell, ResponsiveContainer, Legend } from 'recharts';
+import {PieChart, Pie, Tooltip, Cell, ResponsiveContainer, Legend} from 'recharts'
+import {useGetTopThreatTypes} from '../hooks/api/useDashboardStat'
 
-const COLORS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6'];
+const COLORS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6']
 
 function TopThreatsChart() {
-  const mockAttackStats = [
-    { threat_type: 'SQL Injection', count: 150 },
-    { threat_type: 'XSS', count: 130 },
-    { threat_type: 'RCE', count: 110 },
-    { threat_type: 'LFI', count: 90 },
-    { threat_type: 'CSRF', count: 75 },
-  ];
+  const {data, isLoading, isError} = useGetTopThreatTypes()
+
+  if (isLoading) return <p>Loading ...</p>
+  if (isError) return <p>Something went wrong</p>
+
+  const chartData = data.map((item, index) => ({
+    ...item,
+    short_label: `#${index + 1}: ${item.threat_type.slice(0, 40)}${item.threat_type.length > 40 ? '...' : ''}`,
+  }))
 
   return (
     <div className="p-4">
@@ -17,25 +20,27 @@ function TopThreatsChart() {
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
-            data={mockAttackStats}
+            data={chartData}
             dataKey="count"
-            nameKey="threat_type"
+            nameKey="short_label"
             cx="50%"
             cy="50%"
             outerRadius={90}
             fill="#8884d8"
             label
           >
-            {mockAttackStats.map((_, index) => (
+            {chartData.map((_, index) => (
               <Cell key={index} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip />
+          <Tooltip
+            formatter={(value, name, props) => [value, props.payload.threat_type]}
+          />
           <Legend />
         </PieChart>
       </ResponsiveContainer>
     </div>
-  );
+  )
 }
 
-export default TopThreatsChart;
+export default TopThreatsChart

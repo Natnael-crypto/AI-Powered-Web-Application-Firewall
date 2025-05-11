@@ -17,7 +17,7 @@ function Button({
   onClick,
   children,
 }: ButtonProps) {
-  const baseClass = 'rounded-lg  focus:outline-none font-medium '
+  const baseClass = '  focus:outline-none font-medium '
 
   const sizeClasses = {
     s: 'px-2 py-1',

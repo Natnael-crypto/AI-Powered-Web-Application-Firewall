@@ -1,10 +1,10 @@
-import { requestData } from '../lib/Constants'
+import {requestData} from '../lib/Constants'
 import countries from 'i18n-iso-countries'
 import localeRegistration from 'i18n-iso-countries/langs/en.json'
 
 countries.registerLocale(localeRegistration)
 
-function RequestStat({ className }: { className?: string }) {
+function RequestStat({className}: {className?: string}) {
   const formattedData = Object.entries(requestData)
     .map(([key, value]) => ({
       label: countries.getName(key, 'en'),
@@ -20,26 +20,32 @@ function RequestStat({ className }: { className?: string }) {
   const points = formattedData.map((data, index) => {
     const x = (index / (formattedData.length - 1)) * 100
     const y = 100 - ((data.value - minValue) / range) * 100
-    return { x, y, ...data }
+    return {x, y, ...data}
   })
 
-  const path = points.map((p, i) =>
-    `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)},${p.y.toFixed(2)}`
-  ).join(' ')
+  const path = points
+    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)},${p.y.toFixed(2)}`)
+    .join(' ')
 
   const gradientId = 'line-gradient'
 
   return (
     <div className={`w-full ${className}`}>
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-semibold text-gray-800">Top Countries by Request Volume</h3>
-        <span className="text-sm text-gray-500 font-medium bg-gray-100 px-3 py-1 rounded-full">
+        <h3 className="text-xl font-semibold text-gray-800">
+          Top Countries by Request Volume
+        </h3>
+        <span className="text-sm text-gray-500 font-medium bg-gray-100 px-3 py-1 ull">
           {formattedData.length} Countries
         </span>
       </div>
 
       <div className="relative h-[300px] w-full">
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
+        <svg
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          className="absolute inset-0 w-full h-full"
+        >
           {/* Gradient under the line */}
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -49,10 +55,7 @@ function RequestStat({ className }: { className?: string }) {
           </defs>
 
           {/* Filled area under curve */}
-          <path
-            d={`${path} L 100,100 L 0,100 Z`}
-            fill={`url(#${gradientId})`}
-          />
+          <path d={`${path} L 100,100 L 0,100 Z`} fill={`url(#${gradientId})`} />
 
           {/* Line path */}
           <path

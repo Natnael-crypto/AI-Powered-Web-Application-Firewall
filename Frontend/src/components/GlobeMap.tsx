@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { VectorMap } from '@react-jvectormap/core'
-import { worldMill } from '@react-jvectormap/world'
-import { requestData, blockedRequestData } from '../lib/Constants'
+import React, {useState} from 'react'
+import {VectorMap} from '@react-jvectormap/core'
+import {worldMill} from '@react-jvectormap/world'
+import {requestData, blockedRequestData} from '../lib/Constants'
 
 const GlobeMap: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'blocked'>('all')
@@ -15,7 +15,7 @@ const GlobeMap: React.FC = () => {
         <div className="flex gap-2 items-center">
           <select
             value={filter}
-            onChange={(e) => setFilter(e.target.value as 'all' | 'blocked')}
+            onChange={e => setFilter(e.target.value as 'all' | 'blocked')}
             className="text-xs font-medium text-gray-700 bg-gray-100 px-2 py-1 rounded border border-gray-300 focus:outline-none"
           >
             <option value="all">All Requests</option>
@@ -27,14 +27,14 @@ const GlobeMap: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 rounded-md overflow-hidden">
+      <div className="flex-1 rounded-lg overflow-hidden">
         <VectorMap
           backgroundColor="#f8fafc"
           className="h-full w-full"
           zoomOnScroll={false}
           regionStyle={{
-            initial: { fill: '#E2E8F0', stroke: '#fff', strokeWidth: 1 },
-            hover: { fill: '#3B82F6', cursor: 'pointer' },
+            initial: {fill: '#E2E8F0', stroke: '#fff', strokeWidth: 1},
+            hover: {fill: '#3B82F6', cursor: 'pointer'},
           }}
           series={{
             regions: [

@@ -44,12 +44,12 @@ const LogFilter: React.FC<LogFilterProps> = ({onFilter, logtype, onLogtypeChange
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6 flex gap-10 items-end">
+    <div className="bg-white p-6  shadow-md mb-6 flex gap-10 items-end">
       {/* Log type selection buttons */}
       <div className="flex gap-2 ">
         <button
           onClick={() => handleLogtypeChange('log')}
-          className={`px-4 py-2 rounded-md border border-gray-500 ${
+          className={`px-4 py-2  border border-gray-500 ${
             selectedLogtype === 'log'
               ? 'bg-blue-500 text-white'
               : 'bg-gray-200 text-gray-800'
@@ -59,7 +59,7 @@ const LogFilter: React.FC<LogFilterProps> = ({onFilter, logtype, onLogtypeChange
         </button>
         <button
           onClick={() => handleLogtypeChange('event')}
-          className={`px-4 py-2 rounded-md border border-gray-500 ${
+          className={`px-4 py-2  border border-gray-500 ${
             selectedLogtype === 'event'
               ? 'bg-blue-500 text-white'
               : 'bg-gray-200 text-gray-800'
@@ -81,7 +81,7 @@ const LogFilter: React.FC<LogFilterProps> = ({onFilter, logtype, onLogtypeChange
             name="ipAddress"
             value={filters.ipAddress}
             onChange={handleInputChange}
-            className=" block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className=" block w-full px-3 py-2 border border-gray-300  shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -96,7 +96,7 @@ const LogFilter: React.FC<LogFilterProps> = ({onFilter, logtype, onLogtypeChange
             name="port"
             value={filters.port}
             onChange={handleInputChange}
-            className=" block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className=" block w-full px-3 py-2 border border-gray-300  shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -111,7 +111,7 @@ const LogFilter: React.FC<LogFilterProps> = ({onFilter, logtype, onLogtypeChange
             name="domain"
             value={filters.domain}
             onChange={handleInputChange}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full px-3 py-2 border border-gray-300  shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -126,7 +126,7 @@ const LogFilter: React.FC<LogFilterProps> = ({onFilter, logtype, onLogtypeChange
             name="startAt"
             value={filters.startAt}
             onChange={handleInputChange}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full px-3 py-2 border border-gray-300  shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -141,7 +141,7 @@ const LogFilter: React.FC<LogFilterProps> = ({onFilter, logtype, onLogtypeChange
             name="endAt"
             value={filters.endAt}
             onChange={handleInputChange}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full px-3 py-2 border border-gray-300  shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
       </div>

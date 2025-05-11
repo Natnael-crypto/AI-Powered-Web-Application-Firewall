@@ -5,7 +5,7 @@ import Card from '../components/Card'
 
 import AddAppModal from '../components/AddAppModal'
 import {CellContext, ColumnDef} from '@tanstack/react-table'
-import {useGetAppliactions} from '../hooks/useApplication'
+import {useGetApplications} from '../hooks/api/useApplication'
 
 type applicationType = {
   applicationId: string
@@ -25,7 +25,7 @@ const Application: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const toggleModal = () => setIsModalOpen(prev => !prev)
-  const {data: applications = [], isLoading, error} = useGetAppliactions()
+  const {data: applications = [], isLoading, error} = useGetApplications()
 
   const columns: ColumnDef<applicationType>[] = useMemo(
     () => [

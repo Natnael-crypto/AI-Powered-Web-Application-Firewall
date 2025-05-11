@@ -8,7 +8,7 @@ const AttackAlertSettings = () => {
   const [rateLimiting, setRateLimiting] = useState(false)
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-lg w-full">
+    <div className="p-6 bg-white  shadow-lg w-full">
       {/* Title */}
       <div className="flex items-center mb-4">
         <h4 className="text-lg font-semibold text-gray-800 mr-2">Attack Alert</h4>
@@ -36,7 +36,7 @@ const AttackAlertSettings = () => {
         placeholder="https://api.xxx.com/robot/send?access_token=xxxxxx"
         value={webhook}
         onChange={e => setWebhook(e.target.value)}
-        className="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md text-sm placeholder-gray-400"
+        className="w-full px-4 py-2 mb-4 border border-gray-300  text-sm placeholder-gray-400"
       />
 
       {/* Checkboxes */}

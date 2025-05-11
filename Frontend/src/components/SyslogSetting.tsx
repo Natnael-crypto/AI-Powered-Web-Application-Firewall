@@ -9,7 +9,7 @@ export default function SyslogSettings() {
   }
 
   return (
-    <div className="w-full p-6 bg-white shadow-md rounded-2xl">
+    <div className="w-full p-6 bg-white shadow-md xl">
       <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
         <span>🖥️ Syslog</span>
         <span className="tooltip text-sm text-gray-500">ℹ️</span>
@@ -24,7 +24,7 @@ export default function SyslogSettings() {
             value={serverAddress}
             onChange={e => setServerAddress(e.target.value)}
             placeholder="192.168.10.10"
-            className="w-full p-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300  shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
@@ -38,14 +38,14 @@ export default function SyslogSettings() {
             value={serverPort}
             onChange={e => setServerPort(e.target.value)}
             placeholder="Must be in range 1 ~ 65535"
-            className="w-full p-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300  shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>
       <div className="mt-6 flex justify-end">
         <button
           onClick={handleSave}
-          className="bg-blue-600 text-white font-semibold px-6 py-2 rounded-xl hover:bg-blue-700 transition"
+          className="bg-blue-600 text-white font-semibold px-6 py-2  hover:bg-blue-700 transition"
         >
           Save
         </button>

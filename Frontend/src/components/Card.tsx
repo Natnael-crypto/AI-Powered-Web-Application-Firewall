@@ -7,7 +7,7 @@ interface CardProps {
   children?: ReactNode
 }
 function Card({className, children, size = 'm'}: CardProps) {
-  const baseClass = 'rounded-md  w-full'
+  const baseClass = '  w-full'
   const sizeClasses = {
     s: 'px-3 py-2',
     m: 'px-5 py-3',

@@ -27,7 +27,7 @@ function AttackLogFilter() {
   )
 
   return (
-    <div className="w-full bg-white p-6 rounded-xl  flex flex-col gap-4 md:flex-row md:items-center">
+    <div className="w-full bg-white p-6   flex flex-col gap-4 md:flex-row md:items-center">
       {/* Filter Type */}
       <div className="flex-1">
         <label className="block mb-1 text-sm font-medium text-gray-700">
@@ -36,7 +36,7 @@ function AttackLogFilter() {
         <select
           value={filterType ?? ''}
           onChange={handleSetfilterType}
-          className="w-full px-4 py-2 rounded-md border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2  border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Select Type</option>
           {filterTypeOption.map((val, index) => (
@@ -53,7 +53,7 @@ function AttackLogFilter() {
         <select
           value={filterOperation ?? ''}
           onChange={handleSetFilterOperation}
-          className="w-full px-4 py-2 rounded-md border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2  border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Select Operation</option>
           {filterOperationOption.map((op, index) => (
@@ -66,7 +66,7 @@ function AttackLogFilter() {
 
       {/* Apply Button */}
       <div className="pt-1 md:pt-5">
-        <button className="w-full md:w-auto px-6 py-2 rounded-md bg-blue-600 text-white font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button className="w-full md:w-auto px-6 py-2  bg-blue-600 text-white font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
           Apply Filter
         </button>
       </div>
