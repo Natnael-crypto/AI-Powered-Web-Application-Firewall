@@ -36,20 +36,24 @@ export function useUpdateApplication() {
     mutationFn: updateApplication,
   })
 }
-export function useAssignApplication() {
+export function useAssignApplication(p0: {onSuccess: () => void}) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationKey: ['assignApplication'],
     mutationFn: assignApplication,
-    onSuccess: () => queryClient.invalidateQueries({queryKey: ['GetappAssignments']}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['GetappAssignments']}), p0
+    },
   })
 }
-export function useDeleteAssignment() {
+export function useDeleteAssignment(p0: {onSuccess: () => void}) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationKey: ['deleteAssignment'],
     mutationFn: deleteAssignment,
-    onSuccess: () => queryClient.invalidateQueries({queryKey: ['GetappAssignments']}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['GetappAssignments']}), p0
+    },
   })
 }
 

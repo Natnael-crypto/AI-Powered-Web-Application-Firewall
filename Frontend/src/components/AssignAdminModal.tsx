@@ -6,8 +6,8 @@ import {
 } from '../hooks/api/useApplication'
 import {AdminUser, Application, Assignment} from '../lib/types'
 import Modal from './Modal'
-import {useMemo} from 'react'
 import {Plus, X} from 'lucide-react'
+import {useEffect} from 'react'
 
 interface DetailProps {
   label: string
@@ -42,55 +42,58 @@ export const AssignAdminModal = ({
   onClose,
   onConfirm,
 }: AssignAdminModalProps) => {
-  const {mutate: assignApplication} = useAssignApplication()
-  const {mutate: deleteAssignment} = useDeleteAssignment()
-  const {data: assignedData} = useGetApplicationAssignments()
-  const {data: allApplications} = useGetApplications()
+  const {data: assignedData, refetch: refetchAssignments} = useGetApplicationAssignments()
+  const {data: allApplications, refetch: refetchApplications} = useGetApplications()
 
-  console.log('test', assignedData)
+  const {mutate: assignApplication} = useAssignApplication({
+    onSuccess: () => {
+      refetchAssignments()
+      refetchApplications()
+    },
+  })
+
+  const {mutate: deleteAssignment} = useDeleteAssignment({
+    onSuccess: () => {
+      refetchAssignments()
+      refetchApplications()
+    },
+  })
+
+  useEffect(() => {
+    if (isOpen) {
+      refetchAssignments()
+      refetchApplications()
+    }
+  }, [isOpen, refetchAssignments, refetchApplications])
+
+  if (!admin) return null
 
   const assignments = assignedData?.assignments ?? []
   const applications = allApplications ?? []
 
-  const assignedAppNames = useMemo(
-    () => assignments.map(a => a.application_name),
-    [assignments],
-  )
+  const assignedAppsToThisAdmin = assignments.filter(a => a.user_id === admin.user_id)
+  const assignedAppNames = assignments.map(a => a.application_name)
 
-  const assignedAppsToThisAdmin = useMemo(
-    () => assignments.filter(a => a.user_id === admin?.user_id),
-    [assignments, admin?.user_id],
+  const unassignedApps = applications.filter(
+    app => !assignedAppNames.includes(app.application_name),
   )
-
-  const assignedToThisAdminNames = useMemo(
-    () => new Set(assignedAppsToThisAdmin.map(a => a.application_name)),
-    [assignedAppsToThisAdmin],
-  )
-
-  const unassignedApps = useMemo(() => {
-    return applications.filter(app => !assignedAppNames.includes(app.application_name))
-  }, [applications, assignedAppNames])
 
   const handleAssignment = (application: Application) => {
     if (!admin) return
-
     assignApplication({
       user_id: admin.user_id,
       application_name: application.application_name,
     })
   }
+
   const handleDeleteAssignment = (assignment: Assignment) => {
     if (!admin) return
-
     deleteAssignment(assignment.id)
   }
-
-  if (!admin) return null
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Assign Admin">
       <div className="space-y-6">
-        {/* Admin Details */}
         <div className="grid grid-cols-2 gap-4">
           <Detail label="Username" value={admin.username} />
           <Detail label="Role" value={admin.role} capitalize />
@@ -107,7 +110,6 @@ export const AssignAdminModal = ({
           <Detail label="Profile Image" value={admin.profile_image_url || 'None'} />
         </div>
 
-        {/* Assigned Applications */}
         <div>
           <h3 className="text-md font-semibold mb-2">Assigned Applications</h3>
           <ul className="space-y-2">
@@ -133,7 +135,6 @@ export const AssignAdminModal = ({
           </ul>
         </div>
 
-        {/* Unassigned Applications */}
         <div>
           <h3 className="text-md font-semibold mb-2">Unassigned Applications</h3>
           <ul className="space-y-2">
@@ -159,7 +160,6 @@ export const AssignAdminModal = ({
           </ul>
         </div>
 
-        {/* Footer Buttons */}
         <div className="mt-6 flex justify-end space-x-3">
           <button
             type="button"

@@ -1,5 +1,4 @@
 import {useState} from 'react'
-import Modal from './Modal'
 import Table from './Table'
 import {ColumnDef} from '@tanstack/react-table'
 import {DropdownActions} from './DropdownAction'
