@@ -27,7 +27,7 @@ function Table<T extends object>({columns, data, className}: TableProps<T>) {
   })
 
   return (
-    <div className={clsx('w-full  shadow-md ', className)}>
+    <div className={clsx('w-full shadow-md', className)}>
       <table className="min-w-full table-auto border-collapse bg-white">
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
@@ -48,11 +48,17 @@ function Table<T extends object>({columns, data, className}: TableProps<T>) {
             <tr key={row.id} className="hover:bg-gray-50 transition-colors">
               {row.getVisibleCells().map(cell => {
                 const rendered = flexRender(cell.column.columnDef.cell, cell.getContext())
+                const isActionsColumn = cell.column.id === 'actions'
 
                 return (
                   <td
                     key={cell.id}
-                    className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap max-w-xs truncate"
+                    className={clsx(
+                      'px-6 py-4 text-sm text-gray-900',
+                      isActionsColumn
+                        ? 'whitespace-nowrap relative overflow-visible'
+                        : 'whitespace-nowrap max-w-xs truncate',
+                    )}
                     title={typeof rendered === 'string' ? rendered : undefined}
                   >
                     {typeof rendered === 'string' ? truncateString(rendered) : rendered}

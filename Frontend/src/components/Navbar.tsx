@@ -1,14 +1,16 @@
 import {LuLogOut} from 'react-icons/lu'
 import {useLocation, useNavigate} from 'react-router-dom'
-import ToastExample from './ToastExample'
+import {useUserInfo} from '../store/UserInfo'
 
 function Navbar() {
   const location = useLocation()
   const urls = location.pathname.split('/').filter(url => url !== '')
   const navigate = useNavigate()
+  const {clearUser} = useUserInfo()
 
   const handleLogout = () => {
     localStorage.removeItem('token')
+    clearUser()
     navigate('/login')
   }
 
@@ -29,7 +31,6 @@ function Navbar() {
           ))}
         </nav>
 
-        {/* Logout */}
         <button
           onClick={handleLogout}
           className="p-2 ull hover:bg-red-50 transition-colors duration-200"

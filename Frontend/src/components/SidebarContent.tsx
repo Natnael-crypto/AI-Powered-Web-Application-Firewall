@@ -2,6 +2,8 @@ import {AiOutlineRight} from 'react-icons/ai'
 import {Link, useLocation} from 'react-router-dom'
 import SidebarItem from './SidebarItem'
 import {useEffect, useState} from 'react'
+import {useUserInfo} from '../store/UserInfo'
+import {Roles} from '../lib/types'
 
 interface SidebarItemType {
   title: string
@@ -22,6 +24,7 @@ function SidebarContent({title, href, children, changeOpenItem, Icon}: SidebarIt
   const location = useLocation()
   const [isOpen, setOpen] = useState(false)
   const [_, setActive] = useState(false)
+  const {user} = useUserInfo()
 
   const normalizeString = (str: string) => {
     return str
@@ -40,6 +43,9 @@ function SidebarContent({title, href, children, changeOpenItem, Icon}: SidebarIt
   }, [location.pathname, title, href])
 
   const hasChildren = children && children.length > 0
+
+  if (title.toLocaleLowerCase() === 'system' && user?.role != Roles.SUPER_ADMIN)
+    return null
 
   return (
     <div className="transition-all duration-200 ease-in-out w-full">
