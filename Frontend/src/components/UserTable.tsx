@@ -10,6 +10,7 @@ import {
   useGetUsers,
 } from '../hooks/api/useUser'
 import {AdminUser} from '../lib/types'
+import {AssignAdminModal} from './AssignAdminModal'
 
 const AdminTable = () => {
   const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null)
@@ -125,79 +126,17 @@ const AdminTable = () => {
       {isError && <p className="text-red-500">Failed to load admin data.</p>}
       {!isLoading && !isError && <Table columns={columns} data={data?.admins || []} />}
 
-      <Modal
+      <AssignAdminModal
         isOpen={isAssignModalOpen}
+        admin={selectedAdmin}
         onClose={() => setIsAssignModalOpen(false)}
-        title="Assign Admin"
-      >
-        {selectedAdmin && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Detail label="Username" value={selectedAdmin.username} />
-              <Detail label="Role" value={selectedAdmin.role} capitalize />
-              <Detail label="Status" value={selectedAdmin.status} capitalize />
-              <Detail label="User ID" value={selectedAdmin.user_id} mono />
-              <Detail
-                label="Created At"
-                value={new Date(selectedAdmin.created_at).toLocaleString()}
-              />
-              <Detail
-                label="Last Login"
-                value={new Date(selectedAdmin.last_login).toLocaleString()}
-              />
-              <Detail
-                label="Profile Image"
-                value={selectedAdmin.profile_image_url || 'None'}
-              />
-            </div>
-
-            <div className="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                onClick={() => setIsAssignModalOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-                onClick={() => {
-                  console.log(`Assigning admin ${selectedAdmin.username}`)
-                  setIsAssignModalOpen(false)
-                }}
-              >
-                Confirm Assignment
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
+        onConfirm={admin => {
+          console.log(`Assigning admin ${admin.username}`)
+          setIsAssignModalOpen(false)
+        }}
+      />
     </div>
   )
 }
-
-const Detail = ({
-  label,
-  value,
-  mono = false,
-  capitalize = false,
-}: {
-  label: string
-  value: string
-  mono?: boolean
-  capitalize?: boolean
-}) => (
-  <div>
-    <p className="text-sm font-medium text-gray-500">{label}</p>
-    <p
-      className={`mt-1 text-sm text-gray-900 ${
-        mono ? 'font-mono' : ''
-      } ${capitalize ? 'capitalize' : ''}`}
-    >
-      {value}
-    </p>
-  </div>
-)
 
 export default AdminTable

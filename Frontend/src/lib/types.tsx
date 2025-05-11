@@ -153,3 +153,14 @@ export type AdminUser = {
 export type AdminsResponse = {
   admins: AdminUser[]
 }
+
+export type Assignment = {
+  id: string
+  user_id: string
+  application_name: string
+  application_id: string
+}
+
+export type AssignmentsResponse = {
+  assignments: Assignment[]
+}
