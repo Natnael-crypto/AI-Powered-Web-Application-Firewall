@@ -7,7 +7,6 @@ import UserTable from '../components/UserTable'
 import {useState} from 'react'
 import AddUserModal from '../components/AddUserModal'
 import {useAddAdmin} from '../hooks/api/useUser'
-import {QueryClient} from '@tanstack/react-query'
 
 function System() {
   const [isAddUser, setAddUser] = useState(false)

@@ -42,3 +42,25 @@ export const isLoggedIn = async () => {
 
   return await response.data.user
 }
+
+export async function deleteUser(username: string) {
+  const response = await axios.delete(`/api/users/delete/${username}`)
+
+  if (!response) throw new Error('Failed to delete user')
+
+  return await response.data
+}
+export async function deActivateUser(username: string) {
+  const response = await axios.put(`/api/users/inactive/${username}`)
+
+  if (!response) throw new Error('Failed to delete user')
+
+  return await response.data
+}
+export async function activateUser(username: string) {
+  const response = await axios.put(`/api/users/active/${username}`)
+
+  if (!response) throw new Error('Failed to delete user')
+
+  return await response.data
+}

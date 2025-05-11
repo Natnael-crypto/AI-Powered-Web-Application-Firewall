@@ -50,7 +50,6 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
     })
   }, [application])
 
-  console.log('application: ', form)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const {name, value, type, checked} = e.target as HTMLInputElement
     setForm(prev => ({
