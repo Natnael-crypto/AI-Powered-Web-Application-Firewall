@@ -3,6 +3,7 @@ package models
 type Request struct {
 	RequestID       string  `json:"request_id" gorm:"primaryKey"`
 	ApplicationName string  `json:"application_name" gorm:"not null"`
+	ApplicationID   string  `json:"application_id" gorm:"not null"`
 	ClientIP        string  `json:"client_ip" gorm:"not null"`
 	RequestMethod   string  `json:"request_method" gorm:"not null"`
 	RequestURL      string  `json:"request_url" gorm:"not null"`

@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/datatypes"
 )
 
 type Notification struct {
@@ -15,17 +13,27 @@ type Notification struct {
 }
 
 type NotificationRule struct {
-	ID         string         `gorm:"primaryKey" json:"id"`
-	CreatedBy  string         `json:"created_by" gorm:"not null" `
-	Name       string         `json:"name" gorm:"not null" `
-	HostName   string         `json:"hostname" gorm:"not null"`
-	ThreatType string         `json:"threat_type" gorm:"not null" `
-	Threshold  int            `json:"threshold" gorm:"not null" `
-	TimeWindow int            `json:"time_window" gorm:"not null" `
-	IsActive   bool           `json:"is_active" gorm:"not null" `
-	UsersID    datatypes.JSON `gorm:"type:jsonb" json:"users_id" `
-	CreatedAt  time.Time      `json:"created_at"`
-	UpdatedAt  time.Time      `json:"updated_at"`
+	ID         string    `gorm:"primaryKey" json:"id"`
+	CreatedBy  string    `json:"created_by" gorm:"not null" `
+	Name       string    `json:"name" gorm:"not null" `
+	ThreatType string    `json:"threat_type" gorm:"not null" `
+	Threshold  int       `json:"threshold" gorm:"not null" `
+	TimeWindow int       `json:"time_window" gorm:"not null" `
+	IsActive   bool      `json:"is_active" gorm:"not null" `
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+}
+
+type NotificationRuleToApplication struct {
+	ID                 string `json:"id" gorm:"primaryKey" `
+	NotificationRuleID string `json:"notification_rule_id" gorm:"not null" `
+	ApplicationID      string `json:"application_id" gorm:"not null" `
+}
+
+type NotificationRuleToUser struct {
+	ID                 string `json:"id" gorm:"primaryKey" `
+	NotificationRuleID string `json:"notification_rule_id" gorm:"not null" `
+	UserID             string `json:"application_id" gorm:"not null" `
 }
 
 type NotificationConfig struct {
