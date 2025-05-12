@@ -1,5 +1,5 @@
-import { Link, useLocation } from 'react-router-dom'
-import { IconType } from 'react-icons'
+import {Link, useLocation} from 'react-router-dom'
+import {IconType} from 'react-icons'
 
 interface SidebarItem {
   title: string
@@ -31,11 +31,13 @@ function SidebarItem({
     <div className="transition-all duration-200 ease-in-out">
       <Link
         to={href}
-        onClick={() => changeOpenItem && changeOpenItem({ title, href })}
-        className={`flex w-full items-center gap-x-4 px-7 py-3 hover:bg-green-50 hover:text-gray-600 rounded-sm transition-colors duration-200 ${isActive ? '' : ''} ${className}`}
+        onClick={() => changeOpenItem && changeOpenItem({title, href})}
+        className={`flex w-full items-center gap-x-4 px-7 py-3 hover:bg-green-50 hover:text-gray-600  transition-colors duration-200 ${isActive ? '' : ''} ${className}`}
       >
-        {Icon && <Icon className="w-5 h-5 text-gray-400" />} {/* Render the Icon if provided */}
-        <h2 className="text-sm font-normal text-left flex-1">{title}</h2> {/* Ensure text aligns left and occupies available space */}
+        {Icon && <Icon className="w-5 h-5 text-gray-400" />}{' '}
+        {/* Render the Icon if provided */}
+        <h2 className="text-sm font-normal text-left flex-1">{title}</h2>{' '}
+        {/* Ensure text aligns left and occupies available space */}
       </Link>
     </div>
   )

@@ -1,6 +1,6 @@
-import { MdDashboard, MdWeb } from 'react-icons/md'
-import { FaRegFileAlt } from 'react-icons/fa'
-import { AiOutlineTool, AiOutlineSetting } from 'react-icons/ai'
+import {MdDashboard, MdWeb} from 'react-icons/md'
+import {FaRegFileAlt} from 'react-icons/fa'
+import {AiOutlineTool, AiOutlineSetting} from 'react-icons/ai'
 
 export const SiderbarContentItems = [
   {
@@ -69,3 +69,5 @@ export const blockedRequestData: Record<string, number> = {
   AU: 150000,
   RU: 2000,
 }
+
+export const API_BASE_URL = 'https://waf-backend-latest.onrender.com'

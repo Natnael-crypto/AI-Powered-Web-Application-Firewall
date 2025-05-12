@@ -1,13 +1,17 @@
 import Button from './atoms/Button'
 import Card from './Card'
-
-function ManageUser() {
+interface manageUserProps {
+  toggleAddUser: () => void
+}
+function ManageUser({toggleAddUser}: manageUserProps) {
   return (
     <Card className="shadow-sm bg-white">
       <div className="flex flex-col">
         <div className="flex justify-between items-center">
           <h2>Manage Users</h2>
-          <Button classname="border border-green-400">Add User</Button>
+          <Button classname="border border-gray-600" onClick={toggleAddUser}>
+            Add User
+          </Button>
         </div>
       </div>
     </Card>

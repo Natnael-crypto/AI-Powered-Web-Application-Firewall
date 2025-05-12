@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import {Info, Tag, Save, X} from 'lucide-react'
-import {useAddApplication} from '../hooks/useApplication'
 import {QueryClient} from '@tanstack/react-query'
+import {useAddApplication} from '../hooks/api/useApplication'
 
 interface AddAppModalProps {
   isModalOpen: boolean
@@ -81,7 +81,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
         queryClient.invalidateQueries({queryKey: ['applications']})
         toggleModal()
       },
-      onError: error => {
+      onError: (error: Error) => {
         alert('Failed to add application: ' + error.message)
       },
     })
@@ -97,7 +97,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
           onClick={toggleModal}
         />
 
-        <div className="relative inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:align-middle">
+        <div className="relative inline-block transform overflow-hidden  bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:align-middle">
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-medium text-white">Add New Application</h3>
@@ -113,7 +113,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
                 <label className="block text-sm font-medium text-gray-700">
                   Application Name
                 </label>
-                <div className="relative mt-1 rounded-md shadow-sm">
+                <div className="relative mt-1  shadow-sm">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                     <Info className="h-5 w-5 text-gray-400" />
                   </div>
@@ -122,7 +122,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
                     name="application_name"
                     value={payload.application_name}
                     onChange={handleChange}
-                    className="block w-full rounded-md border border-gray-300 pl-10 py-2 focus:border-indigo-500 focus:ring-indigo-500"
+                    className="block w-full  border border-gray-300 pl-10 py-2 focus:border-indigo-500 focus:ring-indigo-500"
                     placeholder="Enter application name"
                     required
                   />
@@ -138,7 +138,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
                   value={payload.description}
                   onChange={handleChange}
                   rows={3}
-                  className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  className="mt-1 block w-full  border border-gray-300 py-2 px-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   placeholder="Enter a brief description"
                   required
                 />
@@ -149,7 +149,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
                   <label className="block text-sm font-medium text-gray-700">
                     Hostname
                   </label>
-                  <div className="relative mt-1 rounded-md shadow-sm">
+                  <div className="relative mt-1  shadow-sm">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                       <Info className="h-5 w-5 text-gray-400" />
                     </div>
@@ -158,7 +158,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
                       name="hostname"
                       value={payload.hostname}
                       onChange={handleChange}
-                      className="block w-full rounded-md border border-gray-300 pl-10 py-2 focus:border-indigo-500 focus:ring-indigo-500"
+                      className="block w-full  border border-gray-300 pl-10 py-2 focus:border-indigo-500 focus:ring-indigo-500"
                       placeholder="Enter hostname"
                       required
                     />
@@ -169,7 +169,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
                   <label className="block text-sm font-medium text-gray-700">
                     IP Address
                   </label>
-                  <div className="relative mt-1 rounded-md shadow-sm">
+                  <div className="relative mt-1 shadow-sm">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                       <Info className="h-5 w-5 text-gray-400" />
                     </div>
@@ -178,7 +178,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
                       name="ip_address"
                       value={payload.ip_address}
                       onChange={handleChange}
-                      className="block w-full rounded-md border border-gray-300 pl-10 py-2 focus:border-indigo-500 focus:ring-indigo-500"
+                      className="block w-full border border-gray-300 pl-10 py-2 focus:border-indigo-500 focus:ring-indigo-500"
                       placeholder="Enter IP address"
                       required
                     />
@@ -187,7 +187,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Port</label>
-                  <div className="relative mt-1 rounded-md shadow-sm">
+                  <div className="relative mt-1  shadow-sm">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                       <Tag className="h-5 w-5 text-gray-400" />
                     </div>
@@ -196,7 +196,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
                       name="port"
                       value={payload.port}
                       onChange={handleChange}
-                      className="block w-full rounded-md border border-gray-300 pl-10 py-2 focus:border-indigo-500 focus:ring-indigo-500"
+                      className="block w-full  border border-gray-300 pl-10 py-2 focus:border-indigo-500 focus:ring-indigo-500"
                       placeholder="Enter port number"
                       required
                     />
@@ -211,7 +211,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
                     name="status"
                     value={payload.status ? 'true' : 'false'}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border border-gray-300 py-2 pl-3 pr-10 focus:border-indigo-500 focus:ring-indigo-500"
+                    className="mt-1 block w-full  border border-gray-300 py-2 pl-3 pr-10 focus:border-indigo-500 focus:ring-indigo-500"
                   >
                     <option value="true">Active</option>
                     <option value="false">Inactive</option>
@@ -220,7 +220,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">TLS</label>
-                  <div className="relative mt-1 rounded-md shadow-sm">
+                  <div className="relative mt-1  shadow-sm">
                     <input
                       type="checkbox"
                       name="tls"
@@ -238,13 +238,13 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
               <button
                 type="button"
                 onClick={toggleModal}
-                className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="inline-flex items-center  border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="inline-flex items-center  border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 <Save className="mr-2 h-4 w-4" />
                 Save Application

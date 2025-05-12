@@ -12,9 +12,15 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://waf-backend-latest.onrender.com/',
+        target: 'https://waf-backend-latest.onrender.com',
         changeOrigin: true,
+        secure: false,
         rewrite: path => path.replace(/^\/api/, ''),
+
+        headers: {
+          Connection: 'keep-alive',
+        },
+        cookieDomainRewrite: '',
       },
     },
   },

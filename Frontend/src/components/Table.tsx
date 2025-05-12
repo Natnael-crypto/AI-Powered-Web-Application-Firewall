@@ -19,7 +19,7 @@ function truncateString(value: unknown, maxLength = 60): string {
   return String(value)
 }
 
-function Table<T extends object>({ columns, data, className }: TableProps<T>) {
+function Table<T extends object>({columns, data, className}: TableProps<T>) {
   const table = useReactTable({
     columns,
     data,
@@ -27,12 +27,12 @@ function Table<T extends object>({ columns, data, className }: TableProps<T>) {
   })
 
   return (
-    <div className={clsx('w-full shadow-md rounded-lg', className)}>
+    <div className={clsx('w-full shadow-md', className)}>
       <table className="min-w-full table-auto border-collapse bg-white">
         <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
+          {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
+              {headerGroup.headers.map(header => (
                 <th
                   key={header.id}
                   className="px-6 py-4 text-left text-sm font-semibold text-gray-900 bg-gray-50 border-b"
@@ -44,20 +44,24 @@ function Table<T extends object>({ columns, data, className }: TableProps<T>) {
           ))}
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {table.getRowModel().rows.map((row) => (
+          {table.getRowModel().rows.map(row => (
             <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-              {row.getVisibleCells().map((cell) => {
+              {row.getVisibleCells().map(cell => {
                 const rendered = flexRender(cell.column.columnDef.cell, cell.getContext())
+                const isActionsColumn = cell.column.id === 'actions'
 
                 return (
                   <td
                     key={cell.id}
-                    className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap max-w-xs truncate"
+                    className={clsx(
+                      'px-6 py-4 text-sm text-gray-900',
+                      isActionsColumn
+                        ? 'whitespace-nowrap relative overflow-visible'
+                        : 'whitespace-nowrap max-w-xs truncate',
+                    )}
                     title={typeof rendered === 'string' ? rendered : undefined}
                   >
-                    {typeof rendered === 'string'
-                      ? truncateString(rendered)
-                      : rendered}
+                    {typeof rendered === 'string' ? truncateString(rendered) : rendered}
                   </td>
                 )
               })}

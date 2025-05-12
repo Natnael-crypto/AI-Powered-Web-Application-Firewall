@@ -7,7 +7,7 @@ function AntiBot() {
       header: 'IP Addr',
       accessorKey: 'ip',
       cell: ({getValue}: CellContext<any, unknown>) => (
-        <div className="rounded-md py-1 px-2 font-semibold text-sm text-black">
+        <div className=" py-1 px-2 font-semibold text-sm text-black">
           {String(getValue())}
         </div>
       ),
@@ -64,7 +64,7 @@ function AntiBot() {
   ]
 
   return (
-    <div className="p-4 bg-gray-100 rounded-lg shadow-lg">
+    <div className="p-4 bg-gray-100  shadow-lg">
       <h2 className="text-xl font-bold mb-4">Request Logs</h2>
       <Table data={data} columns={columns} />
     </div>

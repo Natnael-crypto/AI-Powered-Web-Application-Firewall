@@ -7,7 +7,7 @@ const CleanDataSettings = () => {
   const [statisticsData, setStatisticsData] = useState('Not Clean')
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-lg w-full">
+    <div className="p-6 bg-white  shadow-lg w-full">
       <h4 className="text-2xl font-bold text-gray-800 mb-6">Clean Data</h4>
 
       {/* Clean Protection Logs */}

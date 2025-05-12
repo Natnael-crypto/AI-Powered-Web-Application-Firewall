@@ -1,17 +1,18 @@
 import axios from '../lib/axios'
+import {AdminsResponse} from '../lib/types'
 
 export const loginUser = async (userData: {username: string; password: string}) => {
-  const response = await axios.post('/api/login', userData)
+  const response = await axios.post('/api/login', userData, {
+    withCredentials: true, // This is crucial
+  })
   if (!response) throw new Error('Failed to get users')
-
-  return await response.data
+  return response.data
 }
-
-export const getUsers = async () => {
-  const response = await axios.get('/api/users')
+export const getUsers = async (): Promise<AdminsResponse> => {
+  const response = await axios.get<AdminsResponse>('/api/users/', {withCredentials: true})
 
   if (!response) throw new Error('Failed to get users')
-  return await response.data
+  return response.data
 }
 
 export const getuser = async (username: string) => {
@@ -19,11 +20,11 @@ export const getuser = async (username: string) => {
 
   if (!response) throw new Error('Failed to get user')
 
-  return await response.data
+  return await response.data.admins
 }
 
 export const addUser = async (userData: {username: string; password: string}) => {
-  const response = await axios.post('/users/add', userData)
+  const response = await axios.post('/api/users/add', userData)
 
   if (!response) throw new Error('Failed to add user')
 
@@ -32,4 +33,34 @@ export const addUser = async (userData: {username: string; password: string}) =>
 
 export const updateUsers = async (_userId: string) => {
   // Todo: Implement
+}
+
+export const isLoggedIn = async () => {
+  const response = await axios.get('/api/is-logged-in')
+
+  if (!response) throw new Error('Failed to add user')
+
+  return await response.data.user
+}
+
+export async function deleteUser(username: string) {
+  const response = await axios.delete(`/api/users/delete/${username}`)
+
+  if (!response) throw new Error('Failed to delete user')
+
+  return await response.data
+}
+export async function deActivateUser(username: string) {
+  const response = await axios.put(`/api/users/inactive/${username}`)
+
+  if (!response) throw new Error('Failed to delete user')
+
+  return await response.data
+}
+export async function activateUser(username: string) {
+  const response = await axios.put(`/api/users/active/${username}`)
+
+  if (!response) throw new Error('Failed to delete user')
+
+  return await response.data
 }

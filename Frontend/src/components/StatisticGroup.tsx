@@ -3,7 +3,7 @@ import StatisticCard from './StatisticCard'
 
 interface stats {
   label: string
-  value: number
+  value: number | undefined
 }
 interface StatisticGroupProps {
   stats: stats[]
