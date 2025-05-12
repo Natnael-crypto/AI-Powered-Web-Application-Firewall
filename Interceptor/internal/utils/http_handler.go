@@ -12,6 +12,7 @@ import (
 )
 
 type MessageModel struct {
+	RequestID       string `json:"request_id"`
 	ApplicationName string `json:"application_name"`
 	ClientIP        string `json:"client_ip"`
 	RequestMethod   string `json:"request_method"`

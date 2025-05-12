@@ -1,11 +1,10 @@
 package controllers
 
 import (
-	"net/http"
-
 	"backend/internal/config"
 	"backend/internal/models"
 	"backend/internal/utils"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )

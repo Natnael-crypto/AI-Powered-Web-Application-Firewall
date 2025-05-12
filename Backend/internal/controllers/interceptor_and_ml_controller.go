@@ -52,3 +52,10 @@ func InterceptorCheckState(c *gin.Context) {
 	// After interceptor fetches the status, reset the change to false
 	config.Change = false
 }
+
+func MlCheckState(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"untrained_model": config.UntrainedModel,
+		"select_model":    config.SelecteModel,
+	})
+}

@@ -6,7 +6,9 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/corazawaf/coraza/v3"
 )
@@ -32,6 +34,13 @@ func InitializeRuleEngine(customRule string) (*WAF, error) {
 func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int, string) {
 	tx := w.engine.NewTransaction()
 	defer tx.Close()
+
+	ignoredMessages := []string{
+		"Enabling body inspection",
+		"Invalid HTTP Request Line",
+		"Request Missing a Host Header",
+		"",
+	}
 
 	for name, values := range r.Header {
 		for _, value := range values {
@@ -64,13 +73,21 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int, st
 	interruption := tx.Interruption()
 
 	ruleMessage := ""
-
 	if interruption != nil {
+		var matchedMessages []string
+
 		for _, rule := range tx.MatchedRules() {
-			if rule.Rule().ID() == interruption.RuleID {
-				ruleMessage = rule.Message()
-				break
+			if !slices.Contains(ignoredMessages, rule.Message()) {
+				matchedMessages = append(matchedMessages, rule.Message())
+				if rule.Rule().ID() == interruption.RuleID && rule.Rule().ID() >= 1000000000000000000 {
+					ruleMessage = rule.Message()
+					break
+				}
 			}
+		}
+
+		if ruleMessage == "" {
+			ruleMessage = strings.Join(matchedMessages, " & ")
 		}
 		log.Printf("[WAF] Request blocked by rule ID %d Message: %s (action: %s, status: %d)", interruption.RuleID, ruleMessage, interruption.Action, interruption.Status)
 		return true, interruption.RuleID, ruleMessage, interruption.Action, interruption.Status, string_body

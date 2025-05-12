@@ -12,6 +12,8 @@ var (
 	WsKey              string
 	InterceptorRunning bool = false
 	Change             bool = false
+	UntrainedModel     bool = false
+	SelecteModel       bool = false
 )
 
 func LoadConfig() {

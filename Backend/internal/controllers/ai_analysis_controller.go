@@ -81,7 +81,6 @@ func FetchAndAnalyzeRequests(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"requests": requests})
 }
 
-
 func SubmitAnalysisResults(c *gin.Context) {
 	var results []struct {
 		RequestID  string `json:"request_id"`
@@ -151,6 +150,8 @@ func CreateModelTrainingRequest(c *gin.Context) {
 		return
 	}
 
+	config.UntrainedModel = true
+
 	c.JSON(http.StatusOK, gin.H{"message": "model training request created", "model": ai_model})
 }
 
@@ -196,6 +197,7 @@ func GetUntrainedModelForML(c *gin.Context) {
 		return
 	}
 
+	config.UntrainedModel = false
 	c.JSON(http.StatusOK, gin.H{
 		"id":                      model.ID,
 		"number_requests_used":    model.NumberRequestsUsed,
@@ -254,6 +256,10 @@ func SelectActiveModel(c *gin.Context) {
 		return
 	}
 
+	if err := config.DB.Where("modeled == ? AND id = ?", true, input.ID).First(&models.AIModel{}).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "model not found"})
+	}
+
 	if err := config.DB.Model(&models.AIModel{}).Where("selected = ?", true).Update("selected", false).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to deselect existing model"})
 		return
@@ -263,6 +269,8 @@ func SelectActiveModel(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to select model"})
 		return
 	}
+
+	config.SelecteModel = true
 
 	c.JSON(http.StatusOK, gin.H{"message": "model selected successfully"})
 }
@@ -275,6 +283,8 @@ func GetSelectedModel(c *gin.Context) {
 		return
 	}
 
+	config.SelecteModel = false
+	
 	c.JSON(http.StatusOK, gin.H{"model": model})
 }
 

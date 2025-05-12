@@ -19,6 +19,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/time/rate"
 )
 
@@ -85,6 +86,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		limiterLock.Unlock()
 
 		message := utils.MessageModel{
+			RequestID:       uuid.New().String(),
 			ApplicationName: hostname,
 			ClientIP:        r.RemoteAddr,
 			RequestMethod:   r.Method,
@@ -136,6 +138,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare message
 	message := utils.MessageModel{
+		RequestID:       uuid.New().String(),
 		ApplicationName: hostname,
 		ClientIP:        r.RemoteAddr,
 		RequestMethod:   r.Method,
@@ -175,9 +178,10 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 
 	// ML and Fusion Evaluation
 	requestData := ml.RequestData{
-		Url:     r.URL.String(),
-		Headers: headers,
-		Body:    body,
+		RequestID: message.RequestID,
+		Url:       r.URL.String(),
+		Headers:   headers,
+		Body:      body,
 	}
 
 	blockedByMl, percent, err := ml.EvaluateML(requestData)

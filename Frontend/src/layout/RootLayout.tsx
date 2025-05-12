@@ -2,16 +2,38 @@ import {Outlet, useLocation, useNavigate} from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import {useEffect} from 'react'
+import axios from 'axios'
 
 function RootLayout() {
   const {pathname} = useLocation()
   const navigate = useNavigate()
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const checkToken = ()=>{
+    const token = localStorage.getItem('token')
+    if (token) {
+      axios.get(`${backendUrl}/is-logged-in`, {
+        headers: {
+          Authorization: token,
+        },
+      })
+      .then((response) => {
+        if (response.status !== 200) {
+          navigate('/login');
+        }
+      })
+      .catch((error) => {
+        navigate('/login');
+      });
+    } else {
+      navigate('/login');
+    }
+
+  }
 
   useEffect(() => {
-    console.log('got you')
-    // if (!localStorage.getItem('token')) {
-    //   navigate('/login')
-    // }
+    console.log('got you 1')
+    checkToken()
+    console.log('got you 2')
   }, [pathname])
 
   return (

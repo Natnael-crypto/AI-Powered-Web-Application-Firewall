@@ -9,9 +9,10 @@ import (
 )
 
 type RequestData struct {
-	Url     string `json:"url"`
-	Headers string `json:"headers"`
-	Body    string `json:"body"`
+	RequestID string `json:"request_id"`
+	Url       string `json:"url"`
+	Headers   string `json:"headers"`
+	Body      string `json:"body"`
 }
 
 func EvaluateML(requestData RequestData) (bool, float64, error) {

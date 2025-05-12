@@ -64,7 +64,6 @@ func InitializeRoutes(r *gin.Engine) {
 		rules.POST("/activate/:rule_id", controllers.ActivateRule)
 		rules.GET("", controllers.GetAllRulesAdmin)
 		rules.GET("/:rule_id", controllers.GetOneRule)
-
 	}
 
 	requests := authorized.Group("/requests")
@@ -144,11 +143,11 @@ func InitializeRoutes(r *gin.Engine) {
 
 	ms_services := allowed_ip.Group("/ml")
 	{
-		ms_services.GET("/fetch-analysis", controllers.FetchAndAnalyzeRequests)
 		ms_services.POST("/submit-analysis", controllers.SubmitAnalysisResults)
 		ms_services.GET("/model/untrained", controllers.GetUntrainedModelForML)
 		ms_services.POST("/model/results", controllers.SubmitModelResults)
 		ms_services.GET("/model/selected", controllers.GetSelectedModel)
+		ms_services.GET("/changes", controllers.MlCheckState)
 	}
 
 	interceptor_services := allowed_ip.Group("/interceptor")
