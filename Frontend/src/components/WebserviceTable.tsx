@@ -1,7 +1,7 @@
 import {ColumnDef} from '@tanstack/react-table'
-import {Application} from '../pages/WebServices'
 import Table from './Table'
 import {DropdownActions} from './DropdownAction'
+import {Application} from '../lib/types'
 
 interface WebserviceTableProps {
   data: Application[]
