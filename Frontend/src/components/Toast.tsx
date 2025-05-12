@@ -14,13 +14,7 @@ type ToastProps = {
     | 'bottom-right'
 }
 
-export const Toast = ({
-  message,
-  type = 'info',
-  duration = 3000,
-  onClose,
-  position = 'top-right',
-}: ToastProps) => {
+export const Toast = ({message, type = 'info', duration = 3000, onClose}: ToastProps) => {
   const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
@@ -39,15 +33,6 @@ export const Toast = ({
     error: 'bg-red-100 text-red-700 border-red-300',
     info: 'bg-blue-100 text-blue-700 border-blue-300',
     warning: 'bg-yellow-100 text-yellow-700 border-yellow-300',
-  }
-
-  const positionClasses = {
-    'top-left': 'top-4 left-4',
-    'top-center': 'top-4 left-1/2 transform -translate-x-1/2',
-    'top-right': 'top-4 right-4',
-    'bottom-left': 'bottom-4 left-4',
-    'bottom-center': 'bottom-4 left-1/2 transform -translate-x-1/2',
-    'bottom-right': 'bottom-4 right-4',
   }
 
   return (

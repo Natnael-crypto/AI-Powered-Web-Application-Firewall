@@ -37,7 +37,7 @@ const validActions = ['deny', 'log', 'drop', 'pass', 'redirect', 'status:403']
 const EditRuleModal: React.FC<EditRuleModalProps> = ({ruleID, onClose, onSuccess}) => {
   const [ruleInput, setRuleInput] = useState<RuleInput | null>(null)
   const [availableApps, setAvailableApps] = useState<AppOption[]>([])
-  const [preview, setPreview] = useState<string>('')
+  // Removed unused 'preview' state
 
   useEffect(() => {
     const fetchRule = async () => {
@@ -88,27 +88,7 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ruleID, onClose, onSuccess
     fetchApps()
   }, [ruleID])
 
-  useEffect(() => {
-    if (ruleInput) generateRule(ruleInput)
-  }, [ruleInput])
-
-  const generateRule = (input: RuleInput) => {
-    const {ruleID, action, category, conditions} = input
-    if (conditions.length === 0) return
-
-    let ruleText = ''
-    conditions.forEach((cond, i) => {
-      const prefix = i === 0 ? 'SecRule' : '    SecRule'
-      const chain = i < conditions.length - 1 ? `"chain"` : ''
-      const firstLine =
-        i === 0
-          ? `"id:${ruleID},phase:2,${action},msg:'${category}'${conditions.length > 1 ? ',chain' : ''}"`
-          : chain
-      ruleText += `${prefix} ${cond.ruleType} "@${cond.ruleMethod} ${cond.ruleDefinition}" ${firstLine}\n`
-    })
-
-    setPreview(ruleText.trim())
-  }
+  // Removed unused 'generateRule' function and related useEffect
 
   const updateCondition = (index: number, field: keyof Condition, value: string) => {
     if (!ruleInput) return

@@ -42,40 +42,6 @@ const RulesTable = ({onUpdate}: rulesTabelProps) => {
       },
     })
   }
-  const mockData: Rule[] = [
-    {
-      rule_id: '592249559871523992',
-      rule_type: 'multiple',
-      rule_method: 'chained',
-      rule_definition:
-        '[{"rule_type":"REQUEST_URI","rule_method":"streq","rule_definition":"admin"}]',
-      action: 'deny',
-      application_id: '16d3f539-6c7b-45ac-b977-6a51c3582d29',
-      rule_string:
-        'SecRule REQUEST_URI "@streq admin" "id:592249559871523992,phase:2,deny,msg:\'blocked path\'',
-      created_by: 'd1c65bfd-307a-4fd4-84f8-584881bbb60a',
-      created_at: '2025-03-10T22:19:49.252583+03:00',
-      updated_at: '2025-03-10T22:19:49.252583+03:00',
-      is_active: true,
-      category: 'blocked path',
-    },
-    {
-      rule_id: '211430091046783650',
-      rule_type: 'multiple',
-      rule_method: 'chained',
-      rule_definition:
-        '[{"rule_type":"REQUEST_URI","rule_method":"streq","rule_definition":"admin"},{"rule_type":"REQUEST_URI","rule_method":"contains","rule_definition":"test"}]',
-      action: 'deny',
-      application_id: '16d3f539-6c7b-45ac-b977-6a51c3582d29',
-      rule_string:
-        'SecRule REQUEST_URI "@streq admin" "id:211430091046783650,phase:2,deny,msg:\'blocked path2\'\n    chain\n    SecRule REQUEST_URI "@contains test"',
-      created_by: 'd1c65bfd-307a-4fd4-84f8-584881bbb60a',
-      created_at: '2025-03-10T22:28:09.558079+03:00',
-      updated_at: '2025-03-10T22:28:09.558079+03:00',
-      is_active: true,
-      category: 'blocked path2',
-    },
-  ]
 
   const columns: ColumnDef<Rule>[] = [
     {

@@ -164,22 +164,3 @@ interface RuleDefinitionItem {
   rule_method: string
   rule_definition: string
 }
-
-interface Rule {
-  rule_id: string
-  rule_type: string
-  rule_method: string
-  rule_definition: string | RuleDefinitionItem[]
-  action: string
-  application_id: string
-  rule_string: string
-  created_by: string
-  created_at: string
-  updated_at: string
-  is_active: boolean
-  category: string
-}
-
-interface RulesResponse {
-  rules: Rule[]
-}

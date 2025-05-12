@@ -16,7 +16,7 @@ function RootLayout() {
   const {pathname} = useLocation()
   const navigate = useNavigate()
   const {addToast: toast} = useToast()
-  const {user, setUser} = useUserInfo()
+  const {setUser} = useUserInfo()
   const [retryCount, setRetryCount] = useState(0)
   const {data: userInfo, isLoading, error, refetch} = useIsLoggedIn()
 

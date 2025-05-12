@@ -26,8 +26,8 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
   onSubmit,
   application,
 }) => {
-  const [certFile, setCertFile] = useState<File | null>(null)
-  const [keyFile, setKeyFile] = useState<File | null>(null)
+  // const [certFile, setCertFile] = useState<File | null>(null)
+  // const [keyFile, setKeyFile] = useState<File | null>(null)
   const [form, setForm] = useState<WebServiceData>({
     application_name: application?.application_name ?? '',
     description: application?.description ?? '',
@@ -165,7 +165,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
               </label>
               <input
                 type="file"
-                onChange={e => setCertFile(e.target.files?.[0] || null)}
+                // onChange={e => setCertFile(e.target.files?.[0] || null)}
                 className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                 required
               />
@@ -174,7 +174,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
               <label className="text-sm font-semibold text-gray-700 mb-1">Key File</label>
               <input
                 type="file"
-                onChange={e => setKeyFile(e.target.files?.[0] || null)}
+                // onChange={e => setKeyFile(e.target.files?.[0] || null)}
                 className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4  file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                 required
               />
