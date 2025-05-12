@@ -1,8 +1,11 @@
-import {useMutation, useQuery} from '@tanstack/react-query'
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 import {
+  assignApplication,
   createApplication,
+  deleteAssignment,
   getApplication,
   getApplications,
+  getAssignments,
   updateApplication,
 } from '../../services/applicationApi'
 
@@ -31,5 +34,32 @@ export function useUpdateApplication() {
   return useMutation({
     mutationKey: ['updateApplication'],
     mutationFn: updateApplication,
+  })
+}
+export function useAssignApplication(p0: {onSuccess: () => void}) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['assignApplication'],
+    mutationFn: assignApplication,
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['GetappAssignments']}), p0
+    },
+  })
+}
+export function useDeleteAssignment(p0: {onSuccess: () => void}) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['deleteAssignment'],
+    mutationFn: deleteAssignment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['GetappAssignments']}), p0
+    },
+  })
+}
+
+export function useGetApplicationAssignments() {
+  return useQuery({
+    queryKey: ['GetappAssignments'],
+    queryFn: getAssignments,
   })
 }

@@ -1,36 +1,21 @@
 import {useState} from 'react'
-import {
-  ColumnDef,
-  Row,
-  getCoreRowModel,
-  useReactTable,
-  flexRender,
-} from '@tanstack/react-table'
-import clsx from 'clsx'
 import Card from '../components/Card'
 import Button from '../components/atoms/Button'
-import CreateRuleModal from '../components/CreateRuleModal'
-import {
-  HiOutlineBan,
-  HiOutlineCheckCircle,
-  HiOutlineTrash,
-  HiOutlineThumbUp,
-  HiOutlineThumbDown,
-  HiOutlinePencilAlt,
-} from 'react-icons/hi'
-import EditRuleModal from '../components/EditRuleModal'
-import {
-  useGetRules,
-  useActivateRule,
-  useDeactivateRule,
-  useUpdateApplication,
-} from '../hooks/api/useRules'
+import RulesTable from '../components/RulesTable' // Your existing table component
+import {useCreateRule, useUpdateRule} from '../hooks/api/useRules'
+import RuleDetailsModal from '../components/RuleDetailModal'
+
+interface RuleDefinitionItem {
+  rule_type: string
+  rule_method: string
+  rule_definition: string
+}
 
 export interface Rule {
   rule_id: string
   rule_type: string
   rule_method: string
-  rule_definition: string
+  rule_definition: string | RuleDefinitionItem[]
   action: string
   application_id: string
   rule_string: string
@@ -41,250 +26,56 @@ export interface Rule {
   category: string
 }
 
-function truncateString(value: unknown, maxLength = 60): string {
-  if (typeof value === 'string' && value.length > maxLength) {
-    return value.substring(0, maxLength) + '...'
-  }
-  return String(value)
-}
-
-interface TableProps<T> {
-  columns: ColumnDef<T>[]
-  data: T[]
-  className?: string
-  onSelectionChange?: (rows: Row<T>[]) => void
-}
-
-function Table<T extends object>({
-  columns,
-  data,
-  className,
-  onSelectionChange,
-}: TableProps<T>) {
-  const table = useReactTable({
-    columns,
-    data,
-    getCoreRowModel: getCoreRowModel(),
-  })
-
-  const selectedRows = table.getSelectedRowModel().rows
-  if (onSelectionChange) onSelectionChange(selectedRows)
-
-  return (
-    <div className={clsx('w-full shadow-md rounded-lg', className)}>
-      <table className="min-w-full table-auto border-collapse bg-white">
-        <thead>
-          {table.getHeaderGroups().map(headerGroup => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
-                <th
-                  key={header.id}
-                  className="px-6 py-4 text-left text-sm font-semibold text-gray-900 bg-gray-50 border-b"
-                >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {table.getRowModel().rows.map(row => (
-            <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-              {row.getVisibleCells().map(cell => {
-                const rendered = flexRender(cell.column.columnDef.cell, cell.getContext())
-
-                return (
-                  <td
-                    key={cell.id}
-                    className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap max-w-xs truncate"
-                    title={typeof rendered === 'string' ? rendered : undefined}
-                  >
-                    {typeof rendered === 'string' ? truncateString(rendered) : rendered}
-                  </td>
-                )
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
 function CustomRules() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedRows, setSelectedRows] = useState<Row<Rule>[]>([])
-  const [isEditMode, setIsEditMode] = useState(false)
-  const [currentRuleID, setCurrentRuleID] = useState('')
+  const [selectedRule, setSelectedRule] = useState<Rule | undefined>()
+  const {mutate: createRule} = useCreateRule()
+  const {mutate: updateRule} = useUpdateRule()
 
-  const {data: rules = [], refetch} = useGetRules()
-  const {mutate: deleteRule} = useUpdateApplication()
-  const {data: refetchActivate} = useActivateRule('')
-  const {refetch: refetchDeactivate} = useDeactivateRule('')
+  const toggleModal = () => setIsModalOpen(!isModalOpen)
 
-  const columns: ColumnDef<Rule>[] = [
-    {
-      id: 'select',
-      header: ({table}) => (
-        <input
-          type="checkbox"
-          checked={table.getIsAllPageRowsSelected()}
-          onChange={table.getToggleAllPageRowsSelectedHandler()}
-        />
-      ),
-      cell: ({row}) => (
-        <input
-          type="checkbox"
-          checked={row.getIsSelected()}
-          onChange={row.getToggleSelectedHandler()}
-        />
-      ),
-    },
-    {
-      header: 'Status',
-      accessorKey: 'is_active',
-      cell: ({row}) => (
-        <span
-          className={`px-3 py-1 rounded-full text-sm font-medium ${
-            row.original.is_active
-              ? 'bg-green-100 text-green-800'
-              : 'bg-red-100 text-red-800'
-          }`}
-        >
-          {row.original.is_active ? 'Active' : 'Inactive'}
-        </span>
-      ),
-    },
-    {
-      header: 'Definition',
-      accessorKey: 'rule_definition',
-      cell: ({row}) => {
-        const value = row.original.rule_definition
-        return <span>{value.length > 60 ? `${value.slice(0, 60)}...` : value}</span>
-      },
-    },
-    {
-      header: 'Action',
-      accessorKey: 'action',
-      cell: ({row}) => (
-        <div className="flex items-center gap-2">
-          {row.original.action.toLowerCase().includes('deny') ? (
-            <HiOutlineBan className="text-red-600" size={20} />
-          ) : (
-            <HiOutlineCheckCircle className="text-green-600" size={20} />
-          )}
-          {row.original.action}
-        </div>
-      ),
-    },
-    {
-      header: 'Message',
-      accessorKey: 'category',
-    },
-    {
-      header: 'Updated At',
-      accessorKey: 'updated_at',
-    },
-    {
-      header: 'Edit',
-      cell: ({row}) => (
-        <button
-          onClick={() => {
-            setCurrentRuleID(row.original.rule_id)
-            setIsEditMode(true)
-          }}
-        >
-          <HiOutlinePencilAlt size={20} className="text-blue-600" />
-        </button>
-      ),
-    },
-  ]
-
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen)
+  const handleOpenDetailsModal = (rule: Rule) => {
+    setSelectedRule(rule)
+    setIsModalOpen(true)
   }
 
-  const handleAction = async (action: 'delete' | 'activate' | 'deactivate') => {
-    const selectedIds = selectedRows.map(r => r.original.rule_id)
+  const handlCreateRule = () => {
+    setSelectedRule(undefined)
+    setIsModalOpen(true)
+  }
 
-    try {
-      for (const ruleId of selectedIds) {
-        if (action === 'delete') {
-          await deleteRule(ruleId)
-        } else if (action === 'activate') {
-          await refetchActivate(ruleId)
-        } else if (action === 'deactivate') {
-          await refetchDeactivate(ruleId)
-        }
-      }
+  const handleFormSubmit = (formData: Partial<Rule>) => {
+    const isUpdate = !!formData.rule_id
 
-      // Refresh data after performing actions
-      await refetch()
-      setSelectedRows([]) // clear selection
-    } catch (error) {
-      console.error(`Failed to ${action} rules:`, error)
-    }
+    const mutationFn = isUpdate ? updateRule : createRule
+
+    mutationFn(formData, {
+      onSuccess: () => {
+        toggleModal()
+      },
+      onError: () => {
+        console.error('Something went wrong while saving the application.')
+      },
+    })
   }
 
   return (
     <div className="space-y-4">
-      {isModalOpen && <CreateRuleModal onSuccess={refetch} onClose={toggleModal} />}
+      <RuleDetailsModal
+        rule={selectedRule}
+        isOpen={isModalOpen}
+        onClose={toggleModal}
+        onSubmit={handleFormSubmit}
+      />
 
-      {isEditMode && (
-        <EditRuleModal
-          ruleID={currentRuleID}
-          onClose={() => {
-            setCurrentRuleID('')
-            setIsEditMode(false)
-          }}
-          onSuccess={refetch}
-        />
-      )}
-
-      <Card className="flex justify-between items-center py-4 px-6 shadow-md bg-white rounded-lg">
+      <Card className="flex justify-between items-center py-4 px-6 bg-white">
         <h2 className="text-lg font-semibold">Custom Rules</h2>
-        <Button
-          classname={`text-white uppercase ${isModalOpen ? 'bg-red-500' : ''}`}
-          size="l"
-          variant="primary"
-          onClick={() => {
-            setIsEditMode(false)
-            setCurrentRuleID('')
-            toggleModal()
-          }}
-        >
-          {isModalOpen ? 'Back' : 'Add Rule'}
-        </Button>
+        <Button onClick={handlCreateRule}>Add Rule</Button>
       </Card>
 
-      {selectedRows.length > 0 && (
-        <Card className="flex items-center justify-start gap-4 px-4 py-2 border bg-white rounded-md shadow-sm">
-          <span className="text-sm text-gray-700">{selectedRows.length} selected</span>
-
-          <button
-            onClick={() => handleAction('delete')}
-            className="flex items-center gap-1 text-red-600 hover:text-red-800"
-          >
-            <HiOutlineTrash size={18} /> Delete
-          </button>
-
-          <button
-            onClick={() => handleAction('activate')}
-            className="flex items-center gap-1 text-green-600 hover:text-green-800"
-          >
-            <HiOutlineThumbUp size={18} /> Activate
-          </button>
-
-          <button
-            onClick={() => handleAction('deactivate')}
-            className="flex items-center gap-1 text-yellow-600 hover:text-yellow-800"
-          >
-            <HiOutlineThumbDown size={18} /> Deactivate
-          </button>
-        </Card>
-      )}
-
-      <Table<Rule> columns={columns} data={rules} onSelectionChange={setSelectedRows} />
+      <Card className="shadow-md p-4 bg-white">
+        <RulesTable onUpdate={handleOpenDetailsModal} />
+      </Card>
     </div>
   )
 }

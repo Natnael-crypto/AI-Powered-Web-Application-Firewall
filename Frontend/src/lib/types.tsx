@@ -84,12 +84,6 @@ export type ApplicationsResponse = {
   applications: Application[]
 }
 
-export interface RuleDefinitionItem {
-  rule_type: string
-  rule_method: string
-  rule_definition: string
-}
-
 export interface SecurityRule {
   rule_id: string
   rule_type: string
@@ -152,4 +146,40 @@ export type AdminUser = {
 
 export type AdminsResponse = {
   admins: AdminUser[]
+}
+
+export type Assignment = {
+  id: string
+  user_id: string
+  application_name: string
+  application_id: string
+}
+
+export type AssignmentsResponse = {
+  assignments: Assignment[]
+}
+
+interface RuleDefinitionItem {
+  rule_type: string
+  rule_method: string
+  rule_definition: string
+}
+
+interface Rule {
+  rule_id: string
+  rule_type: string
+  rule_method: string
+  rule_definition: string | RuleDefinitionItem[]
+  action: string
+  application_id: string
+  rule_string: string
+  created_by: string
+  created_at: string
+  updated_at: string
+  is_active: boolean
+  category: string
+}
+
+interface RulesResponse {
+  rules: Rule[]
 }
