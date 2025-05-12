@@ -1,6 +1,6 @@
 import {MdDashboard, MdWeb} from 'react-icons/md'
 import {FaRegFileAlt} from 'react-icons/fa'
-import {AiOutlineTool, AiOutlineSetting} from 'react-icons/ai'
+import {AiOutlineTool, AiOutlineSetting, AiOutlineBarChart} from 'react-icons/ai'
 
 export const SiderbarContentItems = [
   {
@@ -38,6 +38,12 @@ export const SiderbarContentItems = [
     title: 'Web Services',
     href: 'web-services',
     icon: MdWeb,
+    children: [],
+  },
+  {
+    title: 'AI Analysis',
+    href: 'ai-analysis',
+    icon: AiOutlineBarChart,
     children: [],
   },
   {

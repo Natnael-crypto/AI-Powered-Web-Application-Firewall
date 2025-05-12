@@ -15,6 +15,7 @@ import RateLimiting from './pages/Requestlogs/RateLimiting'
 import AntiBot from './pages/Requestlogs/Antibot'
 import WebServices from './pages/WebServices'
 import {ToastProvider} from './providers/ToastProvider'
+import AIAnalysis from './pages/AIAnalysis'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -30,6 +31,7 @@ const router = createBrowserRouter(
         </Route>
         <Route path="custom-rules" element={<CustomeRules />} />
         <Route path="web-services" element={<WebServices />} />
+        <Route path="ai-analysis" element={<AIAnalysis />} />
         <Route path="system" element={<System />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>

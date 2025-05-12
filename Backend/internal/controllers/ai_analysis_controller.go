@@ -111,13 +111,14 @@ func CreateModelTrainingRequest(c *gin.Context) {
 		return
 	}
 	var input struct {
-		ID                    string  `json:"id" binding:"required"`
 		NumberRequestsUsed    int     `json:"number_requests_used" binding:"required"`
 		PercentTrainData      float32 `json:"percent_train_data" binding:"required"`
 		PercentNormalRequests float32 `json:"percent_normal_requests" gorm:"not null"`
 		NumTrees              int     `json:"num_trees" binding:"required"`
 		MaxDepth              int     `json:"max_depth" binding:"required"`
+		MaxFeatures           string  `json:"max_features" binding:"required"`
 		MinSamplesSplit       int     `json:"min_samples_split" binding:"required"`
+		MinSamplesLeaf        int     `json:"min_samples_leaf" binding:"required"`
 		Criterion             string  `json:"criterion" binding:"required"`
 	}
 
@@ -127,13 +128,15 @@ func CreateModelTrainingRequest(c *gin.Context) {
 	}
 
 	ai_model := models.AIModel{
-		ID:                    input.ID,
+		ID:                    utils.GenerateUUID(),
 		NumberRequestsUsed:    input.NumberRequestsUsed,
 		PercentTrainData:      input.PercentTrainData,
 		PercentNormalRequests: input.PercentNormalRequests,
 		NumTrees:              input.NumTrees,
 		MaxDepth:              input.MaxDepth,
 		MinSamplesSplit:       input.MinSamplesSplit,
+		MaxFeatures:           input.MaxFeatures,
+		MinSamplesLeaf:        input.MinSamplesLeaf,
 		Criterion:             input.Criterion,
 		Accuracy:              0,
 		Precision:             0,
@@ -206,9 +209,11 @@ func GetUntrainedModelForML(c *gin.Context) {
 		"num_trees":               model.NumTrees,
 		"max_depth":               model.MaxDepth,
 		"min_samples_split":       model.MinSamplesSplit,
+		"min_samples_leaf":        model.MinSamplesLeaf,
+		"max_features":            model.MaxFeatures,
 		"criterion":               model.Criterion,
 		"normal_requests":         normalRequests,
-		"malisous_request":        maliciousRequests,
+		"malicious_request":       maliciousRequests,
 	})
 }
 
@@ -284,7 +289,7 @@ func GetSelectedModel(c *gin.Context) {
 	}
 
 	config.SelecteModel = false
-	
+
 	c.JSON(http.StatusOK, gin.H{"model": model})
 }
 

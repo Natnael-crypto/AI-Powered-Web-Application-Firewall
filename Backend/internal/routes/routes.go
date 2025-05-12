@@ -135,7 +135,7 @@ func InitializeRoutes(r *gin.Engine) {
 
 	ai_analysis := authorized.Group("/")
 	{
-		ai_analysis.POST("/queue-analysis", controllers.QueueRequestForAnalysis)
+		// ai_analysis.POST("/queue-analysis", controllers.QueueRequestForAnalysis)
 		ai_analysis.POST("/model/train", controllers.CreateModelTrainingRequest)
 		ai_analysis.POST("/model/select", controllers.SelectActiveModel)
 		ai_analysis.GET("/models", controllers.GetModels)
