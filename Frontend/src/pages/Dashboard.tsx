@@ -10,7 +10,6 @@ import TopThreatsChart from '../components/TopThreatsChart'
 import {useState} from 'react'
 import FilterBar from '../components/FilterBar'
 import {useGetOverAllStat} from '../hooks/api/useDashboardStat'
-import {DashboardOverAllStats} from '../lib/types'
 
 const cardStyles =
   'bg-white shadow-md rounded-md transition-shadow duration-300 border border-gray-100 hover:shadow-lg'
@@ -19,7 +18,7 @@ function Dashboard() {
   const [selectedApp, setSelectedApp] = useState('All')
   const [timeRange, setTimeRange] = useState('24h')
 
-  const {data, isLoading, isError} = useGetOverAllStat('waf.local')
+  const {data} = useGetOverAllStat('waf.local')
   return (
     <main className="flex flex-col gap-6 w-full">
       <FilterBar

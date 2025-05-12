@@ -8,8 +8,8 @@ interface FilterBarProps {
 }
 
 const FilterBar = ({
-  selectedApp,
-  setSelectedApp,
+  // selectedApp,
+  // setSelectedApp,
   timeRange,
   setTimeRange,
 }: FilterBarProps) => {
@@ -22,7 +22,7 @@ const FilterBar = ({
   })
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
-  const [availableEndDates, setAvailableEndDates] = useState<string[]>([])
+  const [_, setAvailableEndDates] = useState<string[]>([])
 
   const applications = ['App1', 'App2', 'App3']
   const timePresets = [

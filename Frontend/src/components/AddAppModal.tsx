@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import {Info, Tag, Save, X} from 'lucide-react'
-import {useAddApplication} from '../hooks/useApplication'
 import {QueryClient} from '@tanstack/react-query'
+import {useAddApplication} from '../hooks/api/useApplication'
 
 interface AddAppModalProps {
   isModalOpen: boolean
@@ -81,7 +81,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
         queryClient.invalidateQueries({queryKey: ['applications']})
         toggleModal()
       },
-      onError: error => {
+      onError: (error: Error) => {
         alert('Failed to add application: ' + error.message)
       },
     })

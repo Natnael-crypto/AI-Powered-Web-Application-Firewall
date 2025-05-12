@@ -37,7 +37,7 @@ function WebService() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedApp, setSelectedApp] = useState<Application | undefined>()
 
-  const {data: applications = [], isLoading, error} = useGetApplications()
+  const {data: applications = []} = useGetApplications()
   const {mutate: createApplication} = useAddApplication()
   const {mutate: updateApplication} = useUpdateApplication()
 

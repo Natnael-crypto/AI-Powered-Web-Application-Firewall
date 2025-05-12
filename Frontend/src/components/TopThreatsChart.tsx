@@ -9,7 +9,16 @@ function TopThreatsChart() {
   if (isLoading) return <p>Loading ...</p>
   if (isError) return <p>Something went wrong</p>
 
-  const chartData = data.map((item, index) => ({
+  interface ThreatType {
+    threat_type: string
+    count: number
+  }
+
+  interface ChartData extends ThreatType {
+    short_label: string
+  }
+
+  const chartData: ChartData[] = data.map((item: ThreatType, index: number) => ({
     ...item,
     short_label: `#${index + 1}: ${item.threat_type.slice(0, 40)}${item.threat_type.length > 40 ? '...' : ''}`,
   }))
@@ -33,9 +42,7 @@ function TopThreatsChart() {
               <Cell key={index} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip
-            formatter={(value, name, props) => [value, props.payload.threat_type]}
-          />
+          <Tooltip formatter={(value, _, props) => [value, props.payload.threat_type]} />
           <Legend />
         </PieChart>
       </ResponsiveContainer>
