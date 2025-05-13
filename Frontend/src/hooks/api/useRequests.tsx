@@ -8,9 +8,9 @@ export function useGetRequests(application: string) {
   })
 }
 
-export function useGetDeviceStat() {
+export function useGetDeviceStat(selectedApp:string,timeRange:any) {
   return useQuery({
     queryKey: ['devices'],
-    queryFn: getDeviceStat,
+    queryFn: ()=> getDeviceStat(selectedApp,timeRange),
   })
 }

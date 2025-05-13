@@ -298,11 +298,11 @@ func GetRequestRateLastMinute(c *gin.Context) {
 		return
 	}
 
-	// Calculate the timestamp 60 seconds ago
-	sixtySecondsAgo := time.Now().Add(-60 * time.Second)
+	sixtySecondsAgo := float64(time.Now().Unix()) - 60
 
 	var totalCount int64
 	if err := query.
+		Model(&models.Request{}).
 		Where("timestamp >= ?", sixtySecondsAgo).
 		Count(&totalCount).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count recent requests"})

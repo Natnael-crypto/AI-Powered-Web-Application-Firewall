@@ -3,6 +3,7 @@ import {
   getMostTargetedEndpoint,
   getOverAllStat,
   getRateStat,
+  getResponseStatusCodeStat,
   getTopAttackTypes,
 } from '../../services/DashboardApi'
 
@@ -28,8 +29,15 @@ export function useGetOverAllStat(appId: string,time:any) {
 
 export function useRateStat(appId: string,time:any) {
   return useQuery({
-    queryKey: ['overAllstat'],
+    queryKey: ['rate'],
     queryFn: () => getRateStat(appId,time),
+  })
+}
+
+export function useResponseStat(appId: string,time:any) {
+  return useQuery({
+    queryKey: ['response'],
+    queryFn: () => getResponseStatusCodeStat(appId,time),
   })
 }
 

@@ -1,5 +1,6 @@
 import {PieChart, Pie, Cell, ResponsiveContainer, Tooltip} from 'recharts'
 import {useGetDeviceStat} from '../hooks/api/useRequests'
+import { useEffect } from 'react'
 
 const OS_COLORS: Record<string, string> = {
   Windows: '#3366FF',
@@ -16,7 +17,11 @@ interface UserClientsCardProps {
 }
 
 export default function UserClientsCard({selectedApp,timeRange}:UserClientsCardProps) {
-  const {data, isLoading, isError} = useGetDeviceStat()
+  const {data, isLoading, isError,refetch} = useGetDeviceStat(selectedApp,timeRange)
+
+  useEffect(()=>{
+    refetch()
+  },[selectedApp,timeRange])
 
   if (isLoading) return <p>Loading...</p>
   if (isError || !data) return <p>Something Went Wrong</p>

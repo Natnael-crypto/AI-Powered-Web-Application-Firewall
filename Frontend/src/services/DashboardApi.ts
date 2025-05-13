@@ -7,18 +7,18 @@ export const getMapStat = async (appId: string,time:any) => {
 
   return await response.data.requests
 }
-export const getOSStat = async (appId: string,time:any) => {
+export const getResponseStat = async (appId: string,time:any) => {
   const response = await axios.get(`/api/requests/os-stats?application_id=${appId}&start_date=${time.start}&end_date=${time.end}`)
   if (!response) throw new Error(`Something went wrong!`)
 
-  return await response.data.requests
+  return await response.data.os_statistics
 }
 
 export const getResponseStatusCodeStat = async (appId: string,time:any) => {
-  const response = await axios.get(`/api/requests/response-status-stats?application_id=${appId}&start_date=${time.start}&end_date=${time.end}`)
+  const response = await axios.get(`/api/requests/response-status-stat?application_id=${appId}&start_date=${time.start}&end_date=${time.end}`)
   if (!response) throw new Error(`Something went wrong!`)
 
-  return await response.data.requests
+  return await response.data.response_status_stats
 }
 export const getMostTargetedEndpoint = async (appId: string,time:any) => {
   const response = await axios.get(`/api/requests/most-targeted-endpoints?application_id=${appId}&start_date=${time.start}&end_date=${time.end}`)
@@ -39,8 +39,8 @@ export const getOverAllStat = async (appId: string,time:any): Promise<DashboardO
   return await response.data
 }
 
-export const getRateStat = async (appId: string,time:any): Promise<DashboardOverAllStats> => {
+export const getRateStat = async (appId: string,time:any): Promise<number> => {
   const response = await axios.get(`/api/requests/requests-per-minute?application_id=${appId}&start_date=${time.start}&end_date=${time.end}`)
   if (!response) throw new Error(`Something went wrong!`)
-  return await response.data
+  return await response.data.rate
 }
