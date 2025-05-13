@@ -37,7 +37,7 @@ function SecurityHeaderTable({ securityHeaders }: { securityHeaders: any[] }) {
               <td className="px-4 py-2 flex gap-2">
                 <button
                   onClick={() => setEditingHeader(header)}
-                  className="text-blue-600 hover:underline"
+                  className="text-blue-600 hover:underline px-3"
                 >
                   <PencilIcon size={16} />
                 </button>

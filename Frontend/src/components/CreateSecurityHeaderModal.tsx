@@ -18,7 +18,7 @@ function CreateSecurityHeaderModal({
   const { mutate: createHeader } = useCreateSecurityHeader()
 
   const handleSubmit = () => {
-    
+
     createHeader(
       {
         header_name:headerName,
@@ -31,6 +31,7 @@ function CreateSecurityHeaderModal({
           setHeaderName('')
           setHeaderValue('')
           setApplicationIds([])
+          alert('Header created successfully!');
         },
       }
     )

@@ -1,7 +1,6 @@
 
 import { useDeleteModel, useSelectModel } from '../hooks/api/useAIModels'
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { DotsVerticalIcon } from '@radix-ui/react-icons'
+import { PencilIcon, TrashIcon } from 'lucide-react'
 
 
 
@@ -79,27 +78,18 @@ const AIModelTable = ({ aiModels = [] }: AIModelTableProps) => {
                 <td className="px-6 py-4 text-sm text-gray-900">{model.modeled ? 'Yes' : 'No'}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{model.created_at}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">
-                  <DropdownMenu.Root>
-                    <DropdownMenu.Trigger asChild>
-                      <button className="p-1 hover:bg-gray-200 rounded-full">
-                        <DotsVerticalIcon />
-                      </button>
-                    </DropdownMenu.Trigger>
-                    <DropdownMenu.Content className="bg-white shadow-md rounded-md text-sm py-1 px-5">
-                      <DropdownMenu.Item
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        onSelect={() => handleSelect(model.id)}
-                      >
-                        Select
-                      </DropdownMenu.Item>
-                      <DropdownMenu.Item
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
-                        onSelect={() => handleDelete(model.id)}
-                      >
-                        Delete
-                      </DropdownMenu.Item>
-                    </DropdownMenu.Content>
-                  </DropdownMenu.Root>
+                  <button
+                  onClick={() => handleSelect(model.id)}
+                  className="text-blue-600 hover:underline px-3"
+                >
+                  <PencilIcon size={16} />
+                </button>
+                <button
+                  onClick={() => handleDelete(model.id)}
+                  className="text-red-600 hover:underline"
+                >
+                  <TrashIcon size={16} />
+                </button>
                 </td>
               </tr>
             ))

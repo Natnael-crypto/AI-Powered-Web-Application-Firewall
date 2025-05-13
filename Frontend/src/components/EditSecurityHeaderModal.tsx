@@ -27,6 +27,7 @@ function EditSecurityHeaderModal({
       {
         onSuccess: () => {
           onClose()
+          alert('Header Updated successfully!');
         },
       }
     )
