@@ -257,7 +257,7 @@ func SelectActiveModel(c *gin.Context) {
 
 	modelID := c.Param("model_id")
 
-	if err := config.DB.Where("modeled == ? AND id = ?", true, modelID).First(&models.AIModel{}).Error; err != nil {
+	if err := config.DB.Where("modeled = ? AND id = ?", true, modelID).First(&models.AIModel{}).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "model not found or not modeled"})
 	}
 
