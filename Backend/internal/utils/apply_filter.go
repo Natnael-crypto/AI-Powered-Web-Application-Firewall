@@ -3,7 +3,7 @@ package utils
 import (
 	"backend/internal/config"
 	"backend/internal/models"
-	"log"
+	"slices"
 	"strconv"
 	"time"
 
@@ -16,12 +16,10 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 
 	appIDs := GetAssignedApplicationIDs(c)
 
-	if applicationName := c.Query("application_name"); applicationName != "" {
-		var application models.Application
-		if err := config.DB.Where("application_id In ? And application_name = ?", appIDs, applicationName).First(&application).Error; err != nil {
-			log.Fatal(err)
+	if applicationId := c.Query("application_id"); applicationId != "" {
+		if slices.Contains(appIDs,applicationId){
+			query = query.Where("application_id = ?", applicationId)
 		}
-		query = query.Where("application_id = ?", application.ApplicationID)
 	} else {
 		query = query.Where("application_id IN ?", appIDs)
 	}

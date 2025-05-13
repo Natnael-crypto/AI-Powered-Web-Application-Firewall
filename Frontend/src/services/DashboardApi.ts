@@ -13,6 +13,8 @@ export const getOSStat = async () => {
 
   return await response.data.requests
 }
+
+
 export const getResponseStatusCodeStat = async () => {
   const response = await axios.get('/api/requests/response-status-stats')
   if (!response) throw new Error(`Something went wrong!`)
@@ -33,9 +35,7 @@ export const getTopAttackTypes = async () => {
 }
 
 export const getOverAllStat = async (appId: string): Promise<DashboardOverAllStats> => {
-  const response = await axios.get('/api/requests/overall-stat', {
-    params: {appId},
-  })
+  const response = await axios.get(`/api/requests/overall-stat/${appId}`)
   if (!response) throw new Error(`Something went wrong!`)
 
   return await response.data

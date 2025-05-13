@@ -23,7 +23,7 @@ function Dashboard() {
     endTime: '23:59',
   })
 
-  const {data} = useGetOverAllStat('waf.local')
+  const {data} = useGetOverAllStat(selectedApp)
   return (
     <main className="flex flex-col gap-6 w-full">
       <FilterBar
