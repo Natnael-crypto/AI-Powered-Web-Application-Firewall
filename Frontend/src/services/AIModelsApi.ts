@@ -6,7 +6,7 @@ export async function getAIModels() {
   })
   if (!response) throw new Error('Something went wrong!')
 
-  return response.data.models
+  return response.data.model
 }
 
 export async function createAIModel(data: any) {

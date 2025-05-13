@@ -111,6 +111,7 @@ func CreateModelTrainingRequest(c *gin.Context) {
 		return
 	}
 	var input struct {
+		ModelsName            string  `json:"models_name" binding:"required"`
 		NumberRequestsUsed    int     `json:"number_requests_used" binding:"required"`
 		PercentTrainData      float32 `json:"percent_train_data" binding:"required"`
 		PercentNormalRequests float32 `json:"percent_normal_requests" gorm:"not null"`
@@ -129,6 +130,7 @@ func CreateModelTrainingRequest(c *gin.Context) {
 
 	ai_model := models.AIModel{
 		ID:                    utils.GenerateUUID(),
+		ModelsName:            input.ModelsName,
 		NumberRequestsUsed:    input.NumberRequestsUsed,
 		PercentTrainData:      input.PercentTrainData,
 		PercentNormalRequests: input.PercentNormalRequests,
@@ -203,6 +205,7 @@ func GetUntrainedModelForML(c *gin.Context) {
 	config.UntrainedModel = false
 	c.JSON(http.StatusOK, gin.H{
 		"id":                      model.ID,
+		"name":                    model.ModelsName,
 		"number_requests_used":    model.NumberRequestsUsed,
 		"percent_train_data":      model.PercentTrainData,
 		"percent_normal_requests": model.PercentNormalRequests,

@@ -5,6 +5,7 @@ import "time"
 type AIModel struct {
 	ID                    string    `json:"id" gorm:"primaryKey"`
 	NumberRequestsUsed    int       `json:"number_requests_used" gorm:"not null"`
+	ModelsName            string    `json:"models_name" gorm:"not null;unique"`
 	PercentTrainData      float32   `json:"percent_train_data" gorm:"not null"`
 	PercentNormalRequests float32   `json:"percent_normal_requests" gorm:"not null"`
 	NumTrees              int       `json:"num_trees" gorm:"not null"`         // Number of trees (n_estimators)

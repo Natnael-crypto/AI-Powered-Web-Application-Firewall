@@ -1,6 +1,7 @@
 
 interface AIModel {
   id: string
+  name: string
   numberRequestsUsed: number
   percentTrainData: number
   percentNormalRequests: number
@@ -28,7 +29,7 @@ const AIModelTable = ({ aiModels = [] }: AIModelTableProps) => {
       <table className="min-w-full table-auto">
         <thead className="border-b bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Model ID</th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Model Name</th>
             <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Accuracy</th>
             <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Precision</th>
             <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Recall</th>
@@ -45,7 +46,7 @@ const AIModelTable = ({ aiModels = [] }: AIModelTableProps) => {
           ) : (
             aiModels.map((model) => (
               <tr key={model.id} className="border-b">
-                <td className="px-6 py-4 text-sm text-gray-900">{model.id}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">{model.name}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{model.accuracy}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{model.precision}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{model.recall}</td>

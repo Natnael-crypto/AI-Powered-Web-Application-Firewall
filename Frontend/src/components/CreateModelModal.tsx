@@ -9,6 +9,7 @@ interface CreateModelModalProps {
 
 export default function CreateModelModal({ isOpen, onClose }: CreateModelModalProps) {
   const [formData, setFormData] = useState({
+    name: '',
     number_requests_used: 1000,
     percent_train_data: 80.0,
     percent_normal_requests: 70.0,
@@ -75,6 +76,7 @@ export default function CreateModelModal({ isOpen, onClose }: CreateModelModalPr
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries({
+              name: 'Model Name',
               number_requests_used: 'Number of Requests Used',
               percent_train_data: 'Percent Train Data',
               percent_normal_requests: 'Percent Normal Requests',
