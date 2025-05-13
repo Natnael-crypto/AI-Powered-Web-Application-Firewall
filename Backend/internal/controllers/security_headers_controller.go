@@ -87,7 +87,12 @@ func GetSecurityHeaders(c *gin.Context) {
 	var securityHeaders []models.SecurityHeader
 	query := config.DB.Model(&models.SecurityHeader{})
 
-	if err := query.Where("security_header_id In ?", appSec).Find(&securityHeaders).Error; err != nil {
+	if appSec == nil {
+		c.JSON(http.StatusOK, gin.H{"security_headers": securityHeaders})
+		return
+	}
+
+	if err := query.Where("id In ?", appSec).Find(&securityHeaders).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch security headers"})
 		return
 	}
