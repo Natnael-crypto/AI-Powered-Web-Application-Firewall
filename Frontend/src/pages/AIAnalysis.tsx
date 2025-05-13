@@ -3,6 +3,7 @@ import { useState } from 'react'
 import AIModelTable from '../components/AIModelTable'
 import CreateModelModal from '../components/CreateModelModal'
 import { useGetAIModels } from '../hooks/api/useAIModels'
+import Card from '../components/Card'
 
 function AIAnalysis() {
   const [isCreateModel, setCreateModel] = useState(false)
@@ -11,21 +12,24 @@ function AIAnalysis() {
   const { data: aiModels, isLoading } = useGetAIModels()
 
   return (
-    <div className="flex flex-col gap-8 px-6 py-10 bg-gradient-to-br from-slate-100 to-white min-h-screen">
-      <div className="max-w-7xl w-full mx-auto space-y-8">
-        <section className="bg-white border border-slate-200 xl shadow-lg p-8">
-          <h2 className="text-xl font-semibold text-slate-800 mb-4">AI Models</h2>
-          {isLoading ? (
-            <div>Loading...</div>
-          ) : (
-            <AIModelTable aiModels={aiModels} />
-          )}
-          <button
+    <div className="flex flex-col gap-8 space-y-4 bg-gradient-to-br from-slate-100 to-white min-h-screen">
+      <div className="w-full mx-auto space-y-4">
+        <Card className="flex justify-between items-center py-4 px-6 bg-white">
+          <h2 className="text-lg font-semibold">AI Models</h2>
+            <button
             className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
             onClick={toggleCreateModel}
           >
             Create New Model
           </button>
+        </Card>
+
+        <section className="bg-white border border-slate-200 xl shadow-lg p-8">
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : (
+            <AIModelTable aiModels={aiModels} />
+          )}
         </section>
       </div>
 

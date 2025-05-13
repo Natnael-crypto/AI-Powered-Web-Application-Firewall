@@ -1,13 +1,15 @@
 
 interface AIModel {
   id: string
-  name: string
-  numberRequestsUsed: number
-  percentTrainData: number
-  percentNormalRequests: number
-  numTrees: number
-  maxDepth: number
-  minSamplesSplit: number
+  models_name: string
+  number_requests_used: number
+  percent_train_data: number
+  percent_normal_requests: number
+  num_trees: number
+  max_depth: number
+  min_samples_split: number
+  min_samples_leaf: number
+  max_features: string
   criterion: string
   accuracy: number
   precision: number
@@ -15,8 +17,8 @@ interface AIModel {
   f1: number
   selected: boolean
   modeled: boolean
-  createdAt: string
-  updatedAt: string
+  created_at: string
+  updated_at: string
 }
 
 interface AIModelTableProps {
@@ -36,6 +38,7 @@ const AIModelTable = ({ aiModels = [] }: AIModelTableProps) => {
             <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">F1 Score</th>
             <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Selected</th>
             <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Modeled</th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Created At</th>
           </tr>
         </thead>
         <tbody>
@@ -46,7 +49,7 @@ const AIModelTable = ({ aiModels = [] }: AIModelTableProps) => {
           ) : (
             aiModels.map((model) => (
               <tr key={model.id} className="border-b">
-                <td className="px-6 py-4 text-sm text-gray-900">{model.name}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">{model.models_name}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{model.accuracy}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{model.precision}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{model.recall}</td>
@@ -57,6 +60,7 @@ const AIModelTable = ({ aiModels = [] }: AIModelTableProps) => {
                 <td className="px-6 py-4 text-sm text-gray-900">
                   {model.modeled ? 'Yes' : 'No'}
                 </td>
+                <td className="px-6 py-4 text-sm text-gray-900">{model.created_at}</td>
               </tr>
             ))
           )}

@@ -139,6 +139,7 @@ func InitializeRoutes(r *gin.Engine) {
 		ai_analysis.POST("/model/train", controllers.CreateModelTrainingRequest)
 		ai_analysis.POST("/model/select", controllers.SelectActiveModel)
 		ai_analysis.GET("/models", controllers.GetModels)
+		ai_analysis.DELETE("/model/:model_id", controllers.DeleteModel)
 	}
 
 	ms_services := allowed_ip.Group("/ml")

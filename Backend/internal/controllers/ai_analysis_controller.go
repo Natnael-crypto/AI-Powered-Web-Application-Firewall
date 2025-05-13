@@ -312,3 +312,20 @@ func GetModels(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"model": model})
 }
+
+func DeleteModel(c *gin.Context) {
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+	modelsID := c.Param("model_id")
+	if err := config.DB.Where("id = ?", modelsID).Delete(&models.AIModel{}).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "model not found"})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{
+		"message": "model deleted successfully",
+	})
+
+}

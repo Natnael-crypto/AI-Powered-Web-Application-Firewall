@@ -9,7 +9,7 @@ interface CreateModelModalProps {
 
 export default function CreateModelModal({ isOpen, onClose }: CreateModelModalProps) {
   const [formData, setFormData] = useState({
-    name: '',
+    models_name: '',
     number_requests_used: 1000,
     percent_train_data: 80.0,
     percent_normal_requests: 70.0,
@@ -54,7 +54,7 @@ export default function CreateModelModal({ isOpen, onClose }: CreateModelModalPr
     mutate(formData, {
       onSuccess: () => {
         alert('Model created successfully!');
-        queryClient.invalidateQueries({ queryKey: ['models'] });
+        queryClient.invalidateQueries({ queryKey: ['aiModels'] });
         onClose();
       },
       onError: (error: Error) => {
@@ -76,7 +76,7 @@ export default function CreateModelModal({ isOpen, onClose }: CreateModelModalPr
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries({
-              name: 'Model Name',
+              models_name: 'Model Name',
               number_requests_used: 'Number of Requests Used',
               percent_train_data: 'Percent Train Data',
               percent_normal_requests: 'Percent Normal Requests',
@@ -88,7 +88,6 @@ export default function CreateModelModal({ isOpen, onClose }: CreateModelModalPr
               <div key={key}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
                 <input
-                  type="number"
                   name={key}
                   value={(formData as any)[key]}
                   onChange={handleChange}
