@@ -47,6 +47,7 @@ func AddSecurityHeader(c *gin.Context) {
 
 	for _, id := range input.ApplicationIDs {
 		applicationToSecurity := models.ApplicationSecurityHeader{
+			ID:               uuid.New().String(),
 			ApplicationID:    id,
 			SecurityHeaderID: securityHeader.ID,
 		}

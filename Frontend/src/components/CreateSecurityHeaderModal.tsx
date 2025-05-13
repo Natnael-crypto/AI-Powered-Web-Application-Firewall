@@ -34,10 +34,10 @@ function CreateSecurityHeaderModal({
     )
   }
 
-  const toggleApp = (id: string) => {
-    setApplicationIds((prev) =>
-      prev.includes(id) ? prev.filter((appId) => appId !== id) : [...prev, id]
-    )
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selected = Array.from(e.target.selectedOptions, (option) => option.value)
+    console.log(selected)
+    setApplicationIds(selected)
   }
 
   if (!isOpen) return null
@@ -64,22 +64,22 @@ function CreateSecurityHeaderModal({
 
         <div>
           <label className="font-medium">Assign to Applications:</label>
-          <div className="max-h-32 overflow-y-auto border rounded p-2 mt-1 space-y-1">
-            {isLoading ? (
-              <div>Loading applications...</div>
-            ) : (
-              applications.map((app: any) => (
-                <label key={app.id} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={applicationIds.includes(app.id)}
-                    onChange={() => toggleApp(app.id)}
-                  />
-                  <span>{app.name}</span>
-                </label>
-              ))
-            )}
-          </div>
+          {isLoading ? (
+            <div>Loading applications...</div>
+          ) : (
+            <select
+              multiple
+              value={applicationIds}
+              onChange={handleSelectChange}
+              className="w-full border p-2 rounded h-32"
+            >
+              {applications.map((app: any) => (
+                <option key={app.id} value={app.application_id}>
+                  {app.application_id}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div className="flex justify-end gap-2">
