@@ -36,7 +36,6 @@ const AIModelTable = ({ aiModels = [] }: AIModelTableProps) => {
 
   const handleSelect = (id: string) => {
     selectMutation.mutate(id)
-    
   }
 
   const handleDelete = (id: string) => {

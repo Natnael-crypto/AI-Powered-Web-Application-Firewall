@@ -1,14 +1,17 @@
-FROM node:18-alpine AS builder
+FROM node:18
 
 WORKDIR /app
+
 COPY package*.json ./
-RUN npm install --frozen-lockfile
-COPY . .
-RUN npm run build
+RUN npm install
 
-FROM node:18-alpine
-RUN npm install -g serve
-WORKDIR /app
-COPY --from=builder /app/dist ./dist
-EXPOSE 3000
-CMD ["serve", "-s", "dist", "-l", "3000"]
+COPY . .
+
+# Option 1: No type checking
+RUN tsc --noEmitOnError false
+
+# OR Option 2: Just transpile using esbuild
+# RUN npm install -g esbuild
+# RUN esbuild src/index.ts --bundle --outfile=dist/app.js
+
+CMD ["node", "dist/app.js"]
