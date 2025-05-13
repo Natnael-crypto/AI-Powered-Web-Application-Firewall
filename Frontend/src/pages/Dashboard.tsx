@@ -15,8 +15,13 @@ const cardStyles =
   'bg-white shadow-md rounded-md transition-shadow duration-300 border border-gray-100 hover:shadow-lg'
 
 function Dashboard() {
-  const [selectedApp, setSelectedApp] = useState('All')
-  const [timeRange, setTimeRange] = useState('24h')
+  const [selectedApp, setSelectedApp] = useState('')
+  const [timeRange, setTimeRange] = useState({
+    startDate: '',
+    endDate: '',
+    startTime: '00:00',
+    endTime: '23:59',
+  })
 
   const {data} = useGetOverAllStat('waf.local')
   return (

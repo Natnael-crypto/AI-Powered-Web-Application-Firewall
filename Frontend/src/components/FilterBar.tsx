@@ -8,12 +8,11 @@ interface FilterBarProps {
 }
 
 const FilterBar = ({
-  // selectedApp,
-  // setSelectedApp,
+  selectedApp,
+  setSelectedApp,
   timeRange,
   setTimeRange,
 }: FilterBarProps) => {
-  const [application, setApplication] = useState('')
   const [customRange, setCustomRange] = useState({
     startDate: '',
     endDate: '',
@@ -62,8 +61,8 @@ const FilterBar = ({
       <div className="flex items-center gap-2">
         <span className="text-sm text-gray-700">Application:</span>
         <select
-          value={application}
-          onChange={e => setApplication(e.target.value)}
+          value={selectedApp}
+          onChange={e => setSelectedApp(e.target.value)}
           className="px-4 py-2 border rounded-md text-sm text-gray-700"
         >
           <option value="">All Applications</option>

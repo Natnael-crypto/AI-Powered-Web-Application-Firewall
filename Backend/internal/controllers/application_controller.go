@@ -232,7 +232,7 @@ func UpdateApplication(c *gin.Context) {
 	if err := config.DB.Model(&application).Where("application_id = ?", applicationID).Updates(map[string]interface{}{
 		"application_name": application.ApplicationName,
 		"description":      application.Description,
-		"hostname":         application.HostName,
+		"host_name":        application.HostName,
 		"ip_address":       application.IpAddress,
 		"port":             application.Port,
 		"status":           application.Status,
