@@ -132,8 +132,8 @@ func UpdateSecurityHeader(c *gin.Context) {
 	headerID := c.Param("header_id")
 
 	var input struct {
-		HeaderName  string `json:"header_name" binding:"required ,max=50"`
-		HeaderValue string `json:"header_value" binding:"required ,max=500"`
+		HeaderName  string `json:"header_name" binding:"required,max=50"`
+		HeaderValue string `json:"header_value" binding:"required,max=500"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -157,11 +157,7 @@ func UpdateSecurityHeader(c *gin.Context) {
 
 	securityHeader.UpdatedAt = time.Now()
 
-	if err := config.DB.Model(&securityHeader).Where("id = ?", headerID).Updates(map[string]interface{}{
-		"header_name":  securityHeader.HeaderName,
-		"header_value": securityHeader.HeaderValue,
-		"updated_at":   securityHeader.UpdatedAt,
-	}).Error; err != nil {
+	if err := config.DB.Save(&securityHeader).Where("id = ?", headerID).Error; err != nil {
 		log.Printf("Error updating security header: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update security header"})
 		return

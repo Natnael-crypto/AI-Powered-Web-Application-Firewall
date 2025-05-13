@@ -6,7 +6,7 @@ export async function getSecurityHeaders() {
   })
   if (!response) throw new Error('Something went wrong!')
 
-  return response.data.model
+  return response.data.security_headers
 }
 
 export async function createSecurityHeader(data: any) {

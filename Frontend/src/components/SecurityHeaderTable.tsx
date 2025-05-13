@@ -18,18 +18,22 @@ function SecurityHeaderTable({ securityHeaders }: { securityHeaders: any[] }) {
       <table className="min-w-full text-sm text-left">
         <thead className="bg-slate-100">
           <tr>
-            <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Value</th>
-            <th className="px-4 py-2">Description</th>
+            <th className="px-4 py-2">Header Name</th>
+            <th className="px-4 py-2">Header Value</th>
+            <th className="px-4 py-2">CreatedBy</th>
+            <th className="px-4 py-2">CreatedAt</th>
             <th className="px-4 py-2">Actions</th>
+
           </tr>
         </thead>
         <tbody>
           {securityHeaders?.map((header) => (
             <tr key={header.id} className="border-b">
-              <td className="px-4 py-2">{header.name}</td>
-              <td className="px-4 py-2">{header.value}</td>
-              <td className="px-4 py-2">{header.description}</td>
+              <td className="px-4 py-2">{header.header_name}</td>
+              <td className="px-4 py-2">{header.header_value}</td>
+              <td className="px-4 py-2">{header.created_by}</td>
+              <td className="px-4 py-2">{header.created_at}</td>
+
               <td className="px-4 py-2 flex gap-2">
                 <button
                   onClick={() => setEditingHeader(header)}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useCreateSecurityHeader } from '../hooks/api/useSecurityHeaders'
 import { useGetApplications } from '../hooks/api/useApplication'
+import { data } from 'react-router-dom'
 
 function CreateSecurityHeaderModal({
   isOpen,
@@ -17,11 +18,12 @@ function CreateSecurityHeaderModal({
   const { mutate: createHeader } = useCreateSecurityHeader()
 
   const handleSubmit = () => {
+    
     createHeader(
       {
-        header_name: headerName,
-        header_value: headerValue,
-        application_id: applicationIds,
+        header_name:headerName,
+      header_value:headerValue,
+      application_id:applicationIds
       },
       {
         onSuccess: () => {
@@ -74,8 +76,8 @@ function CreateSecurityHeaderModal({
               className="w-full border p-2 rounded h-32"
             >
               {applications.map((app: any) => (
-                <option key={app.id} value={app.application_id}>
-                  {app.application_id}
+                <option key={app.application_id} value={app.application_id}>
+                  {app.hostname}
                 </option>
               ))}
             </select>
