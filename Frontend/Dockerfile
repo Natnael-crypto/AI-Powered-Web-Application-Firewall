@@ -2,16 +2,17 @@ FROM node:18
 
 WORKDIR /app
 
+# Copy and install dependencies
 COPY package*.json ./
 RUN npm install
 
+# ✅ Install TypeScript globally
+RUN npm install -g typescript
+
+# Copy the rest of the app
 COPY . .
 
-# Option 1: No type checking
+# ❌ Skip type checking errors but compile
 RUN tsc --noEmitOnError false
-
-# OR Option 2: Just transpile using esbuild
-# RUN npm install -g esbuild
-# RUN esbuild src/index.ts --bundle --outfile=dist/app.js
 
 CMD ["node", "dist/app.js"]
