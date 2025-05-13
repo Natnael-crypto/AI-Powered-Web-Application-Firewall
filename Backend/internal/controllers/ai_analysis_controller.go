@@ -255,17 +255,10 @@ func SelectActiveModel(c *gin.Context) {
 		return
 	}
 
-	var input struct {
-		ID string `json:"id"`
-	}
+	modelID := c.Param("model_id")
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
-		return
-	}
-
-	if err := config.DB.Where("modeled == ? AND id = ?", true, input.ID).First(&models.AIModel{}).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "model not found"})
+	if err := config.DB.Where("modeled == ? AND id = ?", true, modelID).First(&models.AIModel{}).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "model not found or not modeled"})
 	}
 
 	if err := config.DB.Model(&models.AIModel{}).Where("selected = ?", true).Update("selected", false).Error; err != nil {
@@ -273,7 +266,7 @@ func SelectActiveModel(c *gin.Context) {
 		return
 	}
 
-	if err := config.DB.Model(&models.AIModel{}).Where("id = ?", input.ID).Update("selected", true).Error; err != nil {
+	if err := config.DB.Model(&models.AIModel{}).Where("id = ?", modelID).Update("selected", true).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to select model"})
 		return
 	}
