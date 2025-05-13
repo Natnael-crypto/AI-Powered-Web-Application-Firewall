@@ -291,6 +291,29 @@ func GetResponseStatusStats(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"response_status_stats": stats})
 }
 
+func GetRequestRateLastMinute(c *gin.Context) {
+	query := utils.ApplyRequestFilters(c)
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	// Calculate the timestamp 60 seconds ago
+	sixtySecondsAgo := time.Now().Add(-60 * time.Second)
+
+	var totalCount int64
+	if err := query.
+		Where("timestamp >= ?", sixtySecondsAgo).
+		Count(&totalCount).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count recent requests"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"rate": totalCount,
+	})
+}
+
 func GetMostTargetedEndpoints(c *gin.Context) {
 	query := utils.ApplyRequestFilters(c)
 

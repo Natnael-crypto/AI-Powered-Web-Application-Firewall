@@ -72,7 +72,7 @@ func InitializeRoutes(r *gin.Engine) {
 		requests.GET("", controllers.GetRequests)
 		requests.GET("/overall-stat", controllers.GetOverallStats)
 		requests.GET("/:request_id", controllers.GetRequestByID)
-		requests.GET("/requests-per-minute", controllers.GetRequestsPerMinute)
+		requests.GET("/requests-per-minute", controllers.GetRequestRateLastMinute)
 		requests.GET("/all-countries-stat", controllers.GetAllCountriesStat)
 		requests.GET("/os-stats", controllers.GetClientOSStats)
 		requests.GET("/response-status-stat", controllers.GetResponseStatusStats)

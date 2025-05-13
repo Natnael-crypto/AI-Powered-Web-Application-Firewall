@@ -204,7 +204,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		message.ResponseCode = http.StatusForbidden
 		message.Status = "blocked"
 		message.Token = WsKey
-		message.RuleDetected = true
+		message.RuleDetected = blockedByRule
 
 		utils.SendToBackend(message)
 		return

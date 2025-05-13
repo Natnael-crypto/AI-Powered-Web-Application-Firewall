@@ -10,7 +10,12 @@ const OS_COLORS: Record<string, string> = {
   Other: '#999999',
 }
 
-export default function UserClientsCard() {
+interface UserClientsCardProps {
+  selectedApp: string
+  timeRange: any
+}
+
+export default function UserClientsCard({selectedApp,timeRange}:UserClientsCardProps) {
   const {data, isLoading, isError} = useGetDeviceStat()
 
   if (isLoading) return <p>Loading...</p>

@@ -8,7 +8,12 @@ const OS_DATA = [
   {name: '400', value: 6, color: '#B6F0E2'},
 ]
 
-export default function ResponseStatus() {
+interface ResponseStatusProps {
+  selectedApp: string
+  timeRange: any
+}
+
+export default function ResponseStatus({selectedApp,timeRange}:ResponseStatusProps) {
   return (
     <div className="w-full bg-white xl shadow-md p-6">
       <div className="flex justify-between items-center p-3">

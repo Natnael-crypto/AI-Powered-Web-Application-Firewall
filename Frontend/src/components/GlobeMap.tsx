@@ -3,7 +3,13 @@ import {VectorMap} from '@react-jvectormap/core'
 import {worldMill} from '@react-jvectormap/world'
 import {requestData, blockedRequestData} from '../lib/Constants'
 
-const GlobeMap: React.FC = () => {
+
+interface GlobeMapProps {
+  selectedApp: string
+  timeRange: any
+}
+
+const GlobeMap = ({selectedApp,timeRange}:GlobeMapProps) => {
   const [filter, setFilter] = useState<'all' | 'blocked'>('all')
 
   const data = filter === 'all' ? requestData : blockedRequestData

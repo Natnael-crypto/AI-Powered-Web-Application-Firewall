@@ -31,7 +31,7 @@ const FilterBar = ({
   } = useGetApplications()
 
   const timePresets = [
-    { label: 'Last 1 hours', value: 'last_1_hours' },
+    { label: 'Last 1 hour', value: 'last_1_hour' },
     { label: 'Last 24 hours', value: 'last_24_hours' },
     { label: 'Last 7 days', value: 'last_7_days' },
     { label: 'Last 30 days', value: 'last_30_days' },
@@ -64,8 +64,9 @@ const FilterBar = ({
   const applyCustomRange = () => {
     const { startDate, endDate, startTime, endTime } = customRange
     if (startDate && endDate && startTime && endTime) {
-      const start = `${startDate}T${startTime}`
-      const end = `${endDate}T${endTime}`
+      const start = new Date(`${startDate}T${startTime}`).getTime()
+      const end = new Date(`${endDate}T${endTime}`).getTime()
+
       setTimeRange({
         value: 'custom',
         label: 'Custom Range',
@@ -73,6 +74,41 @@ const FilterBar = ({
         end,
       })
       setIsPopoverOpen(false)
+    }
+  }
+
+  const handlePresetSelect = (value: string) => {
+    const now = Date.now()
+    let start = 0
+
+    switch (value) {
+      case 'last_1_hour':
+        start = now - 1 * 60 * 60 * 1000
+        break
+      case 'last_24_hours':
+        start = now - 24 * 60 * 60 * 1000
+        break
+      case 'last_7_days':
+        start = now - 7 * 24 * 60 * 60 * 1000
+        break
+      case 'last_30_days':
+        start = now - 30 * 24 * 60 * 60 * 1000
+        break
+      default:
+        break
+    }
+
+    if (value !== 'custom') {
+      const label = timePresets.find(p => p.value === value)?.label || ''
+      setTimeRange({
+        value,
+        label,
+        start,
+        end: '', // dynamic/live until now
+      })
+      setIsPopoverOpen(false)
+    } else {
+      setTimeRange(value) // set to 'custom'
     }
   }
 
@@ -93,7 +129,7 @@ const FilterBar = ({
             <option disabled>Error loading applications</option>
           ) : (
             applicationsData?.map((app: any) => (
-              <option key={app.application_id} value={app.hostname}>
+              <option key={app.application_id} value={app.application_id}>
                 {app.hostname}
               </option>
             ))
@@ -121,15 +157,10 @@ const FilterBar = ({
               {timePresets.map(preset => (
                 <button
                   key={preset.value}
-                  onClick={() => {
-                    setTimeRange(preset.value)
-                    if (preset.value !== 'custom') {
-                      setIsPopoverOpen(false)
-                    }
-                  }}
+                  onClick={() => handlePresetSelect(preset.value)}
                   className={`text-left px-3 py-1 text-sm rounded hover:bg-gray-100 ${
-                    timeRange === preset.value ||
-                    (typeof timeRange === 'object' && timeRange.value === preset.value)
+                    (typeof timeRange === 'string' && timeRange === preset.value) ||
+                    (typeof timeRange === 'object' && timeRange?.value === preset.value)
                       ? 'bg-gray-100 font-medium'
                       : ''
                   }`}
@@ -138,7 +169,7 @@ const FilterBar = ({
                 </button>
               ))}
 
-              {timeRange === 'custom' || timeRange?.value === 'custom' ? (
+              {(timeRange === 'custom' || timeRange?.value === 'custom') && (
                 <div className="flex flex-col gap-1 mt-2">
                   <label className="text-xs text-gray-500">Start Date</label>
                   <input
@@ -181,7 +212,7 @@ const FilterBar = ({
                     Apply
                   </button>
                 </div>
-              ) : null}
+              )}
             </div>
           </div>
         )}

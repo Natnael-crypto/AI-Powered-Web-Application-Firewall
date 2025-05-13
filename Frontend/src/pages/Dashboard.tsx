@@ -4,12 +4,12 @@ import StatisticGroup from '../components/StatisticGroup'
 import GlobeMap from '../components/GlobeMap'
 import UserClientsCard from '../components/Devices-stat'
 import ResponseStatus from '../components/ResponseStatus'
-import RequestStatus from '../components/RequestStatus'
+// import RequestStatus from '../components/RequestStatus'
 import TopEndpointsChart from '../components/TopEndpointsChart'
 import TopThreatsChart from '../components/TopThreatsChart'
-import {useState} from 'react'
+import { useEffect, useState} from 'react'
 import FilterBar from '../components/FilterBar'
-import {useGetOverAllStat} from '../hooks/api/useDashboardStat'
+import {useGetOverAllStat, useRateStat} from '../hooks/api/useDashboardStat'
 
 const cardStyles =
   'bg-white shadow-md rounded-md transition-shadow duration-300 border border-gray-100 hover:shadow-lg'
@@ -17,13 +17,23 @@ const cardStyles =
 function Dashboard() {
   const [selectedApp, setSelectedApp] = useState('')
   const [timeRange, setTimeRange] = useState({
-    startDate: '',
-    endDate: '',
-    startTime: '00:00',
-    endTime: '23:59',
+        value: '',
+        label: '',
+        start: '',
+        end: '',
   })
 
-  const {data} = useGetOverAllStat(selectedApp)
+ const {data,refetch } = useGetOverAllStat(selectedApp,timeRange)
+
+  useEffect(() => {
+    console.log('Selected app changed:', selectedApp)
+    console.log('Selected app changed:', timeRange)
+    refetch()
+  }, [selectedApp,timeRange])
+
+  const {live_data,refetch} = useRateStat(selectedApp,timeRange)
+
+
   return (
     <main className="flex flex-col gap-6 w-full">
       <FilterBar
@@ -77,7 +87,7 @@ function Dashboard() {
           className={`col-span-1 flex flex-col justify-center rounded-lg border bg-white shadow-sm`}
         >
           <div className="h-full w-full p-4 hover:bg-gray-50 transition-colors duration-300">
-            <StatisticCard label="Live Traffic Rate" value={122} />
+            <StatisticCard label="Live Traffic Rate" value={live_data} />
           </div>
         </div>
       </section>
@@ -86,38 +96,38 @@ function Dashboard() {
       <section>
         <Card className={cardStyles}>
           <div className="h-[600px] w-full p-4">
-            <GlobeMap />
+            <GlobeMap selectedApp={selectedApp} timeRange={timeRange}/>
           </div>
         </Card>
       </section>
 
-      {/* Charts */}
+      {/* Charts
       <section className="">
         <div className="w-full h-[500px]">
-          <RequestStatus />
+          <RequestStatus selectedApp={selectedApp} timeRange={timeRange} />
         </div>
-      </section>
+      </section> */}
 
       {/* Endpoint & Threat Charts */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Top Endpoints Card */}
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-          <TopEndpointsChart />
+          <TopEndpointsChart selectedApp={selectedApp} timeRange={timeRange} />
         </div>
 
         {/* Top Threats Card */}
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-          <TopThreatsChart />
+          <TopThreatsChart selectedApp={selectedApp} timeRange={timeRange} />
         </div>
       </section>
 
       <section className="">
         <div className="grid grid-cols-2 gap-4">
           <div className=" w-full">
-            <UserClientsCard />
+            <UserClientsCard selectedApp={selectedApp} timeRange={timeRange} />
           </div>
           <div className=" w-full">
-            <ResponseStatus />
+            <ResponseStatus selectedApp={selectedApp} timeRange={timeRange} />
           </div>
         </div>
       </section>
