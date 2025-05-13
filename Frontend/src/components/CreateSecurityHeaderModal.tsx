@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useCreateSecurityHeader } from '../hooks/api/useSecurityHeaders'
 import { useGetApplications } from '../hooks/api/useApplication'
-import { data } from 'react-router-dom'
 
 function CreateSecurityHeaderModal({
   isOpen,

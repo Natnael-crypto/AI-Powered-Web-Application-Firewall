@@ -3,6 +3,7 @@ package utils
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+	"log"
 	"strconv"
 	"time"
 
@@ -14,7 +15,16 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 	query := config.DB.Model(&models.Request{})
 
 	appIDs := GetAssignedApplicationIDs(c)
-	query = query.Where("application_id IN ?", appIDs)
+
+	if applicationName := c.Query("application_name"); applicationName != "" {
+		var application models.Application
+		if err := config.DB.Where("application_id In ? And application_name = ?", appIDs, applicationName).First(&application).Error; err != nil {
+			log.Fatal(err)
+		}
+		query = query.Where("application_id = ?", application.ApplicationID)
+	} else {
+		query = query.Where("application_id IN ?", appIDs)
+	}
 
 	if clientIP := c.Query("client_ip"); clientIP != "" {
 		query = query.Where("client_ip ILIKE ?", "%"+clientIP+"%")

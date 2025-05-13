@@ -1,6 +1,6 @@
 import React from 'react'
 import { PencilIcon, TrashIcon } from 'lucide-react'
-import { useDeleteSecurityHeader } from '../hooks/api/useSecurityHeaders'
+import { useDeleteSecurityHeader, useGetSecurityHeaders } from '../hooks/api/useSecurityHeaders'
 import EditSecurityHeaderModal from './EditSecurityHeaderModal'
 import { useGetApplication } from '../hooks/api/useApplication'
 import { useGetUserById } from '../hooks/api/useUser'
@@ -10,7 +10,7 @@ function ApplicationHostCell({ applicationId }: { applicationId: string }) {
   
 
   if (isLoading) return <span>Loading...</span>
-  if (isError || !data) return <span>Error</span>
+  if (isError || !data) return <span></span>
 
   return <span>{data.hostname}</span>
 }
@@ -27,6 +27,7 @@ function UserCell({ userId }: { userId: string }) {
 function SecurityHeaderTable({ securityHeaders }: { securityHeaders: any[] }) {
   const [editingHeader, setEditingHeader] = React.useState(null)
   const { mutate: deleteHeader } = useDeleteSecurityHeader()
+
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to delete this header?')) {

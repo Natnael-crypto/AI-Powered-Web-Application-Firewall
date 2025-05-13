@@ -57,7 +57,6 @@ func GetRequestByID(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "request not found"})
 			return
 		}
-
 	}
 
 	requestID := c.Param("request_id")
