@@ -95,17 +95,12 @@ func GetSecurityHeaders(c *gin.Context) {
 }
 
 func GetSecurityHeadersAdmin(c *gin.Context) {
-	applicationID := c.Param("application_id")
 
 	appIDs := utils.GetAssignedApplicationIDs(c)
 
-	if !slices.Contains(appIDs, applicationID) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-	}
-
 	var applicationToSecurityHeaders []models.ApplicationSecurityHeader
 
-	if err := config.DB.Where("application_id = ?", applicationID).Find(&applicationToSecurityHeaders).Error; err != nil {
+	if err := config.DB.Where("application_id In ?", appIDs).Find(&applicationToSecurityHeaders).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch application to security headers relation"})
 		return
 	}
