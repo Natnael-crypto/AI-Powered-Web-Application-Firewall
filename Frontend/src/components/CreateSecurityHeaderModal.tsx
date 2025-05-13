@@ -1,0 +1,101 @@
+import { useState } from 'react'
+import { useCreateSecurityHeader } from '../hooks/api/useSecurityHeaders'
+import { useGetApplications } from '../hooks/api/useApplication'
+
+function CreateSecurityHeaderModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean
+  onClose: () => void
+}) {
+  const [headerName, setHeaderName] = useState('')
+  const [headerValue, setHeaderValue] = useState('')
+  const [applicationIds, setApplicationIds] = useState<string[]>([])
+
+  const { data: applications = [], isLoading } = useGetApplications()
+  const { mutate: createHeader } = useCreateSecurityHeader()
+
+  const handleSubmit = () => {
+    createHeader(
+      {
+        header_name: headerName,
+        header_value: headerValue,
+        application_id: applicationIds,
+      },
+      {
+        onSuccess: () => {
+          onClose()
+          setHeaderName('')
+          setHeaderValue('')
+          setApplicationIds([])
+        },
+      }
+    )
+  }
+
+  const toggleApp = (id: string) => {
+    setApplicationIds((prev) =>
+      prev.includes(id) ? prev.filter((appId) => appId !== id) : [...prev, id]
+    )
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md space-y-4">
+        <h2 className="text-lg font-semibold">Create Security Header</h2>
+
+        <input
+          type="text"
+          placeholder="Header Name"
+          className="w-full border p-2 rounded"
+          value={headerName}
+          onChange={(e) => setHeaderName(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Header Value"
+          className="w-full border p-2 rounded"
+          value={headerValue}
+          onChange={(e) => setHeaderValue(e.target.value)}
+        />
+
+        <div>
+          <label className="font-medium">Assign to Applications:</label>
+          <div className="max-h-32 overflow-y-auto border rounded p-2 mt-1 space-y-1">
+            {isLoading ? (
+              <div>Loading applications...</div>
+            ) : (
+              applications.map((app: any) => (
+                <label key={app.id} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={applicationIds.includes(app.id)}
+                    onChange={() => toggleApp(app.id)}
+                  />
+                  <span>{app.name}</span>
+                </label>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 bg-gray-300 rounded">
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Create
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default CreateSecurityHeaderModal

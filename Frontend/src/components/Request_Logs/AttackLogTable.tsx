@@ -102,7 +102,6 @@ function AttackLogTable() {
 
   return (
     <div className="bg-white p-6 xl shadow-xl border border-gray-200">
-      <h2 className="text-2xl font-bold text-green-800 mb-4">Request Logs</h2>
       <Table data={data || []} columns={columns} />
     </div>
   )

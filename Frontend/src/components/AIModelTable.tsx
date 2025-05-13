@@ -37,6 +37,7 @@ const AIModelTable = ({ aiModels = [] }: AIModelTableProps) => {
 
   const handleSelect = (id: string) => {
     selectMutation.mutate(id)
+    
   }
 
   const handleDelete = (id: string) => {
@@ -84,7 +85,7 @@ const AIModelTable = ({ aiModels = [] }: AIModelTableProps) => {
                         <DotsVerticalIcon />
                       </button>
                     </DropdownMenu.Trigger>
-                    <DropdownMenu.Content className="bg-white shadow-md rounded-md text-sm py-1">
+                    <DropdownMenu.Content className="bg-white shadow-md rounded-md text-sm py-1 px-5">
                       <DropdownMenu.Item
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         onSelect={() => handleSelect(model.id)}

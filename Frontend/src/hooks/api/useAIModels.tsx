@@ -1,6 +1,6 @@
 // hooks/useAIModelHooks.ts
 import { useMutation } from '@tanstack/react-query'
-import { getAIModels, createAIModel, deleteAIModel, selectAIModel } from '../../services/AIModelsApi'
+import { getAIModels, createAIModel, deleteAIModel, selectAIModel } from '../../services/aiModelsApi'
 import { useQuery } from '@tanstack/react-query'
 
 

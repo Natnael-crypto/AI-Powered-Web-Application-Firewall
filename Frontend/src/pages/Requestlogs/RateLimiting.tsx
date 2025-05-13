@@ -78,7 +78,7 @@ function RateLimiting() {
 
   return (
     <div className="p-4 bg-white  shadow-lg">
-      <h2 className="text-xl font-bold mb-4">Request Logs</h2>
+      <h2 className="text-xl font-bold mb-4">Rate Limit Logs</h2>
       <Table data={mockData} columns={columns} />
     </div>
   )

@@ -65,7 +65,7 @@ function AntiBot() {
 
   return (
     <div className="p-4 bg-gray-100  shadow-lg">
-      <h2 className="text-xl font-bold mb-4">Request Logs</h2>
+      <h2 className="text-xl font-bold mb-4">Rate Limited Request Logs</h2>
       <Table data={data} columns={columns} />
     </div>
   )

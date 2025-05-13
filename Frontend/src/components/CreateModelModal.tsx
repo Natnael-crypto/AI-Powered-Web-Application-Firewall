@@ -70,7 +70,7 @@ export default function CreateModelModal({ isOpen, onClose }: CreateModelModalPr
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Create AI Model</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">×</button>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">X</button>
         </div>
 
         <form onSubmit={handleSubmit}>
