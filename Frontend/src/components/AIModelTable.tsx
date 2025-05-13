@@ -23,7 +23,6 @@ interface AIModelTableProps {
 }
 
 const AIModelTable = ({ aiModels = [] }: AIModelTableProps) => {
-  // If aiModels is undefined, it will default to an empty array
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full table-auto">

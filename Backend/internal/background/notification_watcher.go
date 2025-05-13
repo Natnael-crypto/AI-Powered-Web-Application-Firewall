@@ -99,10 +99,6 @@ func contains(slice []string, item string) bool {
 func createNotification(rule models.NotificationRule, message string) {
 	var userIDs []string
 
-	// if err := json.Unmarshal( &userIDs); err != nil {
-	// 	log.Printf("Error decoding user IDs for rule %s: %v", rule.Name, err)
-	// 	return
-	// }
 
 	for _, userID := range userIDs {
 		notification := models.Notification{

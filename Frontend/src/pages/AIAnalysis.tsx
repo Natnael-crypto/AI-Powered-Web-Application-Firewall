@@ -2,18 +2,13 @@ import { useState } from 'react'
 
 import AIModelTable from '../components/AIModelTable'
 import CreateModelModal from '../components/CreateModelModal'
-import { useGetAIModels, useCreateAIModel } from '../hooks/api/useAIModels'
+import { useGetAIModels } from '../hooks/api/useAIModels'
 
 function AIAnalysis() {
   const [isCreateModel, setCreateModel] = useState(false)
   const toggleCreateModel = () => setCreateModel((prev) => !prev)
 
   const { data: aiModels, isLoading } = useGetAIModels()
-  const { mutate: createAIModel } = useCreateAIModel()
-
-  const handleCreateAIModel = (modelData: any) => {
-    createAIModel(modelData)
-  }
 
   return (
     <div className="flex flex-col gap-8 px-6 py-10 bg-gradient-to-br from-slate-100 to-white min-h-screen">
@@ -37,7 +32,6 @@ function AIAnalysis() {
       <CreateModelModal
         isOpen={isCreateModel}
         onClose={toggleCreateModel}
-        onSubmit={handleCreateAIModel}
       />
     </div>
   )

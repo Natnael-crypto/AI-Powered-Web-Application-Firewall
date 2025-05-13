@@ -300,7 +300,7 @@ func GetModels(c *gin.Context) {
 		return
 	}
 
-	var model models.AIModel
+	var model []models.AIModel
 
 	if err := config.DB.Find(&model).Error; err != nil {
 		c.JSON(http.StatusOK, gin.H{"message": "no model currently selected"})

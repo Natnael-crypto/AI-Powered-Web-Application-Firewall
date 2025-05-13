@@ -8,7 +8,7 @@ export function useGetAIModels() {
   })
 }
 
-export function useCreateAIModel() {
+export function useCreateModel() {
   return useMutation({
     mutationFn: createAIModel,
   })

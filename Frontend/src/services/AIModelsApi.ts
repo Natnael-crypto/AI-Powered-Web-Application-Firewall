@@ -1,7 +1,7 @@
 import axios from '../lib/axios'
 
 export async function getAIModels() {
-  const response = await axios.get('/models', {
+  const response = await axios.get('/api/models', {
     withCredentials: true,
   })
   if (!response) throw new Error('Something went wrong!')
@@ -10,20 +10,15 @@ export async function getAIModels() {
 }
 
 export async function createAIModel(data: any) {
-  const response = await axios.post('/model/train', data, {
-    withCredentials: true,
-  })
-
+  const response = await axios.post('/api/model/train', data)
   if (!response) throw new Error('Something went wrong!')
-
   return response.data
 }
 
 export async function selectAIModel(modelId: string) {
-  const response = await axios.post(`/model/select/${modelId}`, {}, {
+  const response = await axios.post(`/api/model/select/${modelId}`, {}, {
     withCredentials: true,
   })
-
   if (!response) throw new Error('Something went wrong!')
 
   return response.data
