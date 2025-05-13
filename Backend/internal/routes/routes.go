@@ -107,7 +107,7 @@ func InitializeRoutes(r *gin.Engine) {
 		headers.POST("", controllers.AddSecurityHeader)
 		headers.PUT("/:header_id", controllers.UpdateSecurityHeader)
 		headers.DELETE("/:header_id", controllers.DeleteSecurityHeader)
-		headers.GET("/security-headers", controllers.GetSecurityHeadersAdmin)
+		headers.GET("", controllers.GetSecurityHeadersAdmin)
 
 	}
 
