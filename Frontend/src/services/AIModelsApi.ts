@@ -23,3 +23,12 @@ export async function selectAIModel(modelId: string) {
 
   return response.data
 }
+
+export async function deleteAIModel(modelId: string) {
+  const response = await axios.post(`/api/model/${modelId}`, {}, {
+    withCredentials: true,
+  })
+  if (!response) throw new Error('Something went wrong!')
+
+  return response.data
+}
