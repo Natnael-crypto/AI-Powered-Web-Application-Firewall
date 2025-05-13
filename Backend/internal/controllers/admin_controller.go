@@ -75,6 +75,25 @@ func GetAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"admin": admin})
 }
 
+func GetAdminByID(c *gin.Context) {
+	id := c.Param("user_id")
+
+	if c.GetString("role") != "super_admin" || id != c.GetString("id") {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	var admin models.User
+	if err := config.DB.Where("user_id = ?", id).First(&admin).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "admin not found"})
+		return
+	}
+
+	admin.PasswordHash = ""
+
+	c.JSON(http.StatusOK, gin.H{"admin": admin})
+}
+
 func GetAllAdmins(c *gin.Context) {
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})

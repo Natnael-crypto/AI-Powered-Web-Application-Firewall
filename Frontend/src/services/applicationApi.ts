@@ -11,14 +11,14 @@ export async function getApplications() {
 }
 
 export async function getApplication(applicationId: string) {
-  const response = await axios.get(`/application/${applicationId}`)
+  const response = await axios.get(`/api/application/${applicationId}`)
   if (!response) throw new Error('Something went wrong!')
 
   return response.data.application
 }
 
 export async function createApplication(data: Partial<Application>) {
-  const response = await axios.post('/application/add', data)
+  const response = await axios.post('/api/application/add', data)
 
   if (!response) throw new Error('Something went wrong!')
 

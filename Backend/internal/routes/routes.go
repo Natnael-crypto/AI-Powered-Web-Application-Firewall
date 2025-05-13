@@ -24,6 +24,7 @@ func InitializeRoutes(r *gin.Engine) {
 	{
 		admin.POST("/add", controllers.AddAdmin)
 		admin.GET("/:username", controllers.GetAdmin)
+		admin.GET("/id/:user_id", controllers.GetAdminByID)
 		admin.GET("/", controllers.GetAllAdmins)
 		admin.DELETE("/delete/:username", controllers.DeleteAdmin)
 		admin.PUT("/inactive/:username", controllers.InactiveAdmin)

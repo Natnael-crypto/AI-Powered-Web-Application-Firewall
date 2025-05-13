@@ -23,6 +23,15 @@ export const getuser = async (username: string) => {
   return await response.data.admins
 }
 
+
+export const getUserById = async (id: string) => {
+  const response = await axios.get(`/users/${id}`)
+
+  if (!response) throw new Error('Failed to get user')
+
+  return await response.data.admins
+}
+
 export const addUser = async (userData: {username: string; password: string}) => {
   const response = await axios.post('/api/users/add', userData)
 

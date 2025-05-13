@@ -2,6 +2,25 @@ import React from 'react'
 import { PencilIcon, TrashIcon } from 'lucide-react'
 import { useDeleteSecurityHeader } from '../hooks/api/useSecurityHeaders'
 import EditSecurityHeaderModal from './EditSecurityHeaderModal'
+import { useGetApplication } from '../hooks/api/useApplication'
+
+function ApplicationHostCell({ applicationId }: { applicationId: string }) {
+  const { data, isLoading, isError } = useGetApplication(applicationId)
+
+  if (isLoading) return <span>Loading...</span>
+  if (isError || !data) return <span>Error</span>
+
+  return <span>{data.hostname}</span>
+}
+
+function UserCell({ userId }: { userId: string }) {
+  const { data, isLoading, isError } = useGetApplication(userId)
+
+  if (isLoading) return <span>Loading...</span>
+  if (isError || !data) return <span>Error</span>
+
+  return <span>{data.hostname}</span>
+}
 
 function SecurityHeaderTable({ securityHeaders }: { securityHeaders: any[] }) {
   const [editingHeader, setEditingHeader] = React.useState(null)
@@ -20,10 +39,10 @@ function SecurityHeaderTable({ securityHeaders }: { securityHeaders: any[] }) {
           <tr>
             <th className="px-4 py-2">Header Name</th>
             <th className="px-4 py-2">Header Value</th>
+            <th className="px-4 py-2">Application</th>
             <th className="px-4 py-2">CreatedBy</th>
             <th className="px-4 py-2">CreatedAt</th>
             <th className="px-4 py-2">Actions</th>
-
           </tr>
         </thead>
         <tbody>
@@ -31,9 +50,11 @@ function SecurityHeaderTable({ securityHeaders }: { securityHeaders: any[] }) {
             <tr key={header.id} className="border-b">
               <td className="px-4 py-2">{header.header_name}</td>
               <td className="px-4 py-2">{header.header_value}</td>
-              <td className="px-4 py-2">{header.created_by}</td>
+              <td className="px-4 py-2">
+                <ApplicationHostCell applicationId={header.application_id} />
+              </td>
+              <td className="px-4 py-2"><UserCell />{header.created_by}</td>
               <td className="px-4 py-2">{header.created_at}</td>
-
               <td className="px-4 py-2 flex gap-2">
                 <button
                   onClick={() => setEditingHeader(header)}
