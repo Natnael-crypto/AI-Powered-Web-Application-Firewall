@@ -78,9 +78,12 @@ func GetAdmin(c *gin.Context) {
 func GetAdminByID(c *gin.Context) {
 	id := c.Param("user_id")
 
-	if c.GetString("role") != "super_admin" || id != c.GetString("id") {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
+	if c.GetString("role") == "super_admin" {
+	} else {
+		if id != c.GetString("id") {
+			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+			return
+		}
 	}
 
 	var admin models.User

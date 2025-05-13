@@ -3,9 +3,11 @@ import { PencilIcon, TrashIcon } from 'lucide-react'
 import { useDeleteSecurityHeader } from '../hooks/api/useSecurityHeaders'
 import EditSecurityHeaderModal from './EditSecurityHeaderModal'
 import { useGetApplication } from '../hooks/api/useApplication'
+import { useGetUserById } from '../hooks/api/useUser'
 
 function ApplicationHostCell({ applicationId }: { applicationId: string }) {
   const { data, isLoading, isError } = useGetApplication(applicationId)
+  
 
   if (isLoading) return <span>Loading...</span>
   if (isError || !data) return <span>Error</span>
@@ -14,12 +16,12 @@ function ApplicationHostCell({ applicationId }: { applicationId: string }) {
 }
 
 function UserCell({ userId }: { userId: string }) {
-  const { data, isLoading, isError } = useGetApplication(userId)
+  const { data, isLoading, isError } = useGetUserById(userId)
 
   if (isLoading) return <span>Loading...</span>
   if (isError || !data) return <span>Error</span>
 
-  return <span>{data.hostname}</span>
+  return <span>{data.username}</span>
 }
 
 function SecurityHeaderTable({ securityHeaders }: { securityHeaders: any[] }) {
@@ -53,7 +55,7 @@ function SecurityHeaderTable({ securityHeaders }: { securityHeaders: any[] }) {
               <td className="px-4 py-2">
                 <ApplicationHostCell applicationId={header.application_id} />
               </td>
-              <td className="px-4 py-2"><UserCell />{header.created_by}</td>
+              <td className="px-4 py-2"><UserCell userId={header.created_by} /></td>
               <td className="px-4 py-2">{header.created_at}</td>
               <td className="px-4 py-2 flex gap-2">
                 <button

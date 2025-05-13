@@ -16,7 +16,7 @@ export const getUsers = async (): Promise<AdminsResponse> => {
 }
 
 export const getuser = async (username: string) => {
-  const response = await axios.get(`/users/${username}`)
+  const response = await axios.get(`/api/users/${username}`)
 
   if (!response) throw new Error('Failed to get user')
 
@@ -25,11 +25,11 @@ export const getuser = async (username: string) => {
 
 
 export const getUserById = async (id: string) => {
-  const response = await axios.get(`/users/${id}`)
+  const response = await axios.get(`/api/users/id/${id}`)
 
   if (!response) throw new Error('Failed to get user')
 
-  return await response.data.admins
+  return await response.data.admin
 }
 
 export const addUser = async (userData: {username: string; password: string}) => {

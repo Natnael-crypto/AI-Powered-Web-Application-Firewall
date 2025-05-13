@@ -5,6 +5,7 @@ import {
   deActivateUser,
   deleteUser,
   getuser,
+  getUserById,
   getUsers,
   isLoggedIn,
   loginUser,
@@ -28,6 +29,14 @@ export const useGetUser = (username: string) => {
   const {} = useQuery({
     queryKey: ['getUser'],
     queryFn: () => getuser(username),
+  })
+}
+
+
+export const useGetUserById = (id: string) => {
+  return useQuery({
+    queryKey: ['getUserById'],
+    queryFn: () => getUserById(id),
   })
 }
 
