@@ -239,20 +239,6 @@ func DeleteNotificationRule(c *gin.Context) {
 		return
 	}
 
-	// var app models.Application
-	// if err := config.DB.Where("hostname = ?", existingRule.HostName).First(&app).Error; err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "failed to fetch notification rules"})
-	// 	return
-	// }
-
-	// if c.GetString("role") == "super_admin" {
-	// } else {
-	// 	appIds := utils.GetAssignedApplicationIDs(c)
-	// 	if !utils.HasAccessToApplication(appIds, app.ApplicationID) {
-	// 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-	// 		return
-	// 	}
-	// }
 
 	if currentUserID != existingRule.CreatedBy {
 		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})

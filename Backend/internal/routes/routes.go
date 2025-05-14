@@ -137,8 +137,9 @@ func InitializeRoutes(r *gin.Engine) {
 	{
 		notification_config.POST("", controllers.AddNotificationConfig)
 		notification_config.GET("", controllers.GetNotificationConfig)
-		notification_config.PUT("", controllers.UpdateNotificationConfig)
-		notification_config.DELETE("", controllers.DeleteNotificationConfig)
+		notification_config.GET("/all", controllers.GetAllNotificationConfig)
+		notification_config.PUT("/:user_id", controllers.UpdateNotificationConfig)
+		notification_config.DELETE("/:user_id", controllers.DeleteNotificationConfig)
 	}
 
 	ai_analysis := authorized.Group("/")

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Info } from 'lucide-react'
 import {
-  useGetSysEmail,
-  useAddSysEmail,
-  useUpdateSysEmail,
+  useGetSUseEmail,
+  useAddUserEmail,
+  useUpdateUserEmail,
 } from '../hooks/api/useSystemEmail'
 
 const AttackAlertSettings = () => {
@@ -12,9 +12,9 @@ const AttackAlertSettings = () => {
   const [isActive, setIsActive] = useState(false)
   const [emailFetched, setEmailFetched] = useState(false)
 
-  const { data, isSuccess } = useGetSysEmail()
-  const addEmailMutation = useAddSysEmail()
-  const updateEmailMutation = useUpdateSysEmail()
+  const { data, isSuccess } = useGetSUseEmail()
+  const addEmailMutation = useAddUserEmail()
+  const updateEmailMutation = useUpdateUserEmail()
 
   useEffect(() => {
     if (isSuccess && data && !emailFetched) {

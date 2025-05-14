@@ -3,7 +3,7 @@ import { createAllowedIp, deleteAllowedIp, getAllowedIp, updateAllowedIp } from 
 
 export function useAllowedIp() {
   return useQuery({
-    queryKey: ['getConf'],
+    queryKey: ['getAllowedIp'],
     queryFn: () => getAllowedIp(),
   })
 }

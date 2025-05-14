@@ -1,23 +1,31 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { createSysEmail, getSysEmail, updateSysEmail } from '../../services/configApi'
+import { getUserEmail, createUserEmail, updateUserEmail, deleteUserEmail } from '../../services/configApi'
 
-export function useGetSysEmail() {
+export function useGetSUseEmail() {
   return useQuery({
     queryKey: ['getEmail'],
-    queryFn: getSysEmail,
+    queryFn: getUserEmail,
   })
 }
 
-export function useAddSysEmail() {
+export function useAddUserEmail() {
   return useMutation({
-    mutationFn: ({ email, active }: { email: string; active: boolean }) =>
-      createSysEmail(email, active),
+    mutationFn: ({ email, id }: { email: string; id: string }) =>
+      createUserEmail(email, id),
   })
 }
 
-export function useUpdateSysEmail() {
+export function useUpdateUserEmail() {
   return useMutation({
-    mutationFn: ({ email, active }: { email: string; active: boolean }) =>
-      updateSysEmail(email, active),
+    mutationFn: ({ email, id }: { email: string; id: string }) =>
+      updateUserEmail(email, id),
+  })
+}
+
+
+export function useDeleteUserEmail() {
+  return useMutation({
+    mutationFn: ({ id }: { id: string }) =>
+      deleteUserEmail(id),
   })
 }

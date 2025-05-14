@@ -3,6 +3,7 @@ package controllers
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+
 	// "backend/internal/utils"
 	"errors"
 	"fmt"
@@ -66,7 +67,7 @@ func AddNotificationConfig(c *gin.Context) {
 		Email  string `json:"email" binding:"required,email"`
 	}
 
-	if input.UserID != c.GetString("user_id") {
+	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
 	}
@@ -107,6 +108,22 @@ func GetNotificationConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"notification_config": configEntry})
 }
 
+func GetAllNotificationConfig(c *gin.Context) {
+
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	var configEntry models.NotificationConfig
+	if err := config.DB.Find(&configEntry).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "notification config not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"notification_config": configEntry})
+}
+
 func GetNotificationConfig_local(c *gin.Context) (string, error) {
 	userID := c.Param("user_id")
 
@@ -124,7 +141,12 @@ func GetNotificationConfig_local(c *gin.Context) (string, error) {
 
 func UpdateNotificationConfig(c *gin.Context) {
 
-	userID := c.GetString("user_id")
+	userID := c.Param("user_id")
+
+	if c.GetString("role") != "super_admin" || c.GetString("user_id") != userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
 
 	var input struct {
 		Email string `json:"email" binding:"required,email"`
@@ -152,7 +174,12 @@ func UpdateNotificationConfig(c *gin.Context) {
 }
 
 func DeleteNotificationConfig(c *gin.Context) {
-	userID := c.GetString("user_id")
+	userID := c.Param("user_id")
+
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
 
 	if err := config.DB.Where("user_id = ?", userID).Delete(&models.NotificationConfig{}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete notification config"})

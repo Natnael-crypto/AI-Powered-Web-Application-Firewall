@@ -6,7 +6,7 @@ import { createSecurityHeader, deleteSecurityHeader, getSecurityHeaders, updateS
 
 export function useGetSecurityHeaders() {
   return useQuery({
-    queryKey: ['aiModels'],
+    queryKey: ['securityHeaders'],
     queryFn: getSecurityHeaders,
   })
 }

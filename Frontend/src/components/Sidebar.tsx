@@ -23,7 +23,7 @@ function Sidebar() {
         {/* Logo Section */}
         <br />
         <div className="mb-6 self-center border-b border-gray-600">
-          <p className='text-white text-3xl text-center'>GASHA WAF</p>
+          <p className='text-white text-3xl text-left'>GASHA WAF</p>
         </div>
 
         <br />

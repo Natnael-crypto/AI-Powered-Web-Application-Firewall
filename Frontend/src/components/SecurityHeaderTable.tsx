@@ -1,6 +1,6 @@
 import React from 'react'
 import { PencilIcon, TrashIcon } from 'lucide-react'
-import { useDeleteSecurityHeader, useGetSecurityHeaders } from '../hooks/api/useSecurityHeaders'
+import { useDeleteSecurityHeader } from '../hooks/api/useSecurityHeaders'
 import EditSecurityHeaderModal from './EditSecurityHeaderModal'
 import { useGetApplication } from '../hooks/api/useApplication'
 import { useGetUserById } from '../hooks/api/useUser'

@@ -32,7 +32,7 @@ export default function AllowedServiceIps() {
 
       setIp('')
       setService('M')
-      queryClient.invalidateQueries({ queryKey: ['getConf'] })
+      queryClient.invalidateQueries({ queryKey: ['getAllowedIp'] })
     } catch (err) {
       alert('Something went wrong while saving.')
       console.error(err)

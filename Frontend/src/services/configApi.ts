@@ -1,13 +1,13 @@
 import axios from '../lib/axios'
-export const getSysEmail = async () => {
-  const response = await axios.get('/api/sys-email/')
+export const getUserEmail = async () => {
+  const response = await axios.get('/api/notification-config')
   if (!response) throw new Error(`Something went wrong!`)
 
   return await response.data.email
 }
 
-export const createSysEmail = async (email:string,active:boolean) => {
-  const response = await axios.post(`/api/sys-email/`,{email:email,active:active})
+export const createUserEmail = async (email:string,active:string) => {
+  const response = await axios.post(`/api/notification-config`,{email:email,active:active})
 
   if (!response) throw new Error(`Something went wrong!`)
 
@@ -15,8 +15,16 @@ export const createSysEmail = async (email:string,active:boolean) => {
 }
 
 
-export const updateSysEmail = async (email:string,active:boolean) => {
-  const response = await axios.put(`/api/sys-email/`,{email:email,active:active})
+export const updateUserEmail = async (email:string,active:string) => {
+  const response = await axios.put(`/api/notification-config`,{email:email,active:active})
+
+  if (!response) throw new Error(`Something went wrong!`)
+
+  return await response.data.email
+}
+
+export const deleteUserEmail = async (id:string) => {
+  const response = await axios.delete(`/api/notification-config/`)
 
   if (!response) throw new Error(`Something went wrong!`)
 
