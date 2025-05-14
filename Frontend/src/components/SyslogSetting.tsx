@@ -32,9 +32,7 @@ export default function SyslogSettings() {
             Syslog server port
           </label>
           <input
-            type="number"
-            min="1"
-            max="65535"
+            type="text"
             value={serverPort}
             onChange={e => setServerPort(e.target.value)}
             placeholder="Must be in range 1 ~ 65535"
