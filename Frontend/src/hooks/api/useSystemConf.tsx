@@ -1,4 +1,4 @@
-import {useQuery} from '@tanstack/react-query'
+import {useMutation, useQuery} from '@tanstack/react-query'
 import { getSysConf, updateSysPort, updateSysRemoteLogIp } from '../../services/configApi'
 
 export function useGetSysConf() {
@@ -8,16 +8,14 @@ export function useGetSysConf() {
   })
 }
 
-export function useUpdateSysPort(port:string) {
-  return useQuery({
-    queryKey: ['updatePort'],
-    queryFn: ()=> updateSysPort(port),
+export function useUpdateSysRemoteLogIp() {
+  return useMutation({
+    mutationFn: (ip: string) => updateSysRemoteLogIp(ip),
   })
 }
 
-export function useUpdateSysRemoteLogIp(ip:string) {
-  return useQuery({
-    queryKey: ['updateRemoteLogIp'],
-    queryFn: ()=> updateSysRemoteLogIp(ip),
+export function useUpdateSysPort() {
+  return useMutation({
+    mutationFn: (port: string) => updateSysPort(port),
   })
 }

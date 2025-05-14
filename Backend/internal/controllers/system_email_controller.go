@@ -56,7 +56,7 @@ func GetEmail(c *gin.Context) {
 	var sysEmail models.SystemEmail
 
 	if err := config.DB.First(&sysEmail).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 

@@ -1,39 +1,59 @@
 import { useEffect, useState } from 'react'
 import { useGetSysConf } from '../hooks/api/useSystemConf'
 import { useUpdateSysPort, useUpdateSysRemoteLogIp } from '../hooks/api/useSystemConf'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function SyslogSettings() {
   const [serverAddress, setServerAddress] = useState('')
   const [serverPort, setServerPort] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
-  const { data, refetch, isLoading } = useGetSysConf()
+  const queryClient = useQueryClient()
+  const { data, isLoading } = useGetSysConf()
 
-  // Load data only if state is empty
+  const remoteLogIpMutation = useUpdateSysRemoteLogIp()
+  const portMutation = useUpdateSysPort()
+
   useEffect(() => {
-    console.log(data)
     if (data) {
       if (!serverAddress) setServerAddress(data.remote_logServer || '')
       if (!serverPort) setServerPort(data.listening_port || '')
     }
   }, [data])
 
-  const handleSave = async () => {
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    setIsSaving(true)
+
+    const promises: Promise<any>[] = []
+
+    if (serverAddress) {
+      promises.push(
+        remoteLogIpMutation.mutateAsync(serverAddress)
+      )
+    }
+
+    if (serverPort) {
+      promises.push(
+        portMutation.mutateAsync(serverPort)
+      )
+    }
+
     try {
-      setIsSaving(true)
-      if (serverAddress) await useUpdateSysRemoteLogIp(serverAddress)
-      if (serverPort) await useUpdateSysPort(serverPort)
+      await Promise.all(promises)
       alert('Syslog configuration saved successfully!')
-      refetch()
-    } catch (error) {
-      alert('Failed to save configuration. Please try again.')
+      queryClient.invalidateQueries({ queryKey: ['getSysConf'] })
+    } catch (error: any) {
+      alert('Failed to save configuration. ' + error.message)
+      console.error(error)
     } finally {
       setIsSaving(false)
     }
   }
 
   return (
-    <div className="w-full p-6 bg-white shadow-md xl">
+    <form onSubmit={handleSave} className="w-full p-6 bg-white shadow-md xl">
       <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
         <span>🖥️ Syslog</span>
         <span className="tooltip text-sm text-gray-500">ℹ️</span>
@@ -70,13 +90,13 @@ export default function SyslogSettings() {
 
       <div className="mt-6 flex justify-end">
         <button
-          onClick={handleSave}
+          type="submit"
           disabled={isSaving}
           className="bg-blue-600 text-white font-semibold px-6 py-2 hover:bg-blue-700 transition disabled:opacity-50"
         >
           {isSaving ? 'Saving...' : 'Save'}
         </button>
       </div>
-    </div>
+    </form>
   )
 }
