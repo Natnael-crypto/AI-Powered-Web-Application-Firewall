@@ -1,11 +1,35 @@
-import {useState} from 'react'
+import { useEffect, useState } from 'react'
+import { useGetSysConf } from '../hooks/api/useSystemConf'
+import { useUpdateSysPort, useUpdateSysRemoteLogIp } from '../hooks/api/useSystemConf'
 
 export default function SyslogSettings() {
   const [serverAddress, setServerAddress] = useState('')
   const [serverPort, setServerPort] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
 
-  const handleSave = () => {
-    alert(`Saved:\nAddress: ${serverAddress}\nPort: ${serverPort}`)
+  const { data, refetch, isLoading } = useGetSysConf()
+
+  // Load data only if state is empty
+  useEffect(() => {
+    console.log(data)
+    if (data) {
+      if (!serverAddress) setServerAddress(data.remote_logServer || '')
+      if (!serverPort) setServerPort(data.listening_port || '')
+    }
+  }, [data])
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true)
+      if (serverAddress) await useUpdateSysRemoteLogIp(serverAddress)
+      if (serverPort) await useUpdateSysPort(serverPort)
+      alert('Syslog configuration saved successfully!')
+      refetch()
+    } catch (error) {
+      alert('Failed to save configuration. Please try again.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -14,6 +38,7 @@ export default function SyslogSettings() {
         <span>🖥️ Syslog</span>
         <span className="tooltip text-sm text-gray-500">ℹ️</span>
       </h2>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -24,7 +49,8 @@ export default function SyslogSettings() {
             value={serverAddress}
             onChange={e => setServerAddress(e.target.value)}
             placeholder="192.168.10.10"
-            className="w-full p-3 border border-gray-300  shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={isLoading}
           />
         </div>
         <div>
@@ -36,16 +62,19 @@ export default function SyslogSettings() {
             value={serverPort}
             onChange={e => setServerPort(e.target.value)}
             placeholder="Must be in range 1 ~ 65535"
-            className="w-full p-3 border border-gray-300  shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={isLoading}
           />
         </div>
       </div>
+
       <div className="mt-6 flex justify-end">
         <button
           onClick={handleSave}
-          className="bg-blue-600 text-white font-semibold px-6 py-2  hover:bg-blue-700 transition"
+          disabled={isSaving}
+          className="bg-blue-600 text-white font-semibold px-6 py-2 hover:bg-blue-700 transition disabled:opacity-50"
         >
-          Save
+          {isSaving ? 'Saving...' : 'Save'}
         </button>
       </div>
     </div>

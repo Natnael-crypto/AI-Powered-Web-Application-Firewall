@@ -1,17 +1,48 @@
 import axios from '../lib/axios'
-export const getSysConf = async () => {
-  const response = await axios.get('/api/requests')
+export const getSysEmail = async () => {
+  const response = await axios.get('/api/sys-email')
   if (!response) throw new Error(`Something went wrong!`)
 
-  return await response.data.requests
+  return await response.data.email
 }
 
-export const getDeviceStat = async (selectedApp:string,timeRange:any) => {
-  const response = await axios.get(`/api/requests/os-stats?application_id=${selectedApp}&start_date=${timeRange.start}&end_date=${timeRange.end}`, {
-    withCredentials: true,
-  })
+export const createSysEmail = async (email:string,active:boolean) => {
+  const response = await axios.post(`/api/sys-email`,{email:email,active:active})
 
   if (!response) throw new Error(`Something went wrong!`)
 
-  return await response.data.os_statistics
+  return await response.data.email
+}
+
+
+export const updateSysEmail = async (email:string,active:boolean) => {
+  const response = await axios.put(`/api/sys-email`,{email:email,active:active})
+
+  if (!response) throw new Error(`Something went wrong!`)
+
+  return await response.data.email
+}
+
+export const getSysConf = async () => {
+  const response = await axios.get('/api/config')
+  if (!response) throw new Error(`Something went wrong!`)
+
+  return await response.data.data
+}
+
+export const updateSysPort = async (port:string) => {
+  const response = await axios.put(`/api/sys-email`,{listening_port:port})
+
+  if (!response) throw new Error(`Something went wrong!`)
+
+  return await response.data.email
+}
+
+
+export const updateSysRemoteLogIp = async (ip:string) => {
+  const response = await axios.put(`/api/sys-email`,{remote_logServer:ip})
+
+  if (!response) throw new Error(`Something went wrong!`)
+
+  return await response.data.data
 }
