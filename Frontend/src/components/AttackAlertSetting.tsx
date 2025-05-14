@@ -1,5 +1,5 @@
-import {   useState } from 'react'
-import {  Pencil, Trash2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Pencil, Trash2 } from 'lucide-react'
 import {
   useGetUseEmail,
   useAddUserEmail,
@@ -16,36 +16,38 @@ const AttackAlertSettings = () => {
   const { data: emails, refetch } = useGetUseEmail()
   const { data: users } = useGetAllUsers()
 
-  console.log(emails)
-
   const addEmailMutation = useAddUserEmail()
   const updateEmailMutation = useUpdateUserEmail()
   const deleteEmailMutation = useDeleteUserEmail()
 
   const handleSave = () => {
-    if (!email || !selectedUserId) {
-      alert('Please select a user and enter an email.')
-      return
-    }
+  
 
-    const payload = { email, id: selectedUserId }
 
     if (editingId) {
+      if (!email || !selectedUserId) {
+          alert('Please select a user and enter an email.')
+          return
+      }
+      const payload = { email, id: selectedUserId }
+
       updateEmailMutation.mutate(payload, {
         onSuccess: () => {
           alert('Email updated.')
-          setEditingId(null)
-          setEmail('')
-          refetch()
+          resetForm()
         },
         onError: () => alert('Failed to update email'),
       })
     } else {
+        if (!email || !selectedUserId) {
+          alert('Please select a user and enter an email.')
+          return
+        }
+      const payload = { email, id: selectedUserId }
       addEmailMutation.mutate(payload, {
         onSuccess: () => {
           alert('Email added.')
-          setEmail('')
-          refetch()
+          resetForm()
         },
         onError: () => alert('Failed to add email'),
       })
@@ -54,8 +56,8 @@ const AttackAlertSettings = () => {
 
   const handleEdit = (emailItem: any) => {
     setEmail(emailItem.email)
-    setSelectedUserId(emailItem.id)
-    setEditingId(emailItem.id)
+    setSelectedUserId(emailItem.user_id)
+    setEditingId(emailItem.user_id)
   }
 
   const handleDelete = (id: string) => {
@@ -70,10 +72,16 @@ const AttackAlertSettings = () => {
     }
   }
 
+  const resetForm = () => {
+    setEditingId(null)
+    setEmail('')
+    setSelectedUserId('')
+    refetch()
+  }
+
   return (
     <div className="p-6 bg-white shadow-lg w-full">
-
-     <div className="mb-4">
+      <div className="mb-4">
         <label className="block mb-1 font-medium text-gray-700">Select Admin User</label>
         {users ? (
           <select
@@ -93,7 +101,6 @@ const AttackAlertSettings = () => {
         )}
       </div>
 
-
       <div className="mb-4">
         <label className="block mb-1 font-medium text-gray-700">Email Address</label>
         <input
@@ -110,7 +117,7 @@ const AttackAlertSettings = () => {
           onClick={handleSave}
           className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
         >
-          {editingId ? 'Update Email' : 'Add Email'}
+          {editingId ? 'Save Email' : 'Add Email'}
         </button>
       </div>
 
@@ -129,8 +136,10 @@ const AttackAlertSettings = () => {
               <tr key={entry.id} className="border-t">
                 <td className="p-2">
                   {
-                    users?.find((u: any) => u.user_id === entry.id)?.username 
-                    || entry.username 
+                    users? (
+                    users?.find((u: any) => u.user_id === entry.user_id)?.username
+                    ):
+                    <div className="text-gray-500 text-sm">Loading user...</div>
                   }
                 </td>
 
@@ -139,7 +148,7 @@ const AttackAlertSettings = () => {
                   <button onClick={() => handleEdit(entry)}>
                     <Pencil size={16} className="text-blue-600" />
                   </button>
-                  <button onClick={() => handleDelete(entry.id)}>
+                  <button onClick={() => handleDelete(entry.user_id)}>
                     <Trash2 size={16} className="text-red-600" />
                   </button>
                 </td>

@@ -1,6 +1,6 @@
 import axios from '../lib/axios'
 export const getUserEmail = async () => {
-  const response = await axios.get('/api/notification-config')
+  const response = await axios.get('/api/notification-config/all')
   if (!response) throw new Error(`Something went wrong!`)
 
   return await response.data.notification_config
