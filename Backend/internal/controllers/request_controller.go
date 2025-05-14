@@ -298,7 +298,7 @@ func GetRequestRateLastMinute(c *gin.Context) {
 		return
 	}
 
-	sixtySecondsAgo := float64(time.Now().Unix()) - 60
+	sixtySecondsAgo := float64(time.Now().UnixMilli()) - 60000
 
 	var totalCount int64
 	if err := query.
