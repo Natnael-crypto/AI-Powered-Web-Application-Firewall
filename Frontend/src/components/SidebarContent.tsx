@@ -93,7 +93,7 @@ function SidebarContent({title, href, children, changeOpenItem, Icon}: SidebarIt
               className={`text-sm py-2 px-3  transition-colors duration-200 ${
                 location.pathname.replace(/^\/+/, '') === child.href.replace(/^\/+/, '')
                   ? 'bg-[#303750] text-white'
-                  : 'text-gray-500 hover:bg-gray-600 hover:text-white'
+                  : 'text-gray-500 hover:bg-gray-600 text-white'
               }`}
             />
           ))}

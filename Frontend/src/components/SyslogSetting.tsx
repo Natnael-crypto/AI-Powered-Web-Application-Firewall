@@ -9,10 +9,14 @@ export default function SyslogSettings() {
   const [isSaving, setIsSaving] = useState(false)
 
   const queryClient = useQueryClient()
-  const { data, isLoading } = useGetSysConf()
+  const { data, isLoading,refetch } = useGetSysConf()
 
   const remoteLogIpMutation = useUpdateSysRemoteLogIp()
   const portMutation = useUpdateSysPort()
+
+  useEffect(()=>{
+    refetch()
+  })
 
   useEffect(() => {
     if (data) {
@@ -54,7 +58,7 @@ export default function SyslogSettings() {
 
   return (
     <form onSubmit={handleSave} className="w-full p-6 bg-white shadow-md xl">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+      <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
         <span>🖥️ Syslog</span>
         <span className="tooltip text-sm text-gray-500">ℹ️</span>
       </h2>

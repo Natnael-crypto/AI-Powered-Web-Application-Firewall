@@ -46,3 +46,37 @@ export const updateSysRemoteLogIp = async (ip:string) => {
 
   return await response.data.data
 }
+
+
+export const getAllowedIp = async () => {
+  const response = await axios.get('/api/service')
+  if (!response) throw new Error(`Something went wrong!`)
+
+  return await response.data
+}
+
+export const createAllowedIp = async (service:string,ip:string) => {
+  const response = await axios.post(`/api/service`,{service:service,ip:ip})
+
+  if (!response) throw new Error(`Something went wrong!`)
+
+  return await response.data
+}
+
+
+export const updateAllowedIp = async (id:string,service:string,ip:string) => {
+  const response = await axios.put(`/api/service/${id}`,{service:service,ip:ip})
+
+  if (!response) throw new Error(`Something went wrong!`)
+
+  return await response.data
+}
+
+
+export const deleteAllowedIp = async (id:string) => {
+  const response = await axios.delete(`/api/service/${id}`)
+
+  if (!response) throw new Error(`Something went wrong!`)
+
+  return await response.data
+}
