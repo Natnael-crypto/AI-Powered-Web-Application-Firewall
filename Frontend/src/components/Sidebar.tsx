@@ -22,11 +22,12 @@ function Sidebar() {
       <div className="flex flex-col w-full h-full">
         {/* Logo Section */}
         <br />
-        <div className="mb-6 w-[70%] self-center">
+        <div className="mb-6 self-center border-b border-gray-600">
           <p className='text-white text-3xl text-center'>GASHA WAF</p>
         </div>
 
         <br />
+        
         {/* Navigation Items */}
         <div className="flex flex-col gap-4 w-full px-4 overflow-y-auto scrollbar-thin scrollbar-thumb-green-300 scrollbar-track-transparent flex-grow">
           {SiderbarContentItems.map(item => (
