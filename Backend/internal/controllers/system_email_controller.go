@@ -82,7 +82,7 @@ func UpdateEmail(c *gin.Context) {
 	}
 	var sysEmail models.SystemEmail
 
-	if err := config.DB.Create(&sysEmail).Error; err != nil {
+	if err := config.DB.First(&sysEmail).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
