@@ -6,8 +6,8 @@ export const getUserEmail = async () => {
   return await response.data.notification_config
 }
 
-export const createUserEmail = async (email:string,active:string) => {
-  const response = await axios.post(`/api/notification-config`,{email:email,active:active})
+export const createUserEmail = async (email:string,id:string) => {
+  const response = await axios.post(`/api/notification-config`,{email:email,user_id:id})
 
   if (!response) throw new Error(`Something went wrong!`)
 
@@ -15,8 +15,8 @@ export const createUserEmail = async (email:string,active:string) => {
 }
 
 
-export const updateUserEmail = async (email:string,active:string) => {
-  const response = await axios.put(`/api/notification-config`,{email:email,active:active})
+export const updateUserEmail = async (email:string,id:string) => {
+  const response = await axios.put(`/api/notification-config/${id}`,{email:email})
 
   if (!response) throw new Error(`Something went wrong!`)
 
@@ -24,7 +24,7 @@ export const updateUserEmail = async (email:string,active:string) => {
 }
 
 export const deleteUserEmail = async (id:string) => {
-  const response = await axios.delete(`/api/notification-config/`)
+  const response = await axios.delete(`/api/notification-config/${id}`)
 
   if (!response) throw new Error(`Something went wrong!`)
 

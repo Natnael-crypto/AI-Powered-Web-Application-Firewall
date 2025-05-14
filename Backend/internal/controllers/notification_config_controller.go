@@ -115,7 +115,7 @@ func GetAllNotificationConfig(c *gin.Context) {
 		return
 	}
 
-	var configEntry models.NotificationConfig
+	var configEntry []models.NotificationConfig
 	if err := config.DB.Find(&configEntry).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "notification config not found"})
 		return

@@ -16,6 +16,7 @@ const AttackAlertSettings = () => {
   const { data: emails, refetch } = useGetUseEmail()
   const { data: users } = useGetAllUsers()
 
+  console.log(emails)
 
   const addEmailMutation = useAddUserEmail()
   const updateEmailMutation = useUpdateUserEmail()
@@ -71,10 +72,6 @@ const AttackAlertSettings = () => {
 
   return (
     <div className="p-6 bg-white shadow-lg w-full">
-      {/* <div className="flex items-center mb-4">
-        <h4 className="text-lg font-semibold text-gray-800 mr-2">Attack Alert Settings</h4>
-        <Info size={16} className="text-blue-500" />
-      </div> */}
 
      <div className="mb-4">
         <label className="block mb-1 font-medium text-gray-700">Select Admin User</label>
@@ -123,7 +120,6 @@ const AttackAlertSettings = () => {
           <tr className="bg-gray-100">
             <th className="p-2">User</th>
             <th className="p-2">Email</th>
-            <th className="p-2">Active</th>
             <th className="p-2">Actions</th>
           </tr>
         </thead>
@@ -131,9 +127,14 @@ const AttackAlertSettings = () => {
           {emails?.length > 0 ? (
             emails.map((entry: any) => (
               <tr key={entry.id} className="border-t">
-                <td className="p-2">{entry.userName || entry.userEmail || entry.id}</td>
+                <td className="p-2">
+                  {
+                    users?.find((u: any) => u.user_id === entry.id)?.username 
+                    || entry.username 
+                  }
+                </td>
+
                 <td className="p-2">{entry.email}</td>
-                <td className="p-2">{entry.active ? 'Yes' : 'No'}</td>
                 <td className="p-2 flex gap-3">
                   <button onClick={() => handleEdit(entry)}>
                     <Pencil size={16} className="text-blue-600" />
