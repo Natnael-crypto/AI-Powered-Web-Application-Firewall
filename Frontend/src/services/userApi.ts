@@ -1,5 +1,4 @@
 import axios from '../lib/axios'
-import {AdminsResponse} from '../lib/types'
 
 export const loginUser = async (userData: {username: string; password: string}) => {
   const response = await axios.post('/api/login', userData, {
@@ -8,11 +7,18 @@ export const loginUser = async (userData: {username: string; password: string}) 
   if (!response) throw new Error('Failed to get users')
   return response.data
 }
-export const getUsers = async (): Promise<AdminsResponse> => {
-  const response = await axios.get<AdminsResponse>('/api/users/', {withCredentials: true})
+export const getUsers = async () => {
+  const response = await axios.get('/api/users/')
 
   if (!response) throw new Error('Failed to get users')
   return response.data
+}
+
+export const getAllUser = async () => {
+  const response = await axios.get('/api/users/')
+
+  if (!response) throw new Error('Failed to get users')
+  return response.data.admins
 }
 
 export const getuser = async (username: string) => {

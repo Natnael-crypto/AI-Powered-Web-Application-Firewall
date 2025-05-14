@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { getUserEmail, createUserEmail, updateUserEmail, deleteUserEmail } from '../../services/configApi'
 
-export function useGetSUseEmail() {
+export function useGetUseEmail() {
   return useQuery({
     queryKey: ['getEmail'],
     queryFn: getUserEmail,

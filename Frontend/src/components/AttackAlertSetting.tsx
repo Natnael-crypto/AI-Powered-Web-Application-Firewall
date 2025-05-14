@@ -1,107 +1,158 @@
-import { useEffect, useState } from 'react'
-import { Info } from 'lucide-react'
+import {   useState } from 'react'
+import {  Pencil, Trash2 } from 'lucide-react'
 import {
-  useGetSUseEmail,
+  useGetUseEmail,
   useAddUserEmail,
   useUpdateUserEmail,
+  useDeleteUserEmail,
 } from '../hooks/api/useSystemEmail'
+import { useGetAllUsers } from '../hooks/api/useUser'
 
 const AttackAlertSettings = () => {
-  const [alertType, setAlertType] = useState<'Telegram' | 'Email'>('Email')
-  const [webhook, setWebhook] = useState('')
-  const [isActive, setIsActive] = useState(false)
-  const [emailFetched, setEmailFetched] = useState(false)
+  const [selectedUserId, setSelectedUserId] = useState('')
+  const [email, setEmail] = useState('')
+  const [editingId, setEditingId] = useState<string | null>(null)
 
-  const { data, isSuccess } = useGetSUseEmail()
+  const { data: emails, refetch } = useGetUseEmail()
+  const { data: users } = useGetAllUsers()
+
+
   const addEmailMutation = useAddUserEmail()
   const updateEmailMutation = useUpdateUserEmail()
+  const deleteEmailMutation = useDeleteUserEmail()
 
-  useEffect(() => {
-    if (isSuccess && data && !emailFetched) {
-      setWebhook(data.email || '')
-      setIsActive(data.active || false)
-      setEmailFetched(true)
-    }
-  }, [isSuccess, data, emailFetched])
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!webhook || webhook.trim() === '') {
-      alert('Webhook email must not be empty.')
+  const handleSave = () => {
+    if (!email || !selectedUserId) {
+      alert('Please select a user and enter an email.')
       return
     }
 
-    const payload = { email: webhook, active: isActive }
+    const payload = { email, id: selectedUserId }
 
-    if (!data?.email || data.email === '') {
-      addEmailMutation.mutate(payload, {
-        onSuccess: () => alert('Email added successfully.'),
-        onError: error => {
-          alert('Failed to add email settings.')
-          console.error(error)
+    if (editingId) {
+      updateEmailMutation.mutate(payload, {
+        onSuccess: () => {
+          alert('Email updated.')
+          setEditingId(null)
+          setEmail('')
+          refetch()
         },
+        onError: () => alert('Failed to update email'),
       })
     } else {
-      updateEmailMutation.mutate(payload, {
-        onSuccess: () => alert('Email updated successfully.'),
-        onError: error => {
-          alert('Failed to update email settings.')
-          console.error(error)
+      addEmailMutation.mutate(payload, {
+        onSuccess: () => {
+          alert('Email added.')
+          setEmail('')
+          refetch()
         },
+        onError: () => alert('Failed to add email'),
+      })
+    }
+  }
+
+  const handleEdit = (emailItem: any) => {
+    setEmail(emailItem.email)
+    setSelectedUserId(emailItem.id)
+    setEditingId(emailItem.id)
+  }
+
+  const handleDelete = (id: string) => {
+    if (confirm('Are you sure you want to delete this email?')) {
+      deleteEmailMutation.mutate({ id }, {
+        onSuccess: () => {
+          alert('Deleted successfully')
+          refetch()
+        },
+        onError: () => alert('Delete failed'),
       })
     }
   }
 
   return (
     <div className="p-6 bg-white shadow-lg w-full">
-      <div className="flex items-center mb-4">
-        <h4 className="text-lg font-semibold text-gray-800 mr-2">Attack Alert</h4>
+      {/* <div className="flex items-center mb-4">
+        <h4 className="text-lg font-semibold text-gray-800 mr-2">Attack Alert Settings</h4>
         <Info size={16} className="text-blue-500" />
+      </div> */}
+
+     <div className="mb-4">
+        <label className="block mb-1 font-medium text-gray-700">Select Admin User</label>
+        {users ? (
+          <select
+            value={selectedUserId}
+            onChange={e => setSelectedUserId(e.target.value)}
+            className="w-full border px-3 py-2 rounded"
+          >
+            <option value="">-- Select User --</option>
+            {users.map((user: any) => (
+              <option key={user.user_id} value={user.user_id}>
+                {user.username}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <div className="text-gray-500 text-sm">Loading users...</div>
+        )}
       </div>
 
-      <div className="flex gap-6 mb-4">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="radio"
-            name="alertType"
-            value="Email"
-            checked={alertType === 'Email'}
-            onChange={() => setAlertType('Email')}
-            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-          />
-          <span className="text-gray-700">Email</span>
-        </label>
+
+      <div className="mb-4">
+        <label className="block mb-1 font-medium text-gray-700">Email Address</label>
+        <input
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="waf-alert-server-noreply@org.com"
+          className="w-full px-4 py-2 border border-gray-300 text-sm placeholder-gray-400 rounded"
+        />
       </div>
 
-      <input
-        type="text"
-        placeholder="waf-alert-server-noreply@org.com"
-        value={webhook}
-        onChange={e => setWebhook(e.target.value)}
-        className="w-full px-4 py-2 mb-4 border border-gray-300 text-sm placeholder-gray-400"
-      />
-
-      <div className="flex gap-6 mb-4">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={isActive}
-            onChange={() => setIsActive(!isActive)}
-            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-          />
-          <span className="text-gray-700">Allow notifications via this email</span>
-        </label>
-      </div>
-
-      <div className="mt-4 flex justify-end">
+      <div className="mb-6 flex justify-end">
         <button
           onClick={handleSave}
-          className="bg-blue-600 text-white font-semibold px-6 py-2 hover:bg-blue-700 transition"
+          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
         >
-          Save
+          {editingId ? 'Update Email' : 'Add Email'}
         </button>
       </div>
+
+      <h5 className="text-md font-semibold text-gray-800 mb-2">Configured Emails</h5>
+      <table className="w-full border text-sm text-left">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="p-2">User</th>
+            <th className="p-2">Email</th>
+            <th className="p-2">Active</th>
+            <th className="p-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {emails?.length > 0 ? (
+            emails.map((entry: any) => (
+              <tr key={entry.id} className="border-t">
+                <td className="p-2">{entry.userName || entry.userEmail || entry.id}</td>
+                <td className="p-2">{entry.email}</td>
+                <td className="p-2">{entry.active ? 'Yes' : 'No'}</td>
+                <td className="p-2 flex gap-3">
+                  <button onClick={() => handleEdit(entry)}>
+                    <Pencil size={16} className="text-blue-600" />
+                  </button>
+                  <button onClick={() => handleDelete(entry.id)}>
+                    <Trash2 size={16} className="text-red-600" />
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={4} className="p-4 text-center text-gray-500">
+                No email configurations found.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   )
 }

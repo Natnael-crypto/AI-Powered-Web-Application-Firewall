@@ -3,7 +3,7 @@ export const getUserEmail = async () => {
   const response = await axios.get('/api/notification-config')
   if (!response) throw new Error(`Something went wrong!`)
 
-  return await response.data.email
+  return await response.data.notification_config
 }
 
 export const createUserEmail = async (email:string,active:string) => {

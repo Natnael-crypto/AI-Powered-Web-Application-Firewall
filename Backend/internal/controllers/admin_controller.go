@@ -104,7 +104,7 @@ func GetAllAdmins(c *gin.Context) {
 	}
 
 	var admins []models.User
-	if err := config.DB.Where("role = ?", "admin").Find(&admins).Error; err != nil {
+	if err := config.DB.Find(&admins).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "unable to fetch admins"})
 		return
 	}
