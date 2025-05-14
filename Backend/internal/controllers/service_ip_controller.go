@@ -17,7 +17,7 @@ func AddAllowedIp(c *gin.Context) {
 	}
 
 	var input struct {
-		Service string ` binding:"require,max=40" json:"service"`
+		Service string ` binding:"required,max=40" json:"service"`
 		Ip      string ` binding:"required,ip" json:"ip"`
 	}
 

@@ -17,7 +17,7 @@ func AddEmail(c *gin.Context) {
 	}
 
 	var input struct {
-		Email  string ` binding:"require,email" json:"email"`
+		Email  string ` binding:"required,email" json:"email"`
 		Active bool   ` binding:"required" json:"active"`
 	}
 
@@ -41,6 +41,7 @@ func AddEmail(c *gin.Context) {
 
 	if err := config.DB.Create(&sysEmail).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, sysEmail)
@@ -71,7 +72,7 @@ func UpdateEmail(c *gin.Context) {
 	}
 
 	var input struct {
-		Email  string ` binding:"require,email" json:"email"`
+		Email  string ` binding:"required,email" json:"email"`
 		Active bool   ` binding:"required" json:"active"`
 	}
 
