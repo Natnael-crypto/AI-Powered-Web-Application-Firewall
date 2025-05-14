@@ -1,13 +1,13 @@
 import axios from '../lib/axios'
 export const getSysEmail = async () => {
-  const response = await axios.get('/api/sys-email')
+  const response = await axios.get('/api/sys-email/')
   if (!response) throw new Error(`Something went wrong!`)
 
   return await response.data.email
 }
 
 export const createSysEmail = async (email:string,active:boolean) => {
-  const response = await axios.post(`/api/sys-email`,{email:email,active:active})
+  const response = await axios.post(`/api/sys-email/`,{email:email,active:active})
 
   if (!response) throw new Error(`Something went wrong!`)
 
@@ -16,7 +16,7 @@ export const createSysEmail = async (email:string,active:boolean) => {
 
 
 export const updateSysEmail = async (email:string,active:boolean) => {
-  const response = await axios.put(`/api/sys-email`,{email:email,active:active})
+  const response = await axios.put(`/api/sys-email/`,{email:email,active:active})
 
   if (!response) throw new Error(`Something went wrong!`)
 
@@ -24,14 +24,14 @@ export const updateSysEmail = async (email:string,active:boolean) => {
 }
 
 export const getSysConf = async () => {
-  const response = await axios.get('/api/config')
+  const response = await axios.get('/api/config/')
   if (!response) throw new Error(`Something went wrong!`)
 
   return await response.data.data
 }
 
 export const updateSysPort = async (port:string) => {
-  const response = await axios.put(`/api/sys-email`,{listening_port:port})
+  const response = await axios.put(`/api/config/update/listening-port`,{listening_port:port})
 
   if (!response) throw new Error(`Something went wrong!`)
 
@@ -40,7 +40,7 @@ export const updateSysPort = async (port:string) => {
 
 
 export const updateSysRemoteLogIp = async (ip:string) => {
-  const response = await axios.put(`/api/sys-email`,{remote_logServer:ip})
+  const response = await axios.put(`/api/config/update/remote-log-server`,{remote_logServer:ip})
 
   if (!response) throw new Error(`Something went wrong!`)
 
