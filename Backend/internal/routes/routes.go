@@ -56,6 +56,13 @@ func InitializeRoutes(r *gin.Engine) {
 		config.GET("/:application_id", controllers.GetAppConfig)
 	}
 
+	sysEmail := authorized.Group("/sys-email")
+	{
+		sysEmail.POST("/", controllers.AddEmail)
+		sysEmail.GET("/", controllers.GetEmail)
+		sysEmail.PUT("/", controllers.UpdateEmail)
+	}
+
 	rules := authorized.Group("/rule")
 	{
 		rules.POST("/add", controllers.AddRule)
