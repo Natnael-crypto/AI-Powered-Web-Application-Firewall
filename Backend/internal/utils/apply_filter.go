@@ -46,7 +46,7 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 		query = query.Where("body ILIKE ?", "%"+body+"%")
 	}
 	if response_code := c.Query("response_code"); response_code != "" {
-		query = query.Where("response_code ILIKE ?", "%"+response_code+"%")
+		query = query.Where("response_code = ?", "%"+response_code+"%")
 	}
 	if rule_detected := c.Query("rule_detected"); rule_detected != "" {
 		query = query.Where("rule_detected ILIKE ?", "%"+rule_detected+"%")

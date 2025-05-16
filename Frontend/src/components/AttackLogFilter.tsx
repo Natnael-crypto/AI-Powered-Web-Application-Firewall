@@ -1,75 +1,102 @@
-import {ChangeEvent} from 'react'
-import {filterOperations, logFilterType} from '../lib/types'
-import {useLogFilter} from '../store/LogFilter'
+import { ChangeEvent } from 'react'
+import { logFilterType } from '../lib/types'
+import { useLogFilter } from '../store/LogFilter'
+import { X } from 'lucide-react'
 
 function AttackLogFilter() {
-  const {filterType, filterOperation, selectFilterOperation, selectFilterType} =
-    useLogFilter()
+  const {
+    filters,
+    tempFilter,
+    setTempFilter,
+    addFilter,
+    removeFilter,
+    applyFilters,
+  } = useLogFilter()
 
-  const handleSetFilterOperation = (e: ChangeEvent<HTMLSelectElement>) => {
-    const input = e.target.value
-    const matched = Object.values(filterOperations).find(val => val === input)
-    selectFilterOperation(matched as filterOperations)
+  const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setTempFilter('key', e.target.value)
   }
 
-  const handleSetfilterType = (e: ChangeEvent<HTMLSelectElement>) => {
-    const input = e.target.value
-    const matched = Object.values(logFilterType).find(val => val === input)
-    selectFilterType(matched as logFilterType)
+  const handleValueChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setTempFilter('value', e.target.value)
   }
 
-  const filterTypeOption = Object.values(logFilterType).filter(
-    val => typeof val !== 'number',
-  )
+  const filterKeys = Object.keys(logFilterType)
 
-  const filterOperationOption = Object.values(filterOperations).filter(
-    val => typeof val !== 'number',
+  const activeFilters = Object.entries(filters).filter(
+    ([_, value]) => value !== ''
   )
 
   return (
-    <div className="w-full bg-white p-6   flex flex-col gap-4 md:flex-row md:items-center">
-      {/* Filter Type */}
-      <div className="flex-1">
-        <label className="block mb-1 text-sm font-medium text-gray-700">
-          Filter Type
-        </label>
-        <select
-          value={filterType ?? ''}
-          onChange={handleSetfilterType}
-          className="w-full px-4 py-2  border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Select Type</option>
-          {filterTypeOption.map((val, index) => (
-            <option key={index} value={val}>
-              {val}
-            </option>
-          ))}
-        </select>
+    <div className="w-full bg-white p-6 rounded-lg shadow flex flex-col gap-6">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1">
+          <label className="block mb-1 text-sm font-semibold text-gray-700">
+            Filter Type
+          </label>
+          <select
+            value={tempFilter.key}
+            onChange={handleTypeChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select Type</option>
+            {filterKeys.map((key) => (
+              <option key={key} value={key}>
+                {logFilterType[key as keyof typeof logFilterType]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex-1">
+          <label className="block mb-1 text-sm font-semibold text-gray-700">
+            Value
+          </label>
+          <input
+            type="text"
+            value={tempFilter.value}
+            onChange={handleValueChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="flex gap-2 items-end">
+          <button
+            onClick={addFilter}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Add
+          </button>
+          <button
+            onClick={applyFilters}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Apply
+          </button>
+        </div>
       </div>
 
-      {/* Filter Operation */}
-      <div className="flex-1">
-        <label className="block mb-1 text-sm font-medium text-gray-700">Operation</label>
-        <select
-          value={filterOperation ?? ''}
-          onChange={handleSetFilterOperation}
-          className="w-full px-4 py-2  border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Select Operation</option>
-          {filterOperationOption.map((op, index) => (
-            <option key={index} value={op}>
-              {op}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Apply Button */}
-      <div className="pt-1 md:pt-5">
-        <button className="w-full md:w-auto px-6 py-2  bg-blue-600 text-white font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-          Apply Filter
-        </button>
-      </div>
+      {activeFilters.length > 0 && (
+        <div>
+          <p className="font-semibold mb-2 text-gray-800">Active Filters:</p>
+          <div className="flex flex-wrap gap-2">
+            {activeFilters.map(([key, value]) => (
+              <span
+                key={key}
+                className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center"
+              >
+                {logFilterType[key as keyof typeof logFilterType]}: {value}
+                <button
+                  className="ml-2 text-red-500 hover:text-red-700"
+                  onClick={() => removeFilter(key)}
+                >
+                  <X size={14} />
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

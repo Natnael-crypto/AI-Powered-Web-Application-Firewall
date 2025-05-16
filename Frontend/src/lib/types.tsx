@@ -22,13 +22,6 @@ export type LogTable = {
   time: string
 }
 
-export enum logFilterType {
-  CLIENTIP,
-  COUNTRY,
-  METHOD,
-  PROTOCOL,
-}
-
 export enum filterOperations {
   EQUALS_TO,
   GREATER_THAN,
@@ -172,9 +165,9 @@ export type Filter ={
   threat_type: string
   user_agent: string
   geo_location:string
-  threat_detected: boolean
-  bot_detected:boolean
-  rate_limited: boolean
+  threat_detected: string
+  bot_detected:string
+  rate_limited: string
   start_date: string
   timestamp: string
   end_date: string
@@ -182,7 +175,34 @@ export type Filter ={
   body:string
   response_code: string
   rule_detected: string
-  ai_result:boolean
+  ai_result:string
   ai_threat_type: string
   search:string
+  page:string
+  [key: string]: string | undefined
 }
+
+export const logFilterType = {
+  search: "Search",
+  page: "Page",
+  client_ip: "Client IP",
+  request_method: "Request Method",
+  request_url: "Request URL",
+  threat_type: "Threat Type",
+  user_agent: "User Agent",
+  geo_location: "Geo Location",
+  threat_detected: "Threat Detected",
+  bot_detected: "Bot Detected",
+  rate_limited: "Rate Limited",
+  start_date: "Start Date",
+  timestamp: "Timestamp",
+  end_date: "End Date",
+  last_hours: "Last Hours",
+  body: "Body",
+  response_code: "Response Code",
+  rule_detected: "Rule Detected",
+  ai_result: "AI Result",
+  ai_threat_type: "AI Threat Type",
+} as const
+
+export type FilterKey = keyof typeof logFilterType
