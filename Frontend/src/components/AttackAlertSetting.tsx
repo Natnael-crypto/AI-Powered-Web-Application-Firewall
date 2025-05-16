@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
 import {
   useGetUseEmail,

@@ -1,10 +1,11 @@
 import {useQuery} from '@tanstack/react-query'
 import {getDeviceStat, getRequests} from '../../services/requestApi'
+import { Filter } from '../../lib/types'
 
-export function useGetRequests(application: string) {
+export function useGetRequests(filter: Filter) {
   return useQuery({
-    queryKey: ['requests', application],
-    queryFn: () => getRequests(application),
+    queryKey: ['requests', filter],
+    queryFn: () => getRequests(filter),
   })
 }
 

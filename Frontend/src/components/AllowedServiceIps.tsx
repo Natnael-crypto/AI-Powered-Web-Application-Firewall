@@ -6,6 +6,7 @@ import {
   useDeleteAllowedIp,
 } from '../hooks/api/useAllowedIp'
 import { useQueryClient } from '@tanstack/react-query'
+import { Pencil, Trash2 } from 'lucide-react'
 
 export default function AllowedServiceIps() {
   const [ip, setIp] = useState('')
@@ -81,34 +82,35 @@ export default function AllowedServiceIps() {
         </button>
       </form>
 
-      <table className="w-full table-auto">
+      <table className="w-full border text-sm text-left">
         <thead>
-          <tr className="bg-gray-50 border-b">
-            <th className="p-3 text-left">IP Address</th>
-            <th className="p-3 text-left">Service</th>
-            <th className="p-3 text-left">Actions</th>
+          <tr className="bg-gray-100">
+            <th className="p-2">IP Address</th>
+            <th className="p-2">Service</th>
+            <th className="p-2">Actions</th>
           </tr>
         </thead>
         <tbody>
           {!isLoading && data?.length > 0 ? (
             data.map((entry: { id: string; ip: string; service: string }) => (
-              <tr key={entry.id} className="border-b">
-                <td className="p-3 border">{entry.ip}</td>
-                <td className="p-3 border">
+              <tr key={entry.id} className="border-t">
+                <td className="p-2">{entry.ip}</td>
+                <td className="p-2">
                   {entry.service === 'I' ? 'Interceptor Service' : 'ML Service'}
                 </td>
-                <td className="p-3 border space-x-2">
+                <td className="p-2 flex gap-3">
                   <button
                     onClick={() => handleEdit(entry)}
-                    className="text-blue-600 hover:underline"
+                    className="text-blue-600"
                   >
-                    Edit
+                    <Pencil size={16} className="text-blue-600" />
+
                   </button>
                   <button
                     onClick={() => handleDelete(entry.id)}
-                    className="text-red-600 hover:underline"
+                    className="text-red-600"
                   >
-                    Delete
+                    <Trash2 size={16} className="text-red-600" />
                   </button>
                 </td>
               </tr>

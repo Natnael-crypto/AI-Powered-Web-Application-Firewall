@@ -1,6 +1,8 @@
-import {CellContext, ColumnDef} from '@tanstack/react-table'
+import { useState } from 'react'
+import { CellContext, ColumnDef } from '@tanstack/react-table'
 import Table from '../Table'
-import {useGetRequests} from '../../hooks/api/useRequests'
+import { useGetRequests } from '../../hooks/api/useRequests'
+import { Filter } from '../../lib/types'
 
 interface RequestLog {
   request_id: string
@@ -24,13 +26,14 @@ interface RequestLog {
 }
 
 function AttackLogTable() {
-  const {data, isLoading, error} = useGetRequests('waf.local')
+  const [filters,setFilters] = useState<Filter>()
+  const { data, isLoading, error } = useGetRequests(filters)
 
   const columns: ColumnDef<RequestLog>[] = [
     {
       header: 'Status',
       accessorKey: 'status',
-      cell: ({getValue}: CellContext<RequestLog, unknown>) => (
+      cell: ({ getValue }: CellContext<RequestLog, unknown>) => (
         <div
           className={`ull py-1 px-3 text-white text-xs font-medium shadow-sm inline-block ${
             (getValue() as string).toLowerCase() === 'blocked'
@@ -42,12 +45,12 @@ function AttackLogTable() {
         </div>
       ),
     },
-    {header: 'Application', accessorKey: 'application_name'},
-    {header: 'Method', accessorKey: 'request_method'},
+    { header: 'Application', accessorKey: 'application_name' },
+    { header: 'Method', accessorKey: 'request_method' },
     {
       header: 'URL',
       accessorKey: 'request_url',
-      cell: ({getValue}) => (
+      cell: ({ getValue }) => (
         <div className="text-sm text-blue-600 truncate max-w-[300px]">
           {getValue() as string}
         </div>
@@ -56,29 +59,29 @@ function AttackLogTable() {
     {
       header: 'Threat Type',
       accessorKey: 'threat_type',
-      cell: ({getValue}) => (
+      cell: ({ getValue }) => (
         <span className="text-sm font-medium text-red-700">{getValue() as string}</span>
       ),
     },
     {
       header: 'IP',
       accessorKey: 'client_ip',
-      cell: ({getValue}) => (
+      cell: ({ getValue }) => (
         <code className="text-xs text-gray-500">{getValue() as string}</code>
       ),
     },
-    {header: 'Location', accessorKey: 'geo_location'},
+    { header: 'Location', accessorKey: 'geo_location' },
     {
       header: 'Code',
       accessorKey: 'response_code',
-      cell: ({getValue}) => (
+      cell: ({ getValue }) => (
         <div className="text-sm font-semibold text-center">{getValue() as number}</div>
       ),
     },
     {
       header: 'Time',
       accessorKey: 'timestamp',
-      cell: ({getValue}) => (
+      cell: ({ getValue }) => (
         <div className="text-xs text-gray-500">
           {new Date(getValue() as string).toLocaleString()}
         </div>
@@ -102,7 +105,26 @@ function AttackLogTable() {
 
   return (
     <div className="bg-white p-6 xl shadow-xl border border-gray-200">
-      <Table data={data || []} columns={columns} />
+      <Table data={data.requests || []} columns={columns} />
+      <div className="mt-4 flex justify-center gap-4 items-center">
+        <button
+          onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+          disabled={page === 1}
+          className="px-3 py-1 border rounded disabled:opacity-50"
+        >
+          Prev
+        </button>
+        <span className="text-sm font-medium">
+          Page {data.current_page} of {data.total_pages}
+        </span>
+        <button
+          onClick={() => setPage(prev => Math.min(prev + 1, data.total_pages))}
+          disabled={page === data.total_pages}
+          className="px-3 py-1 border rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
   )
 }

@@ -164,3 +164,25 @@ interface RuleDefinitionItem {
   rule_method: string
   rule_definition: string
 }
+
+export type Filter ={
+  client_ip: string
+  request_method: string
+  request_url: string
+  threat_type: string
+  user_agent: string
+  geo_location:string
+  threat_detected: boolean
+  bot_detected:boolean
+  rate_limited: boolean
+  start_date: string
+  timestamp: string
+  end_date: string
+  last_hours: string
+  body:string
+  response_code: string
+  rule_detected: string
+  ai_result:boolean
+  ai_threat_type: string
+  search:string
+}
