@@ -27,6 +27,9 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 	if clientIP := c.Query("client_ip"); clientIP != "" {
 		query = query.Where("client_ip ILIKE ?", "%"+clientIP+"%")
 	}
+	if application_name := c.Query("application_name"); application_name != "" {
+		query = query.Where("application_name ILIKE ?", "%"+application_name+"%")
+	}
 	if requestMethod := c.Query("request_method"); requestMethod != "" {
 		query = query.Where("request_method ILIKE ?", "%"+requestMethod+"%")
 	}
@@ -66,7 +69,7 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 		threatDetected := c.Query("threat_detected") == "true"
 		if threatDetected {
 			query = query.Where("threat_detected = ?", threatDetected)
-		}else{
+		} else {
 			query = query.Where("threat_detected = ?", false)
 		}
 	}
@@ -74,7 +77,7 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 		botDetected := c.Query("bot_detected") == "true"
 		if botDetected {
 			query = query.Where("bot_detected = ?", botDetected)
-		}else{
+		} else {
 			query = query.Where("bot_detected = ?", false)
 		}
 	}
@@ -82,7 +85,7 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 		rateLimited := c.Query("rate_limited") == "true"
 		if rateLimited {
 			query = query.Where("rate_limited = ?", rateLimited)
-		}else{
+		} else {
 			query = query.Where("rate_limited = ?", false)
 		}
 	}

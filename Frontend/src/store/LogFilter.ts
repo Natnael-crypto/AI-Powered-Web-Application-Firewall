@@ -34,6 +34,7 @@ export const useLogFilter = create<FilterState>((set, get) => ({
     rule_detected: '',
     ai_result: '',
     ai_threat_type: '',
+    application_name: ''
   },
   tempFilter: { key: '', value: '' },
   setTempFilter: (key, value) =>
@@ -81,10 +82,12 @@ export const useLogFilter = create<FilterState>((set, get) => ({
     ai_result: '',
     ai_threat_type: '',
     search: '',
-    page: ''
+    page: '',
+    application_name: ''
   } }),  // Reset filters, retain appliedFilters
   applyFilters: () => set(state => ({ appliedFilters: { ...state.filters } })),
   appliedFilters: {
+    application_name:'',
     client_ip: '',
     request_method: '',
     request_url: '',

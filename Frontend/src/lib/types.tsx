@@ -179,12 +179,12 @@ export type Filter ={
   ai_threat_type: string
   search:string
   page:string
+  application_name: string
   [key: string]: string | undefined
 }
 
 export const logFilterType = {
   search: "Search",
-  page: "Page",
   client_ip: "Client IP",
   request_method: "Request Method",
   request_url: "Request URL",
@@ -203,6 +203,7 @@ export const logFilterType = {
   rule_detected: "Rule Detected",
   ai_result: "AI Result",
   ai_threat_type: "AI Threat Type",
+  application_name: "Application Name",
 } as const
 
 export type FilterKey = keyof typeof logFilterType
