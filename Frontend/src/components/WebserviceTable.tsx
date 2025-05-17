@@ -118,105 +118,11 @@ function getColumns({
   ]
 }
 
-const mockData: Application[] = [
-  {
-    application_id: '16d3f539-6c7b-45ac-b977-6a51c3582d29',
-    application_name: 'waf',
-    description: 'this is for tls check',
-    hostname: 'waf.local',
-    ip_address: '127.0.0.1',
-    port: '5500',
-    status: true,
-    tls: false,
-    created_at: '2025-03-10T19:57:54.553735+03:00',
-    updated_at: '2025-03-10T19:57:54.553735+03:00',
-    config: {
-      id: 'efd0de55-b742-410b-83d1-942c33571333',
-      application_id: '16d3f539-6c7b-45ac-b977-6a51c3582d29',
-      rate_limit: 50,
-      window_size: 10,
-      block_time: 0,
-      detect_bot: true,
-      hostname: 'waf.local',
-      max_post_data_size: 5,
-      tls: false,
-    },
-  },
-  {
-    application_id: 'e9c6df27-7ab7-43d5-9309-cb967c3b54a4',
-    application_name: 'auth-service',
-    description: 'handles user authentication',
-    hostname: 'auth.internal',
-    ip_address: '192.168.0.10',
-    port: '8080',
-    status: true,
-    tls: true,
-    created_at: '2025-03-05T10:15:20.123456+03:00',
-    updated_at: '2025-04-01T08:45:00.000000+03:00',
-    config: {
-      id: 'a946c547-961e-46b0-90a3-1d9dd612e3ca',
-      application_id: 'e9c6df27-7ab7-43d5-9309-cb967c3b54a4',
-      rate_limit: 100,
-      window_size: 60,
-      block_time: 300,
-      detect_bot: false,
-      hostname: 'auth.internal',
-      max_post_data_size: 10,
-      tls: true,
-    },
-  },
-  {
-    application_id: 'f1a8b40d-acc9-4014-bd80-928bb6e23af3',
-    application_name: 'analytics',
-    description: 'collects usage metrics',
-    hostname: 'analytics.service',
-    ip_address: '10.10.10.5',
-    port: '3000',
-    status: false,
-    tls: false,
-    created_at: '2025-02-12T14:30:00.000000+03:00',
-    updated_at: '2025-03-28T17:25:00.000000+03:00',
-    config: {
-      id: 'b8e284a0-2d9d-4bc5-8c89-fbde1b0c6fc0',
-      application_id: 'f1a8b40d-acc9-4014-bd80-928bb6e23af3',
-      rate_limit: 30,
-      window_size: 10,
-      block_time: 60,
-      detect_bot: true,
-      hostname: 'analytics.service',
-      max_post_data_size: 2,
-      tls: false,
-    },
-  },
-  {
-    application_id: 'a8e284a0-2d9d-4bc5-8c89-fbde1b0c6fc0',
-    application_name: 'payment-gateway',
-    description: 'handles transactions and payments',
-    hostname: 'payments.local',
-    ip_address: '10.0.0.2',
-    port: '443',
-    status: true,
-    tls: true,
-    created_at: '2025-01-20T11:11:11.111111+03:00',
-    updated_at: '2025-04-10T09:00:00.000000+03:00',
-    config: {
-      id: 'c9e284a0-2d9d-4bc5-8c89-fbde1b0c6fc1',
-      application_id: 'a8e284a0-2d9d-4bc5-8c89-fbde1b0c6fc0',
-      rate_limit: 200,
-      window_size: 60,
-      block_time: 600,
-      detect_bot: true,
-      hostname: 'payments.local',
-      max_post_data_size: 20,
-      tls: true,
-    },
-  },
-]
 
 function WebserviceTable({data, setSelectedApp, openModal}: WebserviceTableProps) {
   const columns = getColumns({setSelectedApp, openModal})
   return (
-    <Table columns={columns} data={data == null || data.length === 0 ? mockData : data} />
+    <Table columns={columns} data={data} />
   )
 }
 

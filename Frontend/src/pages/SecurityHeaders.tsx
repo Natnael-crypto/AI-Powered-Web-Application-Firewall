@@ -4,12 +4,15 @@ import SecurityHeaderTable from '../components/SecurityHeaderTable'
 import CreateSecurityHeaderModal from '../components/CreateSecurityHeaderModal'
 import { useGetSecurityHeaders } from '../hooks/api/useSecurityHeaders'
 import Card from '../components/Card'
+import LoadingSpinner from '../components/LoadingSpinner'
 
 function SecurityHeaders() {
   const [isCreateOpen, setCreateOpen] = useState(false)
   const toggleCreateModal = () => setCreateOpen((prev) => !prev)
 
   const { data: securityHeaders, isLoading } = useGetSecurityHeaders()
+
+    if (isLoading) return <LoadingSpinner />
 
   return (
     <div className="flex flex-col gap-8 space-y-4 bg-gradient-to-br from-slate-100 to-white min-h-screen">

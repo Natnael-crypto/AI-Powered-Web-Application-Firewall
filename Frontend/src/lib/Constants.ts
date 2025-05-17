@@ -12,22 +12,9 @@ export const SiderbarContentItems = [
   },
   {
     title: 'Log',
-    href: 'log/attacks',
+    href: 'attacks-logs',
     icon: FaRegFileAlt,
-    children: [
-      {
-        title: 'Attacks',
-        href: 'log/attacks',
-      },
-      {
-        title: 'Rate Limiting',
-        href: 'log/limits',
-      },
-      {
-        title: 'Anti-Bot',
-        href: 'log/captcha',
-      },
-    ],
+    children: [],
   },
   {
     title: 'Custom Rules',

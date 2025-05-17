@@ -130,7 +130,7 @@ func DeleteSecurityHeader(c *gin.Context) {
 
 	var securityHeader models.SecurityHeader
 	if err := config.DB.Where("id = ? And created_by =?", headerID, userID).First(&securityHeader).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "security header not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "insufficient privileges"})
 		return
 	}
 

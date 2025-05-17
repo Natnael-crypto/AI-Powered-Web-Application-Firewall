@@ -35,6 +35,8 @@ function SecurityHeaderTable({ securityHeaders }: { securityHeaders: any[] }) {
     }
   }
 
+
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full text-sm text-left">

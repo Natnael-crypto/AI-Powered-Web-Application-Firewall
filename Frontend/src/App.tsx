@@ -11,8 +11,6 @@ import PageNotFound from './pages/PageNotFound'
 import CustomeRules from './pages/CustomeRules'
 import System from './pages/System'
 import AttackLog from './pages/Requestlogs/AttackLog'
-import RateLimiting from './pages/Requestlogs/RateLimiting'
-import AntiBot from './pages/Requestlogs/Antibot'
 import WebServices from './pages/WebServices'
 import {ToastProvider} from './providers/ToastProvider'
 import AIAnalysis from './pages/AIAnalysis'
@@ -25,11 +23,7 @@ const router = createBrowserRouter(
       <Route path="/" element={<RootLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="log">
-          <Route path="attacks" element={<AttackLog />} />
-          <Route path="limits" element={<RateLimiting />} />
-          <Route path="captcha" element={<AntiBot />} />
-        </Route>
+        <Route path="attacks-logs" element={<AttackLog />}/>
         <Route path="custom-rules" element={<CustomeRules />} />
         <Route path="web-services" element={<WebServices />} />
         <Route path="ai-models" element={<AIAnalysis />} />

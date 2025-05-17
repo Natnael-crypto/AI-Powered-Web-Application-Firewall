@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 import { logFilterType } from '../lib/types'
 import { useLogFilter } from '../store/LogFilter'
 import { X, ChevronDown } from 'lucide-react'
@@ -165,79 +165,79 @@ function AttackLogFilter() {
           />
         </div>
 
-        <div className="flex-1">
-          <div className="relative">
-            <button
-              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-              className="flex items-center gap-2 px-4 py-2 border rounded-md text-sm text-gray-700 hover:bg-gray-100"
-            >
-              <span>{timeRange.label || 'Select Time Range'}</span>
-              <ChevronDown className="w-4 h-4 text-gray-500" />
-            </button>
+        <div className="flex-1 relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Time Range</label>
+          <button
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            className="w-full flex justify-between items-center px-4 py-2 border border-gray-300 rounded-md bg-white text-sm hover:bg-gray-50 transition"
+          >
+            <span>{timeRange.label || 'Select Time Range'}</span>
+            <ChevronDown className="w-4 h-4 text-gray-500" />
+          </button>
 
-            {isPopoverOpen && (
-              <div className="absolute z-10 mt-2 p-4 w-64 bg-white border rounded-md shadow-md right-0">
-                <div className="flex flex-col gap-2">
-                  {timePresets.map(preset => (
-                    <button
-                      key={preset.value}
-                      onClick={() => handlePresetSelect(preset.value)}
-                      className={`text-left px-3 py-1 text-sm rounded hover:bg-gray-100 ${
-                        timeRange.value === preset.value ? 'bg-gray-100 font-medium' : ''
-                      }`}
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
+          {isPopoverOpen && (
+            <div className="absolute z-20 mt-2 right-0 w-100 bg-white border border-gray-200 rounded-lg shadow-lg p-4 space-y-2">
+              {timePresets.map(preset => (
+                <button
+                  key={preset.value}
+                  onClick={() => handlePresetSelect(preset.value)}
+                  className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 ${
+                    timeRange.value === preset.value ? 'bg-gray-100 font-semibold' : ''
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
 
-                  {timeRange.value === 'custom' && (
-                    <div className="flex flex-col gap-1 mt-2">
-                      <label className="text-xs text-gray-500">Start Date</label>
-                      <input
-                        type="date"
-                        value={customRange.startDate}
-                        onChange={e => handleDateChange(e, 'start', 'date')}
-                        className="border rounded px-2 py-1 text-sm"
-                      />
-
-                      <label className="text-xs text-gray-500 mt-2">Start Time</label>
-                      <input
-                        type="time"
-                        value={customRange.startTime}
-                        onChange={e => handleDateChange(e, 'start', 'time')}
-                        className="border rounded px-2 py-1 text-sm"
-                      />
-
-                      <label className="text-xs text-gray-500 mt-2">End Date</label>
-                      <input
-                        type="date"
-                        value={customRange.endDate}
-                        onChange={e => handleDateChange(e, 'end', 'date')}
-                        min={customRange.startDate}
-                        className="border rounded px-2 py-1 text-sm"
-                      />
-
-                      <label className="text-xs text-gray-500 mt-2">End Time</label>
-                      <input
-                        type="time"
-                        value={customRange.endTime}
-                        onChange={e => handleDateChange(e, 'end', 'time')}
-                        min={customRange.startTime}
-                        className="border rounded px-2 py-1 text-sm"
-                      />
-
-                      <button
-                        className="mt-3 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                        onClick={applyCustomRange}
-                      >
-                        Apply
-                      </button>
-                    </div>
-                  )}
+              {timeRange.value === 'custom' && (
+                <div className="space-y-2">
+                  <div className="flex flex-col text-sm">
+                    <label className="text-gray-600">Start Date</label>
+                    <input
+                      type="date"
+                      value={customRange.startDate}
+                      onChange={e => handleDateChange(e, 'start', 'date')}
+                      className="border rounded-md px-2 py-1"
+                    />
+                  </div>
+                  <div className="flex flex-col text-sm">
+                    <label className="text-gray-600">Start Time</label>
+                    <input
+                      type="time"
+                      value={customRange.startTime}
+                      onChange={e => handleDateChange(e, 'start', 'time')}
+                      className="border rounded-md px-2 py-1"
+                    />
+                  </div>
+                  <div className="flex flex-col text-sm">
+                    <label className="text-gray-600">End Date</label>
+                    <input
+                      type="date"
+                      value={customRange.endDate}
+                      onChange={e => handleDateChange(e, 'end', 'date')}
+                      min={customRange.startDate}
+                      className="border rounded-md px-2 py-1"
+                    />
+                  </div>
+                  <div className="flex flex-col text-sm">
+                    <label className="text-gray-600">End Time</label>
+                    <input
+                      type="time"
+                      value={customRange.endTime}
+                      onChange={e => handleDateChange(e, 'end', 'time')}
+                      className="border rounded-md px-2 py-1"
+                    />
+                  </div>
+                  <button
+                    className="w-full mt-2 bg-blue-600 text-white py-1.5 rounded-md text-sm hover:bg-blue-700"
+                    onClick={applyCustomRange}
+                  >
+                    Apply Custom Range
+                  </button>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex gap-2 items-end">

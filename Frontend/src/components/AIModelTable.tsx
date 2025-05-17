@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useGetAIModels, useSelectModel } from '../hooks/api/useAIModels'
 import { PencilIcon } from 'lucide-react'
 import UpdateAIModelSetting from './UpdateAIModelSetting' // Adjust path if needed
+import LoadingSpinner from './LoadingSpinner'
 
 interface AIModel {
   id: string
@@ -49,11 +50,9 @@ const AIModelTable = () => {
     refetch()
   }
 
+  if (isLoading) return <LoadingSpinner />
   return (
     <>
-      {isLoading ? (
-        <div>Loading...</div>
-      ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">
             <thead className="border-b bg-gray-50">
@@ -63,6 +62,10 @@ const AIModelTable = () => {
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Precision</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Recall</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">F1 Score</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Expected Accuracy</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Expected Precision</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Expected Recall</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Expected F1 Score</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Train Every</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Selected</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
@@ -78,13 +81,17 @@ const AIModelTable = () => {
               ) : (
                 aiModels?.map((model: AIModel) => (
                   <tr key={model.id} className="border-b">
-                    <td className="px-6 py-4 text-sm text-gray-900">{model.models_name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{model.accuracy}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{model.precision}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{model.recall}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{model.f1}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{(model.train_every / 3600000)}h</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                    <td className="px-6 py-4 text-sm text-gray-900 ">{model.models_name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 text-center">{model.accuracy}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 text-center">{model.precision}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 text-center">{model.recall}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 text-center">{model.f1}</td>
+                    <td className="px-2 py-4 text-sm text-gray-900 text-center">{model.expected_accuracy}</td>
+                    <td className="px-2 py-4 text-sm text-gray-900 text-center">{model.expected_precision}</td>
+                    <td className="px-2 py-4 text-sm text-gray-900 text-center">{model.expected_recall}</td>
+                    <td className="px-2 py-4 text-sm text-gray-900 text-center">{model.expected_f1}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 text-center">{(model.train_every / 3600000)}h</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 text-center">
                       <input
                         type="radio"
                         name="selectedModel"
@@ -92,7 +99,7 @@ const AIModelTable = () => {
                         onChange={() => handleSelect(model.id)}
                       />
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                    <td className="px-6 py-4 text-sm text-gray-900 text-center">
                       <button
                         onClick={() => handleEdit(model)}
                         className="text-blue-600 hover:underline px-3"
@@ -106,7 +113,7 @@ const AIModelTable = () => {
             </tbody>
           </table>
         </div>
-      )}
+      
 
       {/* Update Modal */}
       {selectedModel && (
