@@ -8,12 +8,12 @@ import (
 )
 
 var (
-	JWTSecretKey       string
-	WsKey              string
-	InterceptorRunning bool = false
-	Change             bool = false
-	UntrainedModel     bool = false
-	SelecteModel       bool = false
+	JWTSecretKey        string
+	WsKey               string
+	InterceptorRunning  bool = false
+	Change              bool = false
+	ModelSettingUpdated bool = false
+	SelectModel         bool = false
 )
 
 func LoadConfig() {

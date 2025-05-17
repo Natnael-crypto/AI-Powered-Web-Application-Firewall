@@ -144,17 +144,17 @@ func InitializeRoutes(r *gin.Engine) {
 
 	ai_analysis := authorized.Group("/")
 	{
-		ai_analysis.POST("/model/train", controllers.CreateModelTrainingRequest)
 		ai_analysis.GET("/model/select/:model_id", controllers.SelectActiveModel)
 		ai_analysis.GET("/models", controllers.GetModels)
-		ai_analysis.DELETE("/model/:model_id", controllers.DeleteModel)
+		ai_analysis.GET("/model/update/setting", controllers.UpdateTrainingSettings)
+		ai_analysis.GET("/model/update/time", controllers.UpdateTrainingTime)
 	}
 
 	ms_services := allowed_ip.Group("/ml")
 	{
 		ms_services.POST("/submit-analysis", controllers.SubmitAnalysisResults)
-		ms_services.GET("/model/untrained", controllers.GetUntrainedModelForML)
-		ms_services.POST("/model/results", controllers.SubmitModelResults)
+		ms_services.GET("/model/untrained", controllers.GetModelForMLs)
+		ms_services.POST("/model/results", controllers.SubmitTrainResults)
 		ms_services.GET("/model/selected", controllers.GetSelectedModel)
 		ms_services.GET("/changes", controllers.MlCheckState)
 	}

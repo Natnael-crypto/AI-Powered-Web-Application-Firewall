@@ -5,7 +5,6 @@ import (
 	"backend/internal/models"
 	"slices"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -92,44 +91,24 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 
 	if startDate := c.Query("start_date"); startDate != "" {
 		startTs, err := strconv.ParseFloat(startDate, 64)
-		if err != nil {
-			return nil
+		if err == nil {
+			query = query.Where("timestamp >= ?", startTs)
+
 		}
-		query = query.Where("timestamp >= ?", startTs)
 	}
 	if endDate := c.Query("end_date"); endDate != "" {
 		endTs, err := strconv.ParseFloat(endDate, 64)
-		if err != nil {
-			return nil
-		}
-		query = query.Where("timestamp <= ?", endTs)
-	}
-
-	if date := c.Query("date"); date != "" {
-		if startTime := c.Query("start_time"); startTime != "" {
-			startTs, err := strconv.ParseFloat(startTime, 64)
-			if err != nil {
-				return nil
-			}
-			query = query.Where("timestamp >= ?", startTs)
-		}
-		if endTime := c.Query("end_time"); endTime != "" {
-			endTs, err := strconv.ParseFloat(endTime, 64)
-			if err != nil {
-				return nil
-			}
+		if err == nil {
 			query = query.Where("timestamp <= ?", endTs)
+
 		}
 	}
 
 	if lastHours := c.Query("last_hours"); lastHours != "" {
 		hours, err := strconv.Atoi(lastHours)
-		if err != nil {
-			return nil
+		if err == nil {
+			query = query.Where("timestamp >= ?", hours)
 		}
-		now := float64(time.Now().Unix())
-		past := now - float64(hours*3600)
-		query = query.Where("timestamp >= ?", past)
 	}
 
 	if searchQuery := c.Query("search"); searchQuery != "" {

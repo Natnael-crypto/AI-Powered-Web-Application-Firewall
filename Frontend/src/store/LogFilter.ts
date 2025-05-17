@@ -2,14 +2,15 @@ import { create } from 'zustand'
 import { Filter } from '../lib/types'
 
 interface FilterState {
-  filters: Filter  // Updated to use `Filter` instead of `Partial<Filter>`
+  filters: Filter
   tempFilter: { key: string; value: string }
   setTempFilter: (key: string, value: string) => void
   addFilter: () => void
   removeFilter: (key: string) => void
   clearFilters: () => void
   applyFilters: () => void
-  appliedFilters: Filter  // Updated to use `Filter` instead of `Partial<Filter>`
+  setFilter: (key: string, value: string) =>void
+  appliedFilters: Filter
 }
 
 export const useLogFilter = create<FilterState>((set, get) => ({
@@ -41,13 +42,8 @@ export const useLogFilter = create<FilterState>((set, get) => ({
     set(state => ({ tempFilter: { ...state.tempFilter, [key]: value } })),
   addFilter: () => {
     const { tempFilter, filters } = get()
-
-    // Skip adding filter if tempFilter is empty
     if (!tempFilter.key || !tempFilter.value) return
-
-    // Skip adding filter if it already exists
     if (filters[tempFilter.key as keyof Filter]) return
-
     set(state => ({
       filters: {
         ...state.filters,
@@ -62,32 +58,48 @@ export const useLogFilter = create<FilterState>((set, get) => ({
       delete updated[key]
       return { filters: updated }
     }),
-  clearFilters: () => set({ filters: get().filters, appliedFilters: {
-    client_ip: '',
-    request_method: '',
-    request_url: '',
-    threat_type: '',
-    user_agent: '',
-    geo_location: '',
-    threat_detected: '',
-    bot_detected: '',
-    rate_limited: '',
-    start_date: '',
-    timestamp: '',
-    end_date: '',
-    last_hours: '',
-    body: '',
-    response_code: '',
-    rule_detected: '',
-    ai_result: '',
-    ai_threat_type: '',
-    search: '',
-    page: '',
-    application_name: ''
-  } }),  // Reset filters, retain appliedFilters
-  applyFilters: () => set(state => ({ appliedFilters: { ...state.filters } })),
+  setFilter: (key:any, value:any) =>
+    set(state => ({
+      filters: {
+        ...state.filters,
+        [key]: value,
+      },
+    })),
+
+  clearFilters: () => set({
+    filters: get().filters,
+    appliedFilters: {
+      client_ip: '',
+      request_method: '',
+      request_url: '',
+      threat_type: '',
+      user_agent: '',
+      geo_location: '',
+      threat_detected: '',
+      bot_detected: '',
+      rate_limited: '',
+      start_date: '',
+      timestamp: '',
+      end_date: '',
+      last_hours: '',
+      body: '',
+      response_code: '',
+      rule_detected: '',
+      ai_result: '',
+      ai_threat_type: '',
+      search: '',
+      page: '',
+      application_name: ''
+    }
+  }),
+applyFilters: () => {
+  const filters = get().filters
+  let updatedFilters = { ...filters }
+  
+  set({ appliedFilters: updatedFilters })
+},
   appliedFilters: {
-    application_name:'',
+    application_name: '',
     client_ip: '',
     request_method: '',
     request_url: '',

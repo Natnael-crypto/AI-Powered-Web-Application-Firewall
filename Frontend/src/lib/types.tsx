@@ -184,6 +184,7 @@ export type Filter ={
 }
 
 export const logFilterType = {
+  application_name: "Application Name",
   search: "Search",
   client_ip: "Client IP",
   request_method: "Request Method",
@@ -194,16 +195,15 @@ export const logFilterType = {
   threat_detected: "Threat Detected",
   bot_detected: "Bot Detected",
   rate_limited: "Rate Limited",
-  start_date: "Start Date",
-  timestamp: "Timestamp",
-  end_date: "End Date",
-  last_hours: "Last Hours",
   body: "Body",
   response_code: "Response Code",
   rule_detected: "Rule Detected",
   ai_result: "AI Result",
   ai_threat_type: "AI Threat Type",
-  application_name: "Application Name",
+  last_hours: "Last Hours",
+  start_date: "Start Date",
+  end_date: "End Date"
+
 } as const
 
 export type FilterKey = keyof typeof logFilterType

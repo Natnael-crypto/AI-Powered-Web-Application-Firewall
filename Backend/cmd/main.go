@@ -16,6 +16,7 @@ import (
 func main() {
 	config.InitDB()
 	config.LoadConfig()
+	utils.CreateModel()
 	err := utils.LoadIPRanges("./internal/static/iptogeo.csv")
 	if err != nil {
 		fmt.Println("Error loading IP ranges:", err)
