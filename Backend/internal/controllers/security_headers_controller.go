@@ -60,7 +60,7 @@ func GetSecurityHeaders(c *gin.Context) {
 	applicationID := c.Param("application_id")
 
 	var securityHeaders []models.SecurityHeader
-	if err := config.DB.Where("application_id In ?", applicationID).Find(&securityHeaders).Error; err != nil {
+	if err := config.DB.Where("application_id = ?", applicationID).Find(&securityHeaders).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch security headers"})
 		return
 	}
@@ -75,7 +75,7 @@ func GetSecurityHeadersAdmin(c *gin.Context) {
 	var securityHeaders []models.SecurityHeader
 	query := config.DB.Model(&models.SecurityHeader{})
 
-	if err := query.Where("application_id In ?", appIDs).Find(&securityHeaders).Error; err != nil {
+	if err := query.Where("application_id = ?", appIDs).Find(&securityHeaders).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch security headers"})
 		return
 	}
