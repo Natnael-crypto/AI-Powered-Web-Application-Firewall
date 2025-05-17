@@ -16,12 +16,6 @@ function AIAnalysis() {
       <div className="w-full mx-auto space-y-4">
         <Card className="flex justify-between items-center py-4 px-6 bg-white">
           <h2 className="text-lg font-semibold">AI Models</h2>
-            <button
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-            onClick={toggleCreateModel}
-          >
-            Create New Model
-          </button>
         </Card>
 
         <section className="bg-white border border-slate-200 xl shadow-lg p-8">
@@ -32,11 +26,6 @@ function AIAnalysis() {
           )}
         </section>
       </div>
-
-      <CreateModelModal
-        isOpen={isCreateModel}
-        onClose={toggleCreateModel}
-      />
     </div>
   )
 }

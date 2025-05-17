@@ -9,8 +9,14 @@ export async function getAIModels() {
   return response.data.model
 }
 
-export async function createAIModel(data: any) {
-  const response = await axios.post('/api/model/train', data)
+export async function updateAIModelSetting(data: any) {
+  const response = await axios.post('/api/model/update/setting', data)
+  if (!response) throw new Error('Something went wrong!')
+  return response.data
+}
+
+export async function updateAIModelTrainTime(data: any) {
+  const response = await axios.post('/api/model/update/time', data)
   if (!response) throw new Error('Something went wrong!')
   return response.data
 }
@@ -22,9 +28,3 @@ export async function selectAIModel(modelId: string) {
   return response.data
 }
 
-export async function deleteAIModel(modelId: string) {
-  const response = await axios.delete(`/api/model/${modelId}`)
-  if (!response) throw new Error('Something went wrong!')
-
-  return response.data
-}
