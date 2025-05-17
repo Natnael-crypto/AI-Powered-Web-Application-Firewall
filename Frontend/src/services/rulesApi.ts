@@ -10,13 +10,14 @@ export async function getRules() {
   return response.data.rules
 }
 
-export async function createRule(data: Partial<Rule>) {
+export async function createRule(data: any) {
   const response = await axios.post('/api/rule/add', data)
 
   if (!response) throw new Error('Something went wrong!')
 
   return response.data
 }
+
 export async function updateRule(data: Partial<Rule>) {
   const response = await axios.put(`/api/rule/update/${data.rule_id}`, data)
 

@@ -34,7 +34,7 @@ func GenerateRequestsCSV(c *gin.Context) {
 	defer writer.Flush()
 
 	headers := []string{
-		"ID", "Application Name", "Client IP", "Request Method", "Request URL", "Headers", "Body", "Timestamp", "ResponseCode", "Status", "ThreatType", "BotDetected", "GeoLocation", "RateLimited", "UserAgent",
+		"ID", "Application Name", "Client IP", "Request Method", "Request URL", "Headers", "Body", "Timestamp", "ResponseCode", "Status", "ThreatType", "BotDetected", "GeoLocation", "RateLimited", "UserAgent", "AI Result", "AI Threat Type", "Rule Detected",
 	}
 	if err := writer.Write(headers); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -60,9 +60,14 @@ func GenerateRequestsCSV(c *gin.Context) {
 			req.GeoLocation,
 			fmt.Sprintf("%t", req.RateLimited),
 			req.UserAgent,
+			fmt.Sprintf("%t", req.AIResult),
+			req.AIThreatType,
+			fmt.Sprintf("%t", req.RuleDetected),
 		}
 		if err := writer.Write(row); err != nil {
 			fmt.Printf("Error writing request %s to CSV: %v\n", req.RequestID, err)
 		}
 	}
+
+	
 }

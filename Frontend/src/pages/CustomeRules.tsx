@@ -1,9 +1,9 @@
 import {useState} from 'react'
 import Card from '../components/Card'
-import Button from '../components/atoms/Button'
 import RulesTable from '../components/RulesTable' // Your existing table component
 import {useCreateRule, useUpdateRule} from '../hooks/api/useRules'
 import RuleDetailsModal from '../components/RuleDetailModal'
+import CreateRuleModal from '../components/CreateRuleModal'
 
 interface RuleDefinitionItem {
   rule_type: string
@@ -31,6 +31,7 @@ function CustomRules() {
   const [selectedRule, setSelectedRule] = useState<Rule | undefined>()
   const {mutate: createRule} = useCreateRule()
   const {mutate: updateRule} = useUpdateRule()
+   const [isModalOpenAdd, setModalOpenAdd] = useState(false);
 
   const toggleModal = () => setIsModalOpen(!isModalOpen)
 
@@ -38,12 +39,7 @@ function CustomRules() {
     setSelectedRule(rule)
     setIsModalOpen(true)
   }
-
-  const handlCreateRule = () => {
-    setSelectedRule(undefined)
-    setIsModalOpen(true)
-  }
-
+  
   const handleFormSubmit = (formData: Partial<Rule>) => {
     const isUpdate = !!formData.rule_id
 
@@ -70,7 +66,14 @@ function CustomRules() {
 
       <Card className="flex justify-between items-center py-4 px-6 bg-white">
         <h2 className="text-lg font-semibold">Custom Rules</h2>
-        <Button onClick={handlCreateRule}>Add Rule</Button>
+        <button
+          className="bg-indigo-600 text-white px-4 py-2 rounded"
+          onClick={() => setModalOpenAdd(true)}
+        >
+          ➕ New Rule
+        </button>
+
+        <CreateRuleModal isOpen={isModalOpenAdd} onClose={() => setModalOpenAdd(false)} />
       </Card>
 
       <Card className="shadow-md p-4 bg-white">

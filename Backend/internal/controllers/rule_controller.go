@@ -5,11 +5,13 @@ import (
 	"backend/internal/models"
 	"backend/internal/utils"
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"slices"
 	"strconv"
 	"time"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -129,6 +131,8 @@ func GetAllRulesAdmin(c *gin.Context) {
 	for _, mapping := range ruleApp {
 		ruleAppIDs = append(ruleAppIDs, mapping.RuleID)
 	}
+
+	fmt.Print(ruleAppIDs)
 
 	var rules []models.Rule
 	if err := config.DB.Where("rule_id IN ?", ruleAppIDs).Find(&rules).Error; err != nil {

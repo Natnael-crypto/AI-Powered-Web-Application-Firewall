@@ -4,6 +4,7 @@ import Table from '../Table'
 import { useGetRequests } from '../../hooks/api/useRequests'
 import { useLogFilter } from '../../store/LogFilter'
 import LoadingSpinner from '../LoadingSpinner'
+import { generateRequest } from '../../services/requestApi'
 
 interface RequestLog {
   request_id: string
@@ -40,6 +41,23 @@ function AttackLogTable() {
   useEffect(() => {
     setPage(1)
   }, [appliedFilters])
+
+const handleGenerateRequest = async () => {
+  try {
+    const blob = await generateRequest(appliedFilters) // ✅ This returns a Blob
+    const url = window.URL.createObjectURL(new Blob([blob]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', 'logs.csv')
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error('Error generating CSV:', err)
+    alert('Failed to generate CSV file.')
+  }
+}
 
   const columns: ColumnDef<RequestLog>[] = [
     {
@@ -112,6 +130,7 @@ function AttackLogTable() {
 
   return (
     <div className="bg-white p-6 shadow-xl border border-gray-200">
+      <button onClick={handleGenerateRequest} className='py-4 px-6 text-white rounded-sm mb-4' style={{backgroundColor: '#1F263E'}}>Generate Request</button>
       <Table data={data?.requests || []} columns={columns} />
       <div className="mt-4 flex justify-center gap-4 items-center">
         <button

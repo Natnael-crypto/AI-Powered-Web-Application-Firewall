@@ -217,3 +217,39 @@ export type AiModelSetting ={
   expected_f1: number,
   train_every: number
 }
+
+export type Condition = {
+  ruleType: string;
+  ruleMethod: string;
+  ruleDefinition: string;
+};
+
+export type RuleInput = {
+  ruleID: string;
+  action: string;
+  category: string;
+  conditions: Condition[];
+  applications: string[];
+};
+
+export type AppOption = {
+  application_id: string;
+  application_name: string;
+};
+
+export const validRuleTypes = [
+  "REQUEST_HEADERS", "REQUEST_URI", "ARGS", "ARGS_GET", "ARGS_POST",
+  "REQUEST_COOKIES", "REQUEST_BODY", "XML", "JSON", "REQUEST_METHOD",
+  "REQUEST_PROTOCOL", "REMOTE_ADDR",
+];
+
+export const validRuleMethods = [
+  "regex", "streq", "contains", "ipMatch", "rx", "beginsWith",
+  "endsWith", "eq", "pm",
+];
+
+export const validActions = [
+  "deny", "log", "nolog", "pass", "drop", "redirect", "capture",
+  "t:none", "t:lowercase", "t:normalizePath", "t:urlDecode",
+  "t:compressWhitespace", "severity:2", "severity:3", "status:403",
+];
