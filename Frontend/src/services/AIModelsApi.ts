@@ -10,13 +10,7 @@ export async function getAIModels() {
 }
 
 export async function updateAIModelSetting(data: any) {
-  const response = await axios.post('/api/model/update/setting', data)
-  if (!response) throw new Error('Something went wrong!')
-  return response.data
-}
-
-export async function updateAIModelTrainTime(data: any) {
-  const response = await axios.post('/api/model/update/time', data)
+  const response = await axios.put('/api/model/update/setting', data)
   if (!response) throw new Error('Something went wrong!')
   return response.data
 }

@@ -207,3 +207,13 @@ export const logFilterType = {
 } as const
 
 export type FilterKey = keyof typeof logFilterType
+
+
+export type AiModelSetting ={
+  id : string,
+  expected_accuracy: number,
+  expected_precision: number,
+  expected_recall: number,
+  expected_f1: number,
+  train_every: number
+}

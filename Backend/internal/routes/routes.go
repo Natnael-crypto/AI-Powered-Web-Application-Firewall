@@ -147,7 +147,6 @@ func InitializeRoutes(r *gin.Engine) {
 		ai_analysis.GET("/model/select/:model_id", controllers.SelectActiveModel)
 		ai_analysis.GET("/models", controllers.GetModels)
 		ai_analysis.PUT("/model/update/setting", controllers.UpdateTrainingSettings)
-		ai_analysis.PUT("/model/update/time", controllers.UpdateTrainingTime)
 	}
 
 	ms_services := allowed_ip.Group("/ml")

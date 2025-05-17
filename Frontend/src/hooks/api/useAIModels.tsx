@@ -1,6 +1,6 @@
 // hooks/useAIModelHooks.ts
 import { useMutation } from '@tanstack/react-query'
-import { getAIModels, selectAIModel, updateAIModelSetting, updateAIModelTrainTime } from '../../services/aiModelsApi'
+import { getAIModels, selectAIModel, updateAIModelSetting } from '../../services/aiModelsApi'
 import { useQuery } from '@tanstack/react-query'
 
 
@@ -11,15 +11,9 @@ export function useGetAIModels() {
   })
 }
 
-export function useCreateModel() {
+export function useUpdateAiModelSetting() {
   return useMutation({
     mutationFn: updateAIModelSetting,
-  })
-}
-
-export function useUpdateModelTrainTime() {
-  return useMutation({
-    mutationFn: updateAIModelTrainTime,
   })
 }
 

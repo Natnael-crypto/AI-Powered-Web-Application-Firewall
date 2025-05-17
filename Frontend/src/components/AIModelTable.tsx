@@ -1,14 +1,13 @@
-
-import {  useSelectModel } from '../hooks/api/useAIModels'
-import { PencilIcon, TrashIcon } from 'lucide-react'
-
-
+import { useState } from 'react'
+import { useGetAIModels, useSelectModel } from '../hooks/api/useAIModels'
+import { PencilIcon } from 'lucide-react'
+import UpdateAIModelSetting from './UpdateAIModelSetting' // Adjust path if needed
 
 interface AIModel {
   id: string
   models_name: string
   number_requests_used: number
-  train_every:number,
+  train_every: number
   accuracy: number
   precision: number
   recall: number
@@ -21,66 +20,103 @@ interface AIModel {
   expected_precision: number
   expected_recall: number
   expected_f1: number
-  percent_of_training_data: 0
+  percent_of_training_data: number
 }
 
-interface AIModelTableProps {
-  aiModels: AIModel[] | undefined
-}
-
-const AIModelTable = ({ aiModels = [] }: AIModelTableProps) => {
+const AIModelTable = () => {
+  const { data: aiModels, isLoading, refetch } = useGetAIModels()
   const selectMutation = useSelectModel()
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedModel, setSelectedModel] = useState<AIModel | null>(null)
+
   const handleSelect = (id: string) => {
-    selectMutation.mutate(id)
+    selectMutation.mutate(id, {
+      onSuccess: () => {
+        refetch()
+      }
+    })
+  }
+
+  const handleEdit = (model: AIModel) => {
+    setSelectedModel(model)
+    setIsEditModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsEditModalOpen(false)
+    setSelectedModel(null)
+    refetch()
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full table-auto">
-        <thead className="border-b bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Model Name</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Accuracy</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Precision</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Recall</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">F1 Score</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Selected</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Modeled</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Train Every</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {aiModels.length === 0 ? (
-            <tr>
-              <td colSpan={9} className="px-6 py-4 text-sm text-gray-900 text-center">No models available</td>
-            </tr>
-          ) : (
-            aiModels.map((model) => (
-              <tr key={model.id} className="border-b">
-                <td className="px-6 py-4 text-sm text-gray-900">{model.models_name}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{model.accuracy}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{model.precision}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{model.recall}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{model.f1}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{model.selected ? 'Yes' : 'No'}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{model.modeled ? 'Yes' : 'No'}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{(model.train_every/3600000)}h</td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  <button
-                  onClick={() => handleSelect(model.id)}
-                  className="text-blue-600 hover:underline px-3"
-                >
-                  <PencilIcon size={16} />
-                </button>
-                </td>
+    <>
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-auto">
+            <thead className="border-b bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Model Name</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Accuracy</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Precision</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Recall</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">F1 Score</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Train Every</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Selected</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+            </thead>
+            <tbody>
+              {aiModels?.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-6 py-4 text-sm text-gray-900 text-center">
+                    No models available
+                  </td>
+                </tr>
+              ) : (
+                aiModels?.map((model: AIModel) => (
+                  <tr key={model.id} className="border-b">
+                    <td className="px-6 py-4 text-sm text-gray-900">{model.models_name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{model.accuracy}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{model.precision}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{model.recall}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{model.f1}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{(model.train_every / 3600000)}h</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      <input
+                        type="radio"
+                        name="selectedModel"
+                        checked={model.selected}
+                        onChange={() => handleSelect(model.id)}
+                      />
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      <button
+                        onClick={() => handleEdit(model)}
+                        className="text-blue-600 hover:underline px-3"
+                      >
+                        <PencilIcon size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Update Modal */}
+      {selectedModel && (
+        <UpdateAIModelSetting
+          isOpen={isEditModalOpen}
+          onClose={closeModal}
+          aiModelSetting={selectedModel}
+        />
+      )}
+    </>
   )
 }
 

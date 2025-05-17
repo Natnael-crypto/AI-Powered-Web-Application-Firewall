@@ -207,6 +207,7 @@ func UpdateTrainingSettings(c *gin.Context) {
 		ExpectedPrecision float32 `json:"expected_precision" binding:"required"`
 		ExpectedRecall    float32 `json:"expected_recall" binding:"required"`
 		ExpectedF1        float32 `json:"expected_f1" binding:"required"`
+		TrainEvery        float64 `json:"train_every" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -219,6 +220,7 @@ func UpdateTrainingSettings(c *gin.Context) {
 		"expected_precision": input.ExpectedPrecision,
 		"expected_recall":    input.ExpectedRecall,
 		"expected_f1":        input.ExpectedF1,
+		"train_every":        input.TrainEvery,
 	}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update training setting stats"})
 		return
@@ -227,33 +229,4 @@ func UpdateTrainingSettings(c *gin.Context) {
 	config.ModelSettingUpdated = true
 
 	c.JSON(http.StatusOK, gin.H{"message": "training setting updated"})
-}
-
-func UpdateTrainingTime(c *gin.Context) {
-
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
-	}
-
-	var input struct {
-		ID         string  `json:"id" binding:"required"`
-		TrainEvery float64 `json:"train_every"`
-	}
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
-		return
-	}
-
-	if err := config.DB.Model(&models.AIModel{}).Where("id = ?", input.ID).Updates(map[string]interface{}{
-		"train_every": input.TrainEvery,
-	}).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update training time stats"})
-		return
-	}
-
-	config.ModelSettingUpdated = true
-
-	c.JSON(http.StatusOK, gin.H{"message": "training time updated"})
 }
