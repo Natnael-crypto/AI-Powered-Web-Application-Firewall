@@ -9,10 +9,11 @@ function ApplicationHostCell({ applicationId }: { applicationId: string }) {
   const { data, isLoading, isError } = useGetApplication(applicationId)
   
 
+  console.log(data)
   if (isLoading) return <span>Loading...</span>
   if (isError || !data) return <span></span>
 
-  return <span>{data.hostname}</span>
+  return <span>{data.host_name}</span>
 }
 
 function UserCell({ userId }: { userId: string }) {

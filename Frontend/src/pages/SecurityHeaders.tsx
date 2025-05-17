@@ -22,6 +22,7 @@ function SecurityHeaders() {
           <button
             className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
             onClick={toggleCreateModal}
+            style={{backgroundColor: '#1F263E'}}
           >
             Create New Header
           </button>
