@@ -71,7 +71,7 @@ func AddApplication(c *gin.Context) {
 		DetectBot:       false,
 		HostName:        application.HostName,
 		MaxPostDataSize: 5.0,
-		Tls:             true,
+		Tls:             false,
 	}
 
 	if err := CreateAppConfigLocal(newAppConf); err != nil {
