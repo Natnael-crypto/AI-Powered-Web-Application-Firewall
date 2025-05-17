@@ -1,5 +1,5 @@
 
-import { useDeleteModel, useSelectModel } from '../hooks/api/useAIModels'
+import {  useSelectModel } from '../hooks/api/useAIModels'
 import { PencilIcon, TrashIcon } from 'lucide-react'
 
 
@@ -29,17 +29,10 @@ interface AIModelTableProps {
 }
 
 const AIModelTable = ({ aiModels = [] }: AIModelTableProps) => {
-  const deleteMutation = useDeleteModel()
   const selectMutation = useSelectModel()
 
   const handleSelect = (id: string) => {
     selectMutation.mutate(id)
-  }
-
-  const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this model?')) {
-      deleteMutation.mutate(id)
-    }
   }
 
   return (
@@ -80,12 +73,6 @@ const AIModelTable = ({ aiModels = [] }: AIModelTableProps) => {
                   className="text-blue-600 hover:underline px-3"
                 >
                   <PencilIcon size={16} />
-                </button>
-                <button
-                  onClick={() => handleDelete(model.id)}
-                  className="text-red-600 hover:underline"
-                >
-                  <TrashIcon size={16} />
                 </button>
                 </td>
               </tr>

@@ -149,11 +149,6 @@ func SelectActiveModel(c *gin.Context) {
 
 	modelID := c.Param("model_id")
 
-	if err := config.DB.Where("modeled = ? AND id = ?", true, modelID).First(&models.AIModel{}).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "model not found or not modeled"})
-		return
-	}
-
 	if err := config.DB.Model(&models.AIModel{}).Where("selected = ?", true).Update("selected", false).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to deselect existing model"})
 		return

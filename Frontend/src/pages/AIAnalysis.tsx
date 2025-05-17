@@ -1,14 +1,8 @@
-import { useState } from 'react'
-
 import AIModelTable from '../components/AIModelTable'
-import CreateModelModal from '../components/CreateModelModal'
 import { useGetAIModels } from '../hooks/api/useAIModels'
 import Card from '../components/Card'
 
 function AIAnalysis() {
-  const [isCreateModel, setCreateModel] = useState(false)
-  const toggleCreateModel = () => setCreateModel((prev) => !prev)
-
   const { data: aiModels, isLoading } = useGetAIModels()
 
   return (
