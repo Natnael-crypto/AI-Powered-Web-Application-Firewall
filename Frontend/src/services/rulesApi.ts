@@ -12,9 +12,7 @@ export async function getRules() {
 
 export async function createRule(data: any) {
   const response = await axios.post('/api/rule/add', data)
-
   if (!response) throw new Error('Something went wrong!')
-
   return response.data
 }
 

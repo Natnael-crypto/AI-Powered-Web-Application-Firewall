@@ -230,6 +230,20 @@ export type RuleInput = {
   applications: string[]
 }
 
+export type RuleResponse ={
+  rule_id: string;
+  rule_type: string;
+  rule_method: string;
+  rule_definition: Condition[];
+  action: string;
+  rule_string: string;
+  created_at: string;
+  updated_at: string;
+  is_active: boolean;
+  applications: string[];
+  category: string;
+}
+
 export type AppOption = {
   application_id: string
   application_name: string
