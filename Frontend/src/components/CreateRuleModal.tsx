@@ -15,9 +15,9 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ isOpen, onClose }) =>
     action: "deny",
     category: "Message",
     conditions: [{
-      ruleType: "ARGS",
-      ruleMethod: "regex",
-      ruleDefinition: "value like *select*",
+      rule_type: "ARGS",
+      rule_method: "regex",
+      rule_definition: "value like *select*",
     }],
     applications: [],
   });
@@ -70,7 +70,7 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ isOpen, onClose }) =>
       const firstLine = i === 0
         ? `"id:${ruleID},phase:2,${action},msg:'${category}'${conditions.length > 1 ? ",chain" : ""}"`
         : chain;
-      ruleText += `${prefix} ${cond.ruleType} "@${cond.ruleMethod} ${cond.ruleDefinition}" ${firstLine}\n`;
+      ruleText += `${prefix} ${cond.rule_type} "@${cond.rule_method} ${cond.rule_definition}" ${firstLine}\n`;
     });
 
     setPreview(ruleText.trim());
@@ -79,7 +79,7 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ isOpen, onClose }) =>
   const addCondition = () => {
     setRuleInput({
       ...ruleInput,
-      conditions: [...ruleInput.conditions, { ruleType: "", ruleMethod: "", ruleDefinition: "" }],
+      conditions: [...ruleInput.conditions, { rule_type: "", rule_method: "", rule_definition: "" }],
     });
   };
 
@@ -94,9 +94,9 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ isOpen, onClose }) =>
       category: ruleInput.category,
       is_active: true,
       conditions: ruleInput.conditions.map((cond) => ({
-        rule_type: cond.ruleType,
-        rule_method: cond.ruleMethod,
-        rule_definition: cond.ruleDefinition,
+        rule_type: cond.rule_type,
+        rule_method: cond.rule_method,
+        rule_definition: cond.rule_definition,
       })),
       application_ids: ruleInput.applications,
     };
@@ -185,8 +185,8 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ isOpen, onClose }) =>
           <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center my-2">
             <select
               className="border p-2"
-              value={cond.ruleType}
-              onChange={(e) => updateCondition(index, "ruleType", e.target.value)}
+              value={cond.rule_type}
+              onChange={(e) => updateCondition(index, "rule_type", e.target.value)}
             >
               <option value="">Select Rule Type</option>
               {validRuleTypes.map(type => (
@@ -196,8 +196,8 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ isOpen, onClose }) =>
 
             <select
               className="border p-2"
-              value={cond.ruleMethod}
-              onChange={(e) => updateCondition(index, "ruleMethod", e.target.value)}
+              value={cond.rule_method}
+              onChange={(e) => updateCondition(index, "rule_method", e.target.value)}
             >
               <option value="">Select Method</option>
               {validRuleMethods.map(method => (
@@ -209,8 +209,8 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ isOpen, onClose }) =>
               <input
                 className="border p-2 flex-1"
                 placeholder="Definition"
-                value={cond.ruleDefinition}
-                onChange={(e) => updateCondition(index, "ruleDefinition", e.target.value)}
+                value={cond.rule_definition}
+                onChange={(e) => updateCondition(index, "rule_definition", e.target.value)}
               />
               {index > 0 && (
                 <button

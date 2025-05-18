@@ -217,9 +217,9 @@ export type AiModelSetting = {
 }
 
 export type Condition = {
-  ruleType: string
-  ruleMethod: string
-  ruleDefinition: string
+  rule_type: string
+  rule_method: string
+  rule_definition: string
 }
 
 export type RuleInput = {
@@ -228,6 +228,11 @@ export type RuleInput = {
   category: string
   conditions: Condition[]
   applications: string[]
+}
+
+export type AppOption = {
+  application_id: string
+  application_name: string
 }
 
 export type RuleResponse ={
@@ -240,14 +245,11 @@ export type RuleResponse ={
   created_at: string;
   updated_at: string;
   is_active: boolean;
-  applications: string[];
+  applications: AppOption[];
   category: string;
 }
 
-export type AppOption = {
-  application_id: string
-  application_name: string
-}
+
 
 export const validRuleTypes = [
   'REQUEST_HEADERS',

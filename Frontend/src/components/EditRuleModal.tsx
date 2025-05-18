@@ -1,30 +1,60 @@
 import React, { useEffect, useState } from "react";
-import { AppOption, Condition, RuleResponse, validActions, validRuleMethods, validRuleTypes } from "../lib/types";
+import {
+  Application,
+  Condition,
+  RuleResponse,
+  validActions,
+  validRuleMethods,
+  validRuleTypes,
+} from "../lib/types";
 import { useGetApplications } from "../hooks/api/useApplication";
-import { createRule } from "../services/rulesApi";
+import { createRule, updateRule } from "../services/rulesApi";
+
+export type AppOption = {
+  application_id: string;
+  application_name: string;
+};
 
 type EditRuleModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  rule:RuleResponse
+  rule: RuleResponse; // <-- Updated to reflect the structure
 };
 
-const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) => {
-  const [ruleInput, setRuleInput] = useState<RuleResponse>(rule);
+const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) => {
+  const [ruleInput, setRuleInput] = useState<RuleResponse>({
+    ...rule
+  });
+
   const [preview, setPreview] = useState<string>("");
   const [availableApps, setAvailableApps] = useState<AppOption[]>([]);
-  const {data:applications} = useGetApplications()
+  const { data: applications } = useGetApplications();
 
- useEffect(() => {
-  if (applications) {
-    const apps = applications.map(app => ({
+  useEffect(() => {
+    if (!applications) return;
+
+    const fetchedApps: AppOption[] = applications.map((app) => ({
       application_id: app.application_id,
       application_name: app.application_name,
     }));
-    setAvailableApps(apps);
-  }
-}, [applications]);
 
+    const ruleApps: AppOption[] = rule.applications;
+    const allAppsMap = new Map<string, AppOption>();
+
+    // Add fetched apps
+    fetchedApps.forEach((app) => {
+      allAppsMap.set(app.application_id, app);
+    });
+
+    // Add missing rule apps
+    ruleApps.forEach((app) => {
+      if (!allAppsMap.has(app.application_id)) {
+        allAppsMap.set(app.application_id, app);
+      }
+    });
+
+    setAvailableApps(Array.from(allAppsMap.values()));
+  }, [applications, rule.applications]);
 
   useEffect(() => {
     generateRule(ruleInput);
@@ -37,15 +67,18 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
   };
 
   const handleAppAdd = (appId: string) => {
-    if (!ruleInput.applications.includes(appId)) {
-      setRuleInput({ ...ruleInput, applications: [...ruleInput.applications, appId] });
+    if (!ruleInput.applications.includes({"application_id":appId,"application_name":""})) {
+      setRuleInput({
+        ...ruleInput,
+        applications: [...ruleInput.applications, {"application_id":appId,"application_name":""}],
+      });
     }
   };
 
   const handleAppRemove = (appId: string) => {
     setRuleInput({
       ...ruleInput,
-      applications: ruleInput.applications.filter(a => a !== appId),
+      applications: ruleInput.applications.filter((a) => a.application_id !== appId),
     });
   };
 
@@ -57,10 +90,11 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
     rule_definition.forEach((cond, i) => {
       const prefix = i === 0 ? "SecRule" : "    SecRule";
       const chain = i < rule_definition.length - 1 ? `"chain"` : "";
-      const firstLine = i === 0
-        ? `"id:${rule_id},phase:2,${action},msg:'${category}'${rule_definition.length > 1 ? ",chain" : ""}"`
-        : chain;
-      ruleText += `${prefix} ${cond.ruleType} "@${cond.ruleMethod} ${cond.ruleDefinition}" ${firstLine}\n`;
+      const firstLine =
+        i === 0
+          ? `"id:${rule_id},phase:2,${action},msg:'${category}'${rule_definition.length > 1 ? ",chain" : ""}"`
+          : chain;
+      ruleText += `${prefix} ${cond.rule_type} "@${cond.rule_method} ${cond.rule_definition}" ${firstLine}\n`;
     });
 
     setPreview(ruleText.trim());
@@ -69,7 +103,10 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
   const addCondition = () => {
     setRuleInput({
       ...ruleInput,
-      rule_definition: [...ruleInput.rule_definition, { ruleType: "", ruleMethod: "", ruleDefinition: "" }],
+      rule_definition: [
+        ...ruleInput.rule_definition,
+        { rule_type: "", rule_method: "", rule_definition: "" },
+      ],
     });
   };
 
@@ -79,22 +116,25 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
       return;
     }
 
+    var appIds=ruleInput.applications.map((appOp)=>appOp.application_id)
+
+    console.log(appIds)
+    
     const payloadTemplate = {
+      rule_id: rule.rule_id,
       action: ruleInput.action,
       category: ruleInput.category,
       is_active: true,
       conditions: ruleInput.rule_definition.map((cond) => ({
-        rule_type: cond.ruleType,
-        rule_method: cond.ruleMethod,
-        rule_definition: cond.ruleDefinition,
+        rule_type: cond.rule_type,
+        rule_method: cond.rule_method,
+        rule_definition: cond.rule_definition,
       })),
-      application_ids: ruleInput.applications,
+      application_ids: appIds
     };
 
-    console.log(payloadTemplate)
-
     try {
-      createRule(payloadTemplate)
+      updateRule(payloadTemplate);
       alert("Rule saved successfully for all selected applications!");
       onClose();
     } catch (error) {
@@ -103,18 +143,26 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
     }
   };
 
-  const unselectedApps = availableApps.filter(app => !ruleInput.applications.includes(app.application_id));
+  const selectedAppIds = ruleInput.applications.map(app => app.application_id);
+
+  const unselectedApps = availableApps.filter(
+    (app) => !selectedAppIds.includes(app.application_id)
+  );
+
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
-        <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-red-600 text-xl">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-600 hover:text-red-600 text-xl"
+        >
           &times;
         </button>
 
-        <h2 className="text-2xl font-bold mb-4">Create WAF Rule</h2>
+        <h2 className="text-2xl font-bold mb-4">Edit WAF Rule</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <select
@@ -123,8 +171,10 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
             onChange={(e) => setRuleInput({ ...ruleInput, action: e.target.value })}
           >
             <option value="">Select Action</option>
-            {validActions.map(action => (
-              <option key={action} value={action}>{action}</option>
+            {validActions.map((action) => (
+              <option key={action} value={action}>
+                {action}
+              </option>
             ))}
           </select>
 
@@ -147,7 +197,7 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
             }}
           >
             <option value="">-- Select Application --</option>
-            {unselectedApps.map(app => (
+            {unselectedApps.map((app) => (
               <option key={app.application_id} value={app.application_id}>
                 {app.application_name}
               </option>
@@ -155,43 +205,49 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
           </select>
 
           <div className="flex flex-wrap gap-2 mt-2">
-            {ruleInput.applications.map(appId => {
-              const app = availableApps.find(a => a.application_id === appId);
+            {ruleInput.applications.map((appId) => {
+              const app = availableApps.find((a) => a.application_id === appId.application_id);
               return (
                 <span
-                  key={appId}
+                  key={appId.application_id}
                   className="bg-green-200 text-green-900 px-3 py-1 rounded-full cursor-pointer hover:bg-red-200 hover:text-red-900"
-                  onClick={() => handleAppRemove(appId)}
+                  onClick={() => handleAppRemove(appId.application_id)}
                 >
-                  {app?.application_name || appId}
+                  {app?.application_name || appId.application_name}
                 </span>
               );
             })}
           </div>
         </div>
 
-        {/* Conditions */}
         {ruleInput.rule_definition.map((cond, index) => (
-          <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center my-2">
+          <div
+            key={index}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center my-2"
+          >
             <select
               className="border p-2"
-              value={cond.ruleType}
-              onChange={(e) => updateCondition(index, "ruleType", e.target.value)}
+              value={cond.rule_type}
+              onChange={(e) => updateCondition(index, "rule_type", e.target.value)}
             >
               <option value="">Select Rule Type</option>
-              {validRuleTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
+              {validRuleTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
               ))}
             </select>
 
             <select
               className="border p-2"
-              value={cond.ruleMethod}
-              onChange={(e) => updateCondition(index, "ruleMethod", e.target.value)}
+              value={cond.rule_method}
+              onChange={(e) => updateCondition(index, "rule_method", e.target.value)}
             >
               <option value="">Select Method</option>
-              {validRuleMethods.map(method => (
-                <option key={method} value={method}>{method}</option>
+              {validRuleMethods.map((method) => (
+                <option key={method} value={method}>
+                  {method}
+                </option>
               ))}
             </select>
 
@@ -199,8 +255,8 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
               <input
                 className="border p-2 flex-1"
                 placeholder="Definition"
-                value={cond.ruleDefinition}
-                onChange={(e) => updateCondition(index, "ruleDefinition", e.target.value)}
+                value={cond.rule_definition}
+                onChange={(e) => updateCondition(index, "rule_definition", e.target.value)}
               />
               {index > 0 && (
                 <button
@@ -223,14 +279,14 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
             className="bg-blue-500 text-white px-4 py-2 rounded"
             onClick={addCondition}
           >
-          Add Condition
+            Add Condition
           </button>
 
           <button
             className="bg-green-500 text-white px-4 py-2 rounded"
             onClick={saveRule}
           >
-          Save Rule
+            Save Rule
           </button>
         </div>
 

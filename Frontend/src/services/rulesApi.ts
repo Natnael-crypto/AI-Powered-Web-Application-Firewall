@@ -16,7 +16,7 @@ export async function createRule(data: any) {
   return response.data
 }
 
-export async function updateRule(data: Partial<Rule>) {
+export async function updateRule(data: any) {
   const response = await axios.put(`/api/rule/update/${data.rule_id}`, data)
 
   if (!response) throw new Error('Something went wrong!')
@@ -25,14 +25,14 @@ export async function updateRule(data: Partial<Rule>) {
 }
 
 export async function activateRule(ruleId: string) {
-  const response = await axios.get(`/api/rule/activate/${ruleId}`)
+  const response = await axios.post(`/api/rule/activate/${ruleId}`)
 
   if (!response) throw new Error('Something went wrong!')
 
   return response.data
 }
 export async function deactivateRule(ruleId: string) {
-  const response = await axios.get(`/api/rule/deactivate/${ruleId}`)
+  const response = await axios.post(`/api/rule/deactivate/${ruleId}`)
 
   if (!response) throw new Error('Something went wrong!')
 
