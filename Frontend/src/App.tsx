@@ -15,6 +15,7 @@ import WebServices from './pages/WebServices'
 import {ToastProvider} from './providers/ToastProvider'
 import AIAnalysis from './pages/AIAnalysis'
 import SecurityHeaders from './pages/SecurityHeaders'
+import Notifications from './pages/Notifications'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -23,11 +24,12 @@ const router = createBrowserRouter(
       <Route path="/" element={<RootLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="attacks-logs" element={<AttackLog />}/>
+        <Route path="attacks-logs" element={<AttackLog />} />
         <Route path="custom-rules" element={<CustomeRules />} />
         <Route path="web-services" element={<WebServices />} />
         <Route path="ai-models" element={<AIAnalysis />} />
         <Route path="security-headers" element={<SecurityHeaders />} />
+        <Route path="notifications" element={<Notifications />} />
         <Route path="system" element={<System />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>

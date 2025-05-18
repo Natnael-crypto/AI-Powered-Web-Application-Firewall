@@ -1,7 +1,7 @@
-import {MdDashboard, MdWeb} from 'react-icons/md'
+import {MdDashboard, MdNotifications, MdWeb} from 'react-icons/md'
 import {FaRegFileAlt} from 'react-icons/fa'
 import {AiOutlineTool, AiOutlineSetting, AiOutlineBarChart} from 'react-icons/ai'
-import { HiOutlineShieldCheck } from 'react-icons/hi'
+import {HiOutlineShieldCheck} from 'react-icons/hi'
 
 export const SiderbarContentItems = [
   {
@@ -34,10 +34,16 @@ export const SiderbarContentItems = [
     icon: AiOutlineBarChart,
     children: [],
   },
-   {
+  {
     title: 'Security Headers',
     href: 'security-headers',
     icon: HiOutlineShieldCheck,
+    children: [],
+  },
+  {
+    title: 'Notifications',
+    href: 'notifications',
+    icon: MdNotifications,
     children: [],
   },
   {
