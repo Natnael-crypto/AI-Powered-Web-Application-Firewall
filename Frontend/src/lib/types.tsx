@@ -230,18 +230,18 @@ export type RuleInput = {
   applications: string[]
 }
 
-export type RuleResponse ={
-  rule_id: string;
-  rule_type: string;
-  rule_method: string;
-  rule_definition: Condition[];
-  action: string;
-  rule_string: string;
-  created_at: string;
-  updated_at: string;
-  is_active: boolean;
-  applications: string[];
-  category: string;
+export type RuleResponse = {
+  rule_id: string
+  rule_type: string
+  rule_method: string
+  rule_definition: Condition[]
+  action: string
+  rule_string: string
+  created_at: string
+  updated_at: string
+  is_active: boolean
+  applications: string[]
+  category: string
 }
 
 export type AppOption = {
@@ -305,4 +305,10 @@ export interface Notification {
 export interface NotificationUpdate {
   notification_ids: string[]
   status: boolean
+}
+
+export type rateLimitInputtype = {
+  rate_limit: number
+  window_size?: number
+  block_time?: number
 }
