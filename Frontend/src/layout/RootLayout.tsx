@@ -7,24 +7,70 @@ import {APP_ROUTES, getDefaultRoute, isPublicRoute} from '../config/routes'
 import LoadingSpinner from '../components/LoadingSpinner'
 import {useToast} from '../hooks/useToast'
 import {useUserInfo} from '../store/UserInfo'
+import {useGetNotifications} from '../hooks/api/useNotifications'
+import {Notification} from '../lib/types'
 
-// Retry configuration
 const MAX_RETRIES = 3
-const RETRY_DELAY = 1000 // 1 second
+const RETRY_DELAY = 1000
+const NOTIFICATION_POLL_INTERVAL = 30000
 
 function RootLayout() {
   const {pathname} = useLocation()
   const navigate = useNavigate()
   const {addToast: toast} = useToast()
-  const {setUser} = useUserInfo()
+  const {setUser, user} = useUserInfo()
   const [retryCount, setRetryCount] = useState(0)
   const {data: userInfo, isLoading, error, refetch} = useIsLoggedIn()
+  const [lastNotificationTime, setLastNotificationTime] = useState<string | null>(null)
+  const [notificationPolling, setNotificationPolling] = useState<NodeJS.Timeout | null>(
+    null,
+  )
+
+  const {data: notifications, refetch: refetchNotifications} = useGetNotifications(
+    user?.user_id,
+  )
+
+  useEffect(() => {
+    if (!notifications?.length || !userInfo) return
+
+    const newNotifications = lastNotificationTime
+      ? notifications.filter((n: Notification) => !n.status)
+      : notifications.slice(0, 1)
+
+    if (newNotifications.length > 0) {
+      newNotifications.forEach((notification: any) => {
+        toast(notification.message, notification.status ? 'success' : 'warning', 5000)
+      })
+      setLastNotificationTime(newNotifications[0].timestamp)
+    }
+  }, [notifications, lastNotificationTime, toast, userInfo])
+
+  useEffect(() => {
+    if (userInfo) {
+      const interval = setInterval(() => {
+        refetchNotifications()
+      }, NOTIFICATION_POLL_INTERVAL)
+      setNotificationPolling(interval)
+    } else if (notificationPolling) {
+      clearInterval(notificationPolling)
+      setNotificationPolling(null)
+    }
+
+    return () => {
+      if (notificationPolling) {
+        clearInterval(notificationPolling)
+      }
+    }
+  }, [userInfo, refetchNotifications])
 
   useEffect(() => {
     if (userInfo) {
       setUser(userInfo)
+      if (notifications?.length) {
+        setLastNotificationTime(notifications[0].timestamp)
+      }
     }
-  }, [userInfo, setUser])
+  }, [userInfo, setUser, notifications])
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -34,7 +80,6 @@ function RootLayout() {
       return
     }
 
-    // If we have an error and haven't exceeded max retries
     if (error && retryCount < MAX_RETRIES) {
       const timer = setTimeout(() => {
         refetch()
@@ -53,7 +98,7 @@ function RootLayout() {
     if (isLoading || !userInfo) return
 
     if (error) {
-      toast('Session Error: Unable to verify your session. Please login again.')
+      toast('Session Error: Unable to verify your session. Please login again.', 'error')
       localStorage.removeItem('token')
       navigate(APP_ROUTES.PUBLIC.LOGIN, {replace: true})
       return

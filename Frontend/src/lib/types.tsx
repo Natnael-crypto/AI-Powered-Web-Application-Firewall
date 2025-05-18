@@ -287,3 +287,8 @@ export interface Notification {
   timestamp: string
   status: boolean
 }
+
+export interface NotificationUpdate {
+  notification_ids: string[]
+  status: boolean
+}
