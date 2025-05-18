@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { AppOption, Condition, RuleInput, validActions, validRuleMethods, validRuleTypes } from "../lib/types";
+import { AppOption, Condition, RuleResponse, validActions, validRuleMethods, validRuleTypes } from "../lib/types";
 import { useGetApplications } from "../hooks/api/useApplication";
 import { createRule } from "../services/rulesApi";
 
 type EditRuleModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  rule:RuleInput
+  rule:RuleResponse
 };
 
 const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) => {
-  const [ruleInput, setRuleInput] = useState<RuleInput>(rule);
+  const [ruleInput, setRuleInput] = useState<RuleResponse>(rule);
   const [preview, setPreview] = useState<string>("");
   const [availableApps, setAvailableApps] = useState<AppOption[]>([]);
   const {data:applications} = useGetApplications()
@@ -31,9 +31,9 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
   }, [ruleInput]);
 
   const updateCondition = (index: number, field: keyof Condition, value: string) => {
-    const updatedConditions = [...ruleInput.conditions];
+    const updatedConditions = [...ruleInput.rule_definition];
     updatedConditions[index][field] = value;
-    setRuleInput({ ...ruleInput, conditions: updatedConditions });
+    setRuleInput({ ...ruleInput, rule_definition: updatedConditions });
   };
 
   const handleAppAdd = (appId: string) => {
@@ -49,16 +49,16 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
     });
   };
 
-  const generateRule = (input: RuleInput) => {
-    const { ruleID, action, category, conditions } = input;
-    if (conditions.length === 0) return;
+  const generateRule = (input: RuleResponse) => {
+    const { rule_id, action, category, rule_definition } = input;
+    if (rule_definition.length === 0) return;
 
     let ruleText = "";
-    conditions.forEach((cond, i) => {
+    rule_definition.forEach((cond, i) => {
       const prefix = i === 0 ? "SecRule" : "    SecRule";
-      const chain = i < conditions.length - 1 ? `"chain"` : "";
+      const chain = i < rule_definition.length - 1 ? `"chain"` : "";
       const firstLine = i === 0
-        ? `"id:${ruleID},phase:2,${action},msg:'${category}'${conditions.length > 1 ? ",chain" : ""}"`
+        ? `"id:${rule_id},phase:2,${action},msg:'${category}'${rule_definition.length > 1 ? ",chain" : ""}"`
         : chain;
       ruleText += `${prefix} ${cond.ruleType} "@${cond.ruleMethod} ${cond.ruleDefinition}" ${firstLine}\n`;
     });
@@ -69,7 +69,7 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
   const addCondition = () => {
     setRuleInput({
       ...ruleInput,
-      conditions: [...ruleInput.conditions, { ruleType: "", ruleMethod: "", ruleDefinition: "" }],
+      rule_definition: [...ruleInput.rule_definition, { ruleType: "", ruleMethod: "", ruleDefinition: "" }],
     });
   };
 
@@ -83,7 +83,7 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
       action: ruleInput.action,
       category: ruleInput.category,
       is_active: true,
-      conditions: ruleInput.conditions.map((cond) => ({
+      conditions: ruleInput.rule_definition.map((cond) => ({
         rule_type: cond.ruleType,
         rule_method: cond.ruleMethod,
         rule_definition: cond.ruleDefinition,
@@ -171,7 +171,7 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
         </div>
 
         {/* Conditions */}
-        {ruleInput.conditions.map((cond, index) => (
+        {ruleInput.rule_definition.map((cond, index) => (
           <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center my-2">
             <select
               className="border p-2"
@@ -206,9 +206,9 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) =
                 <button
                   className="bg-red-500 text-white px-2 py-1 rounded"
                   onClick={() => {
-                    const updated = [...ruleInput.conditions];
+                    const updated = [...ruleInput.rule_definition];
                     updated.splice(index, 1);
-                    setRuleInput({ ...ruleInput, conditions: updated });
+                    setRuleInput({ ...ruleInput, rule_definition: updated });
                   }}
                 >
                   ✕

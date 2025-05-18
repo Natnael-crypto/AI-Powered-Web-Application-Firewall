@@ -1,41 +1,60 @@
-import {ColumnDef} from '@tanstack/react-table'
-import {Rule} from '../pages/CustomeRules'
+import { ColumnDef } from '@tanstack/react-table'
+import { Rule } from '../pages/CustomeRules'
 import Table from './Table'
-import {DropdownActions} from './DropdownAction'
+import { DropdownActions } from './DropdownAction'
 import {
   useActivateRule,
   useDeactivateRule,
   useDeleteRules,
   useGetRules,
 } from '../hooks/api/useRules'
-import {useToast} from '../hooks/useToast'
+import { useToast } from '../hooks/useToast'
 import LoadingSpinner from './LoadingSpinner'
+import { useState } from 'react'
+import EditRuleModal from './EditRuleModal'
+import { RuleInput, RuleResponse } from '../lib/types'
 
 interface rulesTabelProps {
   onUpdate: (rule: Rule) => void
 }
 
-const RulesTable = ({onUpdate}: rulesTabelProps) => {
-  const {mutate: deactivateRule} = useDeactivateRule()
-  const {mutate: activateRule} = useActivateRule()
-  const {mutate: deleteRule} = useDeleteRules()
-  const {addToast: toast} = useToast()
-  const {data: rules, isLoading, isError} = useGetRules()
-  async function handleDeactivation(rule: Rule) {
+const RulesTable = ({ onUpdate }: rulesTabelProps) => {
+  const { mutate: deactivateRule } = useDeactivateRule()
+  const { mutate: activateRule } = useActivateRule()
+  const { mutate: deleteRule } = useDeleteRules()
+  const { addToast: toast } = useToast()
+  const { data: rules, isLoading, isError } = useGetRules()
+
+  const [isOpen, setOpen] = useState(false)
+  const [selectedRule, setSelectedRule] = useState<RuleResponse | null>(null)
+
+  const closeModal = () => {
+    setOpen(false)
+    setSelectedRule(null)
+  }
+
+  const openEditModal = (rule: RuleResponse) => {
+    setSelectedRule(rule)
+    setOpen(true)
+  }
+
+  async function handleDeactivation(rule: RuleResponse) {
     deactivateRule(rule.rule_id, {
       onSuccess: () => {
         toast('deactivated successfully')
       },
     })
   }
-  async function handleActivation(rule: Rule) {
+
+  async function handleActivation(rule: RuleResponse) {
     activateRule(rule.rule_id, {
       onSuccess: () => {
         toast('activated successfully')
       },
     })
   }
-  async function handleDeleteRule(rule: Rule) {
+
+  async function handleDeleteRule(rule: RuleResponse) {
     deleteRule(rule.rule_id, {
       onSuccess: () => {
         toast(`deleted a rule with id: ${rule.rule_id} successfully`)
@@ -43,9 +62,7 @@ const RulesTable = ({onUpdate}: rulesTabelProps) => {
     })
   }
 
-  console.log(rules)
-
-  const columns: ColumnDef<Rule>[] = [
+  const columns: ColumnDef<RuleResponse>[] = [
     {
       accessorKey: 'rule_id',
       header: 'Rule ID',
@@ -61,17 +78,17 @@ const RulesTable = ({onUpdate}: rulesTabelProps) => {
     {
       accessorKey: 'is_active',
       header: 'Active',
-      cell: ({getValue}) => (getValue() ? 'Yes' : 'No'),
+      cell: ({ getValue }) => (getValue() ? 'Yes' : 'No'),
     },
     {
       accessorKey: 'created_at',
       header: 'Created At',
-      cell: ({getValue}) => new Date(getValue() as string).toLocaleString(),
+      cell: ({ getValue }) => new Date(getValue() as string).toLocaleString(),
     },
     {
       accessorKey: 'rule_string',
       header: 'Rule String',
-      cell: ({getValue}) => (
+      cell: ({ getValue }) => (
         <div className="max-w-xs truncate" title={getValue() as string}>
           {getValue() as string}
         </div>
@@ -80,23 +97,23 @@ const RulesTable = ({onUpdate}: rulesTabelProps) => {
     {
       header: 'Actions',
       id: 'actions',
-      cell: ({row}) => (
+      cell: ({ row }) => (
         <DropdownActions
           item={row.original}
           options={[
             {
               label: 'Activate',
               onClick: rule => handleActivation(rule),
-              show: (rule: Rule) => !rule.is_active,
+              show: (rule: RuleResponse) => !rule.is_active,
             },
             {
               label: 'Deactivate',
               onClick: rule => handleDeactivation(rule),
-              show: (rule: Rule) => rule.is_active,
+              show: (rule: RuleResponse) => rule.is_active,
             },
             {
-              label: 'update Rule',
-              onClick: rule => onUpdate(rule),
+              label: 'Update Rule',
+              onClick: rule => openEditModal(rule),
             },
             {
               label: 'Delete Rule',
@@ -115,6 +132,13 @@ const RulesTable = ({onUpdate}: rulesTabelProps) => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">WAF Rules</h1>
       <Table columns={columns} data={rules} />
+      {selectedRule && (
+        <EditRuleModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          rule={selectedRule}
+        />
+      )}
     </div>
   )
 }

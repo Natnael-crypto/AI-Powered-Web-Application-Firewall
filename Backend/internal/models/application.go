@@ -21,3 +21,8 @@ type UserToApplication struct {
 	ApplicationID   string `json:"application_id" gorm:"not null"`
 	ApplicationName string `json:"application_name"`
 }
+
+type ApplicationOptions struct {
+	ApplicationID string `json:"application_id" `
+	HostName      string `json:"hostname"`
+}
