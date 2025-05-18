@@ -79,7 +79,6 @@ function WebService() {
           size="l"
           variant="primary"
           onClick={handleOpenCreateModal}
-          
         >
           Add Service
         </Button>
@@ -90,6 +89,7 @@ function WebService() {
           data={applications}
           openModal={() => setIsModalOpen(true)}
           setSelectedApp={setSelectedApp}
+          selectedApp={selectedApp}
         />
       </Card>
     </div>

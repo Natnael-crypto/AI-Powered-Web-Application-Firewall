@@ -26,16 +26,14 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
   onSubmit,
   application,
 }) => {
-  // const [certFile, setCertFile] = useState<File | null>(null)
-  // const [keyFile, setKeyFile] = useState<File | null>(null)
   const [form, setForm] = useState<WebServiceData>({
-    application_name: application?.application_name ?? '',
-    description: application?.description ?? '',
-    hostname: application?.hostname ?? '',
-    ip_address: application?.ip_address ?? '',
-    port: application?.port ?? '',
-    status: application?.status ?? true,
-    tls: application?.tls ?? false,
+    application_name: '',
+    description: '',
+    hostname: '',
+    ip_address: '',
+    port: '',
+    status: true,
+    tls: false,
   })
 
   useEffect(() => {
@@ -66,12 +64,19 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
     )
   }
 
+  if (!isOpen) return null
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add Web Service">
-      <div className="space-y-8 px-2 sm:px-4 py-4">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={application ? 'Edit Web Service' : 'Add Web Service'}
+    >
+      <div className="space-y-6 px-4 py-4">
+        {/* Main Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold text-gray-700 mb-1">
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
               Application Name
             </label>
             <input
@@ -79,115 +84,139 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
               name="application_name"
               value={form.application_name}
               onChange={handleChange}
-              className="w-full border border-gray-300  px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm transition"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
               placeholder="Enter application name"
+              required
             />
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold text-gray-700 mb-1">Hostname</label>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">Hostname</label>
             <input
               type="text"
               name="hostname"
               value={form.hostname}
               onChange={handleChange}
-              className="w-full border border-gray-300  px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm transition"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
               placeholder="example.com"
+              required
             />
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold text-gray-700 mb-1">IP Address</label>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">IP Address</label>
             <input
               type="text"
               name="ip_address"
               value={form.ip_address}
               onChange={handleChange}
-              className="w-full border border-gray-300  px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm transition"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
               placeholder="192.168.1.1"
+              required
             />
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold text-gray-700 mb-1">Port</label>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">Port</label>
             <input
               type="text"
               name="port"
               value={form.port}
               onChange={handleChange}
-              className="w-full border border-gray-300  px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm transition"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
               placeholder="8080"
+              required
             />
           </div>
         </div>
 
-        <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-1">Description</label>
+        {/* Description Field */}
+        <div className="space-y-1">
+          <label className="block text-sm font-medium text-gray-700">Description</label>
           <textarea
             name="description"
             value={form.description}
             onChange={handleChange}
             rows={3}
-            className="w-full border border-gray-300  px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm transition resize-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
             placeholder="Enter description"
           />
         </div>
 
-        <div className="flex flex-wrap gap-6">
-          <label className="flex items-center gap-2 text-gray-800">
+        {/* Toggle Options */}
+        <div className="flex flex-wrap gap-6 pt-2">
+          <label className="inline-flex items-center">
             <input
               type="checkbox"
               name="status"
               checked={form.status}
               onChange={handleChange}
-              className="w-4 h-4 text-blue-600 border-gray-300  focus:ring-2 focus:ring-blue-500"
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
-            <span className="text-sm font-medium">Active</span>
+            <span className="ml-2 text-sm text-gray-700">Active</span>
           </label>
 
-          <label className="flex items-center gap-2 text-gray-800">
+          <label className="inline-flex items-center">
             <input
               type="checkbox"
               name="tls"
               checked={form.tls}
               onChange={handleChange}
-              className="w-4 h-4 text-blue-600 border-gray-300  focus:ring-2 focus:ring-blue-500"
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
-            <span className="text-sm font-medium">TLS Enabled</span>
+            <span className="ml-2 text-sm text-gray-700">TLS Enabled</span>
           </label>
         </div>
 
+        {/* TLS Certificate Fields (Conditional) */}
         {form.tls && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex flex-col">
-              <label className="text-sm font-semibold text-gray-700 mb-1">
-                Cert File
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">
+                Certificate File
               </label>
               <input
                 type="file"
-                // onChange={e => setCertFile(e.target.files?.[0] || null)}
-                className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-md file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-50 file:text-blue-700
+                  hover:file:bg-blue-100"
                 required
               />
             </div>
-            <div className="flex flex-col">
-              <label className="text-sm font-semibold text-gray-700 mb-1">Key File</label>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">Key File</label>
               <input
                 type="file"
-                // onChange={e => setKeyFile(e.target.files?.[0] || null)}
-                className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4  file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-md file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-50 file:text-blue-700
+                  hover:file:bg-blue-100"
                 required
               />
             </div>
           </div>
         )}
 
-        <div className="flex justify-end gap-3 pt-6 border-t mt-6 text-white">
-          <Button variant="secondary" onClick={onClose}>
+        {/* Form Actions */}
+        <div className="flex justify-end gap-3 pt-6 mt-6 border-t border-gray-200">
+          <Button
+            variant="secondary"
+            onClick={onClose}
+            classname="px-4 text-white py-2 text-sm"
+          >
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleSubmit}>
-            Submit
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            classname="px-4 py-2 text-white text-sm"
+          >
+            {application ? 'Update' : 'Create'} Service
           </Button>
         </div>
       </div>

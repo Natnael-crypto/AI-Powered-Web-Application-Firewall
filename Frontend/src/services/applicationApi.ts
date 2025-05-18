@@ -1,5 +1,10 @@
 import axios from '../lib/axios'
-import {Application, ApplicationsResponse, AssignmentsResponse} from '../lib/types'
+import {
+  Application,
+  ApplicationsResponse,
+  AssignmentsResponse,
+  rateLimitInputtype,
+} from '../lib/types'
 
 export async function getApplications() {
   const response: {data: ApplicationsResponse} = await axios.get('/api/application', {
@@ -57,4 +62,78 @@ export async function deleteAssignment(
   if (!response) throw new Error('Something went wrong')
 
   return await response.data
+}
+
+export async function updateListeningPort(data: {listening_port: string}) {
+  const response = await axios.put(`/api/config/update/listening-port`, data)
+
+  if (!response) throw new Error('Something went wrong')
+
+  return await response.data
+}
+
+export async function updateRateLimit(data: {
+  application_id: string
+  data: rateLimitInputtype
+}) {
+  const response = await axios.put(
+    `/api/config/update/rate-limit/${data.application_id}`,
+    data.data,
+  )
+
+  if (!response) throw new Error('Something went wrong')
+
+  return await response.data
+}
+
+export async function updateRemoteLogServer(data: {remote_logServer: string}) {
+  const response = await axios.put(`/api/config/update/remote-log-server`, data)
+
+  if (!response) throw new Error('Something went wrong')
+
+  return await response.data
+}
+
+export async function getconfig() {
+  const response = await axios.get('/api/config/')
+
+  if (!response) throw new Error('Something went wrong')
+
+  return await response.data.data
+}
+
+export async function getApplicationConfig(application_id: string) {
+  const response = await axios.get(`/api/config/${application_id}`)
+
+  if (!response) throw new Error('Something went wrong')
+
+  return await response.data.data
+}
+
+export async function updateDetectBOT(data: {
+  application_id: string
+  data: {detect_bot: boolean}
+}) {
+  const response = await axios.put(
+    `/api/config/update/detect-bot/${data.application_id}`,
+    data.data,
+  )
+
+  if (!response) throw new Error('Something went wrong')
+
+  return await response.data.data
+}
+
+export async function updateMaxDataSize(data: {
+  application_id: string
+  data: {max_post_data_size: number}
+}) {
+  const response = await axios.put(
+    `/api/config/update/post-data-size/${data.application_id}`,
+    data.data,
+  )
+
+  if (!response) throw new Error('Something went wrong')
+
+  return await response.data.data
 }

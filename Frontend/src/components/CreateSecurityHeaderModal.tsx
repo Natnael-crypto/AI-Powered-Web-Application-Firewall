@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { useCreateSecurityHeader } from '../hooks/api/useSecurityHeaders'
-import { useGetApplications } from '../hooks/api/useApplication'
+import {useState} from 'react'
+import {useCreateSecurityHeader} from '../hooks/api/useSecurityHeaders'
+import {useGetApplications} from '../hooks/api/useApplication'
 
 function CreateSecurityHeaderModal({
   isOpen,
@@ -13,16 +13,15 @@ function CreateSecurityHeaderModal({
   const [headerValue, setHeaderValue] = useState('')
   const [applicationIds, setApplicationIds] = useState<string[]>([])
 
-  const { data: applications = [], isLoading } = useGetApplications()
-  const { mutate: createHeader } = useCreateSecurityHeader()
+  const {data: applications = [], isLoading} = useGetApplications()
+  const {mutate: createHeader} = useCreateSecurityHeader()
 
   const handleSubmit = () => {
-
     createHeader(
       {
-        header_name:headerName,
-      header_value:headerValue,
-      application_id:applicationIds
+        header_name: headerName,
+        header_value: headerValue,
+        application_id: applicationIds,
       },
       {
         onSuccess: () => {
@@ -30,15 +29,14 @@ function CreateSecurityHeaderModal({
           setHeaderName('')
           setHeaderValue('')
           setApplicationIds([])
-          alert('Header created successfully!');
+          alert('Header created successfully!')
         },
-      }
+      },
     )
   }
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selected = Array.from(e.target.selectedOptions, (option) => option.value)
-    console.log(selected)
+    const selected = Array.from(e.target.selectedOptions, option => option.value)
     setApplicationIds(selected)
   }
 
@@ -54,37 +52,36 @@ function CreateSecurityHeaderModal({
           placeholder="Header Name"
           className="w-full border p-2 rounded"
           value={headerName}
-          onChange={(e) => setHeaderName(e.target.value)}
+          onChange={e => setHeaderName(e.target.value)}
         />
         <input
           type="text"
           placeholder="Header Value"
           className="w-full border p-2 rounded"
           value={headerValue}
-          onChange={(e) => setHeaderValue(e.target.value)}
+          onChange={e => setHeaderValue(e.target.value)}
         />
 
-       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Assign to Applications:
-        </label>
-        {isLoading ? (
-          <div className="text-gray-500 text-sm">Loading applications...</div>
-        ) : (
-          <select
-            value={applicationIds}
-            onChange={handleSelectChange}
-            className="w-full border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg p-2 text-sm bg-white shadow-sm"
-          >
-            {applications.map((app: any) => (
-              <option key={app.application_id} value={app.application_id}>
-                {app.hostname}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
-
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Assign to Applications:
+          </label>
+          {isLoading ? (
+            <div className="text-gray-500 text-sm">Loading applications...</div>
+          ) : (
+            <select
+              value={applicationIds}
+              onChange={handleSelectChange}
+              className="w-full border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg p-2 text-sm bg-white shadow-sm"
+            >
+              {applications.map((app: any) => (
+                <option key={app.application_id} value={app.application_id}>
+                  {app.hostname}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
 
         <div className="flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-2 bg-gray-300 rounded">
