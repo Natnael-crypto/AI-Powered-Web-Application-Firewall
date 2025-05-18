@@ -167,31 +167,34 @@ func GetAllRulesAdmin(c *gin.Context) {
 		}
 
 		appIDs := ruleToAppsMap[rule.RuleID]
-		appObjs := make([]models.Application, 0, len(appIDs))
+		appObjs := make([]models.ApplicationOptions, 0, len(appIDs))
 		for _, appID := range appIDs {
 			if app, ok := appMap[appID]; ok {
-				appObjs = append(appObjs, app)
+				var temp = models.ApplicationOptions{
+					HostName:      app.HostName,
+					ApplicationID: app.ApplicationID,
+				}
+				appObjs = append(appObjs, temp)
 			}
 		}
 
 		response = append(response, gin.H{
-			"rule_id":        rule.RuleID,
-			"rule_type":      rule.RuleType,
-			"rule_method":    rule.RuleMethod,
+			"rule_id":         rule.RuleID,
+			"rule_type":       rule.RuleType,
+			"rule_method":     rule.RuleMethod,
 			"rule_definition": conditions,
-			"action":         rule.Action,
-			"rule_string":    rule.RuleString,
-			"created_at":     rule.CreatedAt,
-			"updated_at":     rule.UpdatedAt,
-			"is_active":      rule.IsActive,
-			"category":       rule.Category,
-			"applications":   appObjs,
+			"action":          rule.Action,
+			"rule_string":     rule.RuleString,
+			"created_at":      rule.CreatedAt,
+			"updated_at":      rule.UpdatedAt,
+			"is_active":       rule.IsActive,
+			"category":        rule.Category,
+			"applications":    appObjs,
 		})
 	}
 
 	c.JSON(http.StatusOK, gin.H{"rules": response})
 }
-
 
 func GetOneRule(c *gin.Context) {
 	ruleID := c.Param("rule_id")
