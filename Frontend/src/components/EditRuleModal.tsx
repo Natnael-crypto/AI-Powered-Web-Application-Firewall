@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { AppOption, Condition, RuleInput, validActions, validRuleMethods, validRuleTypes } from "../lib/types";
 import { useGetApplications } from "../hooks/api/useApplication";
@@ -10,18 +9,8 @@ type EditRuleModalProps = {
   rule:RuleInput
 };
 
-const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose }) => {
-  const [ruleInput, setRuleInput] = useState<RuleInput>({
-    ruleID: "1001",
-    action: "deny",
-    category: "Message",
-    conditions: [{
-      ruleType: "ARGS",
-      ruleMethod: "regex",
-      ruleDefinition: "value like *select*",
-    }],
-    applications: [],
-  });
+const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose ,rule}) => {
+  const [ruleInput, setRuleInput] = useState<RuleInput>(rule);
   const [preview, setPreview] = useState<string>("");
   const [availableApps, setAvailableApps] = useState<AppOption[]>([]);
   const {data:applications} = useGetApplications()

@@ -70,38 +70,40 @@ func GetNotifications(c *gin.Context) {
 }
 
 func UpdateNotification(c *gin.Context) {
-	notificationID := c.Param("notification_id")
-
-	var existingNotification models.Notification
-	if err := config.DB.Where("notification_id = ?", notificationID).First(&existingNotification).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "notification not found"})
-		return
-	}
-
-	currentUserID := c.GetString("user_id")
-
-	if currentUserID != existingNotification.UserID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
-		return
-	}
 
 	var input struct {
-		Status bool `json:"status" binding:"required"`
+		NotificationIds []string `json:"notification_ids" binding:"required"`
+		Status          bool     `json:"status" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	currentUserID := c.GetString("user_id")
 
-	existingNotification.Status = input.Status
+	for _, id := range input.NotificationIds {
 
-	if err := config.DB.Save(existingNotification).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update notification"})
-		return
+		var existingNotification models.Notification
+		if err := config.DB.Where("notification_id = ?", id).First(&existingNotification).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "notification not found"})
+			return
+		}
+
+		if currentUserID != existingNotification.UserID {
+			c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+			return
+		}
+
+		existingNotification.Status = input.Status
+
+		if err := config.DB.Save(existingNotification).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update notification"})
+			return
+		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "notification updated successfully", "notification": existingNotification})
+	c.JSON(http.StatusOK, gin.H{"message": "notification updated successfully"})
 }
 
 func DeleteNotification(c *gin.Context) {
