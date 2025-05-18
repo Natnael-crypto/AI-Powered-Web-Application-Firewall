@@ -46,22 +46,7 @@ func AddRule(c *gin.Context) {
 		}
 	}
 
-	var app models.Application
 	ruleID := generateRuleID()
-
-	for _, id := range input.ApplicationIDs {
-		if err := config.DB.Where("application_id = ?", id).First(&app).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
-			return
-		}
-		var rule_to_app models.RuleToApp
-		rule_to_app.RuleID = ruleID
-		rule_to_app.ApplicationID = id
-		if err := config.DB.Create(&rule_to_app).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create rule to app"})
-			return
-		}
-	}
 
 	input.RuleID = ruleID
 
@@ -88,6 +73,22 @@ func AddRule(c *gin.Context) {
 	if err := config.DB.Create(&rule).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create rule"})
 		return
+	}
+
+	for _, id := range input.ApplicationIDs {
+		var app models.Application
+		if err := config.DB.Where("application_id = ?", id).First(&app).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
+			return
+		}
+		fmt.Print("Passed")
+		var rule_to_app models.RuleToApp
+		rule_to_app.RuleID = ruleID
+		rule_to_app.ApplicationID = id
+		if err := config.DB.Create(&rule_to_app).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create rule to app"})
+			return
+		}
 	}
 	config.Change = true
 	c.JSON(http.StatusCreated, gin.H{"message": "rule added successfully", "rule": rule})
