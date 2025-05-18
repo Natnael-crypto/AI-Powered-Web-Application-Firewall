@@ -57,14 +57,14 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
   }, [applications, rule.applications]);
 
   useEffect(() => {
-    generateRule(ruleInput);
-  }, [ruleInput]);
+    generateRule(ruleInput)
+  }, [ruleInput])
 
   const updateCondition = (index: number, field: keyof Condition, value: string) => {
-    const updatedConditions = [...ruleInput.rule_definition];
-    updatedConditions[index][field] = value;
-    setRuleInput({ ...ruleInput, rule_definition: updatedConditions });
-  };
+    const updatedConditions = [...ruleInput.rule_definition]
+    updatedConditions[index][field] = value
+    setRuleInput({...ruleInput, rule_definition: updatedConditions})
+  }
 
   const handleAppAdd = (appId: string) => {
     if (!ruleInput.applications.includes({"application_id":appId,"application_name":""})) {
@@ -73,7 +73,7 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
         applications: [...ruleInput.applications, {"application_id":appId,"application_name":""}],
       });
     }
-  };
+  }
 
   const handleAppRemove = (appId: string) => {
     setRuleInput({
@@ -83,10 +83,10 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
   };
 
   const generateRule = (input: RuleResponse) => {
-    const { rule_id, action, category, rule_definition } = input;
-    if (rule_definition.length === 0) return;
+    const {rule_id, action, category, rule_definition} = input
+    if (rule_definition.length === 0) return
 
-    let ruleText = "";
+    let ruleText = ''
     rule_definition.forEach((cond, i) => {
       const prefix = i === 0 ? "SecRule" : "    SecRule";
       const chain = i < rule_definition.length - 1 ? `"chain"` : "";
@@ -97,8 +97,8 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
       ruleText += `${prefix} ${cond.rule_type} "@${cond.rule_method} ${cond.rule_definition}" ${firstLine}\n`;
     });
 
-    setPreview(ruleText.trim());
-  };
+    setPreview(ruleText.trim())
+  }
 
   const addCondition = () => {
     setRuleInput({
@@ -112,8 +112,8 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
 
   const saveRule = async () => {
     if (ruleInput.applications.length === 0) {
-      alert("Please select at least one application.");
-      return;
+      alert('Please select at least one application.')
+      return
     }
 
     var appIds=ruleInput.applications.map((appOp)=>appOp.application_id)
@@ -138,10 +138,10 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
       alert("Rule saved successfully for all selected applications!");
       onClose();
     } catch (error) {
-      console.error("Error saving rule:", error);
-      alert("An error occurred while saving the rule.");
+      console.error('Error saving rule:', error)
+      alert('An error occurred while saving the rule.')
     }
-  };
+  }
 
   const selectedAppIds = ruleInput.applications.map(app => app.application_id);
 
@@ -150,11 +150,15 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
   );
 
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-600 hover:text-red-600 text-xl"
+        >
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-600 hover:text-red-600 text-xl"
@@ -168,7 +172,7 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
           <select
             className="border p-2"
             value={ruleInput.action}
-            onChange={(e) => setRuleInput({ ...ruleInput, action: e.target.value })}
+            onChange={e => setRuleInput({...ruleInput, action: e.target.value})}
           >
             <option value="">Select Action</option>
             {validActions.map((action) => (
@@ -182,7 +186,7 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
             className="border p-2"
             placeholder="Category"
             value={ruleInput.category}
-            onChange={(e) => setRuleInput({ ...ruleInput, category: e.target.value })}
+            onChange={e => setRuleInput({...ruleInput, category: e.target.value})}
           />
         </div>
 
@@ -190,10 +194,10 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
           <label className="block font-semibold mb-2">Select Application</label>
           <select
             className="border p-2 w-full"
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value) handleAppAdd(value);
-              e.target.value = "";
+            onChange={e => {
+              const value = e.target.value
+              if (value) handleAppAdd(value)
+              e.target.value = ''
             }}
           >
             <option value="">-- Select Application --</option>
@@ -215,12 +219,16 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
                 >
                   {app?.application_name || appId.application_name}
                 </span>
-              );
+              )
             })}
           </div>
         </div>
 
         {ruleInput.rule_definition.map((cond, index) => (
+          <div
+            key={index}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center my-2"
+          >
           <div
             key={index}
             className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center my-2"
@@ -262,9 +270,9 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
                 <button
                   className="bg-red-500 text-white px-2 py-1 rounded"
                   onClick={() => {
-                    const updated = [...ruleInput.rule_definition];
-                    updated.splice(index, 1);
-                    setRuleInput({ ...ruleInput, rule_definition: updated });
+                    const updated = [...ruleInput.rule_definition]
+                    updated.splice(index, 1)
+                    setRuleInput({...ruleInput, rule_definition: updated})
                   }}
                 >
                   ✕
@@ -280,6 +288,7 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
             onClick={addCondition}
           >
             Add Condition
+            Add Condition
           </button>
 
           <button
@@ -287,15 +296,16 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({ isOpen, onClose, rule }) 
             onClick={saveRule}
           >
             Save Rule
+            Save Rule
           </button>
         </div>
 
         <pre className="bg-gray-100 p-4 rounded border whitespace-pre-wrap mt-6">
-          {preview || "// Rule preview will appear here..."}
+          {preview || '// Rule preview will appear here...'}
         </pre>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default EditRuleModal;
+export default EditRuleModal

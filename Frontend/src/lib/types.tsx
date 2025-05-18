@@ -308,3 +308,9 @@ export interface NotificationUpdate {
   notification_ids: string[]
   status: boolean
 }
+
+export type rateLimitInputtype = {
+  rate_limit: number
+  window_size?: number
+  block_time?: number
+}

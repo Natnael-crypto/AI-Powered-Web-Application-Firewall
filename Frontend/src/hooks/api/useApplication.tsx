@@ -4,9 +4,16 @@ import {
   createApplication,
   deleteAssignment,
   getApplication,
+  getApplicationConfig,
   getApplications,
   getAssignments,
+  getconfig,
   updateApplication,
+  updateDetectBOT,
+  updateListeningPort,
+  updateMaxDataSize,
+  updateRateLimit,
+  updateRemoteLogServer,
 } from '../../services/applicationApi'
 
 export function useGetApplications() {
@@ -61,5 +68,55 @@ export function useGetApplicationAssignments() {
   return useQuery({
     queryKey: ['GetappAssignments'],
     queryFn: getAssignments,
+  })
+}
+
+export function useUpdateListeningPort() {
+  return useMutation({
+    mutationKey: ['updateConfig'],
+    mutationFn: updateListeningPort,
+  })
+}
+export function useUpdateRateLimit() {
+  return useMutation({
+    mutationKey: ['updateConfig'],
+    mutationFn: updateRateLimit,
+  })
+}
+export function useUpdateRemoteLogServer() {
+  return useMutation({
+    mutationKey: ['updateConfig'],
+    mutationFn: updateRemoteLogServer,
+  })
+}
+
+export function useGetApplicationConfig(application_id: string) {
+  return useQuery({
+    queryKey: ['getApplicationConfig'],
+    queryFn: () => getApplicationConfig(application_id),
+  })
+}
+
+export function useGetConfig() {
+  return useQuery({
+    queryKey: ['getApplicationConfig'],
+    queryFn: getconfig,
+  })
+}
+
+export function useUpdateDetectBot() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['detect_bot'],
+    mutationFn: updateDetectBOT,
+    onSuccess: () => queryClient.invalidateQueries({queryKey: ['applications']}),
+  })
+}
+export function useUpdateMaxDataSize() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['detect_bot'],
+    mutationFn: updateMaxDataSize,
+    onSuccess: () => queryClient.invalidateQueries({queryKey: ['applications']}),
   })
 }
