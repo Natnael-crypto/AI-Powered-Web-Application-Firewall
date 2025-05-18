@@ -9,6 +9,7 @@ import {
 } from '../lib/types'
 import {useGetApplications} from '../hooks/api/useApplication'
 import {createRule} from '../services/rulesApi'
+import Modal from './Modal'
 
 type CreateRuleModalProps = {
   isOpen: boolean
@@ -17,14 +18,16 @@ type CreateRuleModalProps = {
 
 const CreateRuleModal: React.FC<CreateRuleModalProps> = ({isOpen, onClose}) => {
   const [ruleInput, setRuleInput] = useState<RuleInput>({
-    ruleID: "1001",
-    action: "deny",
-    category: "Message",
-    conditions: [{
-      rule_type: "ARGS",
-      rule_method: "regex",
-      rule_definition: "value like *select*",
-    }],
+    ruleID: '1001',
+    action: 'deny',
+    category: 'Message',
+    conditions: [
+      {
+        rule_type: 'ARGS',
+        rule_method: 'regex',
+        rule_definition: 'value like *select*',
+      },
+    ],
     applications: [],
   })
   const [preview, setPreview] = useState<string>('')
@@ -70,13 +73,14 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({isOpen, onClose}) => {
 
     let ruleText = ''
     conditions.forEach((cond, i) => {
-      const prefix = i === 0 ? "SecRule" : "    SecRule";
-      const chain = i < conditions.length - 1 ? `"chain"` : "";
-      const firstLine = i === 0
-        ? `"id:${ruleID},phase:2,${action},msg:'${category}'${conditions.length > 1 ? ",chain" : ""}"`
-        : chain;
-      ruleText += `${prefix} ${cond.rule_type} "@${cond.rule_method} ${cond.rule_definition}" ${firstLine}\n`;
-    });
+      const prefix = i === 0 ? 'SecRule' : '    SecRule'
+      const chain = i < conditions.length - 1 ? `"chain"` : ''
+      const firstLine =
+        i === 0
+          ? `"id:${ruleID},phase:2,${action},msg:'${category}'${conditions.length > 1 ? ',chain' : ''}"`
+          : chain
+      ruleText += `${prefix} ${cond.rule_type} "@${cond.rule_method} ${cond.rule_definition}" ${firstLine}\n`
+    })
 
     setPreview(ruleText.trim())
   }
@@ -84,9 +88,12 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({isOpen, onClose}) => {
   const addCondition = () => {
     setRuleInput({
       ...ruleInput,
-      conditions: [...ruleInput.conditions, { rule_type: "", rule_method: "", rule_definition: "" }],
-    });
-  };
+      conditions: [
+        ...ruleInput.conditions,
+        {rule_type: '', rule_method: '', rule_definition: ''},
+      ],
+    })
+  }
 
   const saveRule = async () => {
     if (ruleInput.applications.length === 0) {
@@ -98,7 +105,7 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({isOpen, onClose}) => {
       action: ruleInput.action,
       category: ruleInput.category,
       is_active: true,
-      conditions: ruleInput.conditions.map((cond) => ({
+      conditions: ruleInput.conditions.map(cond => ({
         rule_type: cond.rule_type,
         rule_method: cond.rule_method,
         rule_definition: cond.rule_definition,
@@ -107,7 +114,7 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({isOpen, onClose}) => {
     }
 
     try {
-      createRule(payloadTemplate)
+      await createRule(payloadTemplate)
       alert('Rule saved successfully for all selected applications!')
       onClose()
     } catch (error) {
@@ -120,46 +127,40 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({isOpen, onClose}) => {
     app => !ruleInput.applications.includes(app.application_id),
   )
 
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-600 hover:text-red-600 text-xl"
-        >
-          &times;
-        </button>
-
-        <h2 className="text-2xl font-bold mb-4">Create WAF Rule</h2>
-
+    <Modal isOpen={isOpen} onClose={onClose} title="Create WAF Rule">
+      <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <select
-            className="border p-2"
-            value={ruleInput.action}
-            onChange={e => setRuleInput({...ruleInput, action: e.target.value})}
-          >
-            <option value="">Select Action</option>
-            {validActions.map(action => (
-              <option key={action} value={action}>
-                {action}
-              </option>
-            ))}
-          </select>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Action</label>
+            <select
+              className="w-full px-3 py-2 border rounded-md"
+              value={ruleInput.action}
+              onChange={e => setRuleInput({...ruleInput, action: e.target.value})}
+            >
+              {validActions.map(action => (
+                <option key={action} value={action}>
+                  {action}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <input
-            className="border p-2"
-            placeholder="Category"
-            value={ruleInput.category}
-            onChange={e => setRuleInput({...ruleInput, category: e.target.value})}
-          />
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Category</label>
+            <input
+              className="w-full px-3 py-2 border rounded-md"
+              placeholder="Category"
+              value={ruleInput.category}
+              onChange={e => setRuleInput({...ruleInput, category: e.target.value})}
+            />
+          </div>
         </div>
 
-        <div className="mt-4">
-          <label className="block font-semibold mb-2">Select Application</label>
+        <div>
+          <label className="block text-xs text-gray-500 mb-1">Select Application</label>
           <select
-            className="border p-2 w-full"
+            className="w-full px-3 py-2 border rounded-md"
             onChange={e => {
               const value = e.target.value
               if (value) handleAppAdd(value)
@@ -180,10 +181,10 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({isOpen, onClose}) => {
               return (
                 <span
                   key={appId}
-                  className="bg-green-200 text-green-900 px-3 py-1 rounded-full cursor-pointer hover:bg-red-200 hover:text-red-900"
+                  className="bg-green-200 text-green-900 px-3 py-1 rounded-full cursor-pointer hover:bg-red-200 hover:text-red-900 text-sm"
                   onClick={() => handleAppRemove(appId)}
                 >
-                  {app?.application_name || appId}
+                  {app?.application_name || appId} ×
                 </span>
               )
             })}
@@ -191,81 +192,116 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({isOpen, onClose}) => {
         </div>
 
         {/* Conditions */}
-        {ruleInput.conditions.map((cond, index) => (
-          <div
-            key={index}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center my-2"
-          >
-            <select
-              className="border p-2"
-              value={cond.rule_type}
-              onChange={(e) => updateCondition(index, "rule_type", e.target.value)}
-            >
-              <option value="">Select Rule Type</option>
-              {validRuleTypes.map(type => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-
-            <select
-              className="border p-2"
-              value={cond.rule_method}
-              onChange={(e) => updateCondition(index, "rule_method", e.target.value)}
-            >
-              <option value="">Select Method</option>
-              {validRuleMethods.map(method => (
-                <option key={method} value={method}>
-                  {method}
-                </option>
-              ))}
-            </select>
-
-            <div className="flex gap-2">
-              <input
-                className="border p-2 flex-1"
-                placeholder="Definition"
-                value={cond.rule_definition}
-                onChange={(e) => updateCondition(index, "rule_definition", e.target.value)}
-              />
-              {index > 0 && (
-                <button
-                  className="bg-red-500 text-white px-2 py-1 rounded"
-                  onClick={() => {
-                    const updated = [...ruleInput.conditions]
-                    updated.splice(index, 1)
-                    setRuleInput({...ruleInput, conditions: updated})
-                  }}
-                >
-                  ✕
-                </button>
-              )}
-            </div>
+        <div className="space-y-4">
+          <div className="flex items-center">
+            <div className="flex-grow border-t border-gray-200"></div>
+            <span className="mx-4 text-sm font-medium text-gray-500">
+              RULE CONDITIONS
+            </span>
+            <div className="flex-grow border-t border-gray-200"></div>
           </div>
-        ))}
 
-        <div className="flex justify-between items-center mt-4">
+          {ruleInput.conditions.map((cond, index) => (
+            <div
+              key={index}
+              className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center"
+            >
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Rule Type</label>
+                <select
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={cond.rule_type}
+                  onChange={e => updateCondition(index, 'rule_type', e.target.value)}
+                >
+                  <option value="">Select Rule Type</option>
+                  {validRuleTypes.map(type => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Method</label>
+                <select
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={cond.rule_method}
+                  onChange={e => updateCondition(index, 'rule_method', e.target.value)}
+                >
+                  <option value="">Select Method</option>
+                  {validRuleMethods.map(method => (
+                    <option key={method} value={method}>
+                      {method}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="block text-xs text-gray-500 mb-1">Definition</label>
+                  <input
+                    className="w-full px-3 py-2 border rounded-md"
+                    placeholder="Definition"
+                    value={cond.rule_definition}
+                    onChange={e =>
+                      updateCondition(index, 'rule_definition', e.target.value)
+                    }
+                  />
+                </div>
+                {index > 0 && (
+                  <button
+                    className="self-end text-red-500 hover:text-red-700"
+                    onClick={() => {
+                      const updated = [...ruleInput.conditions]
+                      updated.splice(index, 1)
+                      setRuleInput({...ruleInput, conditions: updated})
+                    }}
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+
           <button
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            className="text-sm text-blue-600 hover:text-blue-800"
             onClick={addCondition}
           >
-            Add Condition
+            + Add Condition
           </button>
+        </div>
 
+        {/* Rule Preview */}
+        <div className="mt-4">
+          <div className="flex items-center mb-2">
+            <div className="flex-grow border-t border-gray-200"></div>
+            <span className="mx-4 text-sm font-medium text-gray-500">RULE PREVIEW</span>
+            <div className="flex-grow border-t border-gray-200"></div>
+          </div>
+          <pre className="bg-gray-100 p-4 rounded-md border text-sm whitespace-pre-wrap overflow-x-auto">
+            {preview || '// Rule preview will appear here...'}
+          </pre>
+        </div>
+
+        <div className="pt-4 border-t border-gray-100 flex justify-end gap-2">
           <button
-            className="bg-green-500 text-white px-4 py-2 rounded"
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 text-sm text-white bg-black rounded-md hover:bg-gray-800 transition-colors"
             onClick={saveRule}
           >
             Save Rule
           </button>
         </div>
-
-        <pre className="bg-gray-100 p-4 rounded border whitespace-pre-wrap mt-6">
-          {preview || '// Rule preview will appear here...'}
-        </pre>
       </div>
-    </div>
+    </Modal>
   )
 }
 

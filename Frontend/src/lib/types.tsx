@@ -235,21 +235,19 @@ export type AppOption = {
   application_name: string
 }
 
-export type RuleResponse ={
-  rule_id: string;
-  rule_type: string;
-  rule_method: string;
-  rule_definition: Condition[];
-  action: string;
-  rule_string: string;
-  created_at: string;
-  updated_at: string;
-  is_active: boolean;
-  applications: AppOption[];
-  category: string;
+export type RuleResponse = {
+  rule_id: string
+  rule_type: string
+  rule_method: string
+  rule_definition: Condition[]
+  action: string
+  rule_string: string
+  created_at: string
+  updated_at: string
+  is_active: boolean
+  applications: AppOption[]
+  category: string
 }
-
-
 
 export const validRuleTypes = [
   'REQUEST_HEADERS',
@@ -313,4 +311,27 @@ export type rateLimitInputtype = {
   rate_limit: number
   window_size?: number
   block_time?: number
+}
+
+export interface RequestLog {
+  request_id: string
+  application_name: string
+  client_ip: string
+  request_method: string
+  request_url: string
+  headers: string
+  body: string
+  timestamp: string
+  response_code: number
+  status: string
+  matched_rules: string
+  threat_detected: boolean
+  threat_type: string
+  bot_detected: boolean
+  geo_location: string
+  rate_limited: boolean
+  user_agent: string
+  ai_result: string
+  rule_detected: boolean
+  ai_threat_type: string
 }
