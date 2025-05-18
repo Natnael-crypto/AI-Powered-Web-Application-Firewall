@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react'
 import {
   useGetConfig,
   useUpdateListeningPort,
+  useUpdateMaxDataSize,
   useUpdateRateLimit,
   useUpdateRemoteLogServer,
 } from '../hooks/api/useApplication'
@@ -62,7 +63,6 @@ export default function ApplicationConfigModal({
     remote_logServer: '',
   })
 
-  console.log(data, serverConfig)
   useEffect(() => {
     if (data) {
       setFormData(prev => ({
@@ -73,6 +73,8 @@ export default function ApplicationConfigModal({
     }
   }, [data])
 
+  const {mutate: updateMaxDataSize, isPending: isMaxDataLoading} = useUpdateMaxDataSize()
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {name, value, type, checked} = e.target
     setFormData(prev => ({
@@ -81,15 +83,15 @@ export default function ApplicationConfigModal({
     }))
   }
 
-  const handleUpdateRateLimit = () => {
-    console.log('data here: ', {
+  const handleMaxDataSize = () => {
+    updateMaxDataSize({
       application_id: appId,
       data: {
-        rate_limit: Number(formData.rate_limit),
-        window_size: Number(formData.window_size),
-        block_time: Number(formData.block_time),
+        max_post_data_size: Number(formData.max_post_data_size),
       },
     })
+  }
+  const handleUpdateRateLimit = () => {
     updateRateLimit({
       application_id: appId,
       data: {
@@ -172,6 +174,27 @@ export default function ApplicationConfigModal({
               className="px-4 py-2 text-sm bg-black text-white rounded hover:bg-gray-800 transition-colors"
             >
               {isRateLimitUpdating ? 'Saving...' : 'Save Rate Limits'}
+            </button>
+          </div>
+        </div>
+        <div className="space-y-3 mb-6">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <label className="block text-xs text-gray-500 mb-1">Listening Port</label>
+              <input
+                type="text"
+                name="max_post_data_size"
+                value={formData.max_post_data_size}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+            </div>
+            <button
+              onClick={handleMaxDataSize}
+              disabled={isMaxDataLoading}
+              className="self-end px-4 py-2 text-sm bg-black text-white rounded hover:bg-gray-800 transition-colors whitespace-nowrap"
+            >
+              {isMaxDataLoading ? 'Saving...' : 'Save Port'}
             </button>
           </div>
         </div>

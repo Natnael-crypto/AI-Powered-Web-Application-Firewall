@@ -11,6 +11,7 @@ import {
   updateApplication,
   updateDetectBOT,
   updateListeningPort,
+  updateMaxDataSize,
   updateRateLimit,
   updateRemoteLogServer,
 } from '../../services/applicationApi'
@@ -108,6 +109,14 @@ export function useUpdateDetectBot() {
   return useMutation({
     mutationKey: ['detect_bot'],
     mutationFn: updateDetectBOT,
+    onSuccess: () => queryClient.invalidateQueries({queryKey: ['applications']}),
+  })
+}
+export function useUpdateMaxDataSize() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['detect_bot'],
+    mutationFn: updateMaxDataSize,
     onSuccess: () => queryClient.invalidateQueries({queryKey: ['applications']}),
   })
 }

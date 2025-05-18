@@ -122,6 +122,15 @@ function getColumns({
       },
     },
     {
+      header: 'Max Data Size',
+      accessorKey: 'config.max_post_data_size',
+      cell: ({row}) => (
+        <div className=" text-center">
+          {row.original.config.max_post_data_size + ' MB'}
+        </div>
+      ),
+    },
+    {
       header: 'Updated At',
       accessorKey: 'updated_at',
       cell: ({row}) => new Date(row.original.updated_at).toLocaleString(),

@@ -76,7 +76,6 @@ export async function updateRateLimit(data: {
   application_id: string
   data: rateLimitInputtype
 }) {
-  console.log(data.data)
   const response = await axios.put(
     `/api/config/update/rate-limit/${data.application_id}`,
     data.data,
@@ -117,6 +116,20 @@ export async function updateDetectBOT(data: {
 }) {
   const response = await axios.put(
     `/api/config/update/detect-bot/${data.application_id}`,
+    data.data,
+  )
+
+  if (!response) throw new Error('Something went wrong')
+
+  return await response.data.data
+}
+
+export async function updateMaxDataSize(data: {
+  application_id: string
+  data: {max_post_data_size: number}
+}) {
+  const response = await axios.put(
+    `/api/config/update/post-data-size/${data.application_id}`,
     data.data,
   )
 

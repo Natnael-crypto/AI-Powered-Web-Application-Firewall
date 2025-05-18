@@ -23,7 +23,6 @@ const AdminTable = () => {
     admin: AdminUser,
     newStatus: 'active' | 'inactive' | 'suspended',
   ) => {
-    console.log('header')
     const fn = newStatus === 'inactive' ? deactivateUser : activateUser
 
     fn(admin.username, {

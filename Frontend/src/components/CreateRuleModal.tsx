@@ -101,7 +101,6 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ isOpen, onClose }) =>
       application_ids: ruleInput.applications,
     };
 
-    console.log(payloadTemplate)
 
     try {
       createRule(payloadTemplate)
