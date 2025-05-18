@@ -43,6 +43,8 @@ const RulesTable = ({onUpdate}: rulesTabelProps) => {
     })
   }
 
+  console.log(rules)
+
   const columns: ColumnDef<Rule>[] = [
     {
       accessorKey: 'rule_id',
@@ -111,7 +113,7 @@ const RulesTable = ({onUpdate}: rulesTabelProps) => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Security Rules</h1>
+      <h1 className="text-2xl font-bold mb-4">WAF Rules</h1>
       <Table columns={columns} data={rules} />
     </div>
   )
