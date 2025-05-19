@@ -73,7 +73,7 @@ def load_common_badwords(file_path):
 
 # Load badwords from files
 BADWORDS_BY_TYPE = load_badwords_by_type(BAD_WORDS_BY_TYPE_DIR)
-FLAT_BADWORDS = load_common_badwords(COMMON_BAD_WORDS_PATH)
+COMMON_BADWORDS = load_common_badwords(COMMON_BAD_WORDS_PATH)
 
 
 def count_injection_characters(text, feature_template):
@@ -94,10 +94,10 @@ def count_badwords_by_type(text):
     return counts
 
 
-def count_flat_badwords(text):
+def count_common_badwords(text):
     text = text.lower()
     count = 0
-    for word in FLAT_BADWORDS:
+    for word in COMMON_BADWORDS:
         if word in text:
             count += text.count(word)
     return count
@@ -125,6 +125,6 @@ def parse_request_for_anomaly_detection(request):
         features = count_injection_characters(text, features)
 
     full_text = f"{request.get('url', '')} {request.get('headers', '')} {request.get('body', '')}".lower()
-    features["badword"] = count_flat_badwords(full_text)
+    features["badword"] = count_common_badwords(full_text)
 
     return features
