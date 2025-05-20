@@ -1,6 +1,9 @@
 import os
 from enum import Enum
 
+# Debugging
+DEBUG = True
+
 # Directory Configuration
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS_DIR = os.path.join(BASE_DIR, "ml_models")
@@ -10,15 +13,13 @@ BAD_WORDS_DIR = os.path.join(BASE_DIR, "words")
 BAD_WORDS_BY_TYPE_DIR = os.path.join(BAD_WORDS_DIR, "words_by_type")
 
 # Database Configuration
-DATABASE_FILE = "models.db"
-DATABASE_PATH = os.path.join(DATABASE_DIR, DATABASE_FILE)
+DATABASE_PATH = os.path.join(DATABASE_DIR, "models.db")
 
 # Words Configuration
-COMMON_BAD_WORDS_FILE = "bad_words.txt"
-COMMON_BAD_WORDS_PATH = os.path.join(BAD_WORDS_DIR, COMMON_BAD_WORDS_FILE)
+COMMON_BAD_WORDS_PATH = os.path.join(BAD_WORDS_DIR, "bad_words.txt")
 
 # Backend API Endpoints
-BACKEND_BASE_URL = "http://backend-service"
+BACKEND_BASE_URL = "http://localhost:8484"
 API_ENDPOINTS = {
     "type_analysis": f"{BACKEND_BASE_URL}/ml/submit-analysis",
     "models": f"{BACKEND_BASE_URL}/ml/models",
@@ -26,8 +27,8 @@ API_ENDPOINTS = {
 
 # Model Configuration
 MODEL_FILE_EXTENSION = ".joblib"
-TYPE_PREDICTOR_FILE = "type_predictor.joblib"
-TYPE_PREDICTOR_PATH = os.path.join(TYPE_PREDICTOR_DIR, TYPE_PREDICTOR_FILE)
+ANOMALY_PREDICTOR_MODEL_PATH = os.path.join(MODELS_DIR, "random_forest_model_v.0.1.5.pkl")
+TYPE_PREDICTOR_MODEL_PATH = os.path.join(TYPE_PREDICTOR_DIR, "type_predictor_rf.joblib")
 
 # Threat Type Mapping
 THREAT_TYPE_MAPPING = {

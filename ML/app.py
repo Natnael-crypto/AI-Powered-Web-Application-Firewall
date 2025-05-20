@@ -1,168 +1,72 @@
 from flask import Flask, request, jsonify
 import threading
 import joblib
-import os
-import time
 import requests
 import pandas as pd
-
 from config.config import (
     API_ENDPOINTS,
-    MODELS_DIR,
-    MODEL_FILE_EXTENSION,
-    TYPE_PREDICTOR_PATH,
-    THREAT_TYPE_MAPPING
+    ANOMALY_PREDICTOR_MODEL_PATH,
+    TYPE_PREDICTOR_MODEL_PATH,
+    THREAT_TYPE_MAPPING,
+    DEBUG
 )
-from database.database import (
-    initialize_database,
-    fetch_and_store_models,
-    get_selected_model,
-    update_model_file,
-    should_train_model,
-    train_and_save_model,
-    update_model_version,
-    delete_model_file,
-    discard_model,
-    mark_predecessor,
-)
+
 from utils.parse_request import (
-    parse_request_for_anomaly_detection,
-    parse_request_for_type_prediction,
+    parse_request_for_anomaly_prediction,
+    parse_request_for_type_prediction
 )
 
 app = Flask(__name__)
+app.config['DEBUG'] = DEBUG
 
 # Global state
-current_model = None
-current_model_id = None
-training_thread = None
-training_lock = threading.Lock()
-stop_training_flag = threading.Event()
+anomaly_detector_model = None
 type_predictor_model = None
 
-
-def load_selected_model():
-    """Load selected model from disk into global state"""
-    global current_model, current_model_id
-    selected = get_selected_model()
-    if not selected:
-        current_model = None
-        current_model_id = None
-        return
-
-    model_id, _, model_name = selected
-    model_path = os.path.join(MODELS_DIR, f"{model_name}{MODEL_FILE_EXTENSION}")
-
-    if os.path.exists(model_path):
-        current_model = joblib.load(model_path)
-        current_model.model_id = model_id
-        current_model.model_name = model_name
-        current_model_id = model_id
-        app.logger.info(f"Loaded model {model_id} ({model_name})")
-    else:
-        app.logger.warning(f"Model file not found: {model_path}")
-        current_model = None
-        current_model_id = None
-
-
-def periodic_model_watcher():
-    """Watches for remote changes and triggers training if necessary"""
-    while True:
-        try:
-            if fetch_and_store_models():
-                prev_model_id = current_model_id
-                load_selected_model()
-                if current_model_id != prev_model_id:
-                    app.logger.info("Switched to new selected model")
-
-            # ensure_model_file_present()
-
-            selected = get_selected_model()
-            if selected and should_train_model(selected):
-                start_training_if_appropriate(selected)
-
-        except Exception as e:
-            app.logger.error(f"Error during model watcher loop: {e}")
-
-        time.sleep(60)
-
-
-# def ensure_model_file_present():
-#     """Fetch model file if missing"""
-#     selected = get_selected_model()
-#     if not selected:
-#         return
-
-#     model_id, _, model_name = selected
-#     model_file_path = os.path.join(MODELS_DIR, f"{model_name}{MODEL_FILE_EXTENSION}")
-#     if not os.path.exists(model_file_path):
-#         resp = requests.get(f"{API_ENDPOINTS['models']}/{model_id}/file")
-#         if resp.status_code == 200:
-#             update_model_file(model_id, model_name, resp)
-
-
-def start_training_if_appropriate(selected):
-    """Start model training in a thread if not already running"""
-    global training_thread
-
-    if training_thread and training_thread.is_alive():
-        app.logger.info("Training already in progress. Skipping new training.")
-        return
-
-    training_thread = threading.Thread(
-        target=train_model_flow, args=(selected,), daemon=True
-    )
-    training_thread.start()
-
-
-def train_model_flow(selected):
-    """Full training flow with model versioning and rollback checks"""
-    model_id, _, model_name = selected
-    old_model_id = model_id
-
-    with training_lock:
-        stop_training_flag.clear()
-        app.logger.info("Starting model training...")
-
-        try:
-            new_model = train_and_save_model()
-            if stop_training_flag.is_set():
-                discard_model(new_model)
-                app.logger.info("Training interrupted, new model discarded.")
-                return
-
-            current = get_selected_model()
-            if current and current[0] != old_model_id:
-                discard_model(new_model)
-                app.logger.info(
-                    "User changed selection mid-training. Discarding model."
-                )
-                return
-
-            mark_predecessor(new_model["id"], old_model_id)
-            delete_model_file(old_model_id)
-            update_model_version(new_model)
-            load_selected_model()
-            notify_api_of_update()
-
-        except Exception as e:
-            app.logger.error(f"Training failed: {e}")
-
-
-def notify_api_of_update():
-    """Notify remote API of model update"""
+'''
+Anomaly Prediction
+'''
+# Load the anomaly predictor model
+def load_anomaly_detector_model():
+    global anomaly_detector_model
     try:
-        requests.post(API_ENDPOINTS["models"], json={"update": True})
+        anomaly_detector_model = joblib.load(ANOMALY_PREDICTOR_MODEL_PATH)
+        app.logger.info("Anomaly predictor model loaded from {ANOMALY_PREDICTOR_MODEL_PATH}")
     except Exception as e:
-        app.logger.error(f"Failed to notify API of model update: {e}")
+        app.logger.error(f"Failed to load anomaly predictor model: {e}")
 
 
+# Prediction utility function
+def predict_anomality_with_model(input_data):
+    global anomaly_detector_model
+    try:
+        # Convert input to DataFrame if necessary
+        if isinstance(input_data, dict):
+            input_data = pd.DataFrame([input_data])
+        elif isinstance(input_data, list):
+            input_data = pd.DataFrame(input_data)
+
+        # Ensure model is loaded
+        if anomaly_detector_model is None:
+            raise Exception("Model not loaded")
+
+        # Predict
+        predictions = anomaly_detector_model.predict(input_data)
+        proba = anomaly_detector_model.predict_proba(input_data)
+        return predictions[0],proba[0]  # Assuming single prediction
+    except Exception as e:
+        app.logger.error(f"Anomaly prediction failed: {e}")
+        return None
+
+'''
+Type Prediction
+'''
 # Load the type predictor model
 def load_type_predictor_model():
     """Load the type predictor model"""
-    global type_predictor
+    global type_predictor_model
     try:
-        type_predictor = joblib.load(TYPE_PREDICTOR_PATH)
+        type_predictor_model = joblib.load(TYPE_PREDICTOR_MODEL_PATH)
         app.logger.info("Type predictor model loaded successfully.")
     except Exception as e:
         app.logger.error(f"Failed to load type predictor model: {e}")
@@ -175,8 +79,8 @@ def predict_type(data):
         features = parse_request_for_type_prediction(data)
         features_df = pd.DataFrame([features])
         
-        prediction = type_predictor.predict(features_df)[0]
-        proability = type_predictor.predict_proba(features_df)[0]
+        prediction = type_predictor_model.predict(features_df)[0]
+        proability = type_predictor_model.predict_proba(features_df)[0]
         
         return {
             "threat_type": THREAT_TYPE_MAPPING[prediction],
@@ -193,7 +97,7 @@ def predict_and_notify(data, endpoint):
     prediction = predict_type(data)
     if prediction is not None:
         try:
-            request_id = data.get("request_id")
+            request_id = data.get("request_id", "")
             response = requests.post(
                 endpoint,
                 json={
@@ -212,30 +116,38 @@ def predict_and_notify(data, endpoint):
         except Exception as e:
             app.logger.error(f"Error sending type prediction: {e}")
 
+def init_system():
+    load_anomaly_detector_model()
+    load_type_predictor_model()
 
-@app.route("/analyze", methods=["POST"])
+
+@app.route("/predict", methods=["POST"])
 def analyze_request():
     try:
-        data = request.json
-        request_id = data.get("request_id")
-        if not request_id:
-            return jsonify({"error": "request_id is required"}), 400
+        request_json = request.json
+        if not request_json:
+            return jsonify({"success": False, "error": "No JSON received"}), 400
+        
+        features = parse_request_for_anomaly_prediction(request_json)
 
-        features = parse_request_for_anomaly_detection(data)
-        features_df = pd.DataFrame([features])
+        if anomaly_detector_model:
+            prediction,prob = predict_anomality_with_model(features)
 
-        if current_model:
-            prediction = current_model.predict([features_df])[0]
+            if prediction is None:
+                return jsonify({"success": False, "error": "Prediction failed"}), 500
+
+            # # Send type analysis
             if prediction == 1:
                 threading.Thread(
-                    target=type_predictor.predict_and_notify,
-                    args=(data, API_ENDPOINTS["type_analysis"]),
+                    target=predict_and_notify,
+                    args=(request_json, API_ENDPOINTS["type_analysis"]),
                     daemon=True,
                 ).start()
 
-            return jsonify(
-                {"malicious": bool(prediction), "model": current_model.model_name}
-            )
+            result = "Normal" if prediction == 0 else "Anomaly"
+            return jsonify({"success": True, "prediction": result,"Normal":prob[0],"Anomaly":prob[1]}), 200
+            # With request_id
+            # return jsonify({"success": True, "request_id": reqeust_json.request_id, "prediction": result,"Normal":prob[0],"Anomaly":prob[1]}), 200
 
         return jsonify({"error": "No model loaded"}), 503
 
@@ -243,15 +155,16 @@ def analyze_request():
         app.logger.error(f"Prediction error: {e}")
         return jsonify({"error": str(e)}), 500
 
+# Error handlers
+@app.errorhandler(404)
+def not_found_error(e):
+    return jsonify({"success": False, "error": "Not found"}), 404
 
-@app.before_first_request
-def init_system():
-    initialize_database()
-    fetch_and_store_models()
-    load_selected_model()
-    load_type_predictor_model()
-    threading.Thread(target=periodic_model_watcher, daemon=True).start()
+@app.errorhandler(500)
+def internal_error(e):
+    return jsonify({"success": False, "error": "Internal server error"}), 500
 
 
 if __name__ == "__main__":
+    init_system()
     app.run(host="0.0.0.0", port=5000)

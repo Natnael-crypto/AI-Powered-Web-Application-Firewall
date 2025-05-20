@@ -5,7 +5,7 @@ from config.config import BAD_WORDS_BY_TYPE_DIR, COMMON_BAD_WORDS_PATH
 # Shared character mappings
 INJECTION_CHARACTERS = {
     "single_quote": ["'"],
-    "double_quote": ['"'],
+    "double_quote": ["\""],
     "backtick": ["`"],
     "less_than": ["<"],
     "greater_than": [">"],
@@ -13,8 +13,8 @@ INJECTION_CHARACTERS = {
     "right_parenthesis": [")"],
     "left_bracket": ["["],
     "right_bracket": ["]"],
-    "left_brace": ["{"],
-    "right_brace": ["}"],
+    "left_brace": ["{{"],
+    "right_brace": ["}}"],
     "dash": ["-"],
     "double_dash": ["--"],
     "hash": ["#"],
@@ -50,7 +50,7 @@ INJECTION_CHARACTERS = {
     "newline": ["\n"],
     "null_byte": ["\x00"],
     "space": [" "],
-    "line_feed": ["\n"]
+    "line_feed": ["\n"],
 }
 
 
@@ -87,6 +87,10 @@ def count_injection_characters(text, feature_template):
 def count_badwords_by_type(text):
     text = text.lower()
     counts = defaultdict(int)
+
+    for category in BADWORDS_BY_TYPE.keys():
+        counts[f"badword_{category}"] = 0
+
     for category, words in BADWORDS_BY_TYPE.items():
         for word in words:
             if word in text:
@@ -117,7 +121,7 @@ def parse_request_for_type_prediction(request):
     return features
 
 
-def parse_request_for_anomaly_detection(request):
+def parse_request_for_anomaly_prediction(request):
     """Extract features for anomaly detection (flat badwords + char count + single badword field)"""
     features = {key: 0 for key in INJECTION_CHARACTERS}
     for section in ["url", "headers", "body"]:
