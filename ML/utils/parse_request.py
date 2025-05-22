@@ -1,6 +1,9 @@
+import json
 import os
 from collections import defaultdict
 from config.config import BAD_WORDS_BY_TYPE_DIR, COMMON_BAD_WORDS_PATH
+from urllib.parse import unquote
+import re
 
 # Shared character mappings
 INJECTION_CHARACTERS = {
@@ -97,15 +100,17 @@ def count_badwords_by_type(text):
                 counts[f"badword_{category}"] += text.count(word)
     return counts
 
-
 def count_common_badwords(text):
-    text = text.lower()
-    count = 0
+    decoded_text = unquote(text)
+    print(decoded_text)
+    words = re.split(r'\W+', decoded_text.lower())
+    
+    bad_word_count = 0
     for word in COMMON_BADWORDS:
-        if word in text:
-            count += text.count(word)
-    return count
-
+        count = words.count(word.lower())
+        if count > 0:
+            bad_word_count += count
+    return bad_word_count
 
 def parse_request_for_type_prediction(request):
     """Extract features for type prediction model"""
@@ -121,14 +126,22 @@ def parse_request_for_type_prediction(request):
     return features
 
 
+import re
+
 def parse_request_for_anomaly_prediction(request):
     """Extract features for anomaly detection (flat badwords + char count + single badword field)"""
+
     features = {key: 0 for key in INJECTION_CHARACTERS}
     for section in ["url", "headers", "body"]:
-        text = request.get(section, "").replace("\n", " ").lower()
+        text = request.get(section, "")
+        if isinstance(text, dict):
+            text = json.dumps(text)
+        text = str(text).replace("\n", " ").lower()
         features = count_injection_characters(text, features)
 
-    full_text = f"{request.get('url', '')} {request.get('headers', '')} {request.get('body', '')}".lower()
+    full_text = f"{request.get('url', '')} {json.dumps(request.get('headers', ''))} {request.get('body', '')}".lower()
     features["badword"] = count_common_badwords(full_text)
 
     return features
+
+

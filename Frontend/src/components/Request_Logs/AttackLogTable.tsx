@@ -156,13 +156,17 @@ function AttackLogTable() {
 
   return (
     <div className="bg-white p-6 shadow-xl border border-gray-200">
-      <button
-        onClick={handleGenerateRequest}
-        className="py-4 px-6 text-white rounded-sm mb-4"
-        style={{backgroundColor: '#1F263E'}}
-      >
-        Generate Request
-      </button>
+      <div className='flex justify-between mr-10'>
+        <button
+          onClick={handleGenerateRequest}
+          className="py-4 px-6 text-white rounded-sm mb-4"
+          style={{backgroundColor: '#1F263E'}}
+        >
+          Generate Request
+        </button>
+        <p>{data?.total}</p>
+      </div>
+      
 
       <Table data={data?.requests || []} columns={columns} />
 

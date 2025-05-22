@@ -45,7 +45,6 @@ scp
 tar
 unzip
 dir
-type
 attrib
 copy
 del
@@ -126,7 +125,6 @@ GROUP
 BY
 HAVING
 WHERE
-LIKE
 CAST
 CONVERT
 DATABASE
@@ -167,7 +165,6 @@ OUTFILE
 HAVING
 AND 
 OR 
-LIKE
 <!--#echo
 <!--#exec
 <!--#include
@@ -204,18 +201,11 @@ jar://
 localhost
 script
 img
-img
 iframe
 object
 embed
-form
-input
 textarea
 <a
-body
-head
-link
-style
 onerror
 onload
 onclick
@@ -492,8 +482,6 @@ ORDER BY
 GROUP BY
 HAVING
 WHERE
-LIKE
-IN
 BETWEEN
 EXISTS
 NOT

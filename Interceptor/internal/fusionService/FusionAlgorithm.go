@@ -1,6 +1,6 @@
 package fusionService
 
-func FusionAlgorithm(ruleResult bool, mlResult bool, percent float64) bool {
+func FusionAlgorithm(ruleResult bool, mlResult bool, Normal float64, Anomaly float64) bool {
 	if ruleResult {
 		return true
 	}

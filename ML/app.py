@@ -127,7 +127,6 @@ def analyze_request():
         request_json = request.json
         if not request_json:
             return jsonify({"success": False, "error": "No JSON received"}), 400
-        
         features = parse_request_for_anomaly_prediction(request_json)
 
         if anomaly_detector_model:
@@ -146,8 +145,7 @@ def analyze_request():
 
             result = "Normal" if prediction == 0 else "Anomaly"
             return jsonify({"success": True, "prediction": result,"Normal":prob[0],"Anomaly":prob[1]}), 200
-            # With request_id
-            # return jsonify({"success": True, "request_id": reqeust_json.request_id, "prediction": result,"Normal":prob[0],"Anomaly":prob[1]}), 200
+            
 
         return jsonify({"error": "No model loaded"}), 503
 
@@ -167,4 +165,4 @@ def internal_error(e):
 
 if __name__ == "__main__":
     init_system()
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=8090)
