@@ -36,7 +36,11 @@ func GetRequests(c *gin.Context) {
 	totalPages := int((totalCount + int64(pageSize) - 1) / int64(pageSize))
 
 	var requests []models.Request
-	if err := query.Limit(pageSize).Offset(offset).Find(&requests).Error; err != nil {
+	if err := query.
+		Order("timestamp DESC").
+		Limit(pageSize).
+		Offset(offset).
+		Find(&requests).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch requests"})
 		return
 	}
@@ -45,9 +49,9 @@ func GetRequests(c *gin.Context) {
 		"requests":     requests,
 		"total_pages":  totalPages,
 		"current_page": page,
+		"total":        totalCount,
 	})
 }
-
 
 func GetRequestByID(c *gin.Context) {
 	userRole := c.GetString("role")
