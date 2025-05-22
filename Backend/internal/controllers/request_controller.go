@@ -435,27 +435,27 @@ func GetOverallStats(c *gin.Context) {
 	blockedQuery = blockedQuery.Where("status = ?", "blocked")
 
 	var blockedRequests int64
-	if err := blockedQuery.Count(&blockedRequests).Error; err != nil {
+	if err := query.Count(&blockedRequests).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count blocked requests"})
 		return
 	}
 
 	var maliciousIPs []string
-	if err := blockedQuery.Distinct("client_ip").Pluck("client_ip", &maliciousIPs).Error; err != nil {
+	if err := query.Distinct("client_ip").Pluck("client_ip", &maliciousIPs).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count unique malicious IPs"})
 		return
 	}
 
 	// ====== AI-Based Detections ======
 	var aiDetected int64
-	if err := blockedQuery.Where("ai_result = ?", true).Count(&aiDetected).Error; err != nil {
+	if err := query.Where("ai_result = ?", true).Count(&aiDetected).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count AI detections"})
 		return
 	}
 
 	// ====== Rule-Based Detections ======
 	var ruleDetected int64
-	if err := blockedQuery.Where("rule_detected = ?", true).Count(&ruleDetected).Error; err != nil {
+	if err := query.Where("rule_detected = ?", true).Count(&ruleDetected).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count rule-based detections"})
 		return
 	}
