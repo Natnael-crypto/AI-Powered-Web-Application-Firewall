@@ -3,6 +3,9 @@ package controllers
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+	"log"
+	"strings"
+
 	// "backend/internal/utils"
 	"errors"
 	"fmt"
@@ -160,4 +163,68 @@ func DeleteNotificationConfig(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "notification config deleted successfully"})
+}
+
+func SaveNotificationSenderConfig(c *gin.Context) {
+	var input models.NotificationSender
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	// Check if the notification sender already exists
+	var senderConfig models.NotificationSender
+	result := config.DB.First(&senderConfig, "email = ?", input.Email) // Find by email
+
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		// Handle unexpected error
+		log.Println("Database Error")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something went wrong"})
+		return
+	}
+
+	// If the sender does not exist, create it
+	if result.RowsAffected == 0 {
+		if err := config.DB.Create(&input).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create notification sender"})
+			return
+		}
+	} else {
+		// If it exists, update both the email and app password
+		if input.AppPassword == strings.Repeat("•", 16) {
+			senderConfig.Email = input.Email
+		} else {
+			senderConfig.Email = input.Email
+			senderConfig.AppPassword = input.AppPassword
+		}
+		if err := config.DB.Save(&senderConfig).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update notification sender"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Notification sender saved successfully"})
+}
+
+func GetNotificationSenderConfig(c *gin.Context) {
+	var senderConfig models.NotificationSender
+
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		return
+	}
+
+	if err := config.DB.First(&senderConfig).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "notification sender config not found"})
+	}
+
+	senderConfig.AppPassword = strings.Repeat("•", 16)
+
+	c.JSON(http.StatusOK, senderConfig)
 }

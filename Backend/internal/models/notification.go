@@ -41,6 +41,11 @@ type NotificationConfig struct {
 	Email  string `json:"email"`
 }
 
+type NotificationSender struct {
+	Email       string `json:"sender_email" gorm:"primaryKey" binding:"required,email"`
+	AppPassword string `json:"app_password" gorm:"not null" binding:"required"`
+}
+
 type NotificationInput struct {
 	UserID           string `json:"user_id" `
 	NotificationType string `json:"notification_type" `

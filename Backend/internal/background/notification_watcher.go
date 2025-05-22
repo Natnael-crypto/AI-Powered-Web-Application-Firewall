@@ -116,23 +116,20 @@ func createNotification(rule models.NotificationRule, message string) {
 }
 
 func sendEmail(rule models.NotificationRule, message string) {
+	var sender models.NotificationSender
 
-	var userIDs []string
-
-	// if err := json.Unmarshal(rule.UsersID, &userIDs); err != nil {
-	// 	log.Printf("Error decoding user IDs for rule %s: %v", rule.Name, err)
-	// 	return
-	// }
-
-	for _, userID := range userIDs {
-		var user models.NotificationConfig
-
-		if err := config.DB.Where("user_id = ?", userID).First(&user).Error; err != nil {
-			log.Printf("Error fetching users for rule %s: %v", rule.Name, err)
-			return
-		}
-
-		fmt.Printf("Email sent!\nSubject: Alert - %s\nTo: %s\nBody: %s\n\n", rule.Name, user.Email, message)
+	if err := config.DB.First(&sender).Error; err != nil {
+		log.Println("Sender email has not been configured:", err)
+		return
 	}
 
+	var recipients []models.NotificationConfig
+	if err := config.DB.Find(&recipients).Error; err != nil {
+		log.Println("Failed to retrieve recipient emails:", err)
+		return
+	}
+
+	for _, recipient := range recipients {
+		SendEmail(recipient, sender, rule, message)
+	}
 }
