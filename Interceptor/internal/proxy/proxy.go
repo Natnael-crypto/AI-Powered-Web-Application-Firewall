@@ -185,7 +185,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	blockedByMl, Normal, Anomaly, err := ml.EvaluateML(requestData)
-	fmt.Print(blockedByMl, Normal, Anomaly)
+	// fmt.Print(blockedByMl, Normal, Anomaly)
 	if err != nil {
 		http.Error(w, "Error evaluating ML model", http.StatusInternalServerError)
 		return
@@ -194,7 +194,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	message.AIResult = blockedByMl
 	message.RuleDetected = blockedByRule
 
-	result := fusionService.FusionAlgorithm(blockedByRule, blockedByMl, Normal, Anomaly)
+	result := fusionService.FusionAlgorithm(blockedByRule, Normal, Anomaly)
 
 	if requestBodySize >= application_config[hostname].MaxPostDataSize {
 		if result {
@@ -203,10 +203,10 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		message.Body = ""
 	}
 
-	err = utils.SaveEvaluationResult(message.RuleDetected, Normal, Anomaly, "results_n.csv")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err = utils.SaveEvaluationResult(message.RuleDetected, Normal, Anomaly, "results_n.csv")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	if result {
 		error_page.Send403Response(w, ruleID, ruleMessage, action, status)
