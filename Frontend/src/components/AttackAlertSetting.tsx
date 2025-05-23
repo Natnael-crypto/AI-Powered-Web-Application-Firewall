@@ -38,36 +38,26 @@ const AttackAlertSettings = () => {
 }, [senderEmailConfig, setValue]);
 
   return (
-    <div className="p-6 bg-white shadow-lg w-full">
-      <div className="mb-4">
-        <label className="block mb-1 font-medium text-gray-700">Select Admin User</label>
-        {users ? (
-          <select
-            value={selectedUserId}
-            onChange={e => setSelectedUserId(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
-          >
-            <option value="">-- Select User --</option>
-            {users.map((user: any) => (
-              <option key={user.user_id} value={user.user_id}>
-                {user.username}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <div className="text-gray-500 text-sm">Loading users...</div>
-        )}
+    <div className="p-6 bg-white  shadow-lg w-full">
+      {/* Title */}
+      <div className="flex items-center mb-4">
+        <h4 className="text-lg font-semibold text-gray-800 mr-2">Attack Alert</h4>
+        <Info size={16} className="text-blue-500" />
       </div>
 
-      <div className="mb-4">
-        <label className="block mb-1 font-medium text-gray-700">Email Address</label>
-        <input
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          placeholder="waf-alert-server-noreply@org.com"
-          className="w-full px-4 py-2 border border-gray-300 text-sm placeholder-gray-400 rounded"
-        />
+      {/* Radio buttons */}
+      <div className="flex gap-6 mb-4">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="radio"
+            name="alertType"
+            value="Email"
+            checked={alertType === 'Email'}
+            onChange={() => setAlertType('Email')}
+            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+          />
+          <span className="text-gray-700">Email</span>
+        </label>
       </div>
 
       {/* Webhook input
