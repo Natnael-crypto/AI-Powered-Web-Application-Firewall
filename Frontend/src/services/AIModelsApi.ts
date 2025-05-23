@@ -9,26 +9,16 @@ export async function getAIModels() {
   return response.data.model
 }
 
-export async function createAIModel(data: any) {
-  const response = await axios.post('/api/model/train', data)
+export async function updateAIModelSetting(data: any) {
+  const response = await axios.put('/api/model/update/setting', data)
   if (!response) throw new Error('Something went wrong!')
   return response.data
 }
 
 export async function selectAIModel(modelId: string) {
-  const response = await axios.post(`/api/model/select/${modelId}`, {}, {
-    withCredentials: true,
-  })
+  const response = await axios.get(`/api/model/select/${modelId}`)
   if (!response) throw new Error('Something went wrong!')
 
   return response.data
 }
 
-export async function deleteAIModel(modelId: string) {
-  const response = await axios.post(`/api/model/${modelId}`, {}, {
-    withCredentials: true,
-  })
-  if (!response) throw new Error('Something went wrong!')
-
-  return response.data
-}

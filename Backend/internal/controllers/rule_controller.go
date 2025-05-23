@@ -5,11 +5,13 @@ import (
 	"backend/internal/models"
 	"backend/internal/utils"
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"slices"
 	"strconv"
 	"time"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -44,22 +46,7 @@ func AddRule(c *gin.Context) {
 		}
 	}
 
-	var app models.Application
 	ruleID := generateRuleID()
-
-	for _, id := range input.ApplicationIDs {
-		if err := config.DB.Where("application_id = ?", id).First(&app).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
-			return
-		}
-		var rule_to_app models.RuleToApp
-		rule_to_app.RuleID = ruleID
-		rule_to_app.ApplicationID = id
-		if err := config.DB.Create(&rule_to_app).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create rule to app"})
-			return
-		}
-	}
 
 	input.RuleID = ruleID
 
@@ -86,6 +73,22 @@ func AddRule(c *gin.Context) {
 	if err := config.DB.Create(&rule).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create rule"})
 		return
+	}
+
+	for _, id := range input.ApplicationIDs {
+		var app models.Application
+		if err := config.DB.Where("application_id = ?", id).First(&app).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
+			return
+		}
+		fmt.Print("Passed")
+		var rule_to_app models.RuleToApp
+		rule_to_app.RuleID = ruleID
+		rule_to_app.ApplicationID = id
+		if err := config.DB.Create(&rule_to_app).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create rule to app"})
+			return
+		}
 	}
 	config.Change = true
 	c.JSON(http.StatusCreated, gin.H{"message": "rule added successfully", "rule": rule})
@@ -116,27 +119,81 @@ func GetRules(c *gin.Context) {
 }
 
 func GetAllRulesAdmin(c *gin.Context) {
-
 	appIDs := utils.GetAssignedApplicationIDs(c)
 
 	var ruleApp []models.RuleToApp
 	if err := config.DB.Where("application_id IN ?", appIDs).Find(&ruleApp).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch rules"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch rules to apps mapping"})
 		return
 	}
 
+	// Collect unique RuleIDs
 	ruleAppIDs := make([]string, 0, len(ruleApp))
+	ruleToAppsMap := make(map[string][]string) // rule_id -> []application_id
+
 	for _, mapping := range ruleApp {
 		ruleAppIDs = append(ruleAppIDs, mapping.RuleID)
+		ruleToAppsMap[mapping.RuleID] = append(ruleToAppsMap[mapping.RuleID], mapping.ApplicationID)
 	}
 
+	// Fetch rules by rule_id
 	var rules []models.Rule
 	if err := config.DB.Where("rule_id IN ?", ruleAppIDs).Find(&rules).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch rules"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"rules": rules})
+	// Fetch applications
+	var applications []models.Application
+	if err := config.DB.Where("application_id IN ?", appIDs).Find(&applications).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch applications"})
+		return
+	}
+
+	// Map application_id -> application object
+	appMap := make(map[string]models.Application)
+	for _, app := range applications {
+		appMap[app.ApplicationID] = app
+	}
+
+	// Build final response
+	var response []gin.H
+
+	for _, rule := range rules {
+		var conditions []models.RuleCondition
+		if err := json.Unmarshal([]byte(rule.RuleDefinition), &conditions); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse rule definition"})
+			return
+		}
+
+		appIDs := ruleToAppsMap[rule.RuleID]
+		appObjs := make([]models.ApplicationOptions, 0, len(appIDs))
+		for _, appID := range appIDs {
+			if app, ok := appMap[appID]; ok {
+				var temp = models.ApplicationOptions{
+					HostName:      app.HostName,
+					ApplicationID: app.ApplicationID,
+				}
+				appObjs = append(appObjs, temp)
+			}
+		}
+
+		response = append(response, gin.H{
+			"rule_id":         rule.RuleID,
+			"rule_type":       rule.RuleType,
+			"rule_method":     rule.RuleMethod,
+			"rule_definition": conditions,
+			"action":          rule.Action,
+			"rule_string":     rule.RuleString,
+			"created_at":      rule.CreatedAt,
+			"updated_at":      rule.UpdatedAt,
+			"is_active":       rule.IsActive,
+			"category":        rule.Category,
+			"applications":    appObjs,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"rules": response})
 }
 
 func GetOneRule(c *gin.Context) {

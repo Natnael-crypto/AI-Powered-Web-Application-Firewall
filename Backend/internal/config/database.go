@@ -66,7 +66,7 @@ func InitDB() {
 		&models.AIModel{},
 		&models.AllowedIp{},
 		&models.RuleToApp{},
-		&models.ApplicationSecurityHeader{},
+		&models.SystemEmail{},
 	)
 	if err != nil {
 		log.Fatalf("Migration failed: %v", err)

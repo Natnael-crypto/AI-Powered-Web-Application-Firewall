@@ -37,25 +37,13 @@ func AddSecurityHeader(c *gin.Context) {
 	}
 
 	securityHeader := models.SecurityHeader{
-		ID:          uuid.New().String(),
-		HeaderName:  input.HeaderName,
-		HeaderValue: input.HeaderValue,
-		CreatedBy:   userID,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
-
-	for _, id := range input.ApplicationIDs {
-		applicationToSecurity := models.ApplicationSecurityHeader{
-			ApplicationID:    id,
-			SecurityHeaderID: securityHeader.ID,
-		}
-
-		if err := config.DB.Create(&applicationToSecurity).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create security header to application relationship"})
-			return
-		}
-
+		ID:            uuid.New().String(),
+		HeaderName:    input.HeaderName,
+		HeaderValue:   input.HeaderValue,
+		ApplicationID: input.ApplicationIDs[0],
+		CreatedBy:     userID,
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
 	}
 
 	if err := config.DB.Create(&securityHeader).Error; err != nil {
@@ -71,22 +59,8 @@ func AddSecurityHeader(c *gin.Context) {
 func GetSecurityHeaders(c *gin.Context) {
 	applicationID := c.Param("application_id")
 
-	var applicationToSecurityHeaders []models.ApplicationSecurityHeader
-
-	if err := config.DB.Where("application_id = ?", applicationID).Find(&applicationToSecurityHeaders).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch application to security headers relation"})
-		return
-	}
-
-	appSec := make([]string, 0, len(applicationToSecurityHeaders))
-	for _, mapping := range applicationToSecurityHeaders {
-		appSec = append(appSec, mapping.SecurityHeaderID)
-	}
-
 	var securityHeaders []models.SecurityHeader
-	query := config.DB.Model(&models.SecurityHeader{})
-
-	if err := query.Where("security_header_id In ?", appSec).Find(&securityHeaders).Error; err != nil {
+	if err := config.DB.Where("application_id = ?", applicationID).Find(&securityHeaders).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch security headers"})
 		return
 	}
@@ -95,30 +69,13 @@ func GetSecurityHeaders(c *gin.Context) {
 }
 
 func GetSecurityHeadersAdmin(c *gin.Context) {
-	applicationID := c.Param("application_id")
 
 	appIDs := utils.GetAssignedApplicationIDs(c)
-
-	if !slices.Contains(appIDs, applicationID) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-	}
-
-	var applicationToSecurityHeaders []models.ApplicationSecurityHeader
-
-	if err := config.DB.Where("application_id = ?", applicationID).Find(&applicationToSecurityHeaders).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch application to security headers relation"})
-		return
-	}
-
-	appSec := make([]string, 0, len(applicationToSecurityHeaders))
-	for _, mapping := range applicationToSecurityHeaders {
-		appSec = append(appSec, mapping.SecurityHeaderID)
-	}
 
 	var securityHeaders []models.SecurityHeader
 	query := config.DB.Model(&models.SecurityHeader{})
 
-	if err := query.Where("security_header_id In ?", appSec).Find(&securityHeaders).Error; err != nil {
+	if err := query.Where("application_id In ?", appIDs).Find(&securityHeaders).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch security headers"})
 		return
 	}
@@ -131,8 +88,8 @@ func UpdateSecurityHeader(c *gin.Context) {
 	headerID := c.Param("header_id")
 
 	var input struct {
-		HeaderName  string `json:"header_name" binding:"required ,max=50"`
-		HeaderValue string `json:"header_value" binding:"required ,max=500"`
+		HeaderName  string `json:"header_name" binding:"required,max=50"`
+		HeaderValue string `json:"header_value" binding:"required,max=500"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -156,11 +113,7 @@ func UpdateSecurityHeader(c *gin.Context) {
 
 	securityHeader.UpdatedAt = time.Now()
 
-	if err := config.DB.Model(&securityHeader).Where("id = ?", headerID).Updates(map[string]interface{}{
-		"header_name":  securityHeader.HeaderName,
-		"header_value": securityHeader.HeaderValue,
-		"updated_at":   securityHeader.UpdatedAt,
-	}).Error; err != nil {
+	if err := config.DB.Save(&securityHeader).Where("id = ?", headerID).Error; err != nil {
 		log.Printf("Error updating security header: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update security header"})
 		return
@@ -177,7 +130,7 @@ func DeleteSecurityHeader(c *gin.Context) {
 
 	var securityHeader models.SecurityHeader
 	if err := config.DB.Where("id = ? And created_by =?", headerID, userID).First(&securityHeader).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "security header not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "insufficient privileges"})
 		return
 	}
 

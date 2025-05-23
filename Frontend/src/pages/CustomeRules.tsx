@@ -1,9 +1,10 @@
 import {useState} from 'react'
 import Card from '../components/Card'
-import Button from '../components/atoms/Button'
 import RulesTable from '../components/RulesTable' // Your existing table component
 import {useCreateRule, useUpdateRule} from '../hooks/api/useRules'
-import RuleDetailsModal from '../components/RuleDetailModal'
+import RuleDetailsModal from '../components/RuleDetailUpdateModal'
+import CreateRuleModal from '../components/CreateRuleModal'
+import {Plus} from 'lucide-react'
 
 interface RuleDefinitionItem {
   rule_type: string
@@ -31,16 +32,12 @@ function CustomRules() {
   const [selectedRule, setSelectedRule] = useState<Rule | undefined>()
   const {mutate: createRule} = useCreateRule()
   const {mutate: updateRule} = useUpdateRule()
+  const [isModalOpenAdd, setModalOpenAdd] = useState(false)
 
   const toggleModal = () => setIsModalOpen(!isModalOpen)
 
   const handleOpenDetailsModal = (rule: Rule) => {
     setSelectedRule(rule)
-    setIsModalOpen(true)
-  }
-
-  const handlCreateRule = () => {
-    setSelectedRule(undefined)
     setIsModalOpen(true)
   }
 
@@ -70,7 +67,14 @@ function CustomRules() {
 
       <Card className="flex justify-between items-center py-4 px-6 bg-white">
         <h2 className="text-lg font-semibold">Custom Rules</h2>
-        <Button onClick={handlCreateRule}>Add Rule</Button>
+        <button
+          className="bg-black text-white px-4 py-2 rounded flex gap-3 items-center"
+          onClick={() => setModalOpenAdd(true)}
+        >
+          <Plus /> New Rule
+        </button>
+
+        <CreateRuleModal isOpen={isModalOpenAdd} onClose={() => setModalOpenAdd(false)} />
       </Card>
 
       <Card className="shadow-md p-4 bg-white">

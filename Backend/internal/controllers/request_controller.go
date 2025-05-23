@@ -27,13 +27,30 @@ func GetRequests(c *gin.Context) {
 	pageSize := 50
 	offset := (page - 1) * pageSize
 
+	var totalCount int64
+	if err := query.Model(&models.Request{}).Count(&totalCount).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count requests"})
+		return
+	}
+
+	totalPages := int((totalCount + int64(pageSize) - 1) / int64(pageSize))
+
 	var requests []models.Request
-	if err := query.Limit(pageSize).Offset(offset).Find(&requests).Error; err != nil {
+	if err := query.
+		Order("timestamp DESC").
+		Limit(pageSize).
+		Offset(offset).
+		Find(&requests).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch requests"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"requests": requests})
+	c.JSON(http.StatusOK, gin.H{
+		"requests":     requests,
+		"total_pages":  totalPages,
+		"current_page": page,
+		"total":        totalCount,
+	})
 }
 
 func GetRequestByID(c *gin.Context) {
@@ -57,7 +74,6 @@ func GetRequestByID(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "request not found"})
 			return
 		}
-
 	}
 
 	requestID := c.Param("request_id")
@@ -292,6 +308,29 @@ func GetResponseStatusStats(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"response_status_stats": stats})
 }
 
+func GetRequestRateLastMinute(c *gin.Context) {
+	query := utils.ApplyRequestFilters(c)
+	if query == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply filters"})
+		return
+	}
+
+	sixtySecondsAgo := float64(time.Now().UnixMilli()) - 60000
+
+	var totalCount int64
+	if err := query.
+		Model(&models.Request{}).
+		Where("timestamp >= ?", sixtySecondsAgo).
+		Count(&totalCount).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count recent requests"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"rate": totalCount,
+	})
+}
+
 func GetMostTargetedEndpoints(c *gin.Context) {
 	query := utils.ApplyRequestFilters(c)
 
@@ -386,37 +425,36 @@ func GetOverallStats(c *gin.Context) {
 
 	// ====== Total Requests ======
 	var totalRequests int64
-	if err := query.Model(&models.Request{}).Count(&totalRequests).Error; err != nil {
+	if err := query.Session(&gorm.Session{}).Model(&models.Request{}).Count(&totalRequests).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count total requests"})
 		return
 	}
 
-	// ====== Blocked Requests & Malicious IPs ======
-	blockedQuery := query.Session(&gorm.Session{}) // Clone the query to avoid reuse issues
-	blockedQuery = blockedQuery.Where("status = ?", "blocked")
-
+	// ====== Blocked Requests ======
 	var blockedRequests int64
-	if err := blockedQuery.Count(&blockedRequests).Error; err != nil {
+	if err := query.Session(&gorm.Session{}).Where("status = ?", "blocked").Count(&blockedRequests).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count blocked requests"})
 		return
 	}
 
+	// ====== Malicious IPs ======
 	var maliciousIPs []string
-	if err := blockedQuery.Distinct("client_ip").Pluck("client_ip", &maliciousIPs).Error; err != nil {
+	if err := query.Session(&gorm.Session{}).Where("status = ?", "blocked").
+		Distinct("client_ip").Pluck("client_ip", &maliciousIPs).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count unique malicious IPs"})
 		return
 	}
 
 	// ====== AI-Based Detections ======
 	var aiDetected int64
-	if err := blockedQuery.Where("ai_result = ?", true).Count(&aiDetected).Error; err != nil {
+	if err := query.Session(&gorm.Session{}).Where("ai_result = ?", true).Count(&aiDetected).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count AI detections"})
 		return
 	}
 
 	// ====== Rule-Based Detections ======
 	var ruleDetected int64
-	if err := blockedQuery.Where("rule_detected = ?", true).Count(&ruleDetected).Error; err != nil {
+	if err := query.Session(&gorm.Session{}).Where("rule_detected = ?", true).Count(&ruleDetected).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count rule-based detections"})
 		return
 	}

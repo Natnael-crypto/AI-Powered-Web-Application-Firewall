@@ -2,25 +2,42 @@ import {useQuery} from '@tanstack/react-query'
 import {
   getMostTargetedEndpoint,
   getOverAllStat,
+  getRateStat,
+  getResponseStatusCodeStat,
   getTopAttackTypes,
 } from '../../services/DashboardApi'
 
-export function useGetMostTargetedEndpoint() {
+export function useGetMostTargetedEndpoint(appId: string,time:any) {
   return useQuery({
     queryKey: ['mostTargetedEndpoint'],
-    queryFn: getMostTargetedEndpoint,
+    queryFn: ()=>  getMostTargetedEndpoint(appId,time),
   })
 }
-export function useGetTopThreatTypes() {
+export function useGetTopThreatTypes(appId: string,time:any) {
   return useQuery({
     queryKey: ['TopAttackTypes'],
-    queryFn: getTopAttackTypes,
+    queryFn:()=> getTopAttackTypes(appId,time),
   })
 }
 
-export function useGetOverAllStat(appId: string) {
+export function useGetOverAllStat(appId: string,time:any) {
   return useQuery({
     queryKey: ['overAllstat'],
-    queryFn: () => getOverAllStat(appId),
+    queryFn: () => getOverAllStat(appId,time),
   })
 }
+
+export function useRateStat(appId: string,time:any) {
+  return useQuery({
+    queryKey: ['rate'],
+    queryFn: () => getRateStat(appId,time),
+  })
+}
+
+export function useResponseStat(appId: string,time:any) {
+  return useQuery({
+    queryKey: ['response'],
+    queryFn: () => getResponseStatusCodeStat(appId,time),
+  })
+}
+

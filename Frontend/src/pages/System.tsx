@@ -7,6 +7,8 @@ import UserTable from '../components/UserTable'
 import {useState} from 'react'
 import AddUserModal from '../components/AddUserModal'
 import {useAddAdmin} from '../hooks/api/useUser'
+import AllowedServiceIps from '../components/AllowedServiceIps'
+import EmailRecipientSettings from '../components/EmailRecipientSettings'
 
 function System() {
   const [isAddUser, setAddUser] = useState(false)
@@ -45,9 +47,16 @@ function System() {
 
         <section className="bg-white border border-slate-200 xl shadow-lg p-8">
           <h2 className="text-xl font-semibold text-slate-800 mb-4">
-            Attack Alert Settings
+            Email Recipient Settings
           </h2>
-          <AttackAlertSettings />
+          <EmailRecipientSettings />
+        </section>
+
+        <section className="bg-white border border-slate-200 xl shadow-lg p-8">
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">
+            Allowed Service Settings
+          </h2>
+          <AllowedServiceIps/>
         </section>
 
         <section className="bg-white border border-slate-200 xl shadow-lg p-8">

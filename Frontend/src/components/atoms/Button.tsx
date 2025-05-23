@@ -8,6 +8,7 @@ interface ButtonProps {
   disabled?: boolean
   onClick?: () => void
   children?: ReactNode
+  type?: 'button' | 'submit' | 'reset'
 }
 function Button({
   size = 'm',
@@ -16,6 +17,7 @@ function Button({
   disabled,
   onClick,
   children,
+  type,
 }: ButtonProps) {
   const baseClass = '  focus:outline-none font-medium '
 
@@ -36,9 +38,16 @@ function Button({
     variant && variantClasses[variant],
     disabled && 'cursor-not-allowed opacity-50',
     classname,
+    'rounded-sm',
   )
   return (
-    <button  className={finalClassName} onClick={onClick} disabled={disabled}>
+    <button
+      style={{backgroundColor: '#1F263E'}}
+      className={finalClassName}
+      onClick={onClick}
+      disabled={disabled}
+      type={type}
+    >
       {children}
     </button>
   )

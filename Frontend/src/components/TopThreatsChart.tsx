@@ -1,13 +1,26 @@
 import {PieChart, Pie, Tooltip, Cell, ResponsiveContainer, Legend} from 'recharts'
 import {useGetTopThreatTypes} from '../hooks/api/useDashboardStat'
+import { useEffect } from 'react'
 
 const COLORS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6']
 
-function TopThreatsChart() {
-  const {data, isLoading, isError} = useGetTopThreatTypes()
+interface TopThreatsProps {
+  selectedApp: string
+  timeRange: any
+}
+
+
+function TopThreatsChart({selectedApp,timeRange}:TopThreatsProps) {
+  const {data, isLoading, isError,refetch} = useGetTopThreatTypes(selectedApp,timeRange)
+
+ 
+  useEffect(()=>{
+    refetch()  
+  },[selectedApp,timeRange])
 
   if (isLoading) return <p>Loading ...</p>
   if (isError) return <p>Something went wrong</p>
+
 
   interface ThreatType {
     threat_type: string
@@ -20,7 +33,7 @@ function TopThreatsChart() {
 
   const chartData: ChartData[] = data.map((item: ThreatType, index: number) => ({
     ...item,
-    short_label: `#${index + 1}: ${item.threat_type.slice(0, 40)}${item.threat_type.length > 40 ? '...' : ''}`,
+    short_label: `#${index + 1}: ${item.threat_type.slice(0, 20)}${item.threat_type.length > 20 ? '...' : ''}`,
   }))
 
   return (

@@ -55,7 +55,10 @@ func InterceptorCheckState(c *gin.Context) {
 
 func MlCheckState(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"untrained_model": config.UntrainedModel,
-		"select_model":    config.SelecteModel,
+		"model_setting_updated": config.ModelSettingUpdated,
+		"select_model":          config.SelectModel,
 	})
+
+	config.ModelSettingUpdated = false
+	config.SelectModel = false
 }

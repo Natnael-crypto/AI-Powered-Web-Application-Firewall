@@ -24,13 +24,6 @@ export type LogTable = {
   time: string
 }
 
-export enum logFilterType {
-  CLIENTIP,
-  COUNTRY,
-  METHOD,
-  PROTOCOL,
-}
-
 export enum filterOperations {
   EQUALS_TO,
   GREATER_THAN,
@@ -173,3 +166,181 @@ export const SenderEmailSchema = z.object({
 });
 
 export type SenderEmail = z.infer<typeof SenderEmailSchema>;
+
+export type Filter = {
+  client_ip: string
+  request_method: string
+  request_url: string
+  threat_type: string
+  user_agent: string
+  geo_location: string
+  threat_detected: string
+  bot_detected: string
+  rate_limited: string
+  start_date: string
+  timestamp: string
+  end_date: string
+  last_hours: string
+  body: string
+  response_code: string
+  rule_detected: string
+  ai_result: string
+  ai_threat_type: string
+  search: string
+  page: string
+  application_name: string
+  [key: string]: string | undefined
+}
+
+export const logFilterType = {
+  application_name: 'Application Name',
+  search: 'Search',
+  client_ip: 'Client IP',
+  request_method: 'Request Method',
+  request_url: 'Request URL',
+  threat_type: 'Threat Type',
+  user_agent: 'User Agent',
+  geo_location: 'Geo Location',
+  threat_detected: 'Threat Detected',
+  bot_detected: 'Bot Detected',
+  rate_limited: 'Rate Limited',
+  body: 'Body',
+  response_code: 'Response Code',
+  rule_detected: 'Rule Detected',
+  ai_result: 'AI Result',
+  ai_threat_type: 'AI Threat Type',
+  last_hours: 'Last Hours',
+  start_date: 'Start Date',
+  end_date: 'End Date',
+} as const
+
+export type FilterKey = keyof typeof logFilterType
+
+export type AiModelSetting = {
+  id: string
+  expected_accuracy: number
+  expected_precision: number
+  expected_recall: number
+  expected_f1: number
+  train_every: number
+}
+
+export type Condition = {
+  rule_type: string
+  rule_method: string
+  rule_definition: string
+}
+
+export type RuleInput = {
+  ruleID: string
+  action: string
+  category: string
+  conditions: Condition[]
+  applications: string[]
+}
+
+export type AppOption = {
+  application_id: string
+  application_name: string
+}
+
+export type RuleResponse = {
+  rule_id: string
+  rule_type: string
+  rule_method: string
+  rule_definition: Condition[]
+  action: string
+  rule_string: string
+  created_at: string
+  updated_at: string
+  is_active: boolean
+  applications: AppOption[]
+  category: string
+}
+
+export const validRuleTypes = [
+  'REQUEST_HEADERS',
+  'REQUEST_URI',
+  'ARGS',
+  'ARGS_GET',
+  'ARGS_POST',
+  'REQUEST_COOKIES',
+  'REQUEST_BODY',
+  'XML',
+  'JSON',
+  'REQUEST_METHOD',
+  'REQUEST_PROTOCOL',
+  'REMOTE_ADDR',
+]
+
+export const validRuleMethods = [
+  'regex',
+  'streq',
+  'contains',
+  'ipMatch',
+  'rx',
+  'beginsWith',
+  'endsWith',
+  'eq',
+  'pm',
+]
+
+export const validActions = [
+  'deny',
+  'log',
+  'nolog',
+  'pass',
+  'drop',
+  'redirect',
+  'capture',
+  't:none',
+  't:lowercase',
+  't:normalizePath',
+  't:urlDecode',
+  't:compressWhitespace',
+  'severity:2',
+  'severity:3',
+  'status:403',
+]
+
+export interface Notification {
+  notification_id: string
+  user_id: string
+  message: string
+  timestamp: string
+  status: boolean
+}
+
+export interface NotificationUpdate {
+  notification_ids: string[]
+  status: boolean
+}
+
+export type rateLimitInputtype = {
+  rate_limit: number
+  window_size?: number
+  block_time?: number
+}
+
+export interface RequestLog {
+  request_id: string
+  application_name: string
+  client_ip: string
+  request_method: string
+  request_url: string
+  headers: string
+  body: string
+  timestamp: string
+  response_code: number
+  status: string
+  matched_rules: string
+  threat_detected: boolean
+  threat_type: string
+  bot_detected: boolean
+  geo_location: string
+  rate_limited: boolean
+  user_agent: string
+  ai_result: string
+  rule_detected: boolean
+  ai_threat_type: string
+}

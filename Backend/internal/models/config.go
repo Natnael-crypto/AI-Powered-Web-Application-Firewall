@@ -6,6 +6,12 @@ type Conf struct {
 	RemoteLogServer string `json:"remote_logServer" `
 }
 
+type SystemEmail struct {
+	ID     string `json:"id" gorm:"primaryKey"`
+	Email  string `json:"email" binding:"required,email"`
+	Active bool   `json:"active" binding:"default=true"`
+}
+
 type AppConf struct {
 	ID              string  `json:"id" gorm:"primaryKey"`
 	ApplicationID   string  `json:"application_id" gorm:"unique;not null"`

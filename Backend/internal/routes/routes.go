@@ -24,6 +24,7 @@ func InitializeRoutes(r *gin.Engine) {
 	{
 		admin.POST("/add", controllers.AddAdmin)
 		admin.GET("/:username", controllers.GetAdmin)
+		admin.GET("/id/:user_id", controllers.GetAdminByID)
 		admin.GET("/", controllers.GetAllAdmins)
 		admin.DELETE("/delete/:username", controllers.DeleteAdmin)
 		admin.PUT("/inactive/:username", controllers.InactiveAdmin)
@@ -51,8 +52,15 @@ func InitializeRoutes(r *gin.Engine) {
 		config.PUT("/update/detect-bot/:application_id", controllers.UpdateDetectBot)
 		config.PUT("/update/post-data-size/:application_id", controllers.UpdateMaxPosyDataSize)
 		config.PUT("/update/tls/:application_id", controllers.UpdateTls)
-		config.GET("/config", controllers.GetConfigAdmin)
+		config.GET("/", controllers.GetConfigAdmin)
 		config.GET("/:application_id", controllers.GetAppConfig)
+	}
+
+	sysEmail := authorized.Group("/sys-email")
+	{
+		sysEmail.POST("/", controllers.AddEmail)
+		sysEmail.GET("/", controllers.GetEmail)
+		sysEmail.PUT("/", controllers.UpdateEmail)
 	}
 
 	rules := authorized.Group("/rule")
@@ -71,7 +79,7 @@ func InitializeRoutes(r *gin.Engine) {
 		requests.GET("", controllers.GetRequests)
 		requests.GET("/overall-stat", controllers.GetOverallStats)
 		requests.GET("/:request_id", controllers.GetRequestByID)
-		requests.GET("/requests-per-minute", controllers.GetRequestsPerMinute)
+		requests.GET("/requests-per-minute", controllers.GetRequestRateLastMinute)
 		requests.GET("/all-countries-stat", controllers.GetAllCountriesStat)
 		requests.GET("/os-stats", controllers.GetClientOSStats)
 		requests.GET("/response-status-stat", controllers.GetResponseStatusStats)
@@ -82,7 +90,7 @@ func InitializeRoutes(r *gin.Engine) {
 
 	notifications := authorized.Group("/notifications")
 	{
-		notifications.PUT("/update/:notification_id", controllers.UpdateNotification)
+		notifications.PUT("/update/", controllers.UpdateNotification)
 		notifications.GET("/all/:user_id", controllers.GetNotifications)
 		notifications.DELETE("/delete/:notification_id", controllers.DeleteNotification)
 	}
@@ -107,7 +115,7 @@ func InitializeRoutes(r *gin.Engine) {
 		headers.POST("", controllers.AddSecurityHeader)
 		headers.PUT("/:header_id", controllers.UpdateSecurityHeader)
 		headers.DELETE("/:header_id", controllers.DeleteSecurityHeader)
-		headers.GET("/security-headers/:application_id", controllers.GetSecurityHeadersAdmin)
+		headers.GET("", controllers.GetSecurityHeadersAdmin)
 
 	}
 
@@ -129,27 +137,25 @@ func InitializeRoutes(r *gin.Engine) {
 	{
 		notification_config.POST("", controllers.AddNotificationConfig)
 		notification_config.GET("", controllers.GetNotificationConfig)
-		notification_config.PUT("", controllers.UpdateNotificationConfig)
-		notification_config.DELETE("", controllers.DeleteNotificationConfig)
-
-		notification_config.POST("sender", controllers.SaveNotificationSenderConfig)
-		notification_config.GET("sender", controllers.GetNotificationSenderConfig)
+		notification_config.GET("/all", controllers.GetAllNotificationConfig)
+		notification_config.PUT("/:user_id", controllers.UpdateNotificationConfig)
+		notification_config.DELETE("/:user_id", controllers.DeleteNotificationConfig)
+    notification_config.POST("/sender", controllers.SaveNotificationSenderConfig)
+		notification_config.GET("/sender", controllers.GetNotificationSenderConfig)
 	}
 
 	ai_analysis := authorized.Group("/")
 	{
-		// ai_analysis.POST("/queue-analysis", controllers.QueueRequestForAnalysis)
-		ai_analysis.POST("/model/train", controllers.CreateModelTrainingRequest)
-		ai_analysis.POST("/model/select", controllers.SelectActiveModel)
+		ai_analysis.GET("/model/select/:model_id", controllers.SelectActiveModel)
 		ai_analysis.GET("/models", controllers.GetModels)
-		ai_analysis.DELETE("/model/:model_id", controllers.DeleteModel)
+		ai_analysis.PUT("/model/update/setting", controllers.UpdateTrainingSettings)
 	}
 
 	ms_services := allowed_ip.Group("/ml")
 	{
 		ms_services.POST("/submit-analysis", controllers.SubmitAnalysisResults)
-		ms_services.GET("/model/untrained", controllers.GetUntrainedModelForML)
-		ms_services.POST("/model/results", controllers.SubmitModelResults)
+		ms_services.GET("/model/untrained", controllers.GetModelForMLs)
+		ms_services.POST("/model/results", controllers.SubmitTrainResults)
 		ms_services.GET("/model/selected", controllers.GetSelectedModel)
 		ms_services.GET("/changes", controllers.MlCheckState)
 	}

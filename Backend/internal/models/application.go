@@ -6,7 +6,7 @@ type Application struct {
 	ApplicationID   string    `json:"application_id" gorm:"primaryKey"`
 	ApplicationName string    `json:"application_name"`
 	Description     string    `json:"description"`
-	HostName        string    `json:"hostname"`
+	HostName        string    `json:"host_name"`
 	IpAddress       string    `json:"ip_address"`
 	Port            string    `json:"port"`
 	Status          bool      `json:"status"`
@@ -20,4 +20,9 @@ type UserToApplication struct {
 	UserID          string `json:"user_id" gorm:"not null;index"`
 	ApplicationID   string `json:"application_id" gorm:"not null"`
 	ApplicationName string `json:"application_name"`
+}
+
+type ApplicationOptions struct {
+	ApplicationID string `json:"application_id" `
+	HostName      string `json:"hostname"`
 }

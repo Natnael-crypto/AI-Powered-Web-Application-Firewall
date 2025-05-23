@@ -1,6 +1,7 @@
-import {MdDashboard, MdWeb} from 'react-icons/md'
+import {MdDashboard, MdNotifications, MdWeb} from 'react-icons/md'
 import {FaRegFileAlt} from 'react-icons/fa'
 import {AiOutlineTool, AiOutlineSetting, AiOutlineBarChart} from 'react-icons/ai'
+import {HiOutlineShieldCheck} from 'react-icons/hi'
 
 export const SiderbarContentItems = [
   {
@@ -11,22 +12,9 @@ export const SiderbarContentItems = [
   },
   {
     title: 'Log',
-    href: 'log/attacks',
+    href: 'attacks-logs',
     icon: FaRegFileAlt,
-    children: [
-      {
-        title: 'Attacks',
-        href: 'log/attacks',
-      },
-      {
-        title: 'Rate Limiting',
-        href: 'log/limits',
-      },
-      {
-        title: 'Anti-Bot',
-        href: 'log/captcha',
-      },
-    ],
+    children: [],
   },
   {
     title: 'Custom Rules',
@@ -41,9 +29,21 @@ export const SiderbarContentItems = [
     children: [],
   },
   {
-    title: 'AI Analysis',
-    href: 'ai-analysis',
+    title: 'AI Models',
+    href: 'ai-models',
     icon: AiOutlineBarChart,
+    children: [],
+  },
+  {
+    title: 'Security Headers',
+    href: 'security-headers',
+    icon: HiOutlineShieldCheck,
+    children: [],
+  },
+  {
+    title: 'Notifications',
+    href: 'notifications',
+    icon: MdNotifications,
     children: [],
   },
   {

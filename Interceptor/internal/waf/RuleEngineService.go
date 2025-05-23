@@ -56,7 +56,6 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int, st
 
 	tx.ProcessRequestHeaders()
 	url := utils.RecursiveDecode(r.RequestURI, 3)
-	fmt.Print(url)
 	tx.ProcessURI(url, r.Method, r.Proto)
 	string_body := ""
 	if r.Body != nil {
@@ -89,7 +88,6 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int, st
 		if ruleMessage == "" {
 			ruleMessage = strings.Join(matchedMessages, " & ")
 		}
-		log.Printf("[WAF] Request blocked by rule ID %d Message: %s (action: %s, status: %d)", interruption.RuleID, ruleMessage, interruption.Action, interruption.Status)
 		return true, interruption.RuleID, ruleMessage, interruption.Action, interruption.Status, string_body
 	}
 

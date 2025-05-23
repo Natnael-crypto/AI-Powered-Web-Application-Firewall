@@ -1,7 +1,6 @@
 import {useState, useCallback} from 'react'
 import {SiderbarContentItems} from '../lib/Constants'
 import SidebarContent from './SidebarContent'
-import logo from '../assets/waf-Logo.png'
 import {useUserInfo} from '../store/UserInfo'
 
 function Sidebar() {
@@ -22,10 +21,13 @@ function Sidebar() {
     >
       <div className="flex flex-col w-full h-full">
         {/* Logo Section */}
-        <div className="mb-6 w-[70%] self-center">
-          <img src={logo} alt="Company Logo" className="h-20 w-full object-contain" />
+        <br />
+        <div className="mb-6 self-center border-b border-gray-600">
+          <p className='text-white text-3xl text-left'>GASHA WAF</p>
         </div>
 
+        <br />
+        
         {/* Navigation Items */}
         <div className="flex flex-col gap-4 w-full px-4 overflow-y-auto scrollbar-thin scrollbar-thumb-green-300 scrollbar-track-transparent flex-grow">
           {SiderbarContentItems.map(item => (

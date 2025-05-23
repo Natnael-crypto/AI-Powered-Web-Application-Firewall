@@ -16,6 +16,7 @@ type Rule struct {
 	Category       string    `json:"category" gorm:"not null" `
 }
 
+
 type RuleReturn struct {
 	RuleID         string    `json:"rule_id" gorm:"primaryKey"`
 	RuleType       string    `json:"rule_type" gorm:"not null" `

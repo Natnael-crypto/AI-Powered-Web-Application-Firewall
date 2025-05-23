@@ -3,7 +3,6 @@ package controllers
 import (
 	"net/http"
 	"sync"
-	"time"
 
 	"backend/internal/config"
 	"backend/internal/models"
@@ -104,123 +103,17 @@ func SubmitAnalysisResults(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Analysis results updated"})
 }
 
-func CreateModelTrainingRequest(c *gin.Context) {
+func GetModelForMLs(c *gin.Context) {
+	var models models.AIModel
 
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+	if err := config.DB.Find(&models).Error; err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "no models available"})
 		return
 	}
-	var input struct {
-		ModelsName            string  `json:"models_name" binding:"required"`
-		NumberRequestsUsed    int     `json:"number_requests_used" binding:"required"`
-		PercentTrainData      float32 `json:"percent_train_data" binding:"required"`
-		PercentNormalRequests float32 `json:"percent_normal_requests" gorm:"not null"`
-		NumTrees              int     `json:"num_trees" binding:"required"`
-		MaxDepth              int     `json:"max_depth" binding:"required"`
-		MaxFeatures           string  `json:"max_features" binding:"required"`
-		MinSamplesSplit       int     `json:"min_samples_split" binding:"required"`
-		MinSamplesLeaf        int     `json:"min_samples_leaf" binding:"required"`
-		Criterion             string  `json:"criterion" binding:"required"`
-	}
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input", "details": err.Error()})
-		return
-	}
-
-	ai_model := models.AIModel{
-		ID:                    utils.GenerateUUID(),
-		ModelsName:            input.ModelsName,
-		NumberRequestsUsed:    input.NumberRequestsUsed,
-		PercentTrainData:      input.PercentTrainData,
-		PercentNormalRequests: input.PercentNormalRequests,
-		NumTrees:              input.NumTrees,
-		MaxDepth:              input.MaxDepth,
-		MinSamplesSplit:       input.MinSamplesSplit,
-		MaxFeatures:           input.MaxFeatures,
-		MinSamplesLeaf:        input.MinSamplesLeaf,
-		Criterion:             input.Criterion,
-		Accuracy:              0,
-		Precision:             0,
-		Recall:                0,
-		F1:                    0,
-		Selected:              false,
-		Modeled:               false,
-		CreatedAt:             time.Now(),
-		UpdatedAt:             time.Now(),
-	}
-
-	if err := config.DB.Create(&ai_model).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create model"})
-		return
-	}
-
-	config.UntrainedModel = true
-
-	c.JSON(http.StatusOK, gin.H{"message": "model training request created", "model": ai_model})
+	c.JSON(http.StatusOK, gin.H{"models": models})
 }
 
-func GetUntrainedModelForML(c *gin.Context) {
-	var model models.AIModel
-
-	if err := config.DB.Where("modeled = ?", false).First(&model).Error; err != nil {
-		c.JSON(http.StatusOK, gin.H{"message": "no untrained model available"})
-		return
-	}
-
-	totalRequests := model.NumberRequestsUsed
-	normalCount := int(float32(totalRequests) * model.PercentNormalRequests / 100)
-	maliciousCount := totalRequests - normalCount
-
-	type RequestData struct {
-		ApplicationName string `json:"application_name"`
-		RequestMethod   string `json:"request_method"`
-		RequestURL      string `json:"request_url"`
-		Headers         string `json:"headers"`
-		Body            string `json:"body"`
-	}
-
-	var normalRequests []RequestData
-	if err := config.DB.
-		Model(&models.Request{}).
-		Select("application_name, request_method, request_url, headers, body").
-		Where("threat_detected = ?", false).
-		Limit(normalCount).
-		Scan(&normalRequests).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch normal requests"})
-		return
-	}
-
-	var maliciousRequests []RequestData
-	if err := config.DB.
-		Model(&models.Request{}).
-		Select("application_name, request_method, request_url, headers, body").
-		Where("threat_detected = ?", true).
-		Limit(maliciousCount).
-		Scan(&maliciousRequests).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch malicious requests"})
-		return
-	}
-
-	config.UntrainedModel = false
-	c.JSON(http.StatusOK, gin.H{
-		"id":                      model.ID,
-		"name":                    model.ModelsName,
-		"number_requests_used":    model.NumberRequestsUsed,
-		"percent_train_data":      model.PercentTrainData,
-		"percent_normal_requests": model.PercentNormalRequests,
-		"num_trees":               model.NumTrees,
-		"max_depth":               model.MaxDepth,
-		"min_samples_split":       model.MinSamplesSplit,
-		"min_samples_leaf":        model.MinSamplesLeaf,
-		"max_features":            model.MaxFeatures,
-		"criterion":               model.Criterion,
-		"normal_requests":         normalRequests,
-		"malicious_request":       maliciousRequests,
-	})
-}
-
-func SubmitModelResults(c *gin.Context) {
+func SubmitTrainResults(c *gin.Context) {
 	var input struct {
 		ID        string  `json:"id"`
 		Accuracy  float32 `json:"accuracy"`
@@ -239,7 +132,6 @@ func SubmitModelResults(c *gin.Context) {
 		"precision": input.Precision,
 		"recall":    input.Recall,
 		"fl":        input.F1,
-		"modeled":   true,
 	}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update model stats"})
 		return
@@ -255,30 +147,19 @@ func SelectActiveModel(c *gin.Context) {
 		return
 	}
 
-	var input struct {
-		ID string `json:"id"`
-	}
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
-		return
-	}
-
-	if err := config.DB.Where("modeled == ? AND id = ?", true, input.ID).First(&models.AIModel{}).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "model not found"})
-	}
+	modelID := c.Param("model_id")
 
 	if err := config.DB.Model(&models.AIModel{}).Where("selected = ?", true).Update("selected", false).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to deselect existing model"})
 		return
 	}
 
-	if err := config.DB.Model(&models.AIModel{}).Where("id = ?", input.ID).Update("selected", true).Error; err != nil {
+	if err := config.DB.Model(&models.AIModel{}).Where("id = ?", modelID).Update("selected", true).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to select model"})
 		return
 	}
 
-	config.SelecteModel = true
+	config.SelectModel = true
 
 	c.JSON(http.StatusOK, gin.H{"message": "model selected successfully"})
 }
@@ -291,7 +172,7 @@ func GetSelectedModel(c *gin.Context) {
 		return
 	}
 
-	config.SelecteModel = false
+	config.SelectModel = false
 
 	c.JSON(http.StatusOK, gin.H{"model": model})
 }
@@ -313,19 +194,39 @@ func GetModels(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"model": model})
 }
 
-func DeleteModel(c *gin.Context) {
+func UpdateTrainingSettings(c *gin.Context) {
+
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
 	}
-	modelsID := c.Param("model_id")
-	if err := config.DB.Where("id = ?", modelsID).Delete(&models.AIModel{}).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "model not found"})
+
+	var input struct {
+		ID                string  `json:"id" binding:"required"`
+		ExpectedAccuracy  float32 `json:"expected_accuracy" binding:"required"`
+		ExpectedPrecision float32 `json:"expected_precision" binding:"required"`
+		ExpectedRecall    float32 `json:"expected_recall" binding:"required"`
+		ExpectedF1        float32 `json:"expected_f1" binding:"required"`
+		TrainEvery        float64 `json:"train_every" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
 		return
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{
-		"message": "model deleted successfully",
-	})
+	if err := config.DB.Model(&models.AIModel{}).Where("id = ?", input.ID).Updates(map[string]interface{}{
+		"expected_accuracy":  input.ExpectedAccuracy,
+		"expected_precision": input.ExpectedPrecision,
+		"expected_recall":    input.ExpectedRecall,
+		"expected_f1":        input.ExpectedF1,
+		"train_every":        input.TrainEvery,
+	}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update training setting stats"})
+		return
+	}
 
+	config.ModelSettingUpdated = true
+
+	c.JSON(http.StatusOK, gin.H{"message": "training setting updated"})
 }

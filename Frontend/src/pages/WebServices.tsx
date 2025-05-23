@@ -8,6 +8,9 @@ import {
   useGetApplications,
   useUpdateApplication,
 } from '../hooks/api/useApplication'
+import {toast} from 'react-toastify'
+import LoadingSpinner from '../components/LoadingSpinner'
+
 interface Config {
   id: string
   application_id: string
@@ -19,6 +22,7 @@ interface Config {
   max_post_data_size: number
   tls: boolean
 }
+
 export interface Application {
   application_id: string
   application_name: string
@@ -36,8 +40,15 @@ export interface Application {
 function WebService() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedApp, setSelectedApp] = useState<Application | undefined>()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const {data: applications = []} = useGetApplications()
+  const {
+    data: applications = [],
+    isLoading: isLoadingApplications,
+    error: applicationsError,
+    refetch: refetchApplications,
+  } = useGetApplications()
+
   const {mutate: createApplication} = useAddApplication()
   const {mutate: updateApplication} = useUpdateApplication()
 
@@ -48,19 +59,47 @@ function WebService() {
     setIsModalOpen(true)
   }
 
-  const handleFormSubmit = (formData: Partial<Application>) => {
+  const handleFormSubmit = async (formData: Partial<Application>) => {
+    setIsSubmitting(true)
     const isUpdate = !!formData.application_id
 
-    const mutationFn = isUpdate ? updateApplication : createApplication
+    try {
+      const mutationFn = isUpdate ? updateApplication : createApplication
 
-    mutationFn(formData, {
-      onSuccess: () => {
-        toggleModal()
-      },
-      onError: () => {
-        console.error('Something went wrong while saving the application.')
-      },
-    })
+      await mutationFn(formData, {
+        onSuccess: () => {
+          toast.success(`Application ${isUpdate ? 'updated' : 'created'} successfully!`)
+          refetchApplications()
+          toggleModal()
+        },
+        onError: error => {
+          toast.error(
+            `Failed to ${isUpdate ? 'update' : 'create'} application: ${error.message}`,
+          )
+        },
+        onSettled: () => {
+          setIsSubmitting(false)
+        },
+      })
+    } catch (error) {
+      toast.error('An unexpected error occurred')
+      setIsSubmitting(false)
+    }
+  }
+
+  if (applicationsError) {
+    return (
+      <div className="p-4 text-red-500">
+        Error loading applications: {applicationsError.message}
+        <Button onClick={() => refetchApplications()} classname="ml-4">
+          Retry
+        </Button>
+      </div>
+    )
+  }
+
+  if (isLoadingApplications) {
+    return <LoadingSpinner />
   }
 
   return (
@@ -70,6 +109,7 @@ function WebService() {
         isOpen={isModalOpen}
         onClose={toggleModal}
         onSubmit={handleFormSubmit}
+        isSubmitting={isSubmitting}
       />
 
       <Card className="flex justify-between items-center py-4 px-6 bg-white">
@@ -79,16 +119,18 @@ function WebService() {
           size="l"
           variant="primary"
           onClick={handleOpenCreateModal}
+          disabled={isLoadingApplications}
         >
           Add Service
         </Button>
       </Card>
 
-      <Card className="shadow-md p-4 bg-white ">
+      <Card className="shadow-md p-4 bg-white">
         <WebserviceTable
           data={applications}
           openModal={() => setIsModalOpen(true)}
           setSelectedApp={setSelectedApp}
+          selectedApp={selectedApp}
         />
       </Card>
     </div>

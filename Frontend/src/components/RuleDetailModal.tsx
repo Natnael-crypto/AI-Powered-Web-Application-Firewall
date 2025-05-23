@@ -1,168 +1,99 @@
-import {useState, useEffect} from 'react'
-import Modal from '../components/Modal'
-import Button from '../components/atoms/Button'
+import React from 'react'
+import Modal from './Modal'
+import {RuleResponse} from '../lib/types'
 
-interface RuleDefinitionItem {
-  rule_type: string
-  rule_method: string
-  rule_definition: string
-}
-
-export interface Rule {
-  rule_id: string
-  rule_type: string
-  rule_method: string
-  rule_definition: string | RuleDefinitionItem[]
-  action: string
-  application_id: string
-  rule_string: string
-  created_by: string
-  created_at: string
-  updated_at: string
-  is_active: boolean
-  category: string
-}
-
-interface RuleFormModalProps {
-  rule?: Rule
+interface RuleDetailsModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: Partial<Rule>) => void
+  rule: RuleResponse | null
 }
 
-function RuleFormModal({rule, isOpen, onClose, onSubmit}: RuleFormModalProps) {
-  const [form, setForm] = useState<Partial<Rule>>({
-    rule_type: '',
-    rule_method: '',
-    rule_definition: '',
-    action: '',
-    rule_string: '',
-    is_active: true,
-    category: '',
-    application_id: '',
-  })
+const RuleDetailsModal: React.FC<RuleDetailsModalProps> = ({isOpen, onClose, rule}) => {
+  if (!rule) return null
 
-  useEffect(() => {
-    if (rule) {
-      setForm(rule)
-    } else {
-      setForm({
-        rule_type: '',
-        rule_method: '',
-        rule_definition: '',
-        action: '',
-        rule_string: '',
-        is_active: true,
-        category: '',
-        application_id: '',
-      })
-    }
-  }, [rule])
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => {
-    const {name, value, type} = e.target as HTMLInputElement
-    const checked = (e.target as HTMLInputElement).checked
-    setForm(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }))
+  const getStatusBadge = (isActive: boolean) => {
+    const baseClasses = 'inline-block px-2 py-1 text-xs rounded'
+    return isActive
+      ? `${baseClasses} bg-green-100 text-green-800`
+      : `${baseClasses} bg-gray-100 text-gray-800`
   }
 
-  const handleSubmit = () => {
-    onSubmit(form)
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp)
+    return date.toLocaleString()
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={rule ? 'Edit Rule' : 'Add New Rule'}>
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            name="rule_type"
-            placeholder="Rule Type"
-            value={form.rule_type || ''}
-            onChange={handleChange}
-            className="border rounded p-2"
-          />
-          <input
-            name="rule_method"
-            placeholder="Rule Method"
-            value={form.rule_method || ''}
-            onChange={handleChange}
-            className="border rounded p-2"
-          />
-          <input
-            name="action"
-            placeholder="Action"
-            value={form.action || ''}
-            onChange={handleChange}
-            className="border rounded p-2"
-          />
-          <input
-            name="category"
-            placeholder="Category"
-            value={form.category || ''}
-            onChange={handleChange}
-            className="border rounded p-2"
-          />
-          <input
-            name="application_id"
-            placeholder="Application ID"
-            value={form.application_id || ''}
-            onChange={handleChange}
-            className="border rounded p-2"
-          />
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              name="is_active"
-              checked={form.is_active ?? true}
-              onChange={handleChange}
-            />
-            <label htmlFor="is_active">Active</label>
+    <Modal isOpen={isOpen} onClose={onClose} title="Rule Details">
+      <div className="space-y-6">
+        {/* Basic Information */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Rule ID</label>
+            <div className="text-sm text-gray-800 font-mono">{rule.rule_id}</div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Status</label>
+            <div className={getStatusBadge(rule.is_active)}>
+              {rule.is_active ? 'Active' : 'Inactive'}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Category</label>
+            <div className="text-sm text-gray-800 capitalize">{rule.category}</div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Action</label>
+            <div className="text-sm text-gray-800 capitalize">{rule.action}</div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Created At</label>
+            <div className="text-sm text-gray-800">
+              {formatTimestamp(rule.created_at)}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Applications</label>
+            <div className="text-sm text-gray-800">
+              {rule.applications?.length > 0
+                ? rule.applications.map(app => app.application_name).join(', ')
+                : 'All applications'}
+            </div>
           </div>
         </div>
 
+        {/* Rule Definition */}
         <div>
-          <label className="text-sm text-gray-500">Rule Definition</label>
-          <textarea
-            name="rule_definition"
-            placeholder="Rule Definition"
-            value={
-              typeof form.rule_definition === 'string'
-                ? form.rule_definition
-                : JSON.stringify(form.rule_definition, null, 2)
-            }
-            onChange={handleChange}
-            rows={4}
-            className="w-full border rounded p-2"
-          />
+          <div className="flex items-center mb-2">
+            <div className="flex-grow border-t border-gray-200"></div>
+            <span className="mx-4 text-sm font-medium text-gray-500">
+              RULE DEFINITION
+            </span>
+            <div className="flex-grow border-t border-gray-200"></div>
+          </div>
+
+          <pre className="bg-gray-50 p-4 rounded-md text-sm font-mono whitespace-pre-wrap overflow-x-auto">
+            {rule.rule_string}
+          </pre>
         </div>
 
-        <div>
-          <label className="text-sm text-gray-500">Rule String</label>
-          <textarea
-            name="rule_string"
-            placeholder="Rule String"
-            value={form.rule_string || ''}
-            onChange={handleChange}
-            rows={4}
-            className="w-full border rounded p-2"
-          />
-        </div>
-
-        <div className="flex justify-end space-x-2">
-          <Button variant="secondary" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSubmit}>
-            {rule ? 'Update Rule' : 'Create Rule'}
-          </Button>
+        {/* Footer */}
+        <div className="pt-4 border-t border-gray-100 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+          >
+            Close
+          </button>
         </div>
       </div>
     </Modal>
   )
 }
 
-export default RuleFormModal
+export default RuleDetailsModal

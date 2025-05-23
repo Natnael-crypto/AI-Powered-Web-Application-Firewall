@@ -3,8 +3,8 @@ package utils
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+	"slices"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -14,10 +14,20 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 	query := config.DB.Model(&models.Request{})
 
 	appIDs := GetAssignedApplicationIDs(c)
-	query = query.Where("application_id IN ?", appIDs)
+
+	if applicationId := c.Query("application_id"); applicationId != "" {
+		if slices.Contains(appIDs, applicationId) {
+			query = query.Where("application_id = ?", applicationId)
+		}
+	} else {
+		query = query.Where("application_id IN ?", appIDs)
+	}
 
 	if clientIP := c.Query("client_ip"); clientIP != "" {
 		query = query.Where("client_ip ILIKE ?", "%"+clientIP+"%")
+	}
+	if application_name := c.Query("application_name"); application_name != "" {
+		query = query.Where("application_name ILIKE ?", "%"+application_name+"%")
 	}
 	if requestMethod := c.Query("request_method"); requestMethod != "" {
 		query = query.Where("request_method ILIKE ?", "%"+requestMethod+"%")
@@ -34,59 +44,71 @@ func ApplyRequestFilters(c *gin.Context) *gorm.DB {
 	if geoLocation := c.Query("geo_location"); geoLocation != "" {
 		query = query.Where("geo_location ILIKE ?", "%"+geoLocation+"%")
 	}
+	if body := c.Query("body"); body != "" {
+		query = query.Where("body ILIKE ?", "%"+body+"%")
+	}
+	if response_code := c.Query("response_code"); response_code != "" {
+		query = query.Where("response_code = ?", response_code)
+	}
+	if rule_detected := c.Query("rule_detected"); rule_detected != "" {
+		query = query.Where("rule_detected ILIKE ?", "%"+rule_detected+"%")
+	}
+	if ai_threat_type := c.Query("ai_threat_type"); ai_threat_type != "" {
+		query = query.Where("ai_threat_type ILIKE ?", "%"+ai_threat_type+"%")
+	}
+	if c.Query("ai_result") != "" {
+		ai_result := c.Query("ai_result") == "true"
+		if ai_result {
+			query = query.Where("ai_result = ?", ai_result)
+		} else {
+			query = query.Where("ai_result = ?", false)
+		}
+	}
 	if c.Query("threat_detected") != "" {
 		threatDetected := c.Query("threat_detected") == "true"
-		query = query.Where("threat_detected = ?", threatDetected)
+		if threatDetected {
+			query = query.Where("threat_detected = ?", threatDetected)
+		} else {
+			query = query.Where("threat_detected = ?", false)
+		}
 	}
 	if c.Query("bot_detected") != "" {
 		botDetected := c.Query("bot_detected") == "true"
-		query = query.Where("bot_detected = ?", botDetected)
+		if botDetected {
+			query = query.Where("bot_detected = ?", botDetected)
+		} else {
+			query = query.Where("bot_detected = ?", false)
+		}
 	}
 	if c.Query("rate_limited") != "" {
 		rateLimited := c.Query("rate_limited") == "true"
-		query = query.Where("rate_limited = ?", rateLimited)
+		if rateLimited {
+			query = query.Where("rate_limited = ?", rateLimited)
+		} else {
+			query = query.Where("rate_limited = ?", false)
+		}
 	}
 
 	if startDate := c.Query("start_date"); startDate != "" {
 		startTs, err := strconv.ParseFloat(startDate, 64)
-		if err != nil {
-			return nil
+		if err == nil {
+			query = query.Where("timestamp >= ?", startTs)
+
 		}
-		query = query.Where("timestamp >= ?", startTs)
 	}
 	if endDate := c.Query("end_date"); endDate != "" {
 		endTs, err := strconv.ParseFloat(endDate, 64)
-		if err != nil {
-			return nil
-		}
-		query = query.Where("timestamp <= ?", endTs)
-	}
-
-	if date := c.Query("date"); date != "" {
-		if startTime := c.Query("start_time"); startTime != "" {
-			startTs, err := strconv.ParseFloat(startTime, 64)
-			if err != nil {
-				return nil
-			}
-			query = query.Where("timestamp >= ?", startTs)
-		}
-		if endTime := c.Query("end_time"); endTime != "" {
-			endTs, err := strconv.ParseFloat(endTime, 64)
-			if err != nil {
-				return nil
-			}
+		if err == nil {
 			query = query.Where("timestamp <= ?", endTs)
+
 		}
 	}
 
 	if lastHours := c.Query("last_hours"); lastHours != "" {
 		hours, err := strconv.Atoi(lastHours)
-		if err != nil {
-			return nil
+		if err == nil {
+			query = query.Where("timestamp >= ?", hours)
 		}
-		now := float64(time.Now().Unix())
-		past := now - float64(hours*3600)
-		query = query.Where("timestamp >= ?", past)
 	}
 
 	if searchQuery := c.Query("search"); searchQuery != "" {

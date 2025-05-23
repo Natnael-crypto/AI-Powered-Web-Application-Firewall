@@ -42,4 +42,4 @@ WORKDIR /app/ML
 EXPOSE 5000
 
 # Set the default command to run your app
-CMD ["python", "api.py"]
+CMD ["python", "app.py"]
