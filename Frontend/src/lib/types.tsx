@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export type FilterValues = {
   ipAddress: string
   port: string
@@ -157,6 +159,13 @@ interface RuleDefinitionItem {
   rule_method: string
   rule_definition: string
 }
+
+export const SenderEmailSchema = z.object({
+  sender_email: z.string().email('Invalid email address').nonempty('Sender email is required'),
+  app_password: z.string().nonempty('App password is required'),
+});
+
+export type SenderEmail = z.infer<typeof SenderEmailSchema>;
 
 export type Filter = {
   client_ip: string

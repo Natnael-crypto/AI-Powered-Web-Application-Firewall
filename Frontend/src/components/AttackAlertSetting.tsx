@@ -1,83 +1,41 @@
-import { useState } from 'react'
-import { Pencil, Trash2 } from 'lucide-react'
-import {
-  useGetUseEmail,
-  useAddUserEmail,
-  useUpdateUserEmail,
-  useDeleteUserEmail,
-} from '../hooks/api/useSystemEmail'
-import { useGetAllUsers } from '../hooks/api/useUser'
+import { useEffect, useState } from 'react'
+import { Info } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { SenderEmail, SenderEmailSchema } from '../lib/types'
+import { useGetSenderEmail, useSetSenderEmail } from '../hooks/api/useNotification'
+import { useToast } from '../hooks/useToast'
 
 const AttackAlertSettings = () => {
-  const [selectedUserId, setSelectedUserId] = useState('')
-  const [email, setEmail] = useState('')
-  const [editingId, setEditingId] = useState<string | null>(null)
+  const [alertType, setAlertType] = useState<'Telegram' | 'Email'>('Email')
+  // const [webhook, setWebhook] = useState('')
 
-  const { data: emails, refetch } = useGetUseEmail()
-  const { data: users } = useGetAllUsers()
+  const { mutate: setSenderEmail, data: statusCode } = useSetSenderEmail()
+  const { data: senderEmailConfig, refetch: refetchSenderEmail } = useGetSenderEmail()
+  const { addToast: toast } = useToast()
 
-  const addEmailMutation = useAddUserEmail()
-  const updateEmailMutation = useUpdateUserEmail()
-  const deleteEmailMutation = useDeleteUserEmail()
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<SenderEmail>({
+    resolver: zodResolver(SenderEmailSchema), // Use Zod resolver for validation
+  });
 
-  const handleSave = () => {
-  
+  const onSave = (data: SenderEmail) => {
+    setSenderEmail(data, {
+      onSuccess: () => {
+        toast('Email set successfully')
+        refetchSenderEmail()
+      },
+      onError: () => {
+        toast('Something went wrong while setting up sender email')
+      },
+    })
+  };
 
-
-    if (editingId) {
-      if (!email || !selectedUserId) {
-          alert('Please select a user and enter an email.')
-          return
-      }
-      const payload = { email, id: selectedUserId }
-
-      updateEmailMutation.mutate(payload, {
-        onSuccess: () => {
-          alert('Email updated.')
-          resetForm()
-        },
-        onError: () => alert('Failed to update email'),
-      })
-    } else {
-        if (!email || !selectedUserId) {
-          alert('Please select a user and enter an email.')
-          return
-        }
-      const payload = { email, id: selectedUserId }
-      addEmailMutation.mutate(payload, {
-        onSuccess: () => {
-          alert('Email added.')
-          resetForm()
-        },
-        onError: () => alert('Failed to add email'),
-      })
+  useEffect(() => {
+    if (senderEmailConfig) {
+        setValue('sender_email', senderEmailConfig.sender_email);
+        setValue('app_password', senderEmailConfig.app_password);
     }
-  }
-
-  const handleEdit = (emailItem: any) => {
-    setEmail(emailItem.email)
-    setSelectedUserId(emailItem.user_id)
-    setEditingId(emailItem.user_id)
-  }
-
-  const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this email?')) {
-      deleteEmailMutation.mutate({ id }, {
-        onSuccess: () => {
-          alert('Deleted successfully')
-          refetch()
-        },
-        onError: () => alert('Delete failed'),
-      })
-    }
-  }
-
-  const resetForm = () => {
-    setEditingId(null)
-    setEmail('')
-    setSelectedUserId('')
-    refetch()
-  }
+}, [senderEmailConfig, setValue]);
 
   return (
     <div className="p-6 bg-white shadow-lg w-full">
@@ -112,57 +70,55 @@ const AttackAlertSettings = () => {
         />
       </div>
 
-      <div className="mb-6 flex justify-end">
-        <button
-          onClick={handleSave}
-          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
-        >
-          {editingId ? 'Save Email' : 'Add Email'}
-        </button>
-      </div>
+      {/* Webhook input
+      <input
+        type="text"
+        placeholder="https://api.xxx.com/robot/send?access_token=xxxxxx"
+        value={webhook}
+        onChange={e => setWebhook(e.target.value)}
+        className="w-full px-4 py-2 mb-4 border border-gray-300  text-sm placeholder-gray-400"
+      /> */}
 
-      <h5 className="text-md font-semibold text-gray-800 mb-2">Configured Emails</h5>
-      <table className="w-full border text-sm text-left">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="p-2">User</th>
-            <th className="p-2">Email</th>
-            <th className="p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {emails?.length > 0 ? (
-            emails.map((entry: any) => (
-              <tr key={entry.id} className="border-t">
-                <td className="p-2">
-                  {
-                    users? (
-                    users?.find((u: any) => u.user_id === entry.user_id)?.username
-                    ):
-                    <div className="text-gray-500 text-sm">Loading user...</div>
-                  }
-                </td>
-
-                <td className="p-2">{entry.email}</td>
-                <td className="p-2 flex gap-3">
-                  <button onClick={() => handleEdit(entry)}>
-                    <Pencil size={16} className="text-blue-600" />
-                  </button>
-                  <button onClick={() => handleDelete(entry.user_id)}>
-                    <Trash2 size={16} className="text-red-600" />
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={4} className="p-4 text-center text-gray-500">
-                No email configurations found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+      <form onSubmit={handleSubmit(onSave)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Sender Email
+            </label>
+            <input
+              type="email"
+              {...register('sender_email')}
+              placeholder="Enter sender email"
+              className="w-full p-3 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.sender_email && (
+              <p className="text-red-500">{errors.sender_email.message}</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              App Password
+            </label>
+            <input
+              type="password"
+              {...register('app_password')}
+              placeholder="Enter your Gmail or Outlook app password"
+              className="w-full p-3 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.app_password && (
+              <p className="text-red-500">{errors.app_password.message}</p>
+            )}
+          </div>
+        </div>
+        <div className="mt-6 flex justify-end">
+          <button
+            type="submit"
+            className="bg-blue-600 text-white font-semibold px-6 py-2 hover:bg-blue-700 transition"
+          >
+            Save
+          </button>
+        </div>
+      </form>
     </div>
   )
 }

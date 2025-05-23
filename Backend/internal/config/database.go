@@ -61,6 +61,7 @@ func InitDB() {
 		&models.AppConf{},
 		&models.NotificationRule{},
 		&models.NotificationConfig{},
+		&models.NotificationSender{},
 		&models.SecurityHeader{},
 		&models.AIModel{},
 		&models.AllowedIp{},
@@ -81,6 +82,11 @@ func InitDB() {
 
 	if err := CreateConfigLocal(newConf); err != nil {
 		fmt.Println("Unable to set Default Listening Port 80")
+	}
+
+	var existingSuperAdmin models.User
+	if err := DB.Where("role = ?", "super_admin").First(&existingSuperAdmin).Error; err != nil {
+		CreateSuperAdminAccount()
 	}
 }
 
