@@ -467,3 +467,37 @@ func GetOverallStats(c *gin.Context) {
 		"rule_based_detections": ruleDetected,
 	})
 }
+
+func GetRequestsForMl(c *gin.Context) {
+
+	var model models.AIModel
+
+	if err := config.DB.First(&model).Error; err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "no model currently selected"})
+		return
+	}
+	time_from := float64(time.Now().UnixMilli()) - model.TrainEvery
+	var requests []models.Request
+	if err := config.DB.
+		Where("timestamp >= ?", time_from).
+		Find(&requests).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch requests"})
+		return
+	}
+
+	var mlRequests []map[string]interface{}
+	for _, req := range requests {
+		mlReq := map[string]interface{}{
+			"url":     req.RequestURL,
+			"body":    req.Body,
+			"headers": req.Headers,
+			"label":   0,
+		}
+		if req.Status == "Blocked" {
+			mlReq["label"] = 1
+		}
+		mlRequests = append(mlRequests, mlReq)
+	}
+
+	c.JSON(http.StatusOK, mlRequests)
+}

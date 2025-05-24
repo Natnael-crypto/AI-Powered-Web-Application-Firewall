@@ -18,8 +18,6 @@ import (
 func ToggleNotificationRuleStatus(c *gin.Context) {
 	ruleID := c.Param("rule_id")
 
-	currentUserID := c.GetString("user_id")
-
 	var existingRule models.NotificationRule
 	if err := config.DB.Where("id = ?", ruleID).First(&existingRule).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "notification rule not found"})
@@ -40,11 +38,6 @@ func ToggleNotificationRuleStatus(c *gin.Context) {
 	// 		return
 	// 	}
 	// }
-
-	if currentUserID != existingRule.CreatedBy {
-		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
-		return
-	}
 
 	existingRule.IsActive = !existingRule.IsActive
 	existingRule.UpdatedAt = time.Now()

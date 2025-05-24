@@ -21,7 +21,6 @@ func TestSendEmail(t *testing.T) {
 
 	triggeredRule := models.NotificationRule{
 		ID:         "123",
-		CreatedBy:  "super admin",
 		Name:       "SQL Injection",
 		ThreatType: "Attack",
 		Threshold:  5,
