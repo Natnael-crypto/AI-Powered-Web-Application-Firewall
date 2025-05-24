@@ -1,18 +1,20 @@
+# Use Node base image
 FROM node:18
 
+# Set working directory
 WORKDIR /app
 
-# Copy and install dependencies
+# Copy dependency files
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install
 
-# ✅ Install TypeScript globally
-RUN npm install -g typescript
-
-# Copy the rest of the app
+# Copy rest of the application
 COPY . .
 
-# ❌ Skip type checking errors but compile
-RUN tsc --noEmitOnError false
+# Expose default Vite port
+EXPOSE 5173
 
-CMD ["node", "dist/app.js"]
+# Start development server
+CMD ["npm", "run", "dev", "--", "--host"]
