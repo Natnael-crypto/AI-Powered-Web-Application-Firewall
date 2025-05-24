@@ -54,23 +54,23 @@ func UpdateNotificationRule(c *gin.Context) {
 	}
 
 	var input struct {
-		Threshold  int    `json:"threshold" binding:"required"`
-		TimeWindow int    `json:"time_window" binding:"required"`
-		IsActive   bool   `json:"is_active"`
+		Threshold  int  `json:"threshold" binding:"required"`
+		TimeWindow int  `json:"time_window" binding:"required"`
+		IsActive   bool `json:"is_active" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	if input.Threshold != 0 {
 		rule.Threshold = input.Threshold
 	}
 	if input.TimeWindow != 0 {
 		rule.TimeWindow = input.TimeWindow
 	}
-	if input.IsActive {
+	if input.IsActive != rule.IsActive {
 		rule.IsActive = input.IsActive
 	}
 	rule.UpdatedAt = time.Now()
