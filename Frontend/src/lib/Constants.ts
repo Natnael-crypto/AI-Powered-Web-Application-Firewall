@@ -29,12 +29,6 @@ export const SiderbarContentItems = [
     children: [],
   },
   {
-    title: 'AI Models',
-    href: 'ai-models',
-    icon: AiOutlineBarChart,
-    children: [],
-  },
-  {
     title: 'Security Headers',
     href: 'security-headers',
     icon: HiOutlineShieldCheck,

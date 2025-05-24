@@ -3,10 +3,13 @@ package utils
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+	"errors"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 func CreateModelTrainingRequest(model models.AIModel) error {
@@ -46,7 +49,6 @@ func CreateModel() {
 }
 
 func AddNotificationRule() {
-
 	defaultRules := []struct {
 		Name       string
 		ThreatType string
@@ -66,6 +68,18 @@ func AddNotificationRule() {
 	isActive := true
 
 	for _, def := range defaultRules {
+		var existing models.NotificationRule
+		err := config.DB.Where("threat_type = ?", def.ThreatType).First(&existing).Error
+
+		if err == nil {
+			continue
+		}
+
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			fmt.Printf("Error checking existing rule: %v\n", err)
+			continue
+		}
+
 		rule := models.NotificationRule{
 			ID:         uuid.New().String(),
 			Name:       def.Name,
@@ -76,7 +90,9 @@ func AddNotificationRule() {
 			CreatedAt:  time.Now(),
 			UpdatedAt:  time.Now(),
 		}
+
 		if err := config.DB.Create(&rule).Error; err != nil {
+			fmt.Printf("Error creating rule %s: %v\n", def.Name, err)
 		}
 	}
 }

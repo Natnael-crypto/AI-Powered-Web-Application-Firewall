@@ -67,7 +67,6 @@ const AIModelTable = () => {
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Expected Recall</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Expected F1 Score</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Train Every</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Selected</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
@@ -91,14 +90,7 @@ const AIModelTable = () => {
                     <td className="px-2 py-4 text-sm text-gray-900 text-center">{model.expected_recall}</td>
                     <td className="px-2 py-4 text-sm text-gray-900 text-center">{model.expected_f1}</td>
                     <td className="px-6 py-4 text-sm text-gray-900 text-center">{(model.train_every / 3600000)}h</td>
-                    <td className="px-6 py-4 text-sm text-gray-900 text-center">
-                      <input
-                        type="radio"
-                        name="selectedModel"
-                        checked={model.selected}
-                        onChange={() => handleSelect(model.id)}
-                      />
-                    </td>
+                   
                     <td className="px-6 py-4 text-sm text-gray-900 text-center">
                       <button
                         onClick={() => handleEdit(model)}

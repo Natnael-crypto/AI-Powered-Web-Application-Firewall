@@ -49,6 +49,8 @@ function Notifications() {
     })
   }
 
+  
+
   const handleRefresh = async () => {
     setIsRefreshing(true)
     try {
@@ -89,6 +91,8 @@ function Notifications() {
       <Card className="shadow-md p-4 bg-white">
         <NotificationsTable data={notifications} onMarkAsRead={handleMarkAsRead} />
       </Card>
+
+       
     </div>
   )
 }

@@ -180,7 +180,7 @@ export default function ApplicationConfigModal({
         <div className="space-y-3 mb-6">
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <label className="block text-xs text-gray-500 mb-1">Listening Port</label>
+              <label className="block text-xs text-gray-500 mb-1">Maximum Post Data Size</label>
               <input
                 type="text"
                 name="max_post_data_size"
@@ -195,65 +195,6 @@ export default function ApplicationConfigModal({
               className="self-end px-4 py-2 text-sm bg-black text-white rounded hover:bg-gray-800 transition-colors whitespace-nowrap"
             >
               {isMaxDataLoading ? 'Saving...' : 'Save Port'}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* WAF Global Configuration */}
-      <div>
-        <div className="flex items-center mb-4">
-          <div className="flex-grow border-t border-gray-200"></div>
-          <span className="mx-4 text-sm font-medium text-gray-500">
-            WAF GLOBAL SETTINGS
-          </span>
-          <div className="flex-grow border-t border-gray-200"></div>
-        </div>
-
-        {/* Listening Port Section */}
-        <div className="space-y-3 mb-6">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <label className="block text-xs text-gray-500 mb-1">Listening Port</label>
-              <input
-                type="text"
-                name="listening_port"
-                value={formData.listening_port}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-md"
-              />
-            </div>
-            <button
-              onClick={handleUpdateListeningPort}
-              disabled={isListeningPortUpdating}
-              className="self-end px-4 py-2 text-sm bg-black text-white rounded hover:bg-gray-800 transition-colors whitespace-nowrap"
-            >
-              {isListeningPortUpdating ? 'Saving...' : 'Save Port'}
-            </button>
-          </div>
-        </div>
-
-        {/* Remote Log Server Section */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <label className="block text-xs text-gray-500 mb-1">
-                Remote Log Server
-              </label>
-              <input
-                type="text"
-                name="remote_logServer"
-                value={formData.remote_logServer}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-md"
-              />
-            </div>
-            <button
-              onClick={handleUpdateRemoteLogServer}
-              disabled={isRemoteLogUpdating}
-              className="self-end px-4 py-2 text-sm bg-black text-white rounded hover:bg-gray-800 transition-colors whitespace-nowrap"
-            >
-              {isRemoteLogUpdating ? 'Saving...' : 'Save Log Server'}
             </button>
           </div>
         </div>

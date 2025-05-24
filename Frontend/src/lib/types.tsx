@@ -344,3 +344,25 @@ export interface RequestLog {
   rule_detected: boolean
   ai_threat_type: string
 }
+
+export interface NotificationRule {
+  id: string
+  name: string
+  threat_type: string
+  threshold: number
+  time_window: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface NotificationRuleInput {
+  threshold: number
+  time_window: number
+  is_active: boolean
+}
+
+export interface UpdateNotificationRuleInput {
+  rule_id: string
+  data: NotificationRuleInput
+}
