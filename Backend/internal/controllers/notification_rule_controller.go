@@ -54,7 +54,6 @@ func UpdateNotificationRule(c *gin.Context) {
 	}
 
 	var input struct {
-		ThreatType string `json:"threat_type" binding:"required"`
 		Threshold  int    `json:"threshold" binding:"required"`
 		TimeWindow int    `json:"time_window" binding:"required"`
 		IsActive   bool   `json:"is_active"`
@@ -64,10 +63,7 @@ func UpdateNotificationRule(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	if input.ThreatType != "" {
-		rule.ThreatType = input.ThreatType
-	}
+	
 	if input.Threshold != 0 {
 		rule.Threshold = input.Threshold
 	}
