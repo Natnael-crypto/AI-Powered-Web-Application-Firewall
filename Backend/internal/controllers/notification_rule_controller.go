@@ -3,40 +3,23 @@ package controllers
 import (
 	"backend/internal/config"
 	"backend/internal/models"
-	"backend/internal/utils"
 	"log"
 	"net/http"
 	"time"
+
 	"github.com/gin-gonic/gin"
 )
 
 func GetNotificationRule(c *gin.Context) {
 
-	applicationID := c.Param("application_id")
-
-	if c.GetString("role") == "super_admin" {
-	} else {
-		appIds := utils.GetAssignedApplicationIDs(c)
-		if !utils.HasAccessToApplication(appIds, applicationID) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-			return
-		}
-	}
-
-	var notificationRuleToApplication []models.NotificationRuleToApplication
-	if err := config.DB.Where("application_id = ?", applicationID).First(&notificationRuleToApplication).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to fetch notification rules"})
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
-	}
-
-	var ruleIDs []string
-	for _, record := range notificationRuleToApplication {
-		ruleIDs = append(ruleIDs, record.NotificationRuleID)
 	}
 
 	var rules []models.NotificationRule
 
-	if err := config.DB.Where("id = ?", ruleIDs).Find(&rules).Error; err != nil {
+	if err := config.DB.Find(&rules).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch notification rules"})
 		return
 	}
@@ -46,23 +29,14 @@ func GetNotificationRule(c *gin.Context) {
 
 func GetNotificationRules(c *gin.Context) {
 
-	appIds := utils.GetAssignedApplicationIDs(c)
-
-	var notificationRuleToApplication []models.NotificationRuleToApplication
-
-	if err := config.DB.Where("application_id In ?", appIds).Find(&notificationRuleToApplication).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch notification rules"})
+	if c.GetString("role") != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
-	}
-
-	var ruleIDs []string
-	for _, record := range notificationRuleToApplication {
-		ruleIDs = append(ruleIDs, record.NotificationRuleID)
 	}
 
 	var rules []models.NotificationRule
 
-	if err := config.DB.Where("id In ?", ruleIDs).Find(&rules).Error; err != nil {
+	if err := config.DB.Find(&rules).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch notification rules"})
 		return
 	}
@@ -80,17 +54,16 @@ func UpdateNotificationRule(c *gin.Context) {
 	}
 
 	var input struct {
-		ThreatType     string   `json:"threat_type" binding:"required"`
-		Threshold      int      `json:"threshold" binding:"required"`
-		TimeWindow     int      `json:"time_window" binding:"required"`
-		IsActive       bool     `json:"is_active"`
+		ThreatType string `json:"threat_type" binding:"required"`
+		Threshold  int    `json:"threshold" binding:"required"`
+		TimeWindow int    `json:"time_window" binding:"required"`
+		IsActive   bool   `json:"is_active"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 
 	if input.ThreatType != "" {
 		rule.ThreatType = input.ThreatType
