@@ -15,7 +15,7 @@ type Notification struct {
 type NotificationRule struct {
 	ID         string    `gorm:"primaryKey" json:"id"`
 	Name       string    `json:"name" gorm:"not null" `
-	ThreatType string    `json:"threat_type" gorm:"not null" `
+	ThreatType string    `json:"threat_type" gorm:"unique;not null" `
 	Threshold  int       `json:"threshold" gorm:"not null" `
 	TimeWindow int       `json:"time_window" gorm:"not null" `
 	IsActive   bool      `json:"is_active" gorm:"not null" `
