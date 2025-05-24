@@ -5,6 +5,7 @@ import (
 	"backend/internal/models"
 	"log"
 	"strings"
+
 	// "backend/internal/utils"
 	"errors"
 	"fmt"
@@ -240,6 +241,7 @@ func GetNotificationSenderConfig(c *gin.Context) {
 
 	if err := config.DB.First(&senderConfig).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "notification sender config not found"})
+		return
 	}
 
 	senderConfig.AppPassword = strings.Repeat("•", 16)
