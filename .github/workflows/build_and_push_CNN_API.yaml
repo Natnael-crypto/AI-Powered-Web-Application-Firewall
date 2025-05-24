@@ -20,4 +20,4 @@ jobs:
       - name: Push Docker Image to Docker Hub
         run: |
           docker login -u natnaelcrypto -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
-          docker push natnaelcrypto/cnn_api:latest
+          docker push natnaelcrypto/ml:latest
