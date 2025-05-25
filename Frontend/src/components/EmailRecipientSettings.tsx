@@ -1,35 +1,32 @@
-import { useState } from 'react'
-import { Pencil, Trash2 } from 'lucide-react'
+import {useState} from 'react'
+import {Pencil, Trash2} from 'lucide-react'
 import {
   useGetUseEmail,
   useAddUserEmail,
   useUpdateUserEmail,
   useDeleteUserEmail,
 } from '../hooks/api/useSystemEmail'
-import { useGetAllUsers } from '../hooks/api/useUser'
+import {useGetAllUsers} from '../hooks/api/useUser'
 
 const EmailRecipientSettings = () => {
   const [selectedUserId, setSelectedUserId] = useState('')
   const [email, setEmail] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
 
-  const { data: emails, refetch } = useGetUseEmail()
-  const { data: users } = useGetAllUsers()
+  const {data: emails, refetch} = useGetUseEmail()
+  const {data: users} = useGetAllUsers()
 
   const addEmailMutation = useAddUserEmail()
   const updateEmailMutation = useUpdateUserEmail()
   const deleteEmailMutation = useDeleteUserEmail()
 
   const handleSave = () => {
-  
-
-
     if (editingId) {
       if (!email || !selectedUserId) {
-          alert('Please select a user and enter an email.')
-          return
+        alert('Please select a user and enter an email.')
+        return
       }
-      const payload = { email, id: selectedUserId }
+      const payload = {email, id: selectedUserId}
 
       updateEmailMutation.mutate(payload, {
         onSuccess: () => {
@@ -39,11 +36,11 @@ const EmailRecipientSettings = () => {
         onError: () => alert('Failed to update email'),
       })
     } else {
-        if (!email || !selectedUserId) {
-          alert('Please select a user and enter an email.')
-          return
-        }
-      const payload = { email, id: selectedUserId }
+      if (!email || !selectedUserId) {
+        alert('Please select a user and enter an email.')
+        return
+      }
+      const payload = {email, id: selectedUserId}
       addEmailMutation.mutate(payload, {
         onSuccess: () => {
           alert('Email added.')
@@ -62,13 +59,16 @@ const EmailRecipientSettings = () => {
 
   const handleDelete = (id: string) => {
     if (confirm('Are you sure you want to delete this email?')) {
-      deleteEmailMutation.mutate({ id }, {
-        onSuccess: () => {
-          alert('Deleted successfully')
-          refetch()
+      deleteEmailMutation.mutate(
+        {id},
+        {
+          onSuccess: () => {
+            alert('Deleted successfully')
+            refetch()
+          },
+          onError: () => alert('Delete failed'),
         },
-        onError: () => alert('Delete failed'),
-      })
+      )
     }
   }
 
@@ -115,7 +115,7 @@ const EmailRecipientSettings = () => {
       <div className="mb-6 flex justify-end">
         <button
           onClick={handleSave}
-          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+          className="bg-black text-white px-6 py-2 rounded hover:bg-slate-800 transition"
         >
           {editingId ? 'Save Email' : 'Add Email'}
         </button>
@@ -135,12 +135,11 @@ const EmailRecipientSettings = () => {
             emails.map((entry: any) => (
               <tr key={entry.id} className="border-t">
                 <td className="p-2">
-                  {
-                    users? (
+                  {users ? (
                     users?.find((u: any) => u.user_id === entry.user_id)?.username
-                    ):
+                  ) : (
                     <div className="text-gray-500 text-sm">Loading user...</div>
-                  }
+                  )}
                 </td>
 
                 <td className="p-2">{entry.email}</td>

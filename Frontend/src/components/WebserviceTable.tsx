@@ -5,12 +5,14 @@ import {Application} from '../lib/types'
 import ApplicationConfigModal from './ApplicationConfigModal'
 import {useState} from 'react'
 import {useUpdateDetectBot} from '../hooks/api/useApplication'
+import {Edit, Settings, Trash2} from 'lucide-react'
 
 interface WebserviceTableProps {
   data: Application[]
   setSelectedApp?: (app: Application) => void
   openModal: () => void
   selectedApp?: Application
+  handleDelete?: (application_id: string) => void
 }
 
 function getColumns({
@@ -18,11 +20,13 @@ function getColumns({
   openModal,
   setIsConfigModalOpen,
   toggleBotDetection,
+  handleDelete,
 }: {
   setSelectedApp?: (app: Application) => void
   openModal: () => void
   setIsConfigModalOpen: (bool: boolean) => void
   toggleBotDetection: (application_id: string, detectBot: boolean) => void
+  handleDelete?: (application_id: string) => void
 }): ColumnDef<Application>[] {
   return [
     {
@@ -144,6 +148,7 @@ function getColumns({
           options={[
             {
               label: 'Update Detail',
+              icon: <Edit className="mr-2 h-4 w-4" />,
               onClick: app => {
                 setSelectedApp?.(app)
                 openModal()
@@ -151,9 +156,18 @@ function getColumns({
             },
             {
               label: 'Update Config',
+              icon: <Settings className="mr-2 h-4 w-4" />,
               onClick: app => {
                 setSelectedApp?.(app)
                 setIsConfigModalOpen(true)
+              },
+            },
+            {
+              label: 'Delete',
+              icon: <Trash2 className="mr-2 h-4 w-4 text-red-600" />,
+              onClick: app => {
+                setSelectedApp?.(app)
+                handleDelete?.(row.original.application_id)
               },
             },
           ]}
@@ -168,6 +182,7 @@ function WebserviceTable({
   setSelectedApp,
   openModal,
   selectedApp,
+  handleDelete,
 }: WebserviceTableProps) {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false)
   const {mutate: updateDetectBOT} = useUpdateDetectBot()
@@ -181,6 +196,7 @@ function WebserviceTable({
     openModal,
     setIsConfigModalOpen,
     toggleBotDetection,
+    handleDelete,
   })
 
   return (

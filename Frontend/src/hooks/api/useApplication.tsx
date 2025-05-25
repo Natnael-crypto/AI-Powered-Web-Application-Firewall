@@ -2,6 +2,7 @@ import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 import {
   assignApplication,
   createApplication,
+  deleteApplication,
   deleteAssignment,
   getApplication,
   getApplicationConfig,
@@ -117,6 +118,15 @@ export function useUpdateMaxDataSize() {
   return useMutation({
     mutationKey: ['detect_bot'],
     mutationFn: updateMaxDataSize,
+    onSuccess: () => queryClient.invalidateQueries({queryKey: ['applications']}),
+  })
+}
+
+export function useDeleteApplication() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['deleteApplication'],
+    mutationFn: deleteApplication,
     onSuccess: () => queryClient.invalidateQueries({queryKey: ['applications']}),
   })
 }

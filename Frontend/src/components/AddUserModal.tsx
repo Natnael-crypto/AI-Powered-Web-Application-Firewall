@@ -2,7 +2,7 @@ import React, {useState, useCallback} from 'react'
 import Modal from './Modal'
 
 type UserStatus = 'active' | 'inactive'
-type UserRole = 'admin' | 'editor' | 'viewer' // Expanded role options
+type UserRole = 'admin' | 'editor' | 'viewer'
 
 interface AdminUser {
   user_id: string
@@ -17,7 +17,7 @@ interface AddUserModalProps {
   onSubmit: (data: AdminUser) => void
   isOpen: boolean
   onClose: () => void
-  initialData?: Partial<AdminUser> // Allow prefilling form
+  initialData?: Partial<AdminUser>
 }
 
 const defaultUserData: AdminUser = {
@@ -65,7 +65,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }))
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({...prev, [name]: ''}))
     }
@@ -94,7 +93,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title="Admin User Settings">
       <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {/* Username */}
           <div className="col-span-1">
             <label
               htmlFor="username"
@@ -122,7 +120,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             )}
           </div>
 
-          {/* Password */}
           <div className="col-span-1">
             <label
               htmlFor="password"
