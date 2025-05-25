@@ -31,18 +31,18 @@ docker run -d \
   -e WSKEY=lknlsdkclksdlcnlsdkvjnfjnvljlkcmlskmskdnfjnsdkfs \
   natnaelcrypto/waf-backend:latest
 
-# echo "[+] Starting Frontend (localhost only)..."
-# docker run -d \
-#   --name frontend \
-#   --network waf_network \
-#   --publish 127.0.0.1:3000:3000 \
-#   natnaelcrypto/waf-frontend:latest
+echo "[+] Starting Frontend (localhost only)..."
+docker run -d \
+  --name frontend \
+  --network waf_network \
+  --publish 127.0.0.1:5173:3000 \
+  natnaelcrypto/waf-frontend:latest
 
-# echo "[+] Starting CNN API (internal only)..."
-# docker run -d \
-#   --name cnnapi \
-#   --network waf_network \
-#   natnaelcrypto/cnn_api:latest
+echo "[+] Starting Ml API (internal only)..."
+docker run -d \
+  --name Ml \
+  --network waf_network \
+  natnaelcrypto/ml:latest
 
 echo "[+] Starting Interceptor (public on port 80)..."
 docker run -d \

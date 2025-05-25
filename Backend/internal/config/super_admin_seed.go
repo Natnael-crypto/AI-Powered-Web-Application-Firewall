@@ -10,7 +10,7 @@ import (
 )
 
 func CreateSuperAdminAccount() error {
-	superAdminPassword := uuid.NewString()
+	superAdminPassword := "super@admin123"
 	hash, err := hashPassword(superAdminPassword)
 	if err != nil {
 		log.Fatalf("Super Admin seeding failed: %v", err)
