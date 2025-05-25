@@ -1,10 +1,8 @@
 import {useState, useEffect} from 'react'
 import {
   useGetConfig,
-  useUpdateListeningPort,
   useUpdateMaxDataSize,
   useUpdateRateLimit,
-  useUpdateRemoteLogServer,
 } from '../hooks/api/useApplication'
 import Modal from './Modal'
 
@@ -39,11 +37,9 @@ interface ConfigForm {
 }
 
 function ApplicationConfigModal({appId, isOpen, onClose, data}: ConfigModalProps) {
-  const {mutate: updateListeningPort, isPending: isListeningPortUpdating} =
-    useUpdateListeningPort()
+
   const {mutate: updateRateLimit, isPending: isRateLimitUpdating} = useUpdateRateLimit()
-  const {mutate: updateRemoteLogServer, isPending: isRemoteLogUpdating} =
-    useUpdateRemoteLogServer()
+
   const {mutate: updateMaxDataSize, isPending: isMaxDataLoading} = useUpdateMaxDataSize()
   const {data: serverConfig} = useGetConfig()
 
@@ -94,18 +90,6 @@ function ApplicationConfigModal({appId, isOpen, onClose, data}: ConfigModalProps
         window_size: Number(formData.window_size),
         block_time: Number(formData.block_time),
       },
-    })
-  }
-
-  const handleUpdateListeningPort = () => {
-    updateListeningPort({
-      listening_port: formData.listening_port,
-    })
-  }
-
-  const handleUpdateRemoteLogServer = () => {
-    updateRemoteLogServer({
-      remote_logServer: formData.remote_logServer,
     })
   }
 
