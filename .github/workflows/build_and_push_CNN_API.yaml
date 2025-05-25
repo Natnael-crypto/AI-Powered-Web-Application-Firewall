@@ -15,9 +15,9 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t natnaelcrypto/cnn_api:latest -f ML/Dockerfile .
+          docker build -t natnaelcrypto/ml:latest -f ML/Dockerfile .
 
       - name: Push Docker Image to Docker Hub
         run: |
           docker login -u natnaelcrypto -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
-          docker push natnaelcrypto/cnn_api:latest
+          docker push natnaelcrypto/ml:latest

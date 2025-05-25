@@ -10,6 +10,7 @@ import {
 } from '../hooks/api/useUser'
 import {AdminUser} from '../lib/types'
 import {AssignAdminModal} from './AssignAdminModal'
+import {CheckCircle, PauseCircle, Key, Trash2, UserPlus} from 'lucide-react'
 
 const AdminTable = () => {
   const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null)
@@ -89,26 +90,31 @@ const AdminTable = () => {
           options={[
             {
               label: 'Set Active',
+              icon: <CheckCircle className="w-4 h-4 mr-2" />,
               onClick: user => handleStatusChange(user, 'active'),
               show: (user: AdminUser) => user.status !== 'active',
             },
             {
               label: 'Set Inactive',
+              icon: <PauseCircle className="w-4 h-4 mr-2" />,
               onClick: user => handleStatusChange(user, 'inactive'),
               show: (user: AdminUser) => user.status !== 'inactive',
             },
             {
               label: 'Update Password',
+              icon: <Key className="w-4 h-4 mr-2" />,
               onClick: handleUpdatePassword,
               show: () => true,
             },
             {
               label: 'Delete',
+              icon: <Trash2 className="w-4 h-4 mr-2" />,
               onClick: handleDeleteAdmin,
               show: () => true,
             },
             {
-              label: 'Assign',
+              label: 'Assign Service',
+              icon: <UserPlus className="w-4 h-4 mr-2" />,
               onClick: handleAssign,
               show: () => true,
             },

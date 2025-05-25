@@ -7,20 +7,23 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts'
-import { useGetMostTargetedEndpoint } from '../hooks/api/useDashboardStat'
-import { useEffect } from 'react'
+import {useGetMostTargetedEndpoint} from '../hooks/api/useDashboardStat'
+import {useEffect} from 'react'
 
 interface TopEndpointsChartProps {
   selectedApp: string
   timeRange: any
 }
 
-function TopEndpointsChart({ selectedApp, timeRange }: TopEndpointsChartProps) {
-  const { data, isLoading, isError,refetch } = useGetMostTargetedEndpoint(selectedApp, timeRange)
+function TopEndpointsChart({selectedApp, timeRange}: TopEndpointsChartProps) {
+  const {data, isLoading, isError, refetch} = useGetMostTargetedEndpoint(
+    selectedApp,
+    timeRange,
+  )
 
-  useEffect(()=>{
+  useEffect(() => {
     refetch()
-  },[selectedApp,timeRange])
+  }, [selectedApp, timeRange])
 
   if (isLoading) return <p>Loading...</p>
   if (isError) return <p>Something went wrong</p>
@@ -39,7 +42,7 @@ function TopEndpointsChart({ selectedApp, timeRange }: TopEndpointsChartProps) {
           />
           <YAxis />
           <Tooltip
-            formatter={(value: any, name: any, props: any) => [value, 'Requests']}
+            formatter={(value: any, _: any) => [value, 'Requests']}
             labelFormatter={(label: string) => `URL: ${label}`}
           />
           <Bar dataKey="count" fill="#3B82F6" />

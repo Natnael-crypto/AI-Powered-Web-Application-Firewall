@@ -93,17 +93,9 @@ func fetchConfig() error {
 		return fmt.Errorf("WsKey environment variable is not set")
 	}
 
-	backendHost := os.Getenv("BACKENDHOST")
-	if backendHost == "" {
-		return fmt.Errorf("BACKENDHOST environment variable is not set")
-	}
+	backendHost := os.Getenv("BACKENDURL")
 
-	backendPort := os.Getenv("BACKENDPORT")
-	if backendPort == "" {
-		return fmt.Errorf("BACKENDPORT environment variable is not set")
-	}
-
-	configURL := fmt.Sprintf("http://%s:%s/interceptor/config", backendHost, backendPort)
+	configURL := fmt.Sprintf(backendHost + "/interceptor/config")
 
 	req, err := http.NewRequest("GET", configURL, nil)
 	if err != nil {
@@ -143,17 +135,9 @@ func fetchApplicationConfig() error {
 		log.Println("Warning: No .env file found, falling back to environment variables")
 	}
 
-	backendHost := os.Getenv("BACKENDHOST")
-	if backendHost == "" {
-		return fmt.Errorf("BACKENDHOST environment variable is not set")
-	}
+	backendHost := os.Getenv("BACKENDURL")
 
-	backendPort := os.Getenv("BACKENDPORT")
-	if backendPort == "" {
-		return fmt.Errorf("BACKENDPORT environment variable is not set")
-	}
-
-	applicationsURL := fmt.Sprintf("http://%s:%s/interceptor/application/", backendHost, backendPort)
+	applicationsURL := fmt.Sprintf(backendHost + "/interceptor/application/")
 
 	req, err := http.NewRequest("GET", applicationsURL, nil)
 	if err != nil {
@@ -235,7 +219,7 @@ func fetchApplicationConfig() error {
 			appsLock.Unlock()
 
 			// Fetch security headers
-			appSecurityHeaderURL := fmt.Sprintf("http://%s:%s/interceptor/security-headers/%s", backendHost, backendPort, app.ApplicationID)
+			appSecurityHeaderURL := fmt.Sprintf(backendHost+"/interceptor/security-headers/%s", backendHost, app.ApplicationID)
 
 			req, err := http.NewRequest("GET", appSecurityHeaderURL, nil)
 			if err != nil {

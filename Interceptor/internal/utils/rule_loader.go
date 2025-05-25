@@ -28,17 +28,9 @@ type RulesResponse struct {
 }
 
 func FetchRules(applicationID string) (*RulesResponse, error) {
-	backendHost := os.Getenv("BACKENDHOST")
-	if backendHost == "" {
-		return nil, fmt.Errorf("BACKENDHOST environment variable is not set")
-	}
+	backendHost := os.Getenv("BACKENDURL")
 
-	backendPort := os.Getenv("BACKENDPORT")
-	if backendPort == "" {
-		return nil, fmt.Errorf("BACKENDPORT environment variable is not set")
-	}
-
-	url := fmt.Sprintf("http://%s:%s/interceptor/rule/%s", backendHost, backendPort, applicationID)
+	url := fmt.Sprintf(backendHost+"/interceptor/rule/%s", backendHost, applicationID)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

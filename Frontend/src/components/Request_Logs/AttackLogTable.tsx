@@ -49,14 +49,13 @@ function AttackLogTable() {
     {
       header: 'Status',
       accessorKey: 'status',
-      cell: ({getValue, row}: CellContext<RequestLog, unknown>) => (
+      cell: ({getValue}: CellContext<RequestLog, unknown>) => (
         <div
           className={`py-1 px-3 text-white text-xs font-medium inline-block ${
             (getValue() as string).toLowerCase() === 'blocked'
               ? 'bg-red-600'
               : 'bg-yellow-500 text-gray-900'
           }`}
-          onClick={() => handleRowClick(row.original)}
         >
           {getValue() as string}
         </div>
@@ -65,25 +64,22 @@ function AttackLogTable() {
     {
       header: 'Application',
       accessorKey: 'application_name',
-      cell: ({getValue, row}: CellContext<RequestLog, unknown>) => (
-        <div onClick={() => handleRowClick(row.original)}>{getValue() as string}</div>
+      cell: ({getValue}: CellContext<RequestLog, unknown>) => (
+        <div>{getValue() as string}</div>
       ),
     },
     {
       header: 'Method',
       accessorKey: 'request_method',
-      cell: ({getValue, row}: CellContext<RequestLog, unknown>) => (
-        <div onClick={() => handleRowClick(row.original)}>{getValue() as string}</div>
+      cell: ({getValue}: CellContext<RequestLog, unknown>) => (
+        <div>{getValue() as string}</div>
       ),
     },
     {
       header: 'URL',
       accessorKey: 'request_url',
-      cell: ({getValue, row}: CellContext<RequestLog, unknown>) => (
-        <div
-          className="text-sm text-blue-600 truncate max-w-[300px]"
-          onClick={() => handleRowClick(row.original)}
-        >
+      cell: ({getValue}: CellContext<RequestLog, unknown>) => (
+        <div className="text-sm text-blue-600 truncate max-w-[300px]">
           {getValue() as string}
         </div>
       ),
@@ -91,54 +87,36 @@ function AttackLogTable() {
     {
       header: 'Threat Type',
       accessorKey: 'threat_type',
-      cell: ({getValue, row}: CellContext<RequestLog, unknown>) => (
-        <span
-          className="text-sm font-medium text-red-700"
-          onClick={() => handleRowClick(row.original)}
-        >
-          {getValue() as string}
-        </span>
+      cell: ({getValue}: CellContext<RequestLog, unknown>) => (
+        <span className="text-sm font-medium text-red-700">{getValue() as string}</span>
       ),
     },
     {
       header: 'IP',
       accessorKey: 'client_ip',
-      cell: ({getValue, row}: CellContext<RequestLog, unknown>) => (
-        <code
-          className="text-xs text-gray-500"
-          onClick={() => handleRowClick(row.original)}
-        >
-          {getValue() as string}
-        </code>
+      cell: ({getValue}: CellContext<RequestLog, unknown>) => (
+        <code className="text-xs text-gray-500">{getValue() as string}</code>
       ),
     },
     {
       header: 'Location',
       accessorKey: 'geo_location',
-      cell: ({getValue, row}: CellContext<RequestLog, unknown>) => (
-        <div onClick={() => handleRowClick(row.original)}>{getValue() as string}</div>
+      cell: ({getValue}: CellContext<RequestLog, unknown>) => (
+        <div>{getValue() as string}</div>
       ),
     },
     {
       header: 'Code',
       accessorKey: 'response_code',
-      cell: ({getValue, row}: CellContext<RequestLog, unknown>) => (
-        <div
-          className="text-sm font-semibold text-center"
-          onClick={() => handleRowClick(row.original)}
-        >
-          {getValue() as number}
-        </div>
+      cell: ({getValue}: CellContext<RequestLog, unknown>) => (
+        <div className="text-sm font-semibold text-center">{getValue() as number}</div>
       ),
     },
     {
       header: 'Time',
       accessorKey: 'timestamp',
-      cell: ({getValue, row}: CellContext<RequestLog, unknown>) => (
-        <div
-          className="text-xs text-gray-500"
-          onClick={() => handleRowClick(row.original)}
-        >
+      cell: ({getValue}: CellContext<RequestLog, unknown>) => (
+        <div className="text-xs text-gray-500">
           {new Date(getValue() as string).toLocaleString()}
         </div>
       ),
@@ -156,7 +134,7 @@ function AttackLogTable() {
 
   return (
     <div className="bg-white p-6 shadow-xl border border-gray-200">
-      <div className='flex justify-between mr-10'>
+      <div className="flex justify-between mr-10">
         <button
           onClick={handleGenerateRequest}
           className="py-4 px-6 text-white rounded-sm mb-4"
@@ -164,11 +142,10 @@ function AttackLogTable() {
         >
           Generate Request
         </button>
-        <p>{data?.total}</p>
+        <p className='text-lg'>Logs: <strong>{data?.total}</strong></p>
       </div>
-      
 
-      <Table data={data?.requests || []} columns={columns} />
+      <Table data={data?.requests || []} columns={columns} onRowClick={handleRowClick} />
 
       <div className="mt-4 flex justify-center gap-4 items-center">
         <button

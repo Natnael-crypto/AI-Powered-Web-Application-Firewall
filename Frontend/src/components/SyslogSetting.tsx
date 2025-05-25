@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import { useGetSysConf } from '../hooks/api/useSystemConf'
-import { useUpdateSysPort, useUpdateSysRemoteLogIp } from '../hooks/api/useSystemConf'
-import { useQueryClient } from '@tanstack/react-query'
+import {useEffect, useState} from 'react'
+import {useGetSysConf} from '../hooks/api/useSystemConf'
+import {useUpdateSysPort, useUpdateSysRemoteLogIp} from '../hooks/api/useSystemConf'
+import {useQueryClient} from '@tanstack/react-query'
 
 export default function SyslogSettings() {
   const [serverAddress, setServerAddress] = useState('')
@@ -9,12 +9,12 @@ export default function SyslogSettings() {
   const [isSaving, setIsSaving] = useState(false)
 
   const queryClient = useQueryClient()
-  const { data, isLoading,refetch } = useGetSysConf()
+  const {data, isLoading, refetch} = useGetSysConf()
 
   const remoteLogIpMutation = useUpdateSysRemoteLogIp()
   const portMutation = useUpdateSysPort()
 
-  useEffect(()=>{
+  useEffect(() => {
     refetch()
   })
 
@@ -33,21 +33,17 @@ export default function SyslogSettings() {
     const promises: Promise<any>[] = []
 
     if (serverAddress) {
-      promises.push(
-        remoteLogIpMutation.mutateAsync(serverAddress)
-      )
+      promises.push(remoteLogIpMutation.mutateAsync(serverAddress))
     }
 
     if (serverPort) {
-      promises.push(
-        portMutation.mutateAsync(serverPort)
-      )
+      promises.push(portMutation.mutateAsync(serverPort))
     }
 
     try {
       await Promise.all(promises)
       alert('Syslog configuration saved successfully!')
-      queryClient.invalidateQueries({ queryKey: ['getSysConf'] })
+      queryClient.invalidateQueries({queryKey: ['getSysConf']})
     } catch (error: any) {
       alert('Failed to save configuration. ' + error.message)
       console.error(error)
@@ -96,7 +92,7 @@ export default function SyslogSettings() {
         <button
           type="submit"
           disabled={isSaving}
-          className="bg-blue-600 text-white font-semibold px-6 py-2 hover:bg-blue-700 transition disabled:opacity-50"
+          className="bg-black text-white font-semibold px-6 py-2 hover:bg-blue-700 transition disabled:opacity-50"
         >
           {isSaving ? 'Saving...' : 'Save'}
         </button>

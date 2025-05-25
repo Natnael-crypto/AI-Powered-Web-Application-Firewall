@@ -1,4 +1,3 @@
-import {Rule} from '../components/RuleDetailUpdateModal'
 import axios from '../lib/axios'
 
 export async function getRules() {

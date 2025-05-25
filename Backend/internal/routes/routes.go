@@ -126,11 +126,9 @@ func InitializeRoutes(r *gin.Engine) {
 
 	notification_rule := authorized.Group("/notification-rule")
 	{
-		notification_rule.POST("/", controllers.AddNotificationRule)
 		notification_rule.GET("/:application_id", controllers.GetNotificationRule)
 		notification_rule.GET("", controllers.GetNotificationRules)
 		notification_rule.PUT("/:rule_id", controllers.UpdateNotificationRule)
-		notification_rule.DELETE("/:rule_id", controllers.DeleteNotificationRule)
 	}
 
 	notification_config := authorized.Group("/notification-config")
@@ -140,8 +138,8 @@ func InitializeRoutes(r *gin.Engine) {
 		notification_config.GET("/all", controllers.GetAllNotificationConfig)
 		notification_config.PUT("/:user_id", controllers.UpdateNotificationConfig)
 		notification_config.DELETE("/:user_id", controllers.DeleteNotificationConfig)
-    notification_config.POST("/sender", controllers.SaveNotificationSenderConfig)
-		notification_config.GET("/sender", controllers.GetNotificationSenderConfig)
+		notification_config.POST("/sender", controllers.SaveNotificationSenderConfig)
+		notification_config.GET("/seder", controllers.GetNotificationSenderConfig)
 	}
 
 	ai_analysis := authorized.Group("/")
@@ -158,6 +156,7 @@ func InitializeRoutes(r *gin.Engine) {
 		ms_services.POST("/model/results", controllers.SubmitTrainResults)
 		ms_services.GET("/model/selected", controllers.GetSelectedModel)
 		ms_services.GET("/changes", controllers.MlCheckState)
+		ms_services.GET("/requests", controllers.GetRequestsForMl)
 	}
 
 	interceptor_services := allowed_ip.Group("/interceptor")

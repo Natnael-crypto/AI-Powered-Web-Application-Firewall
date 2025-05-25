@@ -1,13 +1,16 @@
-import {Ellipsis} from 'lucide-react'
+import {Ellipsis, Edit, Settings, Trash2} from 'lucide-react'
 import {useEffect, useRef, useState} from 'react'
+
+interface DropdownActionOption<T> {
+  label: string
+  onClick: (item: T) => void
+  show?: (item: T) => boolean
+  icon?: React.ReactNode
+}
 
 interface DropdownActionsProps<T> {
   item: T
-  options: {
-    label: string
-    onClick: (item: T) => void
-    show?: (item: T) => boolean
-  }[]
+  options: DropdownActionOption<T>[]
 }
 
 export function DropdownActions<T>({item, options}: DropdownActionsProps<T>) {
@@ -35,6 +38,13 @@ export function DropdownActions<T>({item, options}: DropdownActionsProps<T>) {
     option.show ? option.show(item) : true,
   )
 
+  // Default icons mapping (can be overridden by options)
+  const defaultIcons: Record<string, React.ReactNode> = {
+    'Update Detail': <Edit className="w-4 h-4 mr-2" />,
+    'Update Config': <Settings className="w-4 h-4 mr-2" />,
+    Delete: <Trash2 className="w-4 h-4 mr-2" />,
+  }
+
   return (
     <div className="relative text-left" ref={menuRef}>
       <button
@@ -46,7 +56,7 @@ export function DropdownActions<T>({item, options}: DropdownActionsProps<T>) {
       </button>
 
       {open && visibleOptions.length > 0 && (
-        <div className="absolute origin-top-right right-0 mt-1 rounded-md shadow-md bg-white border border-gray-100 z-50">
+        <div className="absolute origin-top-right right-0 mt-1 rounded-md shadow-md bg-white border border-gray-100 z-50 w-48">
           {visibleOptions.map((option, index) => (
             <button
               key={index}
@@ -54,8 +64,9 @@ export function DropdownActions<T>({item, options}: DropdownActionsProps<T>) {
                 option.onClick(item)
                 setOpen(false)
               }}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-100"
+              className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-100"
             >
+              {option.icon || defaultIcons[option.label]}
               {option.label}
             </button>
           ))}

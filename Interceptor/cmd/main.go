@@ -25,11 +25,9 @@ func checkForChange() (bool, bool) {
 		log.Println("Warning: No .env file found, falling back to environment variables")
 	}
 
-	backendHost := os.Getenv("BACKENDHOST")
+	backendHost := os.Getenv("BACKENDURL")
 
-	backendPort := os.Getenv("BACKENDPORT")
-
-	changeURL := "http://" + backendHost + ":" + backendPort + "/interceptor/is-running"
+	changeURL := backendHost + "/interceptor/is-running"
 
 	req, err := http.NewRequest("GET", changeURL, nil)
 	if err != nil {

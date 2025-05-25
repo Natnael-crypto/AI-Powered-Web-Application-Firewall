@@ -5,6 +5,7 @@ import (
 	"backend/internal/models"
 	"log"
 	"strings"
+
 	// "backend/internal/utils"
 	"errors"
 	"fmt"
@@ -17,8 +18,6 @@ import (
 
 func ToggleNotificationRuleStatus(c *gin.Context) {
 	ruleID := c.Param("rule_id")
-
-	currentUserID := c.GetString("user_id")
 
 	var existingRule models.NotificationRule
 	if err := config.DB.Where("id = ?", ruleID).First(&existingRule).Error; err != nil {
@@ -40,11 +39,6 @@ func ToggleNotificationRuleStatus(c *gin.Context) {
 	// 		return
 	// 	}
 	// }
-
-	if currentUserID != existingRule.CreatedBy {
-		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
-		return
-	}
 
 	existingRule.IsActive = !existingRule.IsActive
 	existingRule.UpdatedAt = time.Now()
@@ -247,6 +241,7 @@ func GetNotificationSenderConfig(c *gin.Context) {
 
 	if err := config.DB.First(&senderConfig).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "notification sender config not found"})
+		return
 	}
 
 	senderConfig.AppPassword = strings.Repeat("•", 16)

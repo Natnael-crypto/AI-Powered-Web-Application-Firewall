@@ -167,6 +167,7 @@ def analyze_request():
                 ).start()
 
             result = "Normal" if prediction == 0 else "Anomaly"
+            print(prob)
             return jsonify({"success": True, "prediction": result,"Normal":prob[0],"Anomaly":prob[1]}), 200
             
 
