@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func Send403Response(w http.ResponseWriter, RuleID int, RuleMessage string, Action string, Status int) {
+func Send403Response(w http.ResponseWriter, RequestID string) {
 	w.WriteHeader(http.StatusForbidden)
 	w.Header().Set("Content-Type", "text/html")
 
@@ -19,73 +19,75 @@ func Send403Response(w http.ResponseWriter, RuleID int, RuleMessage string, Acti
 		<title>403 Forbidden</title>
 		<style>
 			body {
-				font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-				background-color: #f9fafb;
-				color: #1f2937;
+				margin: 0;
+				padding: 0;
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+				background-color: #f4f6f8;
+				color: #333;
 				display: flex;
+				flex-direction: column;
 				justify-content: center;
 				align-items: center;
 				height: 100vh;
-				margin: 0;
 			}
-			.container {
+			.wrapper {
 				text-align: center;
-				background-color: #ffffff;
-				padding: 40px;
-				border-radius: 10px;
-				box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-				max-width: 500px;
-				width: 90%%;
+				max-width: 600px;
+				padding: 30px;
 			}
 			h1 {
-				font-size: 3rem;
-				color: #dc2626;
+				font-size: 72px;
 				margin-bottom: 10px;
+				color: #dc2626;
+			}
+			h2 {
+				font-size: 24px;
+				margin-bottom: 20px;
 			}
 			p {
-				font-size: 1.1rem;
-				margin: 15px 0;
+				font-size: 16px;
+				margin: 10px 0;
 			}
-			.code-box {
-				background-color: #f3f4f6;
+			.diagnostic {
+				background-color: #f0f0f0;
+				border-left: 4px solid #dc2626;
 				padding: 15px;
-				border-radius: 8px;
 				text-align: left;
-				margin-top: 20px;
+				margin-top: 25px;
 				font-family: monospace;
-				font-size: 0.95rem;
+				font-size: 14px;
+				border-radius: 5px;
+			}
+			.footer {
+				margin-top: 40px;
+				font-size: 13px;
+				color: #888;
 			}
 			a {
 				color: #2563eb;
 				text-decoration: none;
-				font-weight: 500;
 			}
 			a:hover {
 				text-decoration: underline;
 			}
-			@media (max-width: 600px) {
-				h1 {
-					font-size: 2.2rem;
-				}
-			}
 		</style>
 	</head>
 	<body>
-		<div class="container">
-			<h1>403 Forbidden</h1>
-			<p>Access to this resource has been denied for security reasons.</p>
-			<p>If you believe this is an error, please contact the administrator.</p>
-			<div class="code-box">
-				<strong>Rule ID:</strong> %d<br>
-				<strong>Message:</strong> %s<br>
-				<strong>Action Taken:</strong> %s<br>
-				<strong>Status Code:</strong> %d
+		<div class="wrapper">
+			<h1>403</h1>
+			<h2>Access Denied</h2>
+			<p>Your request has been blocked for security reasons.</p>
+			<p>If you believe this was done in error, please contact the site administrator with the information below.</p>
+			<div class="diagnostic">
+				<strong>Rule ID:</strong> %s<br>
 			</div>
-			<p><a href="/">← Return to Home</a></p>
+			<div class="footer">
+				Security protection by Custom WAF &mdash; Request ID: %s
+			</div>
 		</div>
 	</body>
 	</html>
-	`, RuleID, RuleMessage, Action, Status)
+	`, RequestID, RequestID)
 
 	_, err := w.Write([]byte(page))
 	if err != nil {
