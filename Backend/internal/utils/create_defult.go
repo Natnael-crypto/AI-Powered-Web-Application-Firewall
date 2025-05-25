@@ -24,13 +24,18 @@ func CreateModel() {
 	models_name := []string{"Radome Forest"}
 
 	for _, model := range models_name {
+		var existing models.AIModel
+		if err := config.DB.Where("threat_type = ?", model).First(&existing).Error; err != nil {
+			log.Println(err)
+			continue
+		}
 		AiModel := models.AIModel{
 			ID:                    GenerateUUID(),
 			ModelsName:            model,
-			Accuracy:              0.0,
-			Precision:             0.0,
-			Recall:                0.0,
-			F1:                    0.0,
+			Accuracy:              94.35,
+			Precision:             94.73,
+			Recall:                89.62,
+			F1:                    91.82,
 			ExpectedAccuracy:      0.0,
 			ExpectedPrecision:     0.0,
 			ExpectedRecall:        0.0,
