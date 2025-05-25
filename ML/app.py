@@ -3,18 +3,27 @@ import threading
 import joblib
 import requests
 import pandas as pd
-from config.config import (
-    API_ENDPOINTS,
-    ANOMALY_PREDICTOR_MODEL_PATH,
-    TYPE_PREDICTOR_MODEL_PATH,
-    THREAT_TYPE_MAPPING,
-    DEBUG
-)
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from utils.parse_request import (
     parse_request_for_anomaly_prediction,
     parse_request_for_type_prediction
 )
+
+# General App Settings
+DEBUG=os.getenv("DEBUG", "False").lower() == "true"
+
+# API Endpoints
+BACKEND_API_URL = os.getenv("BACKEND_API_URL")
+BACKEND_API_ML_MODELS_PATH = os.getenv("BACKEND_API_ML_MODELS_PATH")
+BACKEND_API_TYPE_ANALYSIS_PATH = os.getenv("BACKEND_API_TYPE_ANALYSIS_PATH")
+
+# Model Paths
+ANOMALY_PREDICTOR_MODEL_PATH = os.getenv("ANOMALY_PREDICTOR_MODEL_PATH")
+TYPE_PREDICTOR_MODEL_PATH = os.getenv("TYPE_PREDICTOR_MODEL_PATH")
 
 app = Flask(__name__)
 app.config['DEBUG'] = DEBUG
@@ -22,6 +31,20 @@ app.config['DEBUG'] = DEBUG
 # Global state
 anomaly_detector_model = None
 type_predictor_model = None
+
+THREAT_TYPE_MAPPING = {
+    1: "Command Injection",
+    2: "Directory Traversal",
+    3: "File Inclusion",
+    4: "LDAP Injection",
+    5: "NoSQL Injection",
+    6: "Open Redirect",
+    7: "SQL Injection",
+    8: "Server-Side Template Injection",
+    9: "Cross-Site Scripting (XSS)",
+    10: "XML External Entity (XXE)",
+}
+
 
 '''
 Anomaly Prediction
@@ -139,7 +162,7 @@ def analyze_request():
             if prediction == 1:
                 threading.Thread(
                     target=predict_and_notify,
-                    args=(request_json, API_ENDPOINTS["type_analysis"]),
+                    args=(request_json, f"{BACKEND_API_URL}{BACKEND_API_TYPE_ANALYSIS_PATH}"),
                     daemon=True,
                 ).start()
 

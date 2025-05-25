@@ -39,7 +39,7 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 WORKDIR /app/ML
 
 # Expose the application port
-EXPOSE 5000
+EXPOSE 8090
 
 # Set the default command to run your app
 CMD ["python", "app.py"]
