@@ -11,6 +11,7 @@ interface TableProps<T> {
   data: T[]
   className?: string
   emptyMessage?: string
+  onRowClick?: (row: T) => void
 }
 
 function truncateString(value: unknown, maxLength = 60): string {
@@ -25,6 +26,7 @@ function Table<T extends object>({
   data,
   className,
   emptyMessage = 'No data available',
+  onRowClick,
 }: TableProps<T>) {
   const table = useReactTable({
     columns,
@@ -52,7 +54,14 @@ function Table<T extends object>({
         <tbody className="divide-y divide-gray-200">
           {table.getRowModel().rows.length > 0 ? (
             table.getRowModel().rows.map(row => (
-              <tr key={row.id} className="hover:bg-gray-50 transition-colors">
+              <tr
+                key={row.id}
+                className={clsx(
+                  'hover:bg-gray-50 transition-colors',
+                  onRowClick && 'cursor-pointer',
+                )}
+                onClick={() => onRowClick?.(row.original)}
+              >
                 {row.getVisibleCells().map(cell => {
                   const rendered = flexRender(
                     cell.column.columnDef.cell,
