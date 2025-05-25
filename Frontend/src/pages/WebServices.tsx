@@ -66,7 +66,7 @@ function WebService() {
     try {
       const mutationFn = isUpdate ? updateApplication : createApplication
 
-      await mutationFn(formData, {
+      mutationFn(formData, {
         onSuccess: () => {
           toast.success(`Application ${isUpdate ? 'updated' : 'created'} successfully!`)
           refetchApplications()

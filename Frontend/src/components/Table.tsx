@@ -10,6 +10,7 @@ interface TableProps<T> {
   columns: ColumnDef<T>[]
   data: T[]
   className?: string
+  emptyMessage?: string
 }
 
 function truncateString(value: unknown, maxLength = 60): string {
@@ -19,7 +20,12 @@ function truncateString(value: unknown, maxLength = 60): string {
   return String(value)
 }
 
-function Table<T extends object>({columns, data, className}: TableProps<T>) {
+function Table<T extends object>({
+  columns,
+  data,
+  className,
+  emptyMessage = 'No data available',
+}: TableProps<T>) {
   const table = useReactTable({
     columns,
     data,
@@ -44,29 +50,43 @@ function Table<T extends object>({columns, data, className}: TableProps<T>) {
           ))}
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {table.getRowModel().rows.map(row => (
-            <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-              {row.getVisibleCells().map(cell => {
-                const rendered = flexRender(cell.column.columnDef.cell, cell.getContext())
-                const isActionsColumn = cell.column.id === 'actions'
+          {table.getRowModel().rows.length > 0 ? (
+            table.getRowModel().rows.map(row => (
+              <tr key={row.id} className="hover:bg-gray-50 transition-colors">
+                {row.getVisibleCells().map(cell => {
+                  const rendered = flexRender(
+                    cell.column.columnDef.cell,
+                    cell.getContext(),
+                  )
+                  const isActionsColumn = cell.column.id === 'actions'
 
-                return (
-                  <td
-                    key={cell.id}
-                    className={clsx(
-                      'px-6 py-4 text-sm text-gray-900',
-                      isActionsColumn
-                        ? 'whitespace-nowrap relative overflow-visible'
-                        : 'whitespace-nowrap max-w-xs truncate',
-                    )}
-                    title={typeof rendered === 'string' ? rendered : undefined}
-                  >
-                    {typeof rendered === 'string' ? truncateString(rendered) : rendered}
-                  </td>
-                )
-              })}
+                  return (
+                    <td
+                      key={cell.id}
+                      className={clsx(
+                        'px-6 py-4 text-sm text-gray-900',
+                        isActionsColumn
+                          ? 'whitespace-nowrap relative overflow-visible'
+                          : 'whitespace-nowrap max-w-xs truncate',
+                      )}
+                      title={typeof rendered === 'string' ? rendered : undefined}
+                    >
+                      {typeof rendered === 'string' ? truncateString(rendered) : rendered}
+                    </td>
+                  )
+                })}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td
+                colSpan={columns.length}
+                className="px-6 py-4 text-center text-sm text-gray-500"
+              >
+                {emptyMessage}
+              </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
