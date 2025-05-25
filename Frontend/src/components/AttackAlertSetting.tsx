@@ -1,22 +1,27 @@
-import { useEffect, useState } from 'react'
-import { Info } from 'lucide-react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { SenderEmail, SenderEmailSchema } from '../lib/types'
-import { useGetSenderEmail, useSetSenderEmail } from '../hooks/api/useNotification'
-import { useToast } from '../hooks/useToast'
+import {useEffect, useState} from 'react'
+import {Info} from 'lucide-react'
+import {useForm} from 'react-hook-form'
+import {zodResolver} from '@hookform/resolvers/zod'
+import {SenderEmail, SenderEmailSchema} from '../lib/types'
+import {useGetSenderEmail, useSetSenderEmail} from '../hooks/api/useNotification'
+import {useToast} from '../hooks/useToast'
 
 const AttackAlertSettings = () => {
   const [alertType, setAlertType] = useState<'Telegram' | 'Email'>('Email')
   // const [webhook, setWebhook] = useState('')
 
-  const { mutate: setSenderEmail, data: statusCode } = useSetSenderEmail()
-  const { data: senderEmailConfig, refetch: refetchSenderEmail } = useGetSenderEmail()
-  const { addToast: toast } = useToast()
+  const {mutate: setSenderEmail, data: statusCode} = useSetSenderEmail()
+  const {data: senderEmailConfig, refetch: refetchSenderEmail} = useGetSenderEmail()
+  const {addToast: toast} = useToast()
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<SenderEmail>({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: {errors},
+  } = useForm<SenderEmail>({
     resolver: zodResolver(SenderEmailSchema), // Use Zod resolver for validation
-  });
+  })
 
   const onSave = (data: SenderEmail) => {
     setSenderEmail(data, {
@@ -28,14 +33,14 @@ const AttackAlertSettings = () => {
         toast('Something went wrong while setting up sender email')
       },
     })
-  };
+  }
 
   useEffect(() => {
     if (senderEmailConfig) {
-        setValue('sender_email', senderEmailConfig.sender_email);
-        setValue('app_password', senderEmailConfig.app_password);
+      setValue('sender_email', senderEmailConfig.sender_email)
+      setValue('app_password', senderEmailConfig.app_password)
     }
-}, [senderEmailConfig, setValue]);
+  }, [senderEmailConfig, setValue])
 
   return (
     <div className="p-6 bg-white  shadow-lg w-full">
@@ -103,7 +108,7 @@ const AttackAlertSettings = () => {
         <div className="mt-6 flex justify-end">
           <button
             type="submit"
-            className="bg-blue-600 text-white font-semibold px-6 py-2 hover:bg-blue-700 transition"
+            className="bg-black text-white font-semibold px-6 py-2 hover:bg-slate-800 transition"
           >
             Save
           </button>

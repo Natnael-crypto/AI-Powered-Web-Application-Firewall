@@ -1,40 +1,42 @@
-import { useState } from 'react'
-import { ColumnDef } from '@tanstack/react-table'
+import {useState} from 'react'
+import {ColumnDef} from '@tanstack/react-table'
 import Table from './Table'
-import { DropdownActions } from './DropdownAction'
-import { NotificationRule } from '../lib/types'
-import NotificationRuleModal from '../components/UpdateNotficationRule' // Import the modal component
+import {DropdownActions} from './DropdownAction'
+import {NotificationRule} from '../lib/types'
+import NotificationRuleModal from '../components/UpdateNotficationRule'
 
 interface NotificationRulesTableProps {
   data: NotificationRule[]
 }
 
-function getColumns(onUpdateRule: (rule: NotificationRule) => void): ColumnDef<NotificationRule>[] {
+function getColumns(
+  onUpdateRule: (rule: NotificationRule) => void,
+): ColumnDef<NotificationRule>[] {
   return [
     {
       header: 'Name',
       accessorKey: 'name',
-      cell: ({ row }) => <div>{row.original.name}</div>,
+      cell: ({row}) => <div>{row.original.name}</div>,
     },
     {
       header: 'Threat Type',
       accessorKey: 'threat_type',
-      cell: ({ row }) => <div>{row.original.threat_type}</div>,
+      cell: ({row}) => <div>{row.original.threat_type}</div>,
     },
     {
       header: 'Threshold',
       accessorKey: 'threshold',
-      cell: ({ row }) => <div>{row.original.threshold}</div>,
+      cell: ({row}) => <div>{row.original.threshold}</div>,
     },
     {
       header: 'Time Window (min)',
       accessorKey: 'time_window',
-      cell: ({ row }) => <div>{row.original.time_window}</div>,
+      cell: ({row}) => <div>{row.original.time_window}</div>,
     },
     {
       header: 'Status',
       accessorKey: 'is_active',
-      cell: ({ row }) => (
+      cell: ({row}) => (
         <span
           className={`px-3 py-1 rounded-full text-sm font-medium ${
             row.original.is_active
@@ -49,7 +51,7 @@ function getColumns(onUpdateRule: (rule: NotificationRule) => void): ColumnDef<N
     {
       header: 'Actions',
       id: 'actions',
-      cell: ({ row }) => (
+      cell: ({row}) => (
         <DropdownActions
           item={row.original}
           options={[
@@ -64,9 +66,7 @@ function getColumns(onUpdateRule: (rule: NotificationRule) => void): ColumnDef<N
   ]
 }
 
-export function NotificationRulesTable({
-  data,
-}: NotificationRulesTableProps) {
+export function NotificationRulesTable({data}: NotificationRulesTableProps) {
   const [isModalOpen, setIsModalOpen] = useState(false) // State to manage modal visibility
   const [selectedRule, setSelectedRule] = useState<NotificationRule | null>(null) // State to store the selected rule for update
 
@@ -85,7 +85,7 @@ export function NotificationRulesTable({
   return (
     <>
       <Table columns={columns} data={data} />
-      
+
       {/* Modal for updating the rule */}
       {isModalOpen && selectedRule && (
         <NotificationRuleModal
