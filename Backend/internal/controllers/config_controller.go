@@ -4,7 +4,6 @@ import (
 	"backend/internal/config"
 	"backend/internal/models"
 	"backend/internal/utils"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -18,7 +17,7 @@ func GetConfig(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "configuration not found"})
 		return
 	}
-	fmt.Println(conf)
+
 	c.JSON(http.StatusOK, gin.H{"data": conf})
 }
 
@@ -34,7 +33,7 @@ func GetConfigAdmin(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "configuration not found"})
 		return
 	}
-	fmt.Println(conf)
+
 	c.JSON(http.StatusOK, gin.H{"data": conf})
 }
 
@@ -102,6 +101,8 @@ func CreateConfig(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create configuration"})
 		return
 	}
+
+	
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Configuration created successfully", "config": newConf})
 }
