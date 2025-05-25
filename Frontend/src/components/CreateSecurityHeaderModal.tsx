@@ -11,24 +11,29 @@ function CreateSecurityHeaderModal({
 }) {
   const [headerName, setHeaderName] = useState('')
   const [headerValue, setHeaderValue] = useState('')
-  const [applicationIds, setApplicationIds] = useState<string[]>([])
+  const [selectedAppId, setSelectedAppId] = useState<string>('')
 
   const {data: applications = [], isLoading} = useGetApplications()
   const {mutate: createHeader} = useCreateSecurityHeader()
 
   const handleSubmit = () => {
+    if (!selectedAppId) {
+      alert('Please select an application')
+      return
+    }
+
     createHeader(
       {
         header_name: headerName,
         header_value: headerValue,
-        application_id: applicationIds,
+        application_id: [selectedAppId],
       },
       {
         onSuccess: () => {
           onClose()
           setHeaderName('')
           setHeaderValue('')
-          setApplicationIds([])
+          setSelectedAppId('')
           alert('Header created successfully!')
         },
       },
@@ -36,8 +41,11 @@ function CreateSecurityHeaderModal({
   }
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selected = Array.from(e.target.selectedOptions, option => option.value)
-    setApplicationIds(selected)
+    setSelectedAppId(e.target.value)
+  }
+
+  const clearSelection = () => {
+    setSelectedAppId('')
   }
 
   if (!isOpen) return null
@@ -64,22 +72,46 @@ function CreateSecurityHeaderModal({
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Assign to Applications:
+            Assign to Application:
           </label>
           {isLoading ? (
             <div className="text-gray-500 text-sm">Loading applications...</div>
           ) : (
-            <select
-              value={applicationIds}
-              onChange={handleSelectChange}
-              className="w-full border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg p-2 text-sm bg-white shadow-sm"
-            >
-              {applications.map((app: any) => (
-                <option key={app.application_id} value={app.application_id}>
-                  {app.hostname}
-                </option>
-              ))}
-            </select>
+            <>
+              <select
+                value={selectedAppId}
+                onChange={handleSelectChange}
+                className="w-full border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg p-2 text-sm bg-white shadow-sm"
+              >
+                <option value="">Select an application</option>
+                {applications.map((app: any) => (
+                  <option key={app.application_id} value={app.application_id}>
+                    {app.hostname}
+                  </option>
+                ))}
+              </select>
+
+              {selectedAppId && (
+                <div className="mt-2">
+                  <p className="text-sm font-medium text-gray-700 mb-1">
+                    Selected Application:
+                  </p>
+                  <div className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                    <span>
+                      {applications.find((a: any) => a.application_id === selectedAppId)
+                        ?.hostname || 'Unknown App'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={clearSelection}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 
