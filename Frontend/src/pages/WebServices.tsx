@@ -5,6 +5,7 @@ import WebServiceModal from '../components/WebServiceModal'
 import WebserviceTable from '../components/WebserviceTable'
 import {
   useAddApplication,
+  useDeleteApplication,
   useGetApplications,
   useUpdateApplication,
 } from '../hooks/api/useApplication'
@@ -51,6 +52,7 @@ function WebService() {
 
   const {mutate: createApplication} = useAddApplication()
   const {mutate: updateApplication} = useUpdateApplication()
+  const {mutate: deleteApplication} = useDeleteApplication()
 
   const toggleModal = () => setIsModalOpen(!isModalOpen)
 
@@ -85,6 +87,12 @@ function WebService() {
       toast.error('An unexpected error occurred')
       setIsSubmitting(false)
     }
+  }
+
+  const handleDeleteApplication = (application_id: string) => {
+    deleteApplication(application_id, {
+      onSuccess: () => toast('Deleted successfully'),
+    })
   }
 
   if (applicationsError) {
@@ -131,6 +139,7 @@ function WebService() {
           openModal={() => setIsModalOpen(true)}
           setSelectedApp={setSelectedApp}
           selectedApp={selectedApp}
+          handleDelete={handleDeleteApplication}
         />
       </Card>
     </div>

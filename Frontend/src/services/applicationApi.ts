@@ -110,6 +110,14 @@ export async function getApplicationConfig(application_id: string) {
   return await response.data.data
 }
 
+export async function deleteApplication(application_id: string) {
+  const response = await axios.delete(`/api/application/${application_id}`)
+
+  if (!response) throw new Error('Something went wrong')
+
+  return await response.data.data
+}
+
 export async function updateDetectBOT(data: {
   application_id: string
   data: {detect_bot: boolean}
