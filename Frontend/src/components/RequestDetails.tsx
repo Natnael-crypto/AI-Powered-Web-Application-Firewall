@@ -152,7 +152,7 @@ const RequestDetailsModal: React.FC<RequestDetailsModalProps> = ({
                   Matched Rules
                 </label>
                 <div className="text-sm text-red-800">{request.matched_rules}</div>
-              </div> */}
+              </div>
 
               <div className="space-y-1">
                 <label className="block text-xs text-red-600 font-medium">
@@ -161,7 +161,7 @@ const RequestDetailsModal: React.FC<RequestDetailsModalProps> = ({
                 <div className="text-sm text-red-800 font-medium">
                   {request.bot_detected ? 'Yes' : 'No'}
                 </div>
-              </div> */}
+              </div>
 
               <div className="space-y-1">
                 <label className="block text-xs text-red-600 font-medium">
@@ -222,14 +222,13 @@ const RequestDetailsModal: React.FC<RequestDetailsModalProps> = ({
               </div>
               {request.ai_threat_type && (
                 <div>
-                  <span className="font-semibold">AI Threat Type:</span>{" "}
+                  <span className="font-semibold">AI Threat Type:</span>{' '}
                   {request.ai_threat_type}
                 </div>
               )}
             </div>
           </div>
         )}
-
 
         {/* Footer */}
         <div className="pt-4 border-t border-gray-200 flex justify-end">
