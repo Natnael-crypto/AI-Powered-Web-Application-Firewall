@@ -164,7 +164,7 @@ function AttackLogTable() {
         >
           Generate Request
         </button>
-        <p>{data?.total}</p>
+        <p className='text-lg'>Logs: <strong>{data?.total}</strong></p>
       </div>
       
 
