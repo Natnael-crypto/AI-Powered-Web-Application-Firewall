@@ -1,9 +1,11 @@
 import json
 import os
 from collections import defaultdict
-from config.config import BAD_WORDS_BY_TYPE_DIR, COMMON_BAD_WORDS_PATH
 from urllib.parse import unquote
 import re
+
+BAD_WORDS_BY_TYPE_DIR = os.getenv("BAD_WORDS_BY_TYPE_DIR")
+COMMON_BAD_WORDS_PATH = os.getenv("COMMON_BAD_WORDS_PATH")
 
 # Shared character mappings
 INJECTION_CHARACTERS = {

