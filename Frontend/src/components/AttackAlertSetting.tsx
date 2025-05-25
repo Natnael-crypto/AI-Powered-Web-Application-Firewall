@@ -10,7 +10,7 @@ const AttackAlertSettings = () => {
   const [alertType, setAlertType] = useState<'Telegram' | 'Email'>('Email')
   // const [webhook, setWebhook] = useState('')
 
-  const {mutate: setSenderEmail, data: statusCode} = useSetSenderEmail()
+  const {mutate: setSenderEmail, data: _} = useSetSenderEmail()
   const {data: senderEmailConfig, refetch: refetchSenderEmail} = useGetSenderEmail()
   const {addToast: toast} = useToast()
 

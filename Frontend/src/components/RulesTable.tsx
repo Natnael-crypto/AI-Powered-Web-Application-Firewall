@@ -19,7 +19,7 @@ interface RulesTableProps {
   onUpdate: (rule: Rule) => void
 }
 
-const RulesTable = ({onUpdate}: RulesTableProps) => {
+const RulesTable = ({}: RulesTableProps) => {
   const {mutate: deactivateRule} = useDeactivateRule()
   const {mutate: activateRule} = useActivateRule()
   const {mutate: deleteRule} = useDeleteRules()

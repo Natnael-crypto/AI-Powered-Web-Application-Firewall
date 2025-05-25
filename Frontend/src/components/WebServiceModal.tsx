@@ -13,6 +13,9 @@ export interface WebServiceData {
   port: string
   status: boolean
   tls: boolean
+  // Add certificate fields if needed
+  // certificate?: File
+  // key?: File
 }
 
 interface WebServiceModalProps {
@@ -55,6 +58,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
         tls: application.tls,
       })
     } else {
+      // Reset form when creating new application
       setForm({
         application_name: '',
         description: '',
@@ -76,8 +80,10 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
       [name]: type === 'checkbox' ? checked : value,
     }))
 
+    // Mark field as touched
     setTouched(prev => ({...prev, [name]: true}))
 
+    // Clear error when user types
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = {...prev}
