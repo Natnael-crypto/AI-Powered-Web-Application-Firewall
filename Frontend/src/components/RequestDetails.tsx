@@ -24,6 +24,7 @@ const RequestDetailsModal: React.FC<RequestDetailsModalProps> = ({
     ))
   }
 
+  console.log(request)
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp)
     return date.toLocaleString()
@@ -151,7 +152,7 @@ const RequestDetailsModal: React.FC<RequestDetailsModalProps> = ({
                   Matched Rules
                 </label>
                 <div className="text-sm text-red-800">{request.matched_rules}</div>
-              </div>
+              </div> */}
 
               <div className="space-y-1">
                 <label className="block text-xs text-red-600 font-medium">
@@ -160,7 +161,7 @@ const RequestDetailsModal: React.FC<RequestDetailsModalProps> = ({
                 <div className="text-sm text-red-800 font-medium">
                   {request.bot_detected ? 'Yes' : 'No'}
                 </div>
-              </div>
+              </div> */}
 
               <div className="space-y-1">
                 <label className="block text-xs text-red-600 font-medium">
@@ -202,20 +203,33 @@ const RequestDetailsModal: React.FC<RequestDetailsModalProps> = ({
         )}
 
         {/* AI Analysis */}
-        {request?.ai_result && (
-          <div className="space-y-2">
-            <div className="flex items-center">
+        {request && (
+          <div>
+            <div className="flex items-center mb-2">
               <div className="flex-grow border-t border-gray-200"></div>
               <span className="mx-4 text-xs font-semibold uppercase tracking-wider text-gray-500">
                 AI Analysis
               </span>
               <div className="flex-grow border-t border-gray-200"></div>
             </div>
-            <div className="text-sm text-gray-800 bg-gray-50 p-3 rounded border border-gray-200 whitespace-pre-line">
-              {request.ai_result}
+            <div className="text-sm text-gray-800 bg-gray-50 p-3 rounded space-y-1">
+              <div>
+                {request.ai_result === false ? (
+                  <span className="text-green-600 font-medium">Allowed by AI</span>
+                ) : (
+                  <span className="text-red-600 font-medium">Blocked by AI</span>
+                )}
+              </div>
+              {request.ai_threat_type && (
+                <div>
+                  <span className="font-semibold">AI Threat Type:</span>{" "}
+                  {request.ai_threat_type}
+                </div>
+              )}
             </div>
           </div>
         )}
+
 
         {/* Footer */}
         <div className="pt-4 border-t border-gray-200 flex justify-end">

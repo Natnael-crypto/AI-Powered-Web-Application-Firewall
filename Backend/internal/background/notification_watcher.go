@@ -126,7 +126,7 @@ func shouldTriggerNotification(rule models.NotificationRule, timeWindowStart int
 		SELECT threat_type , ai_threat_type, application_id , COUNT(*) as count
 		FROM requests
 		WHERE timestamp >= ? AND Status = 'blocked'
-		GROUP BY threat_type, application_id
+		GROUP BY threat_type, ai_threat_type ,application_id
 	`
 
 	err := config.DB.Raw(query, timeWindowStart).Scan(&results).Error

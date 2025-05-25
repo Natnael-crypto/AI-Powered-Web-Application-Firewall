@@ -8,15 +8,10 @@ import (
 var MLEndpoint string
 
 func InitMlService() error {
-	mlHost := os.Getenv("MLHOST")
-	if mlHost == "" {
+	mlHostUrl := os.Getenv("MLHOSTURL")
+	if mlHostUrl == "" {
 		return fmt.Errorf("MLHOST environment variable is not set")
 	}
-
-	mlPort := os.Getenv("MLPORT")
-	if mlPort == "" {
-		return fmt.Errorf("MLPORT environment variable is not set")
-	}
-	MLEndpoint = fmt.Sprintf("http://%s:%s/", mlHost, mlPort)
+	MLEndpoint = fmt.Sprintf(mlHostUrl + "/")
 	return nil
 }

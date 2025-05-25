@@ -340,7 +340,7 @@ export interface RequestLog {
   geo_location: string
   rate_limited: boolean
   user_agent: string
-  ai_result: string
+  ai_result: boolean
   rule_detected: boolean
   ai_threat_type: string
 }

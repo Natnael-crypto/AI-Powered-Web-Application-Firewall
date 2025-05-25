@@ -18,7 +18,6 @@ import (
 	"sync"
 	"syscall"
 	"time"
-
 	"github.com/google/uuid"
 	"golang.org/x/time/rate"
 )
@@ -132,7 +131,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// WAF rule evaluation
-	blockedByRule, ruleID, ruleMessage, action, status, body := wafInstance.EvaluateRules(r)
+	blockedByRule, ruleID, ruleMessage, _, status, body := wafInstance.EvaluateRules(r)
 	headers := utils.ParseHeaders(fmt.Sprintf("%v", r.Header))
 	requestBodySize := utils.GetRequestBodySizeMB(r)
 
@@ -166,7 +165,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 			message.Body = utils.HashSHA256(body)
 		}
 
-		error_page.Send403Response(w, ruleID, ruleMessage, action, status)
+		error_page.Send403Response(w, message.RequestID)
 		message.ResponseCode = http.StatusForbidden
 		message.Status = "blocked"
 		message.Token = WsKey
@@ -209,7 +208,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	if result {
-		error_page.Send403Response(w, ruleID, ruleMessage, action, status)
+		error_page.Send403Response(w, message.RequestID)
 		message.ResponseCode = http.StatusForbidden
 		message.Status = "blocked"
 		message.Token = WsKey

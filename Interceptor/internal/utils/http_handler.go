@@ -43,16 +43,9 @@ var (
 )
 
 func InitHttpHandler() error {
-	backendHost := os.Getenv("BACKENDHOST")
-	if backendHost == "" {
-		return fmt.Errorf("BACKENDHOST environment variable is not set")
-	}
+	backendHost := os.Getenv("BACKENDURL")
 
-	backendPort := os.Getenv("BACKENDPORT")
-	if backendPort == "" {
-		return fmt.Errorf("BACKENDPORT environment variable is not set")
-	}
-	backendEndpoint = fmt.Sprintf("http://%s:%s/interceptor/batch", backendHost, backendPort)
+	backendEndpoint = fmt.Sprintf(backendHost+"/interceptor/batch", backendHost)
 
 	go StartBatchSender()
 	return nil
