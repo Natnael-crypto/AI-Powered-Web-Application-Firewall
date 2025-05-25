@@ -252,7 +252,7 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({isOpen, onClose}) => {
                 </div>
                 {index > 0 && (
                   <button
-                    className="self-end text-red-500 hover:text-red-700"
+                    className="self-end text-red-500 hover:text-red-700 font-lg"
                     onClick={() => {
                       const updated = [...ruleInput.conditions]
                       updated.splice(index, 1)
