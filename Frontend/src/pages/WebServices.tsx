@@ -120,8 +120,8 @@ function WebService() {
         isSubmitting={isSubmitting}
       />
 
-      <Card className="flex justify-between items-center py-4 px-6 bg-white">
-        <h2 className="text-lg font-semibold">Web Services</h2>
+      <Card className="flex  items-center justify-between py-4 px-6 bg-white">
+        <h2 className="font-semibold text-lg">Web Services</h2>
         <Button
           classname="text-white uppercase"
           size="l"
@@ -133,7 +133,7 @@ function WebService() {
         </Button>
       </Card>
 
-      <Card className="shadow-md p-4 bg-white">
+      <Card className="p-4 shadow-md bg-white">
         <WebserviceTable
           data={applications}
           openModal={() => setIsModalOpen(true)}
