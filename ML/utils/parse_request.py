@@ -47,7 +47,7 @@ INJECTION_CHARACTERS = {
     "period": ["."],
     "caret": ["^"],
     "tilde": ["~"],
-    "question_mark": [""],
+    "question_mark": ["jkasdadkjasndasndjnasdjnadoaindoasijdoasiddoaskd"],
     "at_sign": ["@"],
     "vertical_tab": ["\v"],
     "tab": ["\t"],
