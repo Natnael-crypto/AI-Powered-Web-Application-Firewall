@@ -82,7 +82,7 @@ func Send403Response(w http.ResponseWriter, RequestID string) {
 				<strong>Rule ID:</strong> %s<br>
 			</div>
 			<div class="footer">
-				Security protection by Custom WAF &mdash; Request ID: %s
+				Security protection by Gasha WAF &mdash; Request ID: %s
 			</div>
 		</div>
 	</body>
