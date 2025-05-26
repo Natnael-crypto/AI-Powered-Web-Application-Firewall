@@ -30,7 +30,7 @@ type RulesResponse struct {
 func FetchRules(applicationID string) (*RulesResponse, error) {
 	backendHost := os.Getenv("BACKENDURL")
 
-	url := fmt.Sprintf(backendHost+"/interceptor/rule/%s", backendHost, applicationID)
+	url := fmt.Sprintf(backendHost+"/interceptor/rule/%s", applicationID)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
