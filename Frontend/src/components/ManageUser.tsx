@@ -9,7 +9,7 @@ function ManageUser({toggleAddUser}: manageUserProps) {
       <div className="flex flex-col">
         <div className="flex justify-between items-center">
           <h2>Manage Users</h2>
-          <Button classname="border border-gray-600 text-white" onClick={toggleAddUser}>
+          <Button classname="border border-lime-100 text-white" onClick={toggleAddUser}>
             Add User
           </Button>
         </div>
