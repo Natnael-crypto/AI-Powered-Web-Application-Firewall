@@ -11,13 +11,11 @@ facsimileTelephoneNumber
 givenName
 gn
 homePhone
-id
 jpegPhoto
 objectClass
 ou
 owner
 pager
-st
 surname
 userPassword
 ls
@@ -39,7 +37,6 @@ ifconfig
 nc
 netcat
 whoami
-id
 ssh
 scp
 tar
@@ -309,12 +306,8 @@ facsimileTelephoneNumber
 givenName
 gn
 homePhone
-id
 jpegPhoto
 l=
-mail
-mobile
-name
 o=
 objectClass
 ou
