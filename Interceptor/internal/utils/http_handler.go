@@ -45,7 +45,7 @@ var (
 func InitHttpHandler() error {
 	backendHost := os.Getenv("BACKENDURL")
 
-	backendEndpoint = fmt.Sprintf(backendHost+"/interceptor/batch", backendHost)
+	backendEndpoint = fmt.Sprintf(backendHost + "/interceptor/batch")
 
 	go StartBatchSender()
 	return nil

@@ -219,7 +219,7 @@ func fetchApplicationConfig() error {
 			appsLock.Unlock()
 
 			// Fetch security headers
-			appSecurityHeaderURL := fmt.Sprintf(backendHost+"/interceptor/security-headers/%s", backendHost, app.ApplicationID)
+			appSecurityHeaderURL := fmt.Sprintf(backendHost+"/interceptor/security-headers/%s", app.ApplicationID)
 
 			req, err := http.NewRequest("GET", appSecurityHeaderURL, nil)
 			if err != nil {
