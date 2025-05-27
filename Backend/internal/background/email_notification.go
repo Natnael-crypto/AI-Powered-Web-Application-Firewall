@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-
 	"github.com/wneessen/go-mail"
 )
 

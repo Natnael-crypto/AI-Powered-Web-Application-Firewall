@@ -3,6 +3,7 @@ package background
 import (
 	"backend/internal/config"
 	"backend/internal/models"
+	"backend/internal/utils"
 
 	// "encoding/json"
 	"fmt"
@@ -10,13 +11,15 @@ import (
 	"strings"
 	"time"
 
+	"slices"
+
 	"github.com/google/uuid"
 )
 
 func StartNotificationWatcher() {
 	go func() {
 		for {
-			time.Sleep(5 * time.Minute)
+			time.Sleep(1 * time.Minute)
 			processNotificationRules()
 		}
 	}()
@@ -39,17 +42,23 @@ func processNotificationRules() {
 
 		targetedApps, _, _ := shouldTriggerNotification(rule, timeWindowStart)
 
+		fmt.Print(targetedApps)
+
+		fmt.Print(rule.Name)
+
 		for appID, count := range targetedApps {
 
 			var Requests []models.Request
 
-			if err := config.DB.Where("application_id = ? And status = true And timestamp >= ? ", appID, timeWindowStart).Find(&Requests).Error; err != nil {
+			if err := config.DB.Where("application_id = ? And status = 'blocked' And timestamp >= ? ", appID, timeWindowStart).Find(&Requests).Error; err != nil {
 				log.Printf("Error fetching requests for app %s: %v", appID, err)
 			}
 			var clientIPs []string
 
 			for _, request := range Requests {
-				clientIPs = append(clientIPs, request.ClientIP)
+				if !slices.Contains(clientIPs, request.ClientIP) {
+					clientIPs = append(clientIPs, request.ClientIP)
+				}
 			}
 
 			var UserToApp []models.UserToApplication
@@ -64,9 +73,15 @@ func processNotificationRules() {
 				log.Printf("Error fetching application : %v", err)
 			}
 
+			var userID []string
+
+			for _, user := range UserToApp {
+				userID = append(userID, user.UserID)
+			}
+
 			var users []models.User
 
-			if err := config.DB.Where("id IN (?)", UserToApp).Find(&users).Error; err != nil {
+			if err := config.DB.Where("user_id IN ?", userID).Find(&users).Error; err != nil {
 				log.Printf("Error fetching users: %v", err)
 			}
 
@@ -79,40 +94,16 @@ func processNotificationRules() {
 			)
 
 			for _, user := range users {
-				createNotification(rule, dashboardMessage)
-				emailMessage := fmt.Sprintf(
-					`Hello %s,
-
-Your Web Application Firewall has detected suspicious activity.
-
-🛡️ Rule Triggered: %s
-📌 Application: %s
-🌐 Source IP(s): %s
-🔢 Occurrence Count: %d
-🕒 Time: %s
-
-Recommended Action: Please review the related logs and ensure appropriate mitigation steps are in place.
-
-Best regards,
-WAF Security Monitoring System`,
-					user.Username,
-					rule.Name,
-					Application.HostName,
-					clientIPs,
-					count,
-					time.Now().Format("2006-01-02 15:04:05 MST"),
-				)
+				createNotification(user, dashboardMessage)
+				emailMessage := utils.ComposeEmailMessage(user.Username, rule.Name, Application.HostName, clientIPs, count, timeWindowStart)
 				sendEmail(rule, user, emailMessage)
 			}
-
 		}
 	}
 }
 
 func shouldTriggerNotification(rule models.NotificationRule, timeWindowStart int64) (map[string]int64, int64, []string) {
 	type Result struct {
-		ThreatType    string
-		AIThreatType  string
 		ApplicationID string
 		Count         int64
 	}
@@ -122,76 +113,69 @@ func shouldTriggerNotification(rule models.NotificationRule, timeWindowStart int
 	var totalCount int64
 	var matchingThreats []string
 
-	query := `
-		SELECT threat_type , ai_threat_type, application_id , COUNT(*) as count
-		FROM requests
-		WHERE timestamp >= ? AND Status = 'blocked'
-		GROUP BY threat_type, ai_threat_type ,application_id
-	`
+	ruleThreat := strings.ToLower(rule.ThreatType)
 
-	err := config.DB.Raw(query, timeWindowStart).Scan(&results).Error
+	var query string
+	var args []interface{}
+
+	if ruleThreat == "" || ruleThreat == "*" {
+		query = `
+			SELECT application_id, COUNT(*) as count
+			FROM requests
+			WHERE timestamp >= ? AND status = 'blocked'
+			GROUP BY application_id
+		`
+		args = append(args, timeWindowStart)
+	} else {
+		query = `
+			SELECT application_id, COUNT(*) as count
+			FROM requests
+			WHERE timestamp >= ?
+			  AND status = 'blocked'
+			  AND (
+			      LOWER(threat_type) LIKE ?
+			      OR LOWER(ai_threat_type) LIKE ?
+			  )
+			GROUP BY application_id
+		`
+		likePattern := "%" + ruleThreat + "%"
+		args = append(args, timeWindowStart, likePattern, likePattern)
+	}
+
+	err := config.DB.Raw(query, args...).Scan(&results).Error
 	if err != nil {
 		log.Printf("Error fetching request data for rule %s: %v", rule.Name, err)
 		return targetedApps, totalCount, matchingThreats
 	}
 
-	ruleThreat := strings.ToLower(rule.ThreatType)
-
 	for _, res := range results {
-		rule_threat := strings.ToLower(res.ThreatType)
-		Ml_threat := strings.ToLower(res.AIThreatType)
-
-		if ruleThreat == "*" || strings.Contains(rule_threat, ruleThreat) {
-			totalCount += res.Count
-
-			if res.Count >= int64(rule.Threshold) {
-				targetedApps[res.ApplicationID] += res.Count
-			}
-
-			if !contains(matchingThreats, rule_threat) {
-				matchingThreats = append(matchingThreats, rule_threat)
-			}
-		} else if strings.Contains(rule_threat, Ml_threat) {
-			totalCount += res.Count
-
-			if res.Count >= int64(rule.Threshold) {
-				targetedApps[res.ApplicationID] += res.Count
-			}
-
-			if !contains(matchingThreats, rule_threat) {
-				matchingThreats = append(matchingThreats, rule_threat)
-			}
+		totalCount += res.Count
+		if res.Count >= int64(rule.Threshold) {
+			targetedApps[res.ApplicationID] += res.Count
 		}
+	}
+
+	if ruleThreat != "" && ruleThreat != "*" {
+		matchingThreats = append(matchingThreats, ruleThreat)
 	}
 
 	return targetedApps, totalCount, matchingThreats
 }
 
-func contains(slice []string, item string) bool {
-	for _, v := range slice {
-		if v == item {
-			return true
-		}
+func createNotification(users models.User, message string) {
+
+	notification := models.Notification{
+		NotificationID: uuid.New().String(),
+		UserID:         users.UserID,
+		Message:        message,
+		Timestamp:      time.Now(),
+		Status:         false,
 	}
-	return false
-}
 
-func createNotification(rule models.NotificationRule, message string) {
-	var userIDs []string
-
-	for _, userID := range userIDs {
-		notification := models.Notification{
-			NotificationID: uuid.New().String(),
-			UserID:         userID,
-			Message:        message,
-			Timestamp:      time.Now(),
-			Status:         false,
-		}
-
-		if err := config.DB.Create(&notification).Error; err != nil {
-			log.Printf("Error creating notification for rule %s for user %s: %v", rule.Name, userID, err)
-		}
+	if err := config.DB.Create(&notification).Error; err != nil {
+		log.Printf("Error creating notification  %v", err)
 	}
+
 }
 
 func sendEmail(rule models.NotificationRule, user models.User, message string) {
