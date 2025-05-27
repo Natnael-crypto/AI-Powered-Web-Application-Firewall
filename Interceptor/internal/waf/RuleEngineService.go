@@ -90,6 +90,5 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int, st
 		}
 		return true, interruption.RuleID, ruleMessage, interruption.Action, interruption.Status, string_body
 	}
-
 	return false, 0, "", "", 0, string_body
 }

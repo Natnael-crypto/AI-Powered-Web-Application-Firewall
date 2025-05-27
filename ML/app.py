@@ -104,7 +104,6 @@ def predict_type(data):
         
         prediction = type_predictor_model.predict(features_df)[0]
         proability = type_predictor_model.predict_proba(features_df)[0]
-        
         return {
             "threat_type": THREAT_TYPE_MAPPING[prediction],
             "confidence": float(max(proability)),

@@ -42,9 +42,6 @@ func processNotificationRules() {
 
 		targetedApps, _, _ := shouldTriggerNotification(rule, timeWindowStart)
 
-		fmt.Print(targetedApps)
-
-		fmt.Print(rule.Name)
 
 		for appID, count := range targetedApps {
 

@@ -5,12 +5,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/RackSec/srslog"
 )
 
 var (
-	logFile     *os.File
+	logFile      *os.File
 	syslogWriter *srslog.Writer
 )
 
@@ -32,22 +33,36 @@ func InitializeLogger(syslogAddr string) error {
 	return nil
 }
 
-func LogRequest(r *http.Request, decision, reason string) {
-	message := fmt.Sprintf("Method: %s, URL: %s, Decision: %s, Reason: %s",
-		r.Method, r.URL.String(), decision, reason)
+func LogRequest(r *http.Request, decision string, application string, ip string, anomalyScore float64) {
+	timestamp := time.Now().UTC().Format(time.RFC3339)
+	hostname, _ := os.Hostname()
+	severity := 6
+
+	if anomalyScore > 0.5 {
+		severity = 2
+	}
+
+	PRI := 20*8 + severity
+	syslogHeader := fmt.Sprintf("<%d>1 %s %s %s - %s -", PRI,
+		timestamp, hostname, "Gasha waf", application)
+
+	jsonBody := fmt.Sprintf(`{"method":"%s","url":"%s","decision":"%s","source_ip":"%s","anomaly_score":%.2f}`,
+		r.Method, r.URL.String(), decision, ip, anomalyScore)
+
+	fullMessage := fmt.Sprintf("%s %s", syslogHeader, jsonBody)
 
 	if syslogWriter != nil {
-		err := syslogWriter.Info(message)
+		err := syslogWriter.Info(fullMessage)
 		if err != nil {
-			log.Println("An error occured while trying to write logs:", err)
+			log.Println("An error occurred while trying to write to syslog:", err)
 		}
 	} else {
-		log.Println("Syslog writer not initialized. Skipping Syslog logging.")
+		log.Println("Syslog writer not initialized. Skipping syslog logging.")
 	}
 
 	if logFile != nil {
 		log.SetOutput(logFile)
-		log.Println(message)
+		log.Println(fullMessage)
 	} else {
 		log.Println("File logger not initialized. Skipping file logging.")
 	}

