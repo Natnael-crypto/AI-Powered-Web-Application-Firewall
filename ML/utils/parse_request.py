@@ -84,16 +84,18 @@ def count_injection_characters(text, feature_template):
 
 
 def count_badwords_by_type(text):
-    text = text.lower()
     counts = defaultdict(int)
+    decoded_text = unquote(text)
+    words = re.split(r'\W+', decoded_text.lower())
 
     for category in BADWORDS_BY_TYPE.keys():
         counts[f"badword_{category}"] = 0
 
-    for category, words in BADWORDS_BY_TYPE.items():
-        for word in words:
-            if word in text:
-                counts[f"badword_{category}"] += text.count(word)
+    for category, bad_words in BADWORDS_BY_TYPE.items():
+        for word in bad_words:
+            count = words.count(word.lower())
+            if count > 0:
+                counts[f"badword_{category}"] += count
     return counts
 
 def count_common_badwords(text):
@@ -120,9 +122,6 @@ def parse_request_for_type_prediction(request):
 
     features.update(badword_counts)
     return features
-
-
-import re
 
 def parse_request_for_anomaly_prediction(request):
     """Extract features for anomaly detection (flat badwords + char count + single badword field)"""
