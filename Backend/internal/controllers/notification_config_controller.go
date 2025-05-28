@@ -3,7 +3,6 @@ package controllers
 import (
 	"backend/internal/config"
 	"backend/internal/models"
-	"log"
 	"strings"
 
 	// "backend/internal/utils"
@@ -187,6 +186,8 @@ func DeleteNotificationConfig(c *gin.Context) {
 func SaveNotificationSenderConfig(c *gin.Context) {
 	var input models.NotificationSender
 
+	input.ID = 1
+
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -199,17 +200,9 @@ func SaveNotificationSenderConfig(c *gin.Context) {
 
 	// Check if the notification sender already exists
 	var senderConfig models.NotificationSender
-	result := config.DB.First(&senderConfig, "email = ?", input.Email) // Find by email
-
-	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
-		// Handle unexpected error
-		log.Println("Database Error")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something went wrong"})
-		return
-	}
-
-	// If the sender does not exist, create it
-	if result.RowsAffected == 0 {
+	// Find by email
+	if err := config.DB.First(&senderConfig).Error; err != nil {
+		// If the sender does not exist, create it
 		if err := config.DB.Create(&input).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create notification sender"})
 			return
@@ -222,6 +215,7 @@ func SaveNotificationSenderConfig(c *gin.Context) {
 			senderConfig.Email = input.Email
 			senderConfig.AppPassword = input.AppPassword
 		}
+
 		if err := config.DB.Save(&senderConfig).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update notification sender"})
 			return
