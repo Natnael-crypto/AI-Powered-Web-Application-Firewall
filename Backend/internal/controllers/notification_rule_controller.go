@@ -54,9 +54,9 @@ func UpdateNotificationRule(c *gin.Context) {
 	}
 
 	var input struct {
-		Threshold  int  `json:"threshold" binding:"required"`
-		TimeWindow int  `json:"time_window" binding:"required"`
-		IsActive   bool `json:"is_active" binding:"required"`
+		Threshold  int   `json:"threshold" binding:"required"`
+		TimeWindow int   `json:"time_window" binding:"required"`
+		IsActive   *bool `json:"is_active" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -70,9 +70,9 @@ func UpdateNotificationRule(c *gin.Context) {
 	if input.TimeWindow != 0 {
 		rule.TimeWindow = input.TimeWindow
 	}
-	if input.IsActive != rule.IsActive {
-		rule.IsActive = input.IsActive
-	}
+
+	rule.IsActive = *input.IsActive
+
 	rule.UpdatedAt = time.Now()
 
 	if err := config.DB.Save(&rule).Error; err != nil {
