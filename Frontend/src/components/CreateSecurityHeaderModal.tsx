@@ -1,6 +1,7 @@
 import {useState} from 'react'
 import {useCreateSecurityHeader} from '../hooks/api/useSecurityHeaders'
 import {useGetApplications} from '../hooks/api/useApplication'
+import { useToast } from '../hooks/useToast'
 
 function CreateSecurityHeaderModal({
   isOpen,
@@ -12,13 +13,14 @@ function CreateSecurityHeaderModal({
   const [headerName, setHeaderName] = useState('')
   const [headerValue, setHeaderValue] = useState('')
   const [selectedAppId, setSelectedAppId] = useState<string>('')
+  const {addToast: toast} = useToast()
 
   const {data: applications = [], isLoading} = useGetApplications()
   const {mutate: createHeader} = useCreateSecurityHeader()
 
   const handleSubmit = () => {
     if (!selectedAppId) {
-      alert('Please select an application')
+      toast('Please select an application')
       return
     }
 
@@ -34,7 +36,7 @@ function CreateSecurityHeaderModal({
           setHeaderName('')
           setHeaderValue('')
           setSelectedAppId('')
-          alert('Header created successfully!')
+          toast('Header created successfully!')
         },
       },
     )

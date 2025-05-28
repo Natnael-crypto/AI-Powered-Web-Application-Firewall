@@ -9,6 +9,7 @@ import {
 import {useGetApplications} from '../hooks/api/useApplication'
 import {updateRule} from '../services/rulesApi'
 import Modal from './Modal'
+import { useToast } from '../hooks/useToast'
 
 export type AppOption = {
   application_id: string
@@ -26,6 +27,8 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({isOpen, onClose, rule}) =>
   const [preview, setPreview] = useState<string>('')
   const [availableApps, setAvailableApps] = useState<AppOption[]>([])
   const {data: applications} = useGetApplications()
+  const {addToast: toast} = useToast()
+
 
   useEffect(() => {
     if (!applications) return
@@ -113,7 +116,7 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({isOpen, onClose, rule}) =>
 
   const saveRule = async () => {
     if (ruleInput.applications.length === 0) {
-      alert('Please select at least one application.')
+      toast('Please select at least one application.')
       return
     }
 
@@ -134,11 +137,11 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({isOpen, onClose, rule}) =>
 
     try {
       await updateRule(payloadTemplate)
-      alert('Rule updated successfully for all selected applications!')
+      toast('Rule updated successfully for all selected applications!')
       onClose()
     } catch (error) {
       console.error('Error saving rule:', error)
-      alert('An error occurred while saving the rule.')
+      toast('An error occurred while saving the rule.')
     }
   }
 

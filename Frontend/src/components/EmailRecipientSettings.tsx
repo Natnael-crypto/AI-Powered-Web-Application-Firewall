@@ -7,6 +7,7 @@ import {
   useDeleteUserEmail,
 } from '../hooks/api/useSystemEmail'
 import {useGetAllUsers} from '../hooks/api/useUser'
+import { useToast } from '../hooks/useToast'
 
 const EmailRecipientSettings = () => {
   const [selectedUserId, setSelectedUserId] = useState('')
@@ -19,34 +20,36 @@ const EmailRecipientSettings = () => {
   const addEmailMutation = useAddUserEmail()
   const updateEmailMutation = useUpdateUserEmail()
   const deleteEmailMutation = useDeleteUserEmail()
+  const {addToast: toast} = useToast()
+
 
   const handleSave = () => {
     if (editingId) {
       if (!email || !selectedUserId) {
-        alert('Please select a user and enter an email.')
+        toast('Please select a user and enter an email.')
         return
       }
       const payload = {email, id: selectedUserId}
 
       updateEmailMutation.mutate(payload, {
         onSuccess: () => {
-          alert('Email updated.')
+          toast('Email updated.')
           resetForm()
         },
-        onError: () => alert('Failed to update email'),
+        onError: () => toast('Failed to update email'),
       })
     } else {
       if (!email || !selectedUserId) {
-        alert('Please select a user and enter an email.')
+        toast('Please select a user and enter an email.')
         return
       }
       const payload = {email, id: selectedUserId}
       addEmailMutation.mutate(payload, {
         onSuccess: () => {
-          alert('Email added.')
+          toast('Email added.')
           resetForm()
         },
-        onError: () => alert('Failed to add email'),
+        onError: () => toast('Failed to add email'),
       })
     }
   }
@@ -63,10 +66,10 @@ const EmailRecipientSettings = () => {
         {id},
         {
           onSuccess: () => {
-            alert('Deleted successfully')
+            toast('Deleted successfully')
             refetch()
           },
-          onError: () => alert('Delete failed'),
+          onError: () => toast('Delete failed'),
         },
       )
     }

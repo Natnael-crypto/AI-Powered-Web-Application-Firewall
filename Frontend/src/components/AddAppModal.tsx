@@ -2,6 +2,7 @@ import React, {useState} from 'react'
 import {Info, Tag, Save, X} from 'lucide-react'
 import {QueryClient} from '@tanstack/react-query'
 import {useAddApplication} from '../hooks/api/useApplication'
+import { useToast } from '../hooks/useToast'
 
 interface AddAppModalProps {
   isModalOpen: boolean
@@ -32,6 +33,7 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
   const queryClient = new QueryClient()
 
   const {mutate} = useAddApplication()
+  const {addToast: toast} = useToast()
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -77,12 +79,12 @@ export default function AddAppModal({isModalOpen, toggleModal}: AddAppModalProps
 
     mutate(payload, {
       onSuccess: () => {
-        alert('Application added successfully!')
+        toast('Application added successfully!')
         queryClient.invalidateQueries({queryKey: ['applications']})
         toggleModal()
       },
       onError: (error: Error) => {
-        alert('Failed to add application: ' + error.message)
+        toast('Failed to add application: ' + error.message)
       },
     })
   }
