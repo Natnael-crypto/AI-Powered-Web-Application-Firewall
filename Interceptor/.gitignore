@@ -1,2 +1,3 @@
 ./test_page
 .env
+waf.log
