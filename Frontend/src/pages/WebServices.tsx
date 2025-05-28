@@ -135,7 +135,7 @@ function WebService() {
 
       <Card className="bg-white shadow-md p-4 ">
         <WebserviceTable
-          data={applications}
+          data={applications ?? []}
           openModal={() => setIsModalOpen(true)}
           setSelectedApp={setSelectedApp}
           selectedApp={selectedApp}
