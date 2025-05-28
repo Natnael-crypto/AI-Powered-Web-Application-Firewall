@@ -20,9 +20,9 @@ func EvaluateML(requestData RequestData) (bool, float64, float64, error) {
 
 	jsonData, _ := json.Marshal(requestData)
 
-	requestData.Body = utils.RecursiveDecode(requestData.Body, 5)
-	requestData.Url = utils.RecursiveDecode(requestData.Url, 5)
-	requestData.Headers = utils.RecursiveDecode(requestData.Headers, 5)
+	// requestData.Body = utils.RecursiveDecode(requestData.Body, 5)
+	// requestData.Url = utils.RecursiveDecode(requestData.Url, 5)
+	// requestData.Headers = utils.RecursiveDecode(requestData.Headers, 5)
 
 	req, err := http.NewRequest("POST", mlServerURL, bytes.NewBuffer(jsonData))
 	if err != nil {
