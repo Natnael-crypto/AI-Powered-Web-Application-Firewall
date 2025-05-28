@@ -35,6 +35,10 @@ func AddAllowedIp(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add IP"})
 		return
 	}
+
+	if input.Service == "I" {
+		config.Change = true
+	}
 	c.JSON(http.StatusOK, allowed_ip)
 }
 
@@ -64,6 +68,10 @@ func UpdateAllowedIp(c *gin.Context) {
 	ip.Ip = input.Ip
 	config.DB.Save(&ip)
 
+	if ip.Service == "I" {
+		config.Change = true
+	}
+
 	c.JSON(http.StatusOK, ip)
 }
 
@@ -79,6 +87,9 @@ func DeleteAllowedIp(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete IP"})
 		return
 	}
+
+	config.Change = true
+
 	c.JSON(http.StatusOK, gin.H{"message": "IP deleted"})
 }
 
