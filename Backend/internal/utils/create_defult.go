@@ -25,7 +25,7 @@ func CreateModel() {
 
 	for _, model := range models_name {
 		var existing models.AIModel
-		if err := config.DB.Where("models_name = ?", model).First(&existing).Error; err != nil {
+		if err := config.DB.Where("models_name = ?", model).First(&existing).Error; err == nil {
 			log.Println(err)
 			continue
 		}
