@@ -120,6 +120,7 @@ def predict_and_notify(data, endpoint):
     if prediction is not None:
         try:
             request_id = data.get("request_id", "")
+            print(prediction)
             response = requests.post(
                 endpoint,
                 json={
@@ -128,7 +129,7 @@ def predict_and_notify(data, endpoint):
                 },
                 timeout=10,
             )
-            print(prediction)
+            
             if response.status_code == 200:
                 app.logger.info(f"Type prediction sent successfully: {prediction}")
             else:
