@@ -123,6 +123,9 @@ def predict_and_notify(data, endpoint):
             print(prediction)
             response = requests.post(
                 endpoint,
+                headers={
+                    "X-Service":"M"
+                },
                 json={
                     "request_id": request_id,
                     "threat_type": prediction["threat_type"],
