@@ -1,5 +1,6 @@
 import  { useState } from 'react'
 import { useUpdateSecurityHeader } from '../hooks/api/useSecurityHeaders'
+import { useToast } from '../hooks/useToast'
 
 function EditSecurityHeaderModal({
   header,
@@ -10,6 +11,7 @@ function EditSecurityHeaderModal({
 }) {
   const [headerName, setHeaderName] = useState(header.header_name)
   const [headerValue, setHeaderValue] = useState(header.header_value)
+  const {addToast: toast} = useToast()
 
   const { mutate: updateHeader } = useUpdateSecurityHeader()
 
@@ -27,7 +29,7 @@ function EditSecurityHeaderModal({
       {
         onSuccess: () => {
           onClose()
-          alert('Header Updated successfully!');
+          toast('Header Updated successfully!');
         },
       }
     )

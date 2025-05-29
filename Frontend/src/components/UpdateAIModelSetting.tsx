@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {useUpdateAiModelSetting} from '../hooks/api/useAIModels'
 import {QueryClient} from '@tanstack/react-query'
+import { useToast } from '../hooks/useToast'
 
 interface CreateModelModalProps {
   isOpen: boolean
@@ -34,6 +35,8 @@ export default function UpdateAIModelSetting({
   const [errors, _] = useState<Record<string, string>>({})
   const {mutate} = useUpdateAiModelSetting() // Custom hook
   const queryClient = new QueryClient()
+    const {addToast: toast} = useToast()
+
 
   useEffect(() => {
     if (aiModelSetting) {
@@ -62,12 +65,12 @@ export default function UpdateAIModelSetting({
     // Optionally add form validation here
     mutate(formData, {
       onSuccess: () => {
-        alert('Model settings updated successfully!')
+        toast('Model settings updated successfully!')
         queryClient.invalidateQueries({queryKey: ['aiModels']})
         onClose()
       },
       onError: (error: Error) => {
-        alert('Error updating model settings: ' + error.message)
+        toast('Error updating model settings: ' + error.message)
       },
     })
   }

@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react'
 import {useGetSysConf} from '../hooks/api/useSystemConf'
 import {useUpdateSysPort, useUpdateSysRemoteLogIp} from '../hooks/api/useSystemConf'
 import {useQueryClient} from '@tanstack/react-query'
+import { useToast } from '../hooks/useToast'
 
 export default function SyslogSettings() {
   const [serverAddress, setServerAddress] = useState('')
@@ -13,6 +14,9 @@ export default function SyslogSettings() {
 
   const remoteLogIpMutation = useUpdateSysRemoteLogIp()
   const portMutation = useUpdateSysPort()
+
+  const {addToast: toast} = useToast()
+
 
   useEffect(() => {
     refetch()
@@ -42,10 +46,10 @@ export default function SyslogSettings() {
 
     try {
       await Promise.all(promises)
-      alert('Syslog configuration saved successfully!')
+      toast('Syslog configuration saved successfully!')
       queryClient.invalidateQueries({queryKey: ['getSysConf']})
     } catch (error: any) {
-      alert('Failed to save configuration. ' + error.message)
+      toast('Failed to save configuration. ' + error.message)
       console.error(error)
     } finally {
       setIsSaving(false)

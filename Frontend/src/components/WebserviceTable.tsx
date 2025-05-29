@@ -207,7 +207,7 @@ function WebserviceTable({
         onClose={() => setIsConfigModalOpen(false)}
         data={selectedApp?.config}
       />
-      <Table columns={columns} data={data} />
+      <Table columns={columns} data={data} emptyMessage={'No Data'} />
     </>
   )
 }

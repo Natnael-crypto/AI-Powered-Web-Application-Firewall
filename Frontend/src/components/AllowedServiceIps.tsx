@@ -7,6 +7,7 @@ import {
 } from '../hooks/api/useAllowedIp'
 import {useQueryClient} from '@tanstack/react-query'
 import {Pencil, Trash2} from 'lucide-react'
+import { useToast } from '../hooks/useToast'
 
 export default function AllowedServiceIps() {
   const [ip, setIp] = useState('')
@@ -19,6 +20,8 @@ export default function AllowedServiceIps() {
   const createIpMutation = useCreateAllowedIp()
   const updateIpMutation = useUpdateAllowedIp()
   const deleteIpMutation = useDeleteAllowedIp()
+  const {addToast: toast} = useToast()
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,8 +38,7 @@ export default function AllowedServiceIps() {
       setService('M')
       queryClient.invalidateQueries({queryKey: ['getAllowedIp']})
     } catch (err) {
-      alert('Something went wrong while saving.')
-      console.error(err)
+      toast('Something went wrong while saving.')
     }
   }
 

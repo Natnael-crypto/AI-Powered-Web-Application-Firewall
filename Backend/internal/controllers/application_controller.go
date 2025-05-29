@@ -25,8 +25,8 @@ func AddApplication(c *gin.Context) {
 		HostName        string `json:"hostname" binding:"required,max=40"`
 		IpAddress       string `json:"ip_address" binding:"required,ip"`
 		Port            string `json:"port" binding:"required,max=5"`
-		Status          bool   `json:"status"`
-		Tls             bool   `json:"tls"`
+		Status          *bool  `json:"status"`
+		Tls             *bool  `json:"tls"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -52,8 +52,8 @@ func AddApplication(c *gin.Context) {
 		HostName:        input.HostName,
 		IpAddress:       input.IpAddress,
 		Port:            input.Port,
-		Status:          input.Status,
-		Tls:             input.Tls,
+		Status:          *input.Status,
+		Tls:             *input.Tls,
 		CreatedAt:       time.Now(),
 		UpdatedAt:       time.Now(),
 	}
@@ -204,8 +204,8 @@ func UpdateApplication(c *gin.Context) {
 		HostName        string `json:"hostname" binding:"required,max=40"`
 		IpAddress       string `json:"ip_address" binding:"required,ip"`
 		Port            string `json:"port" binding:"required,max=5"`
-		Status          bool   `json:"status" binding:"required"`
-		Tls             bool   `json:"tls"`
+		Status          *bool  `json:"status" binding:"required"`
+		Tls             *bool  `json:"tls" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -225,8 +225,8 @@ func UpdateApplication(c *gin.Context) {
 	application.HostName = input.HostName
 	application.IpAddress = input.IpAddress
 	application.Port = input.Port
-	application.Status = input.Status
-	application.Tls = input.Tls
+	application.Status = *input.Status
+	application.Tls = *input.Tls
 	application.UpdatedAt = time.Now()
 
 	if err := config.DB.Model(&application).Where("application_id = ?", applicationID).Updates(map[string]interface{}{

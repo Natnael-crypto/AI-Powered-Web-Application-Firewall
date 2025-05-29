@@ -102,8 +102,6 @@ func CreateConfig(c *gin.Context) {
 		return
 	}
 
-	
-
 	c.JSON(http.StatusCreated, gin.H{"message": "Configuration created successfully", "config": newConf})
 }
 
@@ -198,7 +196,7 @@ func UpdateTls(c *gin.Context) {
 	}
 
 	var input struct {
-		Tls bool `json:"tls"`
+		Tls *bool `json:"tls" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -213,7 +211,7 @@ func UpdateTls(c *gin.Context) {
 		return
 	}
 
-	conf.Tls = input.Tls
+	conf.Tls = *input.Tls
 
 	if err := config.DB.Save(&conf).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update configuration"})
