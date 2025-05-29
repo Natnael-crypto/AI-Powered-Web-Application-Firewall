@@ -120,7 +120,8 @@ def parse_request_for_type_prediction(request):
     full_text = f"{request.get('url', '')} {request.get('headers', '')} {request.get('body', '')}".lower()
     badword_counts = count_badwords_by_type(full_text)
 
-    features.update(badword_counts)
+    sorted_badword_counts = dict(sorted(badword_counts.items()))
+    features.update(sorted_badword_counts)
     return features
 
 def parse_request_for_anomaly_prediction(request):

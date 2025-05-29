@@ -4,14 +4,17 @@ FROM python:3.11-slim AS builder
 # Set the working directory inside the container
 WORKDIR /app
 
-# Install system dependencies for TensorFlow
-RUN apt-get update && apt-get install -y libglib2.0-0
+# Install system dependencies for TensorFlow and unzip
+RUN apt-get update && apt-get install -y libglib2.0-0 unzip
 
 # Copy the ML directory
 COPY ML /app/ML
 
 # Move into the ML directory
 WORKDIR /app/ML
+
+# Unzip the model file
+RUN unzip ml_models/type_predictor_rf.zip -d ml_models/
 
 # Upgrade pip to the latest version
 RUN pip install --upgrade pip
