@@ -90,7 +90,7 @@ def load_type_predictor_model():
     global type_predictor_model
     try:
         type_predictor_model = joblib.load(TYPE_PREDICTOR_MODEL_PATH)
-        app.logger.info("Type predictor model loaded successfully.")
+        app.logger.info(f"Type predictor model loaded successfully: {type(type_predictor_model)}")
     except Exception as e:
         app.logger.error(f"Failed to load type predictor model: {e}")
 
@@ -129,6 +129,7 @@ def predict_and_notify(data, endpoint):
                 },
                 timeout=10,
             )
+            print(prediction)
             if response.status_code == 200:
                 app.logger.info(f"Type prediction sent successfully: {prediction}")
             else:
