@@ -125,7 +125,6 @@ def predict_and_notify(data, endpoint):
                 json={
                     "request_id": request_id,
                     "threat_type": prediction["threat_type"],
-                    "confidence": prediction["confidence"],
                 },
                 timeout=10,
             )
