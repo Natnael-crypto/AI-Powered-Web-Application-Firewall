@@ -7,6 +7,8 @@ import ipaddress
 import time
 import configparser
 
+import requests
+
 # ===================== UTILITY FUNCTIONS =====================
 
 def info(message): print(f"[INFO] {message}")
@@ -74,6 +76,13 @@ def run_command(command):
 def get_all_ips():
     output = subprocess.getoutput("ip -o -4 addr list")
     ips = [line.split()[3].split('/')[0] for line in output.splitlines()]
+    try:
+        public_ip = requests.get('https://api.ipify.org', timeout=5).text
+        if public_ip not in ips:
+            ips.append(public_ip)
+    except requests.RequestException:
+        pass
+
     return ips
 
 
@@ -129,7 +138,7 @@ def deploy_waf():
     print(f"WSKEY: {WSKEY}")
     print(f"CAPTCHA_SECRET: {CAPTCHA_SECRET}")
 
-    frontend_ip = select_private_ip()
+    # frontend_ip = select_private_ip()
     os.system("docker network inspect waf_network >/dev/null 2>&1 || docker network create waf_network")
 
     if not container_exists("postgres"):
@@ -166,10 +175,10 @@ def deploy_waf():
         warn("ML API already exists. Skipping...")
 
     if not container_exists("frontend"):
-        log(f"Starting Frontend on {frontend_ip}...")
+        log(f"Starting Frontend ...")
         os.system(f"docker run -d --name frontend --network waf_network "
                   f"-e VITE_BACKEND_URL=http://backend:8080 "
-                  f"-p {frontend_ip}:5173:5173 --restart unless-stopped natnaelcrypto/waf-frontend:latest")
+                  f"-p 5173:5173 --restart unless-stopped natnaelcrypto/waf-frontend:latest")
     else:
         warn("Frontend already exists. Skipping...")
 

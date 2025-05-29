@@ -71,36 +71,25 @@ func GetNotifications(c *gin.Context) {
 
 func UpdateNotification(c *gin.Context) {
 
-	var input struct {
-		NotificationIds []string `json:"notification_ids" binding:"required"`
-		Status          bool     `json:"status" binding:"required"`
-	}
+	currentUserID := c.GetString("user_id")
+	notificationID := c.Param("notification_id")
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var existingNotification models.Notification
+	if err := config.DB.Where("notification_id = ?", notificationID).First(&existingNotification).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "notification not found"})
 		return
 	}
-	currentUserID := c.GetString("user_id")
 
-	for _, id := range input.NotificationIds {
+	if currentUserID != existingNotification.UserID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+		return
+	}
 
-		var existingNotification models.Notification
-		if err := config.DB.Where("notification_id = ?", id).First(&existingNotification).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "notification not found"})
-			return
-		}
+	existingNotification.Status = !existingNotification.Status
 
-		if currentUserID != existingNotification.UserID {
-			c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
-			return
-		}
-
-		existingNotification.Status = input.Status
-
-		if err := config.DB.Save(existingNotification).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update notification"})
-			return
-		}
+	if err := config.DB.Save(existingNotification).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update notification"})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "notification updated successfully"})
