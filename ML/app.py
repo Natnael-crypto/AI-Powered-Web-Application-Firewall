@@ -54,7 +54,7 @@ def load_anomaly_detector_model():
     global anomaly_detector_model
     try:
         anomaly_detector_model = joblib.load(ANOMALY_PREDICTOR_MODEL_PATH)
-        app.logger.info("Anomaly predictor model loaded from {ANOMALY_PREDICTOR_MODEL_PATH}")
+        app.logger.info(f"Anomaly predictor model loaded from {ANOMALY_PREDICTOR_MODEL_PATH}")
     except Exception as e:
         app.logger.error(f"Failed to load anomaly predictor model: {e}")
 
