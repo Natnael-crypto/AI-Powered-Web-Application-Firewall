@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"backend/internal/config"
 	"backend/internal/models"
@@ -84,7 +83,7 @@ func HandleBatchRequests(c *gin.Context) {
 			RequestURL:      safeString(requestData["request_url"]),
 			Headers:         headers,
 			Body:            safeString(requestData["body"]),
-			Timestamp:       float64(time.Now().UnixMilli()),
+			Timestamp:       safeFloat64(requestData["timestamp"]),
 			ResponseCode:    int(safeFloat64(requestData["response_code"])),
 			Status:          safeString(requestData["status"]),
 			ThreatDetected:  safeBool(requestData["threat_detected"]),

@@ -12,25 +12,26 @@ import (
 )
 
 type MessageModel struct {
-	RequestID       string `json:"request_id"`
-	ApplicationName string `json:"application_name"`
-	ClientIP        string `json:"client_ip"`
-	RequestMethod   string `json:"request_method"`
-	RequestURL      string `json:"request_url"`
-	Headers         string `json:"headers"`
-	Body            string `json:"body"`
-	ResponseCode    int    `json:"response_code"`
-	Status          string `json:"status"`
-	ThreatDetected  bool   `json:"threat_detected"`
-	ThreatType      string `json:"threat_type"`
-	BotDetected     bool   `json:"bot_detected"`
-	GeoLocation     string `json:"geo_location"`
-	RateLimited     bool   `json:"rate_limited"`
-	UserAgent       string `json:"user_agent"`
-	Token           string `json:"token"`
-	AIResult        bool   `json:"ai_result"`
-	AIThreatType    string `json:"ai_threat_type"`
-	RuleDetected    bool   `json:"rule_detected"`
+	RequestID       string  `json:"request_id"`
+	ApplicationName string  `json:"application_name"`
+	ClientIP        string  `json:"client_ip"`
+	RequestMethod   string  `json:"request_method"`
+	RequestURL      string  `json:"request_url"`
+	Headers         string  `json:"headers"`
+	Body            string  `json:"body"`
+	ResponseCode    int     `json:"response_code"`
+	Status          string  `json:"status"`
+	ThreatDetected  bool    `json:"threat_detected"`
+	ThreatType      string  `json:"threat_type"`
+	BotDetected     bool    `json:"bot_detected"`
+	GeoLocation     string  `json:"geo_location"`
+	RateLimited     bool    `json:"rate_limited"`
+	UserAgent       string  `json:"user_agent"`
+	Token           string  `json:"token"`
+	AIResult        bool    `json:"ai_result"`
+	AIThreatType    string  `json:"ai_threat_type"`
+	RuleDetected    bool    `json:"rule_detected"`
+	Timestamp       float64 `json:"timestamp"`
 }
 
 var (

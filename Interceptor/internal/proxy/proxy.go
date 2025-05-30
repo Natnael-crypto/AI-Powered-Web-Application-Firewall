@@ -90,6 +90,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 				AIResult:        false,
 				RuleDetected:    false,
 				AIThreatType:    "",
+				Timestamp:       float64(time.Now().UnixMilli()),
 			}
 			utils.SendToBackend(message)
 
@@ -125,6 +126,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 			AIResult:        false,
 			RuleDetected:    false,
 			AIThreatType:    "",
+			Timestamp:       float64(time.Now().UnixMilli()),
 		}
 		utils.SendToBackend(message)
 		logger.LogRequest(r, "blocked", hostname, ip, 0.6)
@@ -178,6 +180,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		AIResult:        false,
 		RuleDetected:    false,
 		AIThreatType:    "",
+		Timestamp:       float64(time.Now().UnixMilli()),
 	}
 
 	// Special WAF Rule ID - Skip ML & Fusion
