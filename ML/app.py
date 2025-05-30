@@ -117,11 +117,11 @@ def predict_type(data):
 def predict_and_notify(data, endpoint):
     """Predict the type and notify the backend API"""
     prediction = predict_type(data)
+    print("passed:",prediction)
     print(prediction)
     if prediction is not None:
         try:
             request_id = data.get("request_id", "")
-            
             response = requests.post(
                 endpoint,
                 headers={
