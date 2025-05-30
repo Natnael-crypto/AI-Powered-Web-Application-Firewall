@@ -7,18 +7,25 @@ import {
   useDeactivateUser,
   useDeleteUser,
   useGetUsers,
+  useUpdateUser,
 } from '../hooks/api/useUser'
 import {AdminUser} from '../lib/types'
 import {AssignAdminModal} from './AssignAdminModal'
 import {CheckCircle, PauseCircle, Key, Trash2, UserPlus} from 'lucide-react'
+import UpdatePasswordModal from './UpdatePasswordModal'
+import {useToast} from '../hooks/useToast'
 
 const AdminTable = () => {
   const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null)
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false)
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
+  const [passwordAdmin, setPasswordAdmin] = useState<AdminUser | null>(null)
   const {data, isLoading, isError} = useGetUsers()
+  const {addToast} = useToast()
   const {mutate} = useDeleteUser()
   const {mutate: deactivateUser} = useDeactivateUser()
   const {mutate: activateUser} = useActivateUser()
+  const {mutate: updateUser} = useUpdateUser()
 
   const handleStatusChange = (
     admin: AdminUser,
@@ -32,19 +39,31 @@ const AdminTable = () => {
     console.log(`Changing status for ${admin.username} to ${newStatus}`)
   }
 
-  const handleUpdatePassword = (admin: AdminUser) => {
-    console.log(`Updating password for ${admin.username}`)
-  }
-
   const handleDeleteAdmin = async (admin: AdminUser) => {
     mutate(admin.username, {
       onSuccess: () => console.log(`deleteUser with ${admin.username} username`),
     })
   }
 
+  const handleUpdatePassword = (admin: AdminUser) => {
+    setPasswordAdmin(admin)
+    setIsPasswordModalOpen(true)
+  }
+
   const handleAssign = (admin: AdminUser) => {
     setSelectedAdmin(admin)
     setIsAssignModalOpen(true)
+  }
+
+  const handlePasswordConfirm = (data: {
+    username: string
+    old_password: string
+    new_password: string
+  }) => {
+    updateUser(data, {
+      onSuccess: () => addToast('updated Successfully'),
+    })
+    setIsPasswordModalOpen(false)
   }
 
   const columns: ColumnDef<AdminUser>[] = [
@@ -138,6 +157,12 @@ const AdminTable = () => {
           console.log(`Assigning admin ${admin.username}`)
           setIsAssignModalOpen(false)
         }}
+      />
+      <UpdatePasswordModal
+        isOpen={isPasswordModalOpen}
+        admin={passwordAdmin}
+        onClose={() => setIsPasswordModalOpen(false)}
+        onConfirm={handlePasswordConfirm}
       />
     </div>
   )

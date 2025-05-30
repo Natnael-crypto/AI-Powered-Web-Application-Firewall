@@ -10,6 +10,7 @@ import {
   getUsers,
   isLoggedIn,
   loginUser,
+  updateUser,
 } from '../../services/userApi'
 
 export const useLogin = () => {
@@ -39,7 +40,6 @@ export const useGetUser = (username: string) => {
     queryFn: () => getuser(username),
   })
 }
-
 
 export const useGetUserById = (id: string) => {
   return useQuery({
@@ -92,4 +92,11 @@ export function useActivateUser() {
     onSuccess: () => queryClient.invalidateQueries({queryKey: ['getUsers']}),
   })
 }
-export function useUpdateUser() {}
+export function useUpdateUser() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['updateUser'],
+    mutationFn: updateUser,
+    onSuccess: () => queryClient.invalidateQueries({queryKey: ['getUsers']}),
+  })
+}
