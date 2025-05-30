@@ -127,10 +127,10 @@ def predict_and_notify(data, endpoint):
                 headers={
                     "X-Service":"M"
                 },
-                json={
+                json=[{
                     "request_id": request_id,
                     "threat_type": prediction["threat_type"],
-                },
+                }],
                 timeout=10,
             )
             
