@@ -29,7 +29,6 @@ export const getuser = async (username: string) => {
   return await response.data.admins
 }
 
-
 export const getUserById = async (id: string) => {
   const response = await axios.get(`/api/users/id/${id}`)
 
@@ -46,8 +45,16 @@ export const addUser = async (userData: {username: string; password: string}) =>
   return await response.data
 }
 
-export const updateUsers = async (_userId: string) => {
-  // Todo: Implement
+export const updateUser = async (data: {
+  username: string
+  old_password: string
+  new_password: string
+}) => {
+  const response = await axios.put('/api/updatePassword', data)
+
+  if (!response) throw new Error('Failed to add user')
+
+  return await response.data
 }
 
 export const isLoggedIn = async () => {
