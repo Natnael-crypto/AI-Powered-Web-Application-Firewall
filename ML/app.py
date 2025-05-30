@@ -90,7 +90,7 @@ def load_type_predictor_model():
     global type_predictor_model
     try:
         type_predictor_model = joblib.load(TYPE_PREDICTOR_MODEL_PATH)
-        app.logger.info("Type predictor model loaded successfully.")
+        app.logger.info(f"Type predictor model loaded successfully: {type(type_predictor_model)}")
     except Exception as e:
         app.logger.error(f"Failed to load type predictor model: {e}")
 
@@ -117,18 +117,23 @@ def predict_type(data):
 def predict_and_notify(data, endpoint):
     """Predict the type and notify the backend API"""
     prediction = predict_type(data)
+    print(prediction)
     if prediction is not None:
         try:
             request_id = data.get("request_id", "")
+            
             response = requests.post(
                 endpoint,
+                headers={
+                    "X-Service":"M"
+                },
                 json={
                     "request_id": request_id,
                     "threat_type": prediction["threat_type"],
-                    "confidence": prediction["confidence"],
                 },
                 timeout=10,
             )
+            
             if response.status_code == 200:
                 app.logger.info(f"Type prediction sent successfully: {prediction}")
             else:
