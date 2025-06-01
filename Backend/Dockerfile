@@ -30,6 +30,10 @@ COPY --from=builder /app/Backend/.env .env
 
 COPY --from=builder /app/Backend/internal/static/iptogeo.csv ./internal/static/iptogeo.csv
 
+COPY --from=builder /app/Backend/certs/cert.pem ./certs/cert.pem
+
+COPY --from=builder /app/Backend/certs/key.pem ./certs/key.pem
+
 # Debug: Check if the binary exists in the final image
 RUN ls -lah /
 

@@ -27,9 +27,8 @@ func main() {
 	background.StartNotificationWatcher()
 
 	r := gin.Default()
-
 	r.Use(cors.New(cors.Config{
-		AllowAllOrigins: true, // allow all domains
+		AllowAllOrigins: true,
 		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
 		AllowHeaders:    []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:   []string{"Content-Length"},
@@ -38,8 +37,9 @@ func main() {
 
 	routes.InitializeRoutes(r)
 
-	log.Printf("Starting server on port 8080")
-	if err := r.Run(":8080"); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+	// Start HTTPS server on port 8443
+	log.Println("Starting HTTPS server on :8443")
+	if err := r.RunTLS(":8443", "./certs/cert.pem", "./certs/key.pem"); err != nil {
+		log.Fatalf("HTTPS server failed: %v", err)
 	}
 }

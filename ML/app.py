@@ -191,4 +191,4 @@ def internal_error(e):
 
 if __name__ == "__main__":
     init_system()
-    app.run(host="0.0.0.0", port=8090)
+    app.run(host="0.0.0.0", port=8090,ssl_context=("./certs/cert.pem", "./certs/key.pem"))
