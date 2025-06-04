@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -39,7 +40,12 @@ func FetchRules(applicationID string) (*RulesResponse, error) {
 
 	req.Header.Set("X-Service", "I")
 
-	client := &http.Client{}
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+	client := &http.Client{Transport: transport}
 	resp, err := client.Do(req)
 
 	if err != nil {

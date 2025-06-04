@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -35,11 +36,17 @@ type MessageModel struct {
 }
 
 var (
-	messageQueue    []MessageModel
-	queueMutex      sync.Mutex
-	queueLimit      = 1000
-	sendInterval    = 60 * time.Second
-	httpClient      = &http.Client{Timeout: 10 * time.Second}
+	messageQueue []MessageModel
+	queueMutex   sync.Mutex
+	queueLimit   = 1000
+	sendInterval = 60 * time.Second
+	httpClient   = &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true, // Disable TLS verification
+			},
+		},
+	}
 	backendEndpoint string
 )
 

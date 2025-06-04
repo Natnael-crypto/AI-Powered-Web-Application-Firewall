@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
 	"log"
@@ -48,7 +49,12 @@ func fetchAndSaveFile(url, applicationID, ext string) (string, error) {
 
 	req.Header.Set("X-Service", "I")
 
-	client := &http.Client{}
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+	client := &http.Client{Transport: transport}
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch file: %v", err)

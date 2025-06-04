@@ -90,6 +90,20 @@ func AddApplication(c *gin.Context) {
 		return
 	}
 
+	if !application.Tls {
+		newCert := models.Cert{
+			CertID:        utils.GenerateUUID(),
+			ApplicationID: application.ApplicationID,
+			Cert:          []byte(""),
+			Key:           []byte(""),
+			CreatedAt:     time.Now(),
+			UpdatedAt:     time.Now(),
+		}
+		if err := config.DB.Create(&newCert).Error; err != nil {
+			log.Print(http.StatusConflict, gin.H{"error": "failed to create certificate"})
+		}
+	}
+
 	config.Change = true
 
 	c.JSON(http.StatusCreated, gin.H{"message": "application created successfully", "application": application})

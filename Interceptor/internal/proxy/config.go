@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"interceptor/internal/utils"
@@ -104,7 +105,12 @@ func fetchConfig() error {
 
 	req.Header.Set("X-Service", "I")
 
-	client := &http.Client{}
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+	client := &http.Client{Transport: transport}
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -146,7 +152,12 @@ func fetchApplicationConfig() error {
 
 	req.Header.Set("X-Service", "I")
 
-	client := &http.Client{}
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+	client := &http.Client{Transport: transport}
 	resp, err := client.Do(req)
 
 	if err != nil {
