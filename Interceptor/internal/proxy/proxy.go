@@ -176,7 +176,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		GeoLocation:     "Unknown",
 		RateLimited:     false,
 		UserAgent:       r.UserAgent(),
-		Body:            body,
+		Body:            utils.RecursiveDecode(body, 3),
 		AIResult:        false,
 		RuleDetected:    false,
 		AIThreatType:    "",

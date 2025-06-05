@@ -64,7 +64,6 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int, st
 		if err != nil {
 			log.Println("error while reading the request body", err)
 		}
-		fmt.Println(string(body))
 		tx.AddPostRequestArgument("body", string(body))
 		tx.ProcessRequestBody()
 	}

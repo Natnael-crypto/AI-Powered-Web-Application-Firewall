@@ -19,7 +19,7 @@ import (
 func StartNotificationWatcher() {
 	go func() {
 		for {
-			time.Sleep(1 * time.Minute)
+			time.Sleep(5 * time.Minute)
 			processNotificationRules()
 		}
 	}()
@@ -38,10 +38,9 @@ func processNotificationRules() {
 	}
 
 	for _, rule := range rules {
-		timeWindowStart := time.Now().Add(-time.Duration(rule.TimeWindow) * time.Second).UnixMilli()
+		timeWindowStart := time.Now().Add(-time.Duration(rule.TimeWindow) * time.Minute).UnixMilli()
 
 		targetedApps, _, _ := shouldTriggerNotification(rule, timeWindowStart)
-
 
 		for appID, count := range targetedApps {
 

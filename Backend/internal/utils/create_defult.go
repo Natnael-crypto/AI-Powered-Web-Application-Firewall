@@ -60,16 +60,19 @@ func AddNotificationRule() {
 	}{
 		{"SQL Injection Attack", "sql"},
 		{"XSS Attack", "xss"},
-		{"Command Injection Attack", "cmd"},
 		{"LDAP Injection Attack", "ldap"},
 		{"NoSQL Injection Attack", "nosql"},
-		{"Code Injection Attack", "code"},
+		{"Command Injection Attack", "code"},
 		{"Path Traversal Attack", "path"},
 		{"Rate Limited", "rate"},
+		{"XML External Entity (XXE) Attack", "xxe"},
+		{"Server-Side Template Injection Attack", "server"},
+		{"Open Redirect Attack", "redirect"},
+		{"File Inclusion Attack", "inclusion"},
 	}
 
 	threshold := 10
-	timeWindow := 10
+	timeWindow := 5
 	isActive := true
 
 	for _, def := range defaultRules {

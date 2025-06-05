@@ -16,6 +16,7 @@ interface FilterState {
 export const useLogFilter = create<FilterState>((set, get) => ({
   filters: {
     search: '',
+    request_id: '',
     page: '',
     client_ip: '',
     request_method: '',
@@ -51,13 +52,16 @@ export const useLogFilter = create<FilterState>((set, get) => ({
       },
       tempFilter: { key: '', value: '' },
     }))
+
   },
-  removeFilter: key =>
+  removeFilter: key =>{
     set(state => {
       const updated = { ...state.filters }
-      delete updated[key]
+      updated[key]=''
       return { filters: updated }
-    }),
+    })
+    get().applyFilters()
+  },
   setFilter: (key:any, value:any) =>
     set(state => ({
       filters: {
@@ -70,6 +74,7 @@ export const useLogFilter = create<FilterState>((set, get) => ({
     filters: get().filters,
     appliedFilters: {
       client_ip: '',
+      request_id: '',
       request_method: '',
       request_url: '',
       threat_type: '',
@@ -100,6 +105,7 @@ applyFilters: () => {
 },
   appliedFilters: {
     application_name: '',
+    request_id: '',
     client_ip: '',
     request_method: '',
     request_url: '',

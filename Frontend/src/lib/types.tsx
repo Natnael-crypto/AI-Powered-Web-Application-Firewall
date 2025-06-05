@@ -169,6 +169,7 @@ export type SenderEmail = z.infer<typeof SenderEmailSchema>;
 
 export type Filter = {
   client_ip: string
+  request_id: string
   request_method: string
   request_url: string
   threat_type: string
@@ -194,6 +195,7 @@ export type Filter = {
 
 export const logFilterType = {
   application_name: 'Application Name',
+  request_id: 'Request ID',
   search: 'Search',
   client_ip: 'Client IP',
   request_method: 'Request Method',

@@ -34,7 +34,7 @@ type_predictor_model = None
 
 THREAT_TYPE_MAPPING = {
     1: "Command Injection",
-    2: "Directory Traversal",
+    2: "Path Traversal",
     3: "File Inclusion",
     4: "LDAP Injection",
     5: "NoSQL Injection",

@@ -202,6 +202,18 @@ const RequestDetailsModal: React.FC<RequestDetailsModalProps> = ({
           </div>
         )}
 
+        {/* Body */}
+        {request?.body && (
+          <div className="space-y-2">
+            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Body
+            </label>
+            <div className="text-sm text-gray-800 bg-gray-50 p-3 rounded border border-gray-200 break-all max-h-30 overflow-y-auto">
+              {request.body}
+            </div>
+          </div>
+        )}
+
         {/* AI Analysis */}
         {request && (
           <div>

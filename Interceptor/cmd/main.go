@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"interceptor/internal/proxy"
 	"log"
@@ -36,7 +37,12 @@ func checkForChange() (bool, bool) {
 
 	req.Header.Set("X-Service", "I")
 
-	client := &http.Client{}
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+	client := &http.Client{Transport: transport}
 	resp, err := client.Do(req)
 
 	if err != nil {

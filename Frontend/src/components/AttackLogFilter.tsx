@@ -190,7 +190,7 @@ function AttackLogFilter() {
           </button>
 
           {isPopoverOpen && (
-            <div className="absolute z-20 mt-1 right-0 w-72 bg-white border border-gray-200 rounded-lg shadow-xl p-3 space-y-3">
+            <div className="absolute z-20 mt-1 right-0 w-full bg-white border border-gray-200 rounded-lg shadow-xl p-3 space-y-3">
               <div className="space-y-1">
                 {timePresets.map(preset => (
                   <button

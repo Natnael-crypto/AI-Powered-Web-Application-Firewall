@@ -239,7 +239,12 @@ func fetchApplicationConfig() error {
 
 			req.Header.Set("X-Service", "I")
 
-			client := &http.Client{}
+			transport := &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			}
+			client := &http.Client{Transport: transport}
 			securityResp, err := client.Do(req)
 
 			if err != nil {

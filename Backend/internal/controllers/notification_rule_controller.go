@@ -67,9 +67,9 @@ func UpdateNotificationRule(c *gin.Context) {
 	if input.Threshold != 0 {
 		rule.Threshold = input.Threshold
 	}
-	if input.TimeWindow != 0 {
-		rule.TimeWindow = input.TimeWindow
-	}
+	// if input.TimeWindow != 0 {
+	// 	rule.TimeWindow = input.TimeWindow
+	// }
 
 	rule.IsActive = *input.IsActive
 
