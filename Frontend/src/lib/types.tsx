@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import {z} from 'zod'
 
 export type FilterValues = {
   ipAddress: string
@@ -161,11 +161,14 @@ interface RuleDefinitionItem {
 }
 
 export const SenderEmailSchema = z.object({
-  sender_email: z.string().email('Invalid email address').nonempty('Sender email is required'),
+  sender_email: z
+    .string()
+    .email('Invalid email address')
+    .nonempty('Sender email is required'),
   app_password: z.string().nonempty('App password is required'),
-});
+})
 
-export type SenderEmail = z.infer<typeof SenderEmailSchema>;
+export type SenderEmail = z.infer<typeof SenderEmailSchema>
 
 export type Filter = {
   client_ip: string
@@ -314,8 +317,7 @@ export interface Notification {
 }
 
 export interface NotificationUpdate {
-  notification_ids: string[]
-  status: boolean
+  ids: string[]
 }
 
 export type rateLimitInputtype = {

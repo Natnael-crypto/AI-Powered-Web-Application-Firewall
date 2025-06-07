@@ -8,9 +8,11 @@ import {
   useDeleteApplication,
   useGetApplications,
   useUpdateApplication,
+  useUploadCertificate,
 } from '../hooks/api/useApplication'
 import {toast} from 'react-toastify'
 import LoadingSpinner from '../components/LoadingSpinner'
+import CertificateUploadModal from '../components/CertificateModal'
 
 interface Config {
   id: string
@@ -40,6 +42,7 @@ export interface Application {
 
 function WebService() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false)
   const [selectedApp, setSelectedApp] = useState<Application | undefined>()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -53,6 +56,7 @@ function WebService() {
   const {mutate: createApplication} = useAddApplication()
   const {mutate: updateApplication} = useUpdateApplication()
   const {mutate: deleteApplication} = useDeleteApplication()
+  const {mutate: uploadCertificate} = useUploadCertificate()
 
   const toggleModal = () => setIsModalOpen(!isModalOpen)
 
@@ -89,6 +93,42 @@ function WebService() {
     }
   }
 
+  const handleCertificateUpload = async (certificate: File, key: File) => {
+    if (!selectedApp?.application_id) return
+
+    setIsSubmitting(true)
+    try {
+      await uploadCertificate(
+        {
+          application_id: selectedApp.application_id,
+          certificate,
+          key,
+        } as {
+          application_id: string
+          certificate: File
+          key: File
+        },
+        {
+          onSuccess: (): void => {
+            toast.success('Certificates uploaded successfully!')
+            refetchApplications()
+            setIsCertModalOpen(false)
+          },
+          onError: (error: {message: string}): void => {
+            toast.error(`Failed to upload certificates: ${error.message}`)
+          },
+        } as {
+          onSuccess: () => void
+          onError: (error: {message: string}) => void
+        },
+      )
+    } catch (error) {
+      toast.error('An unexpected error occurred')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const handleDeleteApplication = (application_id: string) => {
     deleteApplication(application_id, {
       onSuccess: () => toast('Deleted successfully'),
@@ -120,8 +160,15 @@ function WebService() {
         isSubmitting={isSubmitting}
       />
 
-      <Card className="flex items-center justify-between  py-4 px-6 bg-white">
-        <h2 className="font-semibold text-lg ">Web Services</h2>
+      <CertificateUploadModal
+        isOpen={isCertModalOpen}
+        onClose={() => setIsCertModalOpen(false)}
+        onSubmit={handleCertificateUpload}
+        isSubmitting={isSubmitting}
+      />
+
+      <Card className="flex items-center justify-between py-4 px-6 bg-white">
+        <h2 className="font-semibold text-lg">Web Services</h2>
         <Button
           classname="text-white uppercase"
           size="l"
@@ -133,13 +180,14 @@ function WebService() {
         </Button>
       </Card>
 
-      <Card className="bg-white shadow-md p-4 ">
+      <Card className="bg-white shadow-md p-4">
         <WebserviceTable
           data={applications ?? []}
           openModal={() => setIsModalOpen(true)}
           setSelectedApp={setSelectedApp}
           selectedApp={selectedApp}
           handleDelete={handleDeleteApplication}
+          setIsCertModalOpen={setIsCertModalOpen}
         />
       </Card>
     </div>

@@ -43,7 +43,6 @@ function getColumns({
       header: 'Actions',
       id: 'actions',
       cell: ({row}) => (
-        !row.original.status?
         <DropdownActions
           item={row.original}
           options={[
@@ -52,7 +51,7 @@ function getColumns({
               onClick: notification => onMarkAsRead(notification.notification_id),
             },
           ]}
-        />:null
+        />
       ),
     },
   ]

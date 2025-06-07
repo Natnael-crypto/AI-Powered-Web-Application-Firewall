@@ -15,6 +15,7 @@ import {
   updateMaxDataSize,
   updateRateLimit,
   updateRemoteLogServer,
+  uploadCertificate,
 } from '../../services/applicationApi'
 
 export function useGetApplications() {
@@ -127,6 +128,14 @@ export function useDeleteApplication() {
   return useMutation({
     mutationKey: ['deleteApplication'],
     mutationFn: deleteApplication,
+    onSuccess: () => queryClient.invalidateQueries({queryKey: ['applications']}),
+  })
+}
+export function useUploadCertificate() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['uploadCertificate'],
+    mutationFn: uploadCertificate,
     onSuccess: () => queryClient.invalidateQueries({queryKey: ['applications']}),
   })
 }
