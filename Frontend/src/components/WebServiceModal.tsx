@@ -13,9 +13,6 @@ export interface WebServiceData {
   port: string
   status: boolean
   tls: boolean
-  // Add certificate fields if needed
-  // certificate?: File
-  // key?: File
 }
 
 interface WebServiceModalProps {
@@ -24,6 +21,7 @@ interface WebServiceModalProps {
   onClose: () => void
   onSubmit: (data: WebServiceData) => void
   isSubmitting?: boolean
+  onCertificateUpload?: (applicationId: string) => void
 }
 
 const WebServiceModal: React.FC<WebServiceModalProps> = ({
@@ -32,6 +30,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
   onSubmit,
   application,
   isSubmitting = false,
+  onCertificateUpload,
 }) => {
   const [form, setForm] = useState<WebServiceData>({
     application_name: '',
@@ -116,11 +115,6 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
       newErrors.port = 'Port is required'
     } else if (!validatePort(form.port)) {
       newErrors.port = 'Port must be between 1 and 65535'
-    }
-
-    // Add TLS certificate validation if needed
-    if (form.tls) {
-      // Validate certificate files here if implementing file upload
     }
 
     setErrors(newErrors)
@@ -275,42 +269,6 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
               <span className="ml-2 text-sm text-gray-700">TLS Enabled</span>
             </label>
           </div>
-
-          {/* TLS Certificate Fields (Conditional) */}
-          {form.tls && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-              <div className="space-y-1">
-                <label className="block text-sm font-medium text-gray-700">
-                  Certificate File <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="file"
-                  className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-blue-50 file:text-blue-700
-                    hover:file:bg-blue-100"
-                  required={form.tls}
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="block text-sm font-medium text-gray-700">
-                  Key File <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="file"
-                  className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-blue-50 file:text-blue-700
-                    hover:file:bg-blue-100"
-                  required={form.tls}
-                />
-              </div>
-            </div>
-          )}
 
           {/* Form Actions */}
           <div className="flex justify-end gap-3 pt-6 mt-6 border-t border-gray-200">

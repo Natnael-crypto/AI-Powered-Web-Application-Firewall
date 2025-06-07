@@ -145,3 +145,23 @@ export async function updateMaxDataSize(data: {
 
   return await response.data.data
 }
+
+export async function uploadCertificate(data: {
+  application_id: string
+  certificate: File
+  key: File
+}) {
+  const formData = new FormData()
+  formData.append('cert', data.certificate)
+  formData.append('key', data.key)
+
+  const response = await axios.post(`/api/certs/${data.application_id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+
+  if (!response) throw new Error('Something went wrong')
+
+  return await response.data
+}

@@ -34,10 +34,9 @@ function Notifications() {
 
   const handleMarkAllAsRead = () => {
     const updatedData: NotificationUpdate = {
-      notification_ids: notifications.map(
+      ids: notifications.map(
         (notification: Notification) => notification.notification_id,
       ),
-      status: true,
     }
     markAllAsRead(updatedData, {
       onSuccess: () => {
@@ -48,8 +47,6 @@ function Notifications() {
       },
     })
   }
-
-  
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
@@ -91,8 +88,6 @@ function Notifications() {
       <Card className="shadow-md p-4 bg-white">
         <NotificationsTable data={notifications} onMarkAsRead={handleMarkAsRead} />
       </Card>
-
-       
     </div>
   )
 }

@@ -24,7 +24,7 @@ export async function deleteNotification(notification_id: string) {
 }
 
 export async function batchMarkAsRead(data: NotificationUpdate) {
-  const response = await axios.put('api/notifications/update', data)
+  const response = await axios.put('/api/notifications/update', data)
   if (!response) throw new Error('Something went wrong!')
 
   return response.data
