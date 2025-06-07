@@ -19,7 +19,7 @@ Your Web Application Firewall has detected suspicious activity.
 
 🛡️ Rule Triggered: %s
 📌 Application: %s
-🌐 Source IP(s): %s
+🌐 Source IP(s): %v
 🔢 Occurrence Count: %d
 🕒 Time: %s to %s
 
