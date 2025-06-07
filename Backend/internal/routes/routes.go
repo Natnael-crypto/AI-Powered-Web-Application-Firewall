@@ -91,7 +91,7 @@ func InitializeRoutes(r *gin.Engine) {
 	notifications := authorized.Group("/notifications")
 	{
 		notifications.PUT("/update/:notification_id", controllers.UpdateNotification)
-		notifications.PUT("/update/", controllers.UpdateNotificationBatch)
+		notifications.PUT("/update", controllers.UpdateNotificationBatch)
 		notifications.GET("/all/:user_id", controllers.GetNotifications)
 		notifications.DELETE("/delete/:notification_id", controllers.DeleteNotification)
 	}

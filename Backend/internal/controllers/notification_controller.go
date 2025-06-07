@@ -120,8 +120,7 @@ func UpdateNotificationBatch(c *gin.Context) {
 			return
 		}
 
-		existingNotification.Status = !existingNotification.Status
-
+		existingNotification.Status = true
 		if err := config.DB.Save(existingNotification).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update notification"})
 			return

@@ -69,6 +69,13 @@ func AddCert(c *gin.Context) {
 		return
 	}
 
+	application.Tls = true
+
+	if err := config.DB.Save(&application).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add certificate in database"})
+		return
+	}
+
 	var existingCert models.Cert
 	if err := config.DB.Where("application_id = ?", applicationID).First(&existingCert).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Certificate already exists for this application"})
@@ -286,6 +293,19 @@ func DeleteCert(c *gin.Context) {
 
 	if err := config.DB.Delete(&cert).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete certificate from database"})
+		return
+	}
+
+	var application models.Application
+	if err := config.DB.Where("application_id = ?", applicationID).First(&application).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Application not found"})
+		return
+	}
+
+	application.Tls = false
+
+	if err := config.DB.Save(&application).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add certificate in database"})
 		return
 	}
 
