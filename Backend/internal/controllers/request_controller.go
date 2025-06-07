@@ -477,12 +477,34 @@ func GetRequestsForMl(c *gin.Context) {
 		return
 	}
 	time_from := float64(time.Now().UnixMilli()) - model.TrainEvery
+
+	var rules []models.Rule
+
+	if err := config.DB.Find(&rules).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch rules"})
+	}
+
+	var ruleName []string
+
+	for _, rule := range rules {
+		ruleName = append(ruleName, rule.Category)
+	}
+
 	var requests []models.Request
-	if err := config.DB.
-		Where("timestamp >= ?", time_from).
-		Find(&requests).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch requests"})
-		return
+	if len(ruleName) == 0 {
+		if err := config.DB.
+			Where("timestamp >= ? and response_code !=429 ", time_from).
+			Find(&requests).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch requests"})
+			return
+		}
+	} else {
+		if err := config.DB.
+			Where("timestamp >= ? AND threat_type NOT IN (?) and response_code !=429", time_from, ruleName).
+			Find(&requests).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch requests"})
+			return
+		}
 	}
 
 	var mlRequests []map[string]interface{}
@@ -493,7 +515,7 @@ func GetRequestsForMl(c *gin.Context) {
 			"headers": req.Headers,
 			"label":   0,
 		}
-		if req.Status == "Blocked" {
+		if req.Status == "blocked" {
 			mlReq["label"] = 1
 		}
 		mlRequests = append(mlRequests, mlReq)

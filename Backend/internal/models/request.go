@@ -21,5 +21,4 @@ type Request struct {
 	AIResult        bool    `json:"ai_result" grom:"not null"`
 	AIThreatType    string  `json:"ai_threat_type" grom:"not null"`
 	RuleDetected    bool    `json:"rule_detected" grom:"not null"`
-	
 }
