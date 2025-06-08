@@ -4,14 +4,11 @@ import (
 	"backend/internal/config"
 	"backend/internal/models"
 	"backend/internal/utils"
-
-	// "encoding/json"
 	"fmt"
 	"log"
+	"slices"
 	"strings"
 	"time"
-
-	"slices"
 
 	"github.com/google/uuid"
 )
@@ -82,7 +79,7 @@ func processNotificationRules() {
 			}
 
 			dashboardMessage := fmt.Sprintf(
-				"🚨 %s rule triggered on %s | IP(s): %s | Count: %d",
+				"🚨 %s rule triggered on %s | IP(s): %v | Count: %d",
 				rule.Name,
 				Application.HostName,
 				clientIPs,

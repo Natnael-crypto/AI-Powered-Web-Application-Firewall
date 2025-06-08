@@ -67,7 +67,6 @@ func AddNotificationRule() {
 		{"Rate Limited", "rate"},
 		{"XML External Entity (XXE) Attack", "xxe"},
 		{"Server-Side Template Injection Attack", "server"},
-		{"Open Redirect Attack", "redirect"},
 		{"File Inclusion Attack", "inclusion"},
 	}
 

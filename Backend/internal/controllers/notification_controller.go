@@ -95,6 +95,41 @@ func UpdateNotification(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "notification updated successfully"})
 }
 
+func UpdateNotificationBatch(c *gin.Context) {
+
+	currentUserID := c.GetString("user_id")
+
+	var input struct {
+		IDS []string `json:"ids"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	for _, ids := range input.IDS {
+		var existingNotification models.Notification
+		if err := config.DB.Where("notification_id = ?", ids).First(&existingNotification).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "notification not found"})
+			return
+		}
+
+		if currentUserID != existingNotification.UserID {
+			c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+			return
+		}
+
+		existingNotification.Status = true
+		if err := config.DB.Save(existingNotification).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update notification"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "notifications updated successfully"})
+}
+
 func DeleteNotification(c *gin.Context) {
 	notificationID := c.Param("notification_id")
 

@@ -120,6 +120,7 @@ func SubmitTrainResults(c *gin.Context) {
 		Precision float32 `json:"precision"`
 		F1        float32 `json:"f1"`
 		Recall    float32 `json:"recall"`
+		ModelType string  `json:"model_type"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -128,10 +129,11 @@ func SubmitTrainResults(c *gin.Context) {
 	}
 
 	if err := config.DB.Model(&models.AIModel{}).Where("id = ?", input.ID).Updates(map[string]interface{}{
-		"accuracy":  input.Accuracy,
-		"precision": input.Precision,
-		"recall":    input.Recall,
-		"fl":        input.F1,
+		"accuracy":   input.Accuracy,
+		"precision":  input.Precision,
+		"recall":     input.Recall,
+		"f1":         input.F1,
+		"model_type": input.ModelType,
 	}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update model stats"})
 		return
@@ -215,12 +217,14 @@ func UpdateTrainingSettings(c *gin.Context) {
 		return
 	}
 
+	trainTime := input.TrainEvery * 3600000
+
 	if err := config.DB.Model(&models.AIModel{}).Where("id = ?", input.ID).Updates(map[string]interface{}{
 		"expected_accuracy":  input.ExpectedAccuracy,
 		"expected_precision": input.ExpectedPrecision,
 		"expected_recall":    input.ExpectedRecall,
 		"expected_f1":        input.ExpectedF1,
-		"train_every":        input.TrainEvery,
+		"train_every":        trainTime,
 	}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update training setting stats"})
 		return
