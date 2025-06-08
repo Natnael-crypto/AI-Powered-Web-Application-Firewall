@@ -98,7 +98,7 @@ func InitializeRoutes(r *gin.Engine) {
 
 	certs := authorized.Group("/certs")
 	{
-		certs.GET("/certs", controllers.GetCertAdmin)
+		certs.GET("", controllers.GetCertAdmin)
 		certs.POST("/:application_id", controllers.AddCert)
 		certs.PUT("/:application_id", controllers.UpdateCert)
 		certs.DELETE("/:application_id", controllers.DeleteCert)

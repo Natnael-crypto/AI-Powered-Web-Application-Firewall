@@ -17,7 +17,11 @@ import (
 
 func generateRuleID() string {
 	rand.Seed(time.Now().UnixNano())
-	number := rand.Int63n(1000000000000000000)
+
+	min := int64(1_000_000_000_000_000_000)
+	max := int64(9_223_372_036_854_775_807)
+
+	number := rand.Int63n(max-min+1) + min
 	return strconv.FormatInt(number, 10)
 }
 
@@ -110,7 +114,7 @@ func GetRules(c *gin.Context) {
 	}
 
 	var rules []models.Rule
-	if err := config.DB.Where("rule_id In ?", ruleIDs).Find(&rules).Error; err != nil {
+	if err := config.DB.Where("rule_id In ? And is_active = true", ruleIDs).Find(&rules).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "rules not found"})
 		return
 	}

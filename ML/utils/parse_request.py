@@ -4,8 +4,8 @@ from collections import defaultdict
 from urllib.parse import unquote
 import re
 
-BAD_WORDS_BY_TYPE_DIR = os.getenv("BAD_WORDS_BY_TYPE_DIR")
-COMMON_BAD_WORDS_PATH = os.getenv("COMMON_BAD_WORDS_PATH")
+BAD_WORDS_BY_TYPE_DIR = "words/words_by_type/"
+COMMON_BAD_WORDS_PATH = "words/bad_words.txt"
 
 # Shared character mappings
 INJECTION_CHARACTERS = {

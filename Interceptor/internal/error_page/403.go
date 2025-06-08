@@ -79,7 +79,7 @@ func Send403Response(w http.ResponseWriter, RequestID string) {
 			<p>Your request has been blocked for security reasons.</p>
 			<p>If you believe this was done in error, please contact the site administrator with the information below.</p>
 			<div class="diagnostic">
-				<strong>Rule ID:</strong> %s<br>
+				<strong>Request ID:</strong> %s<br>
 			</div>
 			<div class="footer">
 				Security protection by Gasha WAF &mdash; Request ID: %s
