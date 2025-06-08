@@ -165,3 +165,13 @@ export async function uploadCertificate(data: {
 
   return await response.data
 }
+
+export async function getCertificates(application_id: string) {
+  const response = await axios.get(`/api/certs`, {
+    params: {application_id: application_id, type: 'cert'},
+  })
+
+  if (!response) throw new Error('Something went wrong')
+
+  return await response.data
+}
