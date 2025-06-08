@@ -38,7 +38,7 @@ COPY --from=builder /app/Backend/certs/key.pem ./certs/key.pem
 RUN ls -lah /
 
 # Expose the port your application will run on
-EXPOSE 8484
+EXPOSE 8443
 
 # Set the default command to run your app
 CMD ["/backend"]
