@@ -17,15 +17,14 @@ func FetchCert(applicationID string) (string, string, error) {
 		log.Println("Warning: No .env file found, falling back to environment variables")
 	}
 
-	backendHost := os.Getenv("BACKENDHOST")
-	backendPort := os.Getenv("BACKENDPORT")
+	backendHost := os.Getenv("BACKENDURL")
 
-	if backendHost == "" || backendPort == "" {
+	if backendHost == "" {
 		return "", "", fmt.Errorf("BACKENDHOST or BACKENDPORT environment variable is not set")
 	}
 
-	backendURLCert := fmt.Sprintf("http://%s:%s/certs?application_id=%s&type=cert", backendHost, backendPort, applicationID)
-	backendURLKey := fmt.Sprintf("http://%s:%s/certs?application_id=%s&type=key", backendHost, backendPort, applicationID)
+	backendURLCert := fmt.Sprintf("%s/interceptor/certs?application_id=%s&type=cert", backendHost, applicationID)
+	backendURLKey := fmt.Sprintf("%s/interceptor/certs?application_id=%s&type=key", backendHost, applicationID)
 
 	certPath, err := fetchAndSaveFile(backendURLCert, applicationID, "crt")
 	if err != nil {

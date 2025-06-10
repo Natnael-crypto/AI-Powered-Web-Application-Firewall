@@ -521,5 +521,5 @@ func GetRequestsForMl(c *gin.Context) {
 		mlRequests = append(mlRequests, mlReq)
 	}
 
-	c.JSON(http.StatusOK, mlRequests)
+	c.JSON(http.StatusOK, gin.H{"requests": mlRequests})
 }

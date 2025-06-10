@@ -66,7 +66,7 @@ func AddNotificationRule() {
 		{"Path Traversal Attack", "path"},
 		{"Rate Limited", "rate"},
 		{"XML External Entity (XXE) Attack", "xxe"},
-		{"Server-Side Template Injection Attack", "server"},
+		{"Server-Side Template Injection Attack", "ssit"},
 		{"File Inclusion Attack", "inclusion"},
 	}
 

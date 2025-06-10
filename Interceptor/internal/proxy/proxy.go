@@ -184,7 +184,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Special WAF Rule ID - Skip ML & Fusion
-	if blockedByRule && ruleID >= 1000000000000000000 {
+	if blockedByRule && ruleID >= 100000000000000000 {
 		if requestBodySize >= application_config[hostname].MaxPostDataSize {
 			message.Body = ""
 		} else {
