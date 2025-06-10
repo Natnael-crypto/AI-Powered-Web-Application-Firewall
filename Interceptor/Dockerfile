@@ -37,7 +37,7 @@ COPY --from=builder /app/Interceptor ./
 RUN ls -lah /internal/config
 
 # Expose the port your application will run on
-EXPOSE 80
+EXPOSE [80 443]
 
 # Set the default command to run your app
 CMD ["/interceptor"]
