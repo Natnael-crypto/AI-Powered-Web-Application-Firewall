@@ -9,11 +9,11 @@
 
 **GASHA WAF** is an AI-powered Web Application Firewall engineered to protect modern web applications from evolving cyber threats, especially **injection-based attacks** like SQLi, XSS, and more. It fuses rule-based security with machine learning models to detect and mitigate threats in real time.
 
-This project was developed as a final capstone submission for the Software Engineering Program at AAiT.
+This project was developed as a final capstone submission for the Software Engineering And Computing Technology Program at AAiT.
 
 ## 🚀 Features
 
-* **AI-Driven Threat Detection**: Inline detection using fusion of RF (request classification) and DT (attack classification).
+* **AI-Driven Threat Detection**: Inline detection using RF.
 * **Online Learning**: Continual update and adjustment to new traffic patterns.
 * **Custom Rule Engine**: Add custom WAF rules per application.
 * **Rate Limiting**: Stop brute-force and DoS-style attacks.
@@ -36,7 +36,7 @@ GASHA WAF consists of multiple microservices:
 ## 📦 Tech Stack
 
 * **Backend**: Go (Gin Framework)
-* **Machine Learning**: Python (Random Forest & Decision Tree)
+* **Machine Learning**: Python
 * **Database**: PostgreSQL
 * **Frontend**: React + Vite
 * **Infrastructure**: Docker, GitHub Actions
@@ -47,11 +47,12 @@ GASHA WAF consists of multiple microservices:
 
 ### Prerequisites
 
-* Docker & Docker Compose installed
+* Docker
+* linux OS
 
 ### Step-by-Step
 
-1. Pull the images:
+#### 1. Pull the images:
 
 ```bash
 docker pull natnaelcrypto/ml
@@ -61,67 +62,69 @@ docker pull natnaelcrypto/interceptor
 docker pull natnaelcrypto/waf-frontend
 ```
 
-2. Run the containers in order:
+#### 2. Environment Variables
 
-   * `waf-db`
-   * `waf-backend`
-   * `interceptor`
-   * `ml`
-   * `frontend`
-
----
-
-## 🔧 Environment Variables
-
-### Backend
+#### Backend
 
 ```
-DB_HOST=pg-xxxx.aivencloud.com
-DB_PORT=25211
-DB_USER=avnadmin
-DB_PASSWORD=***
+DB_HOST=pg-xxxxxxxxxx
+DB_PORT=5432
+DB_USER=username
+DB_PASSWORD=********
 DB_NAME=waf
-DB_SSLMODE=require
+DB_SSLMODE=require/disable
 WSKEY=***
 JWT_SECRET_KEY=***
 ```
 
-### Frontend
+#### Frontend
 
 ```
-VITE_BACKEND_URL=https://waf-backend-latest.onrender.com
+VITE_BACKEND_URL=https://ipaddress-of-backend:port
 ```
 
-### Interceptor
+#### Interceptor
 
 ```
-BACKENDURL=https://waf-backend-latest.onrender.com
-MLHOSTURL=https://ml-oqqe.onrender.com
-CAPTCHA_SECRET=***
-WSKEY=***
+BACKENDURL=https://ipaddress-of-backend:8443
+MLHOSTURL=https://ipaddress-of-ml:port:8090
+WSKEY=***********
 ```
 
-### ML Service
+#### ML Service
 
 ```
-# General App Settings
-DEBUG=True
+DEBUG=False
+BACKEND_API_URL =http://ipaddress-of-backend:8090/
+```
+#### Run the containers in order
 
-# BACKEND API Endpoints
-BACKEND_API_URL =http://localhost:8484/
-BACKEND_API_ML_MODELS_PATH=ml/models
-BACKEND_API_TYPE_ANALYSIS_PATH=ml/submit-analysis
-
-# Model Paths
-ANOMALY_PREDICTOR_MODEL_PATH=ml_models/random_forest_model_v.0.1.5.pkl
-TYPE_PREDICTOR_MODEL_PATH=ml_models/type_predictor_rf.joblib
-
-# Badword Paths
-BAD_WORDS_BY_TYPE_DIR = ./words/words_by_type/
-COMMON_BAD_WORDS_PATH = ./words/bad_words.txt
-
+```bash
+docker network create waf_network
 ```
 
+Default postgres database
+```bash
+docker run -d --name postgres --network waf_network --network-alias db -v waf_pgdata:/var/lib/postgresql/data -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=****** -e POSTGRES_DB=waf --restart unless-stopped postgres:16-alpine
+
+docker restart postgres
+```
+To Run Backend
+```bash
+docker run -d --name backend --network waf_network --network-alias backend -e DB_USER=****** -e DB_PASSWORD=****** -e DB_HOST=****** -e DB_PORT=****** -e DB_NAME=waf -e DB_SSLMODE=require -e WSKEY=****** -e JWT_SECRET_KEY=****** --restart unless-stopped -p 8443:8443 natnaelcrypto/waf-backend:latest
+```
+To Run Frontend
+```bash
+docker run -d --name frontend --network host -e VITE_BACKEND_URL=http://ipaddress-of-backend:8443 -p 5173:5173 --restart unless-stopped natnaelcrypto/waf-frontend:latest
+```
+To Run Interceptor
+```bash 
+docker run -d --name interceptor --network host -e BACKENDURL=https://backend:8443 -e MLHOSTURL=https://ml:8090/ -e WSKEY=****** --restart unless-stopped -p 80:80 -p 443:443 natnaelcrypto/interceptor:latest
+```
+To Run Ml
+```bash
+docker run -d --name ml -p 8090:8090 -e DEBUG=true -e BACKEND_API_URL=https://backend:8443/ natnaelcrypto/ml:latest
+```
 ---
 
 ## 🛡️ Detection Capabilities
@@ -129,9 +132,12 @@ COMMON_BAD_WORDS_PATH = ./words/bad_words.txt
 * SQL Injection
 * Cross-Site Scripting (XSS)
 * Command Injection
-* Code Injection
 * LDAP Injection
 * XML Injection
+* NoSQL Injection
+* File Inclusion
+* Path Traversal
+* Server-Side Template Injection (SSTI)
 * Rate-based attacks (via built-in rate limiter)
 
 All attacks are **logged**, **classified**, and **blocked** in real-time.
@@ -164,11 +170,3 @@ All attacks are **logged**, **classified**, and **blocked** in real-time.
 Licensed under the [Apache License 2.0](LICENSE).
 
 ---
-
-## 👨‍💻 Maintainers
-
-**Natnael Yohannes**
-
-* Email: [yohannesnatanel9@gmail.com](mailto:yohannesnatanel9@gmail.com)
-* GitHub: [@Natnael-crypto](https://github.com/Natnael-crypto)
-* LinkedIn: [Natnael Yohannes Gesiab](https://www.linkedin.com/in/natnael-yohannes-gesiab/)
