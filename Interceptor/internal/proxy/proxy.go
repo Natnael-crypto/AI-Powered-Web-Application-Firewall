@@ -156,7 +156,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// WAF rule evaluation
-	blockedByRule, ruleID, ruleMessage, _, status, body := wafInstance.EvaluateRules(r)
+	blockedByRule, _, ruleMessage, _, status, body := wafInstance.EvaluateRules(r)
 	headers := utils.ParseHeaders(fmt.Sprintf("%v", r.Header))
 	requestBodySize := utils.GetRequestBodySizeMB(r)
 
@@ -184,7 +184,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Special WAF Rule ID - Skip ML & Fusion
-	if blockedByRule && ruleID >= 100000000000000000 {
+	if blockedByRule {
 		if requestBodySize >= application_config[hostname].MaxPostDataSize {
 			message.Body = ""
 		} else {
@@ -229,10 +229,10 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		message.Body = ""
 	}
 
-	// err = utils.SaveEvaluationResult(message.RuleDetected, Normal, Anomaly, "results_n.csv")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	err = utils.SaveEvaluationResult(message.RuleDetected, Normal, Anomaly, "results_n.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if result {
 		error_page.Send403Response(w, message.RequestID)
