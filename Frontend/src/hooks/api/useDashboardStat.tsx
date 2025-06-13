@@ -1,5 +1,6 @@
 import {useQuery} from '@tanstack/react-query'
 import {
+  getMapStat,
   getMostTargetedEndpoint,
   getOverAllStat,
   getRateStat,
@@ -41,3 +42,9 @@ export function useResponseStat(appId: string,time:any) {
   })
 }
 
+export function useMapState(appId: string,time:any,threat:string) {
+  return useQuery({
+    queryKey: ['map'],
+    queryFn: () => getMapStat(appId,time,threat),
+  })
+}
