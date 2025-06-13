@@ -7,7 +7,6 @@ import re
 BAD_WORDS_BY_TYPE_DIR = "words/words_by_type/"
 COMMON_BAD_WORDS_PATH = "words/bad_words.txt"
 
-# Shared character mappings
 INJECTION_CHARACTERS = {
     "single_quote": ["'"],
     "double_quote": ["\""],
@@ -26,12 +25,14 @@ INJECTION_CHARACTERS = {
     "pipe": ["|"],
     "ampersand": ["&"],
     "dollar": ["$"],
+    "percent": ["%"],
     "asterisk": ["*"],
     "exclamation_mark": ["!"],
     "equals": ["="],
     "logical_or": ["||"],
     "logical_and": ["&&"],
     "addition_operator": ["+"],
+    "multiplication_operator": ["*"],
     "sql_comment_multi_line_open": ["/*"],
     "sql_comment_multi_line_close": ["*/"],
     "file_path_root": ["/"],
