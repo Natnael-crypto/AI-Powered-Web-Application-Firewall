@@ -79,10 +79,10 @@ func processNotificationRules() {
 			}
 
 			dashboardMessage := fmt.Sprintf(
-				"🚨 %s rule triggered on %s | IP(s): %v | Count: %d",
+				"🚨 %s rule triggered on %s | IP(s): %s | Count: %d",
 				rule.Name,
 				Application.HostName,
-				clientIPs,
+				strings.Join(clientIPs, ", "),
 				count,
 			)
 
