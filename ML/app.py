@@ -30,7 +30,7 @@ BACKEND_API_TYPE_ANALYSIS_PATH = "/ml/submit-analysis"
 MODEL_CHANGES_ENDPOINT = "/ml/changes"
 
 # Model Paths
-ANOMALY_PREDICTOR_MODEL_PATH = "ml_models/random_forest_model_v.0.2.1.pkl"
+ANOMALY_PREDICTOR_MODEL_PATH = "ml_models/random_forest_model_v.0.2.3.U.pkl"
 TYPE_PREDICTOR_MODEL_PATH = "ml_models/random_forest_model_type.pkl"
 
 app = Flask(__name__)
@@ -300,6 +300,7 @@ def analyze_request():
                     daemon=True,
                 ).start()
 
+            print(prob)
             result = "Normal" if prediction == 0 else "Anomaly"
             return jsonify({"success": True, "prediction": result,"Normal":prob[0],"Anomaly":prob[1]}), 200
             
