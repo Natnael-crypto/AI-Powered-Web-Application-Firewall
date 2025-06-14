@@ -88,7 +88,6 @@ func GetRequestByID(c *gin.Context) {
 }
 
 func GetAllCountriesStat(c *gin.Context) {
-
 	query := utils.ApplyRequestFilters(c)
 	blocked := c.Query("status")
 
@@ -97,7 +96,9 @@ func GetAllCountriesStat(c *gin.Context) {
 		return
 	}
 
-	query = query.Where("status = ?", blocked)
+	if blocked != "" {
+		query = query.Where("status = ?", blocked)
+	}
 
 	type CountryStats struct {
 		Country string `json:"country"`
@@ -116,7 +117,13 @@ func GetAllCountriesStat(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"blocked_countries": stats})
+	// Convert []CountryStats to map[string]int64
+	result := make(map[string]int64)
+	for _, s := range stats {
+		result[s.Country] = s.Count
+	}
+
+	c.JSON(http.StatusOK, gin.H{"blocked_countries": result})
 }
 
 func GetRequestsPerMinute(c *gin.Context) {

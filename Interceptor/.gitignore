@@ -2,3 +2,4 @@
 .env
 waf.log
 ./certs
+./results_n.csv

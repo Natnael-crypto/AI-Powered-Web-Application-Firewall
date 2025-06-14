@@ -7,7 +7,6 @@ import re
 BAD_WORDS_BY_TYPE_DIR = "words/words_by_type/"
 COMMON_BAD_WORDS_PATH = "words/bad_words.txt"
 
-# Shared character mappings
 INJECTION_CHARACTERS = {
     "single_quote": ["'"],
     "double_quote": ["\""],

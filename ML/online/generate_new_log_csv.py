@@ -9,20 +9,48 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path='../.env')
 
 # Injection characters map
-injection_characters = {
-    "single_quote": ["'"], "double_quote": ["\""], "backtick": ["`"],
-    "less_than": ["<"], "greater_than": [">"], "left_parenthesis": ["("],
-    "right_parenthesis": [")"], "left_bracket": ["["], "right_bracket": ["]"],
-    "left_brace": ["{{"], "right_brace": ["}}"], "dash": ["-"],
-    "double_dash": ["--"], "hash": ["#"], "pipe": ["|"], "ampersand": ["&"],
-    "dollar": ["$"], "percent": ["%"], "asterisk": ["*"], "exclamation_mark": ["!"],
-    "equals": ["="], "logical_or": ["||"], "logical_and": ["&&"], 
-    "addition_operator": ["+"], "multiplication_operator": ["*"], 
-    "sql_comment_multi_line_open": ["/*"], "sql_comment_multi_line_close": ["*/"],
-    "file_path_root": ["/"], "backslash": ["\\"], "colon": [":"], "comma": [","],
-    "period": ["."], "caret": ["^"], "tilde": ["~"], "at_sign": ["@"],
-    "carriage_return": ["\r"], "newline": ["\n"], "null_byte": ["\x00"],
-    "space": [" "], "hexadecimal_prefix": ["0x"], "percent_encoded": ["%"],
+INJECTION_CHARACTERS = {
+    "single_quote": ["'"],
+    "double_quote": ["\""],
+    "backtick": ["`"],
+    "less_than": ["<"],
+    "greater_than": [">"],
+    "left_parenthesis": ["("],
+    "right_parenthesis": [")"],
+    "left_bracket": ["["],
+    "right_bracket": ["]"],
+    "left_brace": ["{{"],
+    "right_brace": ["}}"],
+    "dash": ["-"],
+    "double_dash": ["--"],
+    "hash": ["#"],
+    "pipe": ["|"],
+    "ampersand": ["&"],
+    "dollar": ["$"],
+    "percent": ["%"],
+    "asterisk": ["*"],
+    "exclamation_mark": ["!"],
+    "equals": ["="],
+    "logical_or": ["||"],
+    "logical_and": ["&&"],
+    "addition_operator": ["+"],
+    "multiplication_operator": ["*"],
+    "sql_comment_multi_line_open": ["/*"],
+    "sql_comment_multi_line_close": ["*/"],
+    "file_path_root": ["/"],
+    "backslash": ["\\"],
+    "colon": [":"],
+    "comma": [","],
+    "period": ["."],
+    "caret": ["^"],
+    "tilde": ["~"],
+    "at_sign": ["@"],
+    "carriage_return": ["\r"],
+    "newline": ["\n"],
+    "null_byte": ["\x00"],
+    "space": [" "],
+    "hexadecimal_prefix": ["0x"],
+    "percent_encoded": ["%"],
 }
 
 # Path for bad words list
@@ -77,7 +105,7 @@ def generate_csv():
     output_file = "./data/new_log.csv"
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
-    fieldnames = list(injection_characters.keys()) + ["badword", "label"]
+    fieldnames = list(INJECTION_CHARACTERS.keys()) + ["badword", "label"]
 
 
     with open(output_file, "w", newline="") as csvfile:
@@ -86,7 +114,7 @@ def generate_csv():
 
 
         for req in requests_data['requests']:
-            features = extract_features(req, injection_characters, bad_words)
+            features = extract_features(req, INJECTION_CHARACTERS, bad_words)
             writer.writerow({field: features.get(field, 0) for field in fieldnames})
 
 

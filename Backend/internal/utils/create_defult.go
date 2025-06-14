@@ -62,7 +62,7 @@ func AddNotificationRule() {
 		{"XSS Attack", "xss"},
 		{"LDAP Injection Attack", "ldap"},
 		{"NoSQL Injection Attack", "nosql"},
-		{"Command Injection Attack", "code"},
+		{"Command Injection Attack", "command"},
 		{"Path Traversal Attack", "path"},
 		{"Rate Limited", "rate"},
 		{"XML External Entity (XXE) Attack", "xxe"},

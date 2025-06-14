@@ -1,11 +1,11 @@
 import axios from '../lib/axios'
 import {DashboardOverAllStats} from '../lib/types'
 
-export const getMapStat = async (appId: string,time:any) => {
-  const response = await axios.get(`/api/requests/all-blocked-countries?application_id=${appId}&start_date=${time.start}&end_date=${time.end}`)
+export const getMapStat = async (appId: string,time:any,threat:string) => {
+  const response = await axios.get(`/api/requests/all-countries-stat?application_id=${appId}&start_date=${time.start}&end_date=${time.end}&status=${threat}`)
   if (!response) throw new Error(`Something went wrong!`)
 
-  return await response.data.requests
+  return await response.data.blocked_countries
 }
 export const getResponseStat = async (appId: string,time:any) => {
   const response = await axios.get(`/api/requests/os-stats?application_id=${appId}&start_date=${time.start}&end_date=${time.end}`)

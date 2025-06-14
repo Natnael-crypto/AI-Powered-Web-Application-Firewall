@@ -1,17 +1,38 @@
-import {useState} from 'react'
-import {VectorMap} from '@react-jvectormap/core'
-import {worldMill} from '@react-jvectormap/world'
-import {requestData, blockedRequestData} from '../lib/Constants'
+import { useEffect, useState } from 'react'
+import { VectorMap } from '@react-jvectormap/core'
+import { worldMill } from '@react-jvectormap/world'
+import { useMapState } from '../hooks/api/useDashboardStat'
+import { whereCountry } from 'iso-3166-1'  // Import the iso-3166-1 package
 
 interface GlobeMapProps {
   selectedApp: string
   timeRange: any
 }
 
-const GlobeMap = ({}: GlobeMapProps) => {
+const GlobeMap = ({ selectedApp, timeRange }: GlobeMapProps) => {
   const [filter, setFilter] = useState<'all' | 'blocked'>('all')
+  const threat = filter === 'all' ? '' : 'blocked'
+  const { data, refetch } = useMapState(selectedApp, timeRange, threat)
+  const [country, setCountry] = useState<any>({})
 
-  const data = filter === 'all' ? requestData : blockedRequestData
+  useEffect(() => {
+    console.log(threat, "--:--", filter)
+    refetch()
+  }, [filter])
+
+  useEffect(() => {
+    const updatedCountryData: any = {}
+    if (data) {
+      Object.keys(data).forEach((countryName) => {
+        const countryCode = whereCountry(countryName)
+        if (countryCode) {
+          updatedCountryData[countryCode.alpha2] = data[countryName]
+        }
+      })
+    }
+    console.log(updatedCountryData)
+    setCountry(updatedCountryData)
+  }, [data])
 
   return (
     <div className="h-full flex flex-col">
@@ -38,13 +59,13 @@ const GlobeMap = ({}: GlobeMapProps) => {
           className="h-full w-full"
           zoomOnScroll={false}
           regionStyle={{
-            initial: {fill: '#E2E8F0', stroke: '#fff', strokeWidth: 1},
-            hover: {fill: '#3B82F6', cursor: 'pointer'},
+            initial: { fill: '#E2E8F0', stroke: '#fff', strokeWidth: 1 },
+            hover: { fill: '#3B82F6', cursor: 'pointer' },
           }}
           series={{
             regions: [
               {
-                values: data,
+                values: country, 
                 scale: ['#E2E8F0', '#1E40AF'],
                 normalizeFunction: 'linear',
                 attribute: 'fill',
@@ -52,14 +73,16 @@ const GlobeMap = ({}: GlobeMapProps) => {
             ],
           }}
           onRegionTipShow={(_, el: any, code) => {
-            const requests = data[code] || 0
+            const requests = country[code] || 0 
             el.html(
-              `<div style="font-family: 'Oxygen', sans-serif; padding: 6px;">
-                <div style="font-weight: 600; color: #1F2937; margin-bottom: 4px;">${el.html()}</div>
-                <div style="font-size: 12px; color: #4B5563;">
-                  Requests: <span style="font-weight: 600; color: #1E40AF;">${requests.toLocaleString()}</span>
+              `<div style="font-family: 'Oxygen', sans-serif; padding: 12px 16px; background-color: #BBE1F7; color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); max-width: 200px;">
+                <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 8px;">
+                  <span style="color: #BBE1F7;">Country: </span>${el.html()}
                 </div>
-              </div>`,
+                <div style="font-size: 13px; color: #B0C4DE;">
+                  <strong>Requests000:</strong> <span style="color: #4CAF50;">${requests.toLocaleString()}</span>
+                </div>
+              </div>`
             )
           }}
           map={worldMill}
