@@ -34,7 +34,12 @@ function getColumns({
     {
       header: 'Message',
       accessorKey: 'message',
-      cell: ({row}) => <div className="whitespace-pre-line">{row.original.message}</div>,
+      cell: ({row}) => (
+        <div className="whitespace-pre-line">
+          {row.original.message.slice(0, 40)}
+          {row.original.message.length > 40 ? '...' : ''}
+        </div>
+      ),
     },
     {
       header: 'Timestamp',
