@@ -24,7 +24,6 @@ const RequestDetailsModal: React.FC<RequestDetailsModalProps> = ({
     ))
   }
 
-  console.log(request)
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp)
     return date.toLocaleString()

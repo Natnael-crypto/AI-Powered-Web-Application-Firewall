@@ -51,7 +51,6 @@ const AdminTable = () => {
   }
 
   const handleAssign = (admin: AdminUser) => {
-    console.log('here we go', admin)
     setSelectedAdmin(admin)
     setIsAssignModalOpen(true)
   }
@@ -155,7 +154,6 @@ const AdminTable = () => {
         admin={selectedAdmin}
         onClose={() => setIsAssignModalOpen(false)}
         onConfirm={admin => {
-          console.log(`Assigning admin ${admin.username}`)
           setIsAssignModalOpen(false)
         }}
       />

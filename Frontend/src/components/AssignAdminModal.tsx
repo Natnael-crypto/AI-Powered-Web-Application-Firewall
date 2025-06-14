@@ -45,8 +45,6 @@ export const AssignAdminModal = ({
   const {data: assignedData, refetch: refetchAssignments} = useGetApplicationAssignments()
   const {data: allApplications, refetch: refetchApplications} = useGetApplications()
 
-  console.log(assignedData, 'all: ', allApplications)
-
   const {mutate: assignApplication} = useAssignApplication({
     onSuccess: () => {
       refetchAssignments()
