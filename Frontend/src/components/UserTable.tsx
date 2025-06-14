@@ -51,6 +51,7 @@ const AdminTable = () => {
   }
 
   const handleAssign = (admin: AdminUser) => {
+    console.log('here we go', admin)
     setSelectedAdmin(admin)
     setIsAssignModalOpen(true)
   }
