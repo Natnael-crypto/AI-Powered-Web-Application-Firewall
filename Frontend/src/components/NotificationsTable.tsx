@@ -1,7 +1,9 @@
+import {useState} from 'react'
 import {ColumnDef} from '@tanstack/react-table'
 import Table from './Table'
 import {DropdownActions} from './DropdownAction'
 import {Notification} from '../lib/types'
+import NotificationDetail from './NotificationDetail'
 
 interface NotificationsTableProps {
   data: Notification[]
@@ -32,7 +34,12 @@ function getColumns({
     {
       header: 'Message',
       accessorKey: 'message',
-      cell: ({row}) => <div className="whitespace-pre-line">{row.original.message}</div>,
+      cell: ({row}) => (
+        <div className="whitespace-pre-line">
+          {row.original.message.slice(0, 40)}
+          {row.original.message.length > 40 ? '...' : ''}
+        </div>
+      ),
     },
     {
       header: 'Timestamp',
@@ -56,10 +63,37 @@ function getColumns({
     },
   ]
 }
+
 export function NotificationsTable({data, onMarkAsRead}: NotificationsTableProps) {
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(
+    null,
+  )
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
   const columns = getColumns({onMarkAsRead})
 
-  return <Table columns={columns} data={data} />
+  const handleRowClick = (notification: Notification) => {
+    setSelectedNotification(notification)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedNotification(null)
+  }
+
+  return (
+    <>
+      <Table columns={columns} data={data} onRowClick={handleRowClick} />
+
+      <NotificationDetail
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        notification={selectedNotification ?? undefined}
+        onMarkAsRead={onMarkAsRead}
+      />
+    </>
+  )
 }
 
 export default NotificationsTable

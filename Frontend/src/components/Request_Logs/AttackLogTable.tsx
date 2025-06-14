@@ -87,9 +87,18 @@ function AttackLogTable() {
     {
       header: 'Threat Type',
       accessorKey: 'threat_type',
-      cell: ({getValue}: CellContext<RequestLog, unknown>) => (
-        <span className="text-sm font-medium text-red-700">{getValue() as string}</span>
-      ),
+      cell: ({row}: CellContext<RequestLog, unknown>) => {
+        const threatType = row.original.threat_type
+        const aiThreatType = row.original.ai_threat_type
+        const status = row.original.status
+
+        const displayValue =
+          !threatType && status?.toLowerCase() === 'blocked' ? aiThreatType : threatType
+
+        return (
+          <span className="text-sm font-medium text-red-700">{displayValue || '-'}</span>
+        )
+      },
     },
     {
       header: 'IP',
@@ -142,7 +151,9 @@ function AttackLogTable() {
         >
           Generate Request
         </button>
-        <p className='text-lg'>Logs: <strong>{data?.total}</strong></p>
+        <p className="text-lg">
+          Logs: <strong>{data?.total}</strong>
+        </p>
       </div>
 
       <Table data={data?.requests || []} columns={columns} onRowClick={handleRowClick} />

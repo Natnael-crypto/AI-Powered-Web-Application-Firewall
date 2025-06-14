@@ -45,8 +45,6 @@ export const AssignAdminModal = ({
   const {data: assignedData, refetch: refetchAssignments} = useGetApplicationAssignments()
   const {data: allApplications, refetch: refetchApplications} = useGetApplications()
 
-  console.log(assignedData, allApplications)
-
   const {mutate: assignApplication} = useAssignApplication({
     onSuccess: () => {
       refetchAssignments()
@@ -74,12 +72,12 @@ export const AssignAdminModal = ({
   const applications = allApplications ?? []
 
   const assignedAppsToThisAdmin = assignments.filter(a => a.user_id === admin.user_id)
-  const assignedAppNames = assignments.map(a => a.application_name)
-
   const unassignedApps = applications.filter(
-    app => !assignedAppNames.includes(app.application_name),
+    app =>
+      !assignedAppsToThisAdmin
+        .map(a => a.application_name)
+        .includes(app.application_name),
   )
-
   const handleAssignment = (application: Application) => {
     if (!admin) return
     assignApplication({

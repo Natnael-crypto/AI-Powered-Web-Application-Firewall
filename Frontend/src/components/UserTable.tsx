@@ -154,7 +154,6 @@ const AdminTable = () => {
         admin={selectedAdmin}
         onClose={() => setIsAssignModalOpen(false)}
         onConfirm={admin => {
-          console.log(`Assigning admin ${admin.username}`)
           setIsAssignModalOpen(false)
         }}
       />

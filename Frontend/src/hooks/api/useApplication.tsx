@@ -8,6 +8,7 @@ import {
   getApplicationConfig,
   getApplications,
   getAssignments,
+  getCertificates,
   getconfig,
   updateApplication,
   updateDetectBOT,
@@ -45,6 +46,7 @@ export function useUpdateApplication() {
     mutationFn: updateApplication,
   })
 }
+
 export function useAssignApplication(p0: {onSuccess: () => void}) {
   const queryClient = useQueryClient()
   return useMutation({
@@ -55,6 +57,7 @@ export function useAssignApplication(p0: {onSuccess: () => void}) {
     },
   })
 }
+
 export function useDeleteAssignment(p0: {onSuccess: () => void}) {
   const queryClient = useQueryClient()
   return useMutation({
@@ -79,12 +82,14 @@ export function useUpdateListeningPort() {
     mutationFn: updateListeningPort,
   })
 }
+
 export function useUpdateRateLimit() {
   return useMutation({
     mutationKey: ['updateConfig'],
     mutationFn: updateRateLimit,
   })
 }
+
 export function useUpdateRemoteLogServer() {
   return useMutation({
     mutationKey: ['updateConfig'],
@@ -114,6 +119,7 @@ export function useUpdateDetectBot() {
     onSuccess: () => queryClient.invalidateQueries({queryKey: ['applications']}),
   })
 }
+
 export function useUpdateMaxDataSize() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -131,11 +137,23 @@ export function useDeleteApplication() {
     onSuccess: () => queryClient.invalidateQueries({queryKey: ['applications']}),
   })
 }
+
 export function useUploadCertificate() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationKey: ['uploadCertificate'],
     mutationFn: uploadCertificate,
     onSuccess: () => queryClient.invalidateQueries({queryKey: ['applications']}),
+  })
+}
+
+export const useGetCertification = (
+  applicationId: string,
+  options?: {enabled?: boolean},
+) => {
+  return useQuery({
+    queryKey: ['certifications', applicationId],
+    queryFn: () => getCertificates(applicationId),
+    ...options,
   })
 }
