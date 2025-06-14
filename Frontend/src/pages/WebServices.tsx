@@ -7,6 +7,7 @@ import {
   useAddApplication,
   useDeleteApplication,
   useGetApplications,
+  useGetCertification,
   useUpdateApplication,
   useUploadCertificate,
 } from '../hooks/api/useApplication'
@@ -45,6 +46,9 @@ function WebService() {
   const [isCertModalOpen, setIsCertModalOpen] = useState(false)
   const [selectedApp, setSelectedApp] = useState<Application | undefined>()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const {data: cert} = useGetCertification(selectedApp?.application_id || '', 'cert')
+  const {data: key} = useGetCertification(selectedApp?.application_id || '', 'key')
+  console.log('certs', cert, key)
 
   const {
     data: applications = [],
@@ -93,12 +97,15 @@ function WebService() {
     }
   }
 
-  const handleCertificateUpload = async (certificate: File, key: File) => {
-    if (!selectedApp?.application_id) return
+  const handleCertificateUpload = async (certificate: File | null, key: File | null) => {
+    if (!selectedApp?.application_id || !certificate || !key) {
+      toast.error('Please select both certificate and key files.')
+      return
+    }
 
     setIsSubmitting(true)
     try {
-      await uploadCertificate(
+      uploadCertificate(
         {
           application_id: selectedApp.application_id,
           certificate,
@@ -165,6 +172,8 @@ function WebService() {
         onClose={() => setIsCertModalOpen(false)}
         onSubmit={handleCertificateUpload}
         isSubmitting={isSubmitting}
+        existingCert={cert}
+        existingKey={key}
       />
 
       <Card className="flex items-center justify-between py-4 px-6 bg-white">
@@ -188,6 +197,8 @@ function WebService() {
           selectedApp={selectedApp}
           handleDelete={handleDeleteApplication}
           setIsCertModalOpen={setIsCertModalOpen}
+          hasCert={!!cert}
+          hasKey={!!key}
         />
       </Card>
     </div>

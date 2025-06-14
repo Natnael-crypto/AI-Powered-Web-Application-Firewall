@@ -73,16 +73,74 @@ const GlobeMap = ({selectedApp, timeRange}: GlobeMapProps) => {
           }}
           onRegionTipShow={(_, el: any, code) => {
             const requests = country[code] || 0
-            el.html(
-              `<div style="font-family: 'Oxygen', sans-serif; padding: 12px 16px; background-color: #BBE1F7; color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); max-width: 200px;">
-                <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 8px;">
-                  <span style="color: #BBE1F7;">Country: </span>${el.html()}
+            el.html(`
+              <div style="
+                font-family: 'Inter', sans-serif;
+                padding: 12px;
+                background: white;
+                color: #1F2937;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                border: 1px solid #E5E7EB;
+                min-width: 180px;
+              ">
+                <div style="
+                  display: flex;
+                  align-items: center;
+                  margin-bottom: 8px;
+                  padding-bottom: 8px;
+                  border-bottom: 1px solid #F3F4F6;
+                ">
+                  <div style="
+                    width: 24px;
+                    height: 24px;
+                    margin-right: 8px;
+                    background-color: #3B82F6;
+                    border-radius: 4px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: bold;
+                    font-size: 12px;
+                  ">
+                    ${code}
+                  </div>
+                  <div style="font-weight: 600; font-size: 14px;">${el.html()}</div>
                 </div>
-                <div style="font-size: 13px; color: #B0C4DE;">
-                  <strong>Requests000:</strong> <span style="color: #4CAF50;">${requests.toLocaleString()}</span>
+                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                  <span style="color: #6B7280;">Requests:</span>
+                  <span style="font-weight: 600; color: ${filter === 'blocked' ? '#EF4444' : '#10B981'}">
+                    ${requests.toLocaleString()}
+                  </span>
                 </div>
-              </div>`,
-            )
+                ${
+                  filter === 'blocked'
+                    ? `
+                <div style="
+                  margin-top: 8px;
+                  padding-top: 8px;
+                  border-top: 1px solid #F3F4F6;
+                  font-size: 12px;
+                  color: #6B7280;
+                  display: flex;
+                  align-items: center;
+                ">
+                  <span style="
+                    display: inline-block;
+                    width: 8px;
+                    height: 8px;
+                    background-color: #EF4444;
+                    border-radius: 50%;
+                    margin-right: 6px;
+                  "></span>
+                  Blocked requests
+                </div>
+                `
+                    : ''
+                }
+              </div>
+            `)
           }}
           map={worldMill}
         />

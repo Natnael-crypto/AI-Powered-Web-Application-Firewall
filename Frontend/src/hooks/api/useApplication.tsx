@@ -149,11 +149,12 @@ export function useUploadCertificate() {
 
 export const useGetCertification = (
   applicationId: string,
+  type: string,
   options?: {enabled?: boolean},
 ) => {
   return useQuery({
     queryKey: ['certifications', applicationId],
-    queryFn: () => getCertificates(applicationId),
+    queryFn: () => getCertificates(applicationId, type),
     ...options,
   })
 }

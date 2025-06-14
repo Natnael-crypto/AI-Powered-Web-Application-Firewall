@@ -48,7 +48,7 @@ function SidebarContent({title, href, children, changeOpenItem, Icon}: SidebarIt
     return null
 
   return (
-    <div className="transition-all duration-200 ease-in-out w-full">
+    <div className="transition-all duration-200 ease-in-out w-full ">
       <Link
         to={href}
         onClick={() => changeOpenItem?.({title, href})}
