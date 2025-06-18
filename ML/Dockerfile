@@ -14,7 +14,7 @@ COPY ML /app/ML
 WORKDIR /app/ML
 
 # Unzip the model file
-RUN unzip ml_models/type_predictor_rf.zip -d ml_models/
+# RUN unzip ml_models/type_predictor_rf.zip -d ml_models/
 
 # Upgrade pip to the latest version
 RUN pip install --upgrade pip

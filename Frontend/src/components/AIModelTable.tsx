@@ -26,18 +26,10 @@ interface AIModel {
 
 const AIModelTable = () => {
   const {data: aiModels, isLoading, refetch} = useGetAIModels()
-  // const selectMutation = useSelectModel()
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedModel, setSelectedModel] = useState<AIModel | null>(null)
 
-  // const handleSelect = (id: string) => {
-  //   selectMutation.mutate(id, {
-  //     onSuccess: () => {
-  //       refetch()
-  //     }
-  //   })
-  // }
 
   const handleEdit = (model: AIModel) => {
     setSelectedModel(model)
@@ -130,7 +122,7 @@ const AIModelTable = () => {
                     {model.expected_f1}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900 text-center">
-                    {model.train_every / 3600000}h
+                    {model.train_every /86400000}d
                   </td>
 
                   <td className="px-6 py-4 text-sm text-gray-900 text-center">

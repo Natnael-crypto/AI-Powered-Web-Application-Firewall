@@ -19,6 +19,10 @@ type RequestData struct {
 func EvaluateML(requestData RequestData) (bool, float64, float64, error) {
 	mlServerURL := utils.MLEndpoint + "predict"
 
+	// requestData.Body = utils.RecursiveDecode(requestData.Body, 5)
+	// requestData.Headers = utils.RecursiveDecode(requestData.Headers, 5)
+	// requestData.Url = utils.RecursiveDecode(requestData.Url, 5)
+
 	jsonData, _ := json.Marshal(requestData)
 
 	req, err := http.NewRequest("POST", mlServerURL, bytes.NewBuffer(jsonData))

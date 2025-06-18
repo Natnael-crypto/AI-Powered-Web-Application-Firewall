@@ -69,13 +69,14 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 			limiterLock.Unlock()
 			http.Error(w, "Too Many Requests (Blocked)", http.StatusTooManyRequests)
 			logger.LogRequest(r, "blocked", hostname, ip, 0.6)
-
+			body, _ := io.ReadAll(r.Body)
+			string_body := string(body)
 			message := utils.MessageModel{
 				RequestID:       uuid.New().String(),
 				ApplicationName: hostname,
 				ClientIP:        r.RemoteAddr,
 				RequestMethod:   r.Method,
-				RequestURL:      utils.RecursiveDecode(r.URL.String(), 3),
+				RequestURL:      utils.RecursiveDecode(r.URL.String(), 5),
 				Headers:         fmt.Sprintf("%v", r.Header),
 				ResponseCode:    http.StatusTooManyRequests,
 				Status:          "blocked",
@@ -85,7 +86,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 				GeoLocation:     "Unknown",
 				RateLimited:     true,
 				UserAgent:       r.UserAgent(),
-				Body:            "",
+				Body:            string_body,
 				Token:           WsKey,
 				AIResult:        false,
 				RuleDetected:    false,
@@ -105,13 +106,14 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		limiterLock.Lock()
 		blockedIPs[ip] = time.Now().Add(time.Duration(application_config[hostname].BlockTime) * time.Minute)
 		limiterLock.Unlock()
-
+		body, _ := io.ReadAll(r.Body)
+		string_body := string(body)
 		message := utils.MessageModel{
 			RequestID:       uuid.New().String(),
 			ApplicationName: hostname,
 			ClientIP:        r.RemoteAddr,
 			RequestMethod:   r.Method,
-			RequestURL:      utils.RecursiveDecode(r.URL.String(), 3),
+			RequestURL:      utils.RecursiveDecode(r.URL.String(), 5),
 			Headers:         fmt.Sprintf("%v", r.Header),
 			ResponseCode:    http.StatusTooManyRequests,
 			Status:          "blocked",
@@ -121,7 +123,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 			GeoLocation:     "Unknown",
 			RateLimited:     true,
 			UserAgent:       r.UserAgent(),
-			Body:            "",
+			Body:            string_body,
 			Token:           WsKey,
 			AIResult:        false,
 			RuleDetected:    false,
@@ -166,7 +168,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		ApplicationName: hostname,
 		ClientIP:        r.RemoteAddr,
 		RequestMethod:   r.Method,
-		RequestURL:      utils.RecursiveDecode(r.URL.String(), 3),
+		RequestURL:      utils.RecursiveDecode(r.URL.String(), 5),
 		Headers:         fmt.Sprintf("%v", r.Header),
 		ResponseCode:    http.StatusOK,
 		Status:          fmt.Sprintf("%d", status),
@@ -176,7 +178,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		GeoLocation:     "Unknown",
 		RateLimited:     false,
 		UserAgent:       r.UserAgent(),
-		Body:            utils.RecursiveDecode(body, 3),
+		Body:            utils.RecursiveDecode(body, 5),
 		AIResult:        false,
 		RuleDetected:    false,
 		AIThreatType:    "",
@@ -186,8 +188,6 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	// Special WAF Rule ID - Skip ML & Fusion
 	if blockedByRule {
 		if requestBodySize >= application_config[hostname].MaxPostDataSize {
-			message.Body = ""
-		} else {
 			message.Body = utils.HashSHA256(body)
 		}
 
@@ -197,6 +197,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		message.Token = WsKey
 		message.RuleDetected = true
 		logger.LogRequest(r, "blocked", hostname, ip, 0.6)
+		message.AIResult = true
 		utils.SendToBackend(message)
 		return
 	}
@@ -210,7 +211,6 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	blockedByMl, Normal, Anomaly, err := ml.EvaluateML(requestData)
-	// fmt.Print(blockedByMl, Normal, Anomaly)
 	if err != nil {
 		http.Error(w, "Error evaluating ML model", http.StatusInternalServerError)
 		logger.LogRequest(r, "blocked", hostname, ip, 0.4)
@@ -223,15 +223,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	result := fusionService.FusionAlgorithm(blockedByRule, Normal, Anomaly)
 
 	if requestBodySize >= application_config[hostname].MaxPostDataSize {
-		if result {
-			message.Body = utils.HashSHA256(body)
-		}
-		message.Body = ""
-	}
-
-	err = utils.SaveEvaluationResult(message.RuleDetected, Normal, Anomaly, "results_n.csv")
-	if err != nil {
-		log.Fatal(err)
+		message.Body = utils.HashSHA256(body)
 	}
 
 	if result {
