@@ -6,8 +6,11 @@ import LoadingSpinner from './LoadingSpinner'
 interface CertificateUploadModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (certificate: File, key: File) => Promise<void>
+  onSubmit: (certificate: File | null, key: File | null) => Promise<void>
   isSubmitting?: boolean
+  existingCert?: File
+  existingKey?: File
+  mode?: 'upload' | 'update'
 }
 
 const CertificateUploadModal: React.FC<CertificateUploadModalProps> = ({
@@ -15,6 +18,9 @@ const CertificateUploadModal: React.FC<CertificateUploadModalProps> = ({
   onClose,
   onSubmit,
   isSubmitting = false,
+  existingCert,
+  existingKey,
+  mode = 'upload',
 }) => {
   const [certificate, setCertificate] = useState<File | null>(null)
   const [key, setKey] = useState<File | null>(null)
@@ -24,26 +30,24 @@ const CertificateUploadModal: React.FC<CertificateUploadModalProps> = ({
     e: React.ChangeEvent<HTMLInputElement>,
     type: 'certificate' | 'key',
   ) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      if (type === 'certificate') {
-        setCertificate(file)
-      } else {
-        setKey(file)
-      }
-      setErrors(prev => ({...prev, [type]: undefined}))
+    const file = e.target.files?.[0] || null
+    if (type === 'certificate') {
+      setCertificate(file)
+    } else {
+      setKey(file)
     }
+    setErrors(prev => ({...prev, [type]: undefined}))
   }
 
   const validateFiles = (): boolean => {
     const newErrors: {certificate?: string; key?: string} = {}
 
-    if (!certificate) {
-      newErrors.certificate = 'Certificate file is required'
-    }
-
-    if (!key) {
-      newErrors.key = 'Key file is required'
+    if (mode === 'update' && existingCert && existingKey && !certificate && !key) {
+      newErrors.certificate = 'At least one file must be updated'
+      newErrors.key = 'At least one file must be updated'
+    } else if (mode === 'upload') {
+      if (!certificate) newErrors.certificate = 'Certificate file is required'
+      if (!key) newErrors.key = 'Key file is required'
     }
 
     setErrors(newErrors)
@@ -52,69 +56,70 @@ const CertificateUploadModal: React.FC<CertificateUploadModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!validateFiles()) return
 
-    if (!validateFiles() || !certificate || !key) {
-      return
-    }
+    const certToSubmit = certificate || (mode === 'update' ? existingCert || null : null)
+    const keyToSubmit = key || (mode === 'update' ? existingKey || null : null)
 
     try {
-      await onSubmit(certificate, key)
+      await onSubmit(certToSubmit, keyToSubmit)
       setCertificate(null)
       setKey(null)
-    } catch (error) {
-      console.error('Certificate upload error:', error)
+    } catch (err) {
+      console.error('Certificate upload failed:', err)
     }
   }
 
   if (!isOpen) return null
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Upload TLS Certificates">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`${mode === 'upload' ? 'Upload' : 'Update'} TLS Certificates`}
+    >
       <form onSubmit={handleSubmit}>
         <div className="space-y-6 px-4 py-4">
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">
-                Certificate File <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="file"
-                accept=".pem,.crt,.cer"
-                onChange={e => handleFileChange(e, 'certificate')}
-                className="block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-md file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-blue-50 file:text-blue-700
-                  hover:file:bg-blue-100"
-                required
-              />
-              {errors.certificate && (
-                <p className="mt-1 text-sm text-red-500">{errors.certificate}</p>
-              )}
-            </div>
-
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">
-                Key File <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="file"
-                accept=".pem,.key"
-                onChange={e => handleFileChange(e, 'key')}
-                className="block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-md file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-blue-50 file:text-blue-700
-                  hover:file:bg-blue-100"
-                required
-              />
-              {errors.key && <p className="mt-1 text-sm text-red-500">{errors.key}</p>}
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Certificate File{' '}
+              {mode === 'upload' && <span className="text-red-500">*</span>}
+            </label>
+            {existingCert && mode === 'update' && (
+              <p className="text-xs text-gray-500 italic">
+                A certificate is already present
+              </p>
+            )}
+            <input
+              type="file"
+              accept=".pem,.crt,.cer"
+              onChange={e => handleFileChange(e, 'certificate')}
+              className="mt-1 block w-full text-sm text-gray-500 file:py-2 file:px-4 file:rounded-md file:border-0 file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            {errors.certificate && (
+              <p className="text-sm text-red-500 mt-1">{errors.certificate}</p>
+            )}
           </div>
 
-          <div className="flex justify-end gap-3 pt-6 mt-6 border-t border-gray-200">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Key File {mode === 'upload' && <span className="text-red-500">*</span>}
+            </label>
+            {existingKey && mode === 'update' && (
+              <p className="text-xs text-gray-500 italic">
+                A key file is already present
+              </p>
+            )}
+            <input
+              type="file"
+              accept=".pem,.key"
+              onChange={e => handleFileChange(e, 'key')}
+              className="mt-1 block w-full text-sm text-gray-500 file:py-2 file:px-4 file:rounded-md file:border-0 file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            {errors.key && <p className="text-sm text-red-500 mt-1">{errors.key}</p>}
+          </div>
+
+          <div className="flex justify-end pt-6 border-t border-gray-200 mt-6 space-x-3">
             <Button
               variant="secondary"
               onClick={onClose}
@@ -126,10 +131,20 @@ const CertificateUploadModal: React.FC<CertificateUploadModalProps> = ({
             <Button
               variant="primary"
               type="submit"
-              classname="px-4 py-2 text-white text-sm flex items-center justify-center min-w-24"
-              disabled={isSubmitting || !certificate || !key}
+              classname="px-4 py-2 text-sm text-white min-w-24 flex justify-center items-center"
+              disabled={
+                isSubmitting ||
+                (mode === 'upload' && (!certificate || !key)) ||
+                (mode === 'update' && !certificate && !key)
+              }
             >
-              {isSubmitting ? <LoadingSpinner /> : 'Upload Certificates'}
+              {isSubmitting ? (
+                <LoadingSpinner />
+              ) : mode === 'upload' ? (
+                'Upload Certificates'
+              ) : (
+                'Update Certificates'
+              )}
             </Button>
           </div>
         </div>

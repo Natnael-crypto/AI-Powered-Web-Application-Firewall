@@ -14,6 +14,8 @@ interface WebserviceTableProps {
   selectedApp?: Application
   handleDelete?: (application_id: string) => void
   setIsCertModalOpen?: (bool: boolean) => void
+  hasCert?: boolean
+  hasKey?: boolean
 }
 
 function getColumns({
@@ -23,6 +25,8 @@ function getColumns({
   toggleBotDetection,
   handleDelete,
   setIsCertModalOpen,
+  hasCert,
+  hasKey,
 }: {
   setSelectedApp?: (app: Application) => void
   openModal: () => void
@@ -30,6 +34,8 @@ function getColumns({
   toggleBotDetection: (application_id: string, detectBot: boolean) => void
   handleDelete?: (application_id: string) => void
   setIsCertModalOpen?: (bool: boolean) => void
+  hasCert?: boolean
+  hasKey?: boolean
 }): ColumnDef<Application>[] {
   return [
     {
@@ -145,45 +151,51 @@ function getColumns({
     {
       header: 'Actions',
       id: 'actions',
-      cell: ({row}) => (
-        <DropdownActions
-          item={row.original}
-          options={[
-            {
-              label: 'Update Detail',
-              icon: <Edit className="mr-2 h-4 w-4" />,
-              onClick: app => {
-                setSelectedApp?.(app)
-                openModal()
+      cell: ({row}) => {
+        // Determine the label based on what's present
+        const certActionLabel =
+          hasCert || hasKey ? 'Update Certificates' : 'Upload Certificates'
+
+        return (
+          <DropdownActions
+            item={row.original}
+            options={[
+              {
+                label: 'Update Detail',
+                icon: <Edit className="mr-2 h-4 w-4" />,
+                onClick: app => {
+                  setSelectedApp?.(app)
+                  openModal()
+                },
               },
-            },
-            {
-              label: 'Update Config',
-              icon: <Settings className="mr-2 h-4 w-4" />,
-              onClick: app => {
-                setSelectedApp?.(app)
-                setIsConfigModalOpen(true)
+              {
+                label: 'Update Config',
+                icon: <Settings className="mr-2 h-4 w-4" />,
+                onClick: app => {
+                  setSelectedApp?.(app)
+                  setIsConfigModalOpen(true)
+                },
               },
-            },
-            {
-              label: 'Upload Certificates',
-              icon: <Upload className="mr-2 h-4 w-4" />,
-              onClick: app => {
-                setSelectedApp?.(app)
-                setIsCertModalOpen?.(true)
+              {
+                label: certActionLabel,
+                icon: <Upload className="mr-2 h-4 w-4" />,
+                onClick: app => {
+                  setSelectedApp?.(app)
+                  setIsCertModalOpen?.(true)
+                },
               },
-            },
-            {
-              label: 'Delete',
-              icon: <Trash2 className="mr-2 h-4 w-4 text-red-600" />,
-              onClick: app => {
-                setSelectedApp?.(app)
-                handleDelete?.(row.original.application_id)
+              {
+                label: 'Delete',
+                icon: <Trash2 className="mr-2 h-4 w-4 text-red-600" />,
+                onClick: app => {
+                  setSelectedApp?.(app)
+                  handleDelete?.(row.original.application_id)
+                },
               },
-            },
-          ]}
-        />
-      ),
+            ]}
+          />
+        )
+      },
     },
   ]
 }
@@ -195,6 +207,8 @@ function WebserviceTable({
   selectedApp,
   handleDelete,
   setIsCertModalOpen,
+  hasCert,
+  hasKey,
 }: WebserviceTableProps) {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false)
   const {mutate: updateDetectBOT} = useUpdateDetectBot()
@@ -210,6 +224,8 @@ function WebserviceTable({
     toggleBotDetection,
     handleDelete,
     setIsCertModalOpen,
+    hasCert,
+    hasKey,
   })
 
   return (
