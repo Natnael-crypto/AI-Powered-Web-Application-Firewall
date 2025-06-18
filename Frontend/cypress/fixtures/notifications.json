@@ -1,0 +1,9 @@
+[
+  {
+    "notification_id": "notif1",
+    "user_id": "abc123",
+    "message": "New attack detected!",
+    "timestamp": "2025-06-18T12:00:00Z",
+    "status": false
+  }
+]

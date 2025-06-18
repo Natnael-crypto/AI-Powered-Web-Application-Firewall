@@ -1,0 +1,19 @@
+{
+  "requests": [
+    {
+      "status": "Blocked",
+      "application_name": "Admin Portal",
+      "request_method": "PUT",
+      "request_url": "https://admin.example.com/settings",
+      "threat_type": "XSS Attack",
+      "ai_threat_type": null,
+      "client_ip": "203.0.113.5",
+      "geo_location": "Japan",
+      "response_code": 403,
+      "timestamp": "2023-10-14T09:15:00Z"
+    }
+  ],
+  "total": 3,
+  "current_page": 2,
+  "total_pages": 2
+}

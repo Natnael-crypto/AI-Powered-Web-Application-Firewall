@@ -1,0 +1,31 @@
+{
+  "requests": [
+    {
+      "status": "Blocked",
+      "application_name": "Web App",
+      "request_method": "POST",
+      "request_url": "https://example.com/api/login",
+      "threat_type": "SQL Injection",
+      "ai_threat_type": null,
+      "client_ip": "192.168.1.1",
+      "geo_location": "United States",
+      "response_code": 403,
+      "timestamp": "2023-10-15T14:30:00Z"
+    },
+    {
+      "status": "Allowed",
+      "application_name": "API Gateway",
+      "request_method": "GET",
+      "request_url": "https://api.example.com/users",
+      "threat_type": null,
+      "ai_threat_type": "Suspicious Pattern",
+      "client_ip": "10.0.0.1",
+      "geo_location": "Germany",
+      "response_code": 200,
+      "timestamp": "2023-10-15T14:25:00Z"
+    }
+  ],
+  "total": 2,
+  "current_page": 1,
+  "total_pages": 1
+}

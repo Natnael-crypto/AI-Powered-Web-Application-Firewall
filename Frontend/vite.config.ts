@@ -17,10 +17,8 @@ export default defineConfig(({mode}) => {
       },
     },
     server: {
-      https: {
-        key: key,
-        cert: cert,
-      },
+      historyApiFallback: true,
+
       proxy: {
         '/api': {
           target: process.env.VITE_BACKEND_URL,

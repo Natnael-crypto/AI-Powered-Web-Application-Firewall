@@ -1,0 +1,4 @@
+status,application_name,request_method,request_url,threat_type,client_ip,geo_location,response_code,timestamp
+Blocked,Web App,POST,https://example.com/api/login,"SQL Injection",192.168.1.1,"United States",403,2023-10-15T14:30:00Z
+Allowed,API Gateway,GET,https://api.example.com/users,"",10.0.0.1,"Germany",200,2023-10-15T14:25:00Z
+Blocked,Admin Portal,PUT,https://admin.example.com/settings,"XSS Attack",203.0.113.5,"Japan",403,2023-10-14T09:15:00Z

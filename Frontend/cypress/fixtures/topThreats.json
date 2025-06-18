@@ -1,0 +1,4 @@
+[
+  {"threat_type": "SQL Injection", "count": 40},
+  {"threat_type": "XSS", "count": 25}
+]
