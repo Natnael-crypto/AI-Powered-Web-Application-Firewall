@@ -1,0 +1,7 @@
+{
+  "ai_based_detections": 120,
+  "blocked_requests": 300,
+  "malicious_ips_blocked": 25,
+  "rule_based_detections": 180,
+  "total_requests": 5000
+}

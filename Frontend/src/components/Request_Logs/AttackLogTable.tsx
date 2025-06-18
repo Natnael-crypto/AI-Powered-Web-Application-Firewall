@@ -148,6 +148,7 @@ function AttackLogTable() {
           onClick={handleGenerateRequest}
           className="py-4 px-6 text-white rounded-sm mb-4"
           style={{backgroundColor: '#1F263E'}}
+          id="generateRequest"
         >
           Generate Request
         </button>
