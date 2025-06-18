@@ -64,7 +64,7 @@ def decide_and_update_model(new_metrics, current_model_info,model_new_name):
                 "model_type": model_new_name
             }
 
-            path = f"{BACKEND_API_URL}ml/model/results"
+            path = f"{BACKEND_API_URL}/ml/model/results"
             response = requests.post(path, json=payload, verify=False,headers={"X-Service":"M"})
             print("Saved the model")
 

@@ -163,7 +163,7 @@ const RulesTable = ({}: RulesTableProps) => {
   if (isError) return <p>Something went wrong</p>
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container min-w-full p-4">
       <h1 className="text-2xl font-bold mb-4">WAF Rules</h1>
       <Table columns={columns} data={rules || []} emptyMessage={'No rules found'} />
 

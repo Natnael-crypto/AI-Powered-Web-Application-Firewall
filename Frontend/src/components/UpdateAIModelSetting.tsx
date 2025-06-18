@@ -46,7 +46,7 @@ export default function UpdateAIModelSetting({
         expected_precision: aiModelSetting.expected_precision || 0,
         expected_recall: aiModelSetting.expected_recall || 0,
         expected_f1: aiModelSetting.expected_f1 || 0,
-        train_every: aiModelSetting.train_every || 0,
+        train_every: (aiModelSetting.train_every)/86400000 || 0,
       })
     }
   }, [aiModelSetting])
@@ -62,7 +62,7 @@ export default function UpdateAIModelSetting({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Optionally add form validation here
+    formData.train_every=formData.train_every*86400000
     mutate(formData, {
       onSuccess: () => {
         toast('Model settings updated successfully!')
@@ -93,7 +93,7 @@ export default function UpdateAIModelSetting({
             {key: 'expected_precision', label: 'Expected Precision'},
             {key: 'expected_recall', label: 'Expected Recall'},
             {key: 'expected_f1', label: 'Expected F1'},
-            {key: 'train_every', label: 'Train Every (ms)'},
+            {key: 'train_every', label: 'Train Every (day)'},
           ].map(({key, label}) => (
             <div className="mb-4" key={key}>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -122,6 +122,8 @@ export default function UpdateAIModelSetting({
             <button
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              style={{backgroundColor: '#1F263E'}}
+
             >
               Update Settings
             </button>

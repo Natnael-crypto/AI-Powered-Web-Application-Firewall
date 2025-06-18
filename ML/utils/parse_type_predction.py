@@ -2,6 +2,8 @@ import os
 import re
 from urllib.parse import unquote
 
+from utils.decoder import recursive_decode
+
 INJECTION_CHARACTERS = {
     "single_quote": ["'"],
     "double_quote": ["\""],
@@ -88,6 +90,7 @@ def count_bad_words(text, bad_words):
 def extract_features(request):
     features = {feature: 0 for feature in INJECTION_CHARACTERS}
     full_text = request["url"] + " " +request["headers"] + " " + request["body"]
+    full_text=recursive_decode(full_text,5)
     
     # Count injection characters
     for part in [request["url"], request["headers"], request["body"]]:

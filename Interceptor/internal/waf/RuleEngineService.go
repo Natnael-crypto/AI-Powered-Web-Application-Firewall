@@ -9,7 +9,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-
 	"github.com/corazawaf/coraza/v3"
 )
 
@@ -49,13 +48,13 @@ func (w *WAF) EvaluateRules(r *http.Request) (bool, int, string, string, int, st
 				continue
 			}
 
-			decodedVal := utils.RecursiveDecode(value, 3)
+			decodedVal := utils.RecursiveDecode(value, 5)
 			tx.AddRequestHeader(name, decodedVal)
 		}
 	}
 
 	tx.ProcessRequestHeaders()
-	url := utils.RecursiveDecode(r.RequestURI, 3)
+	url := utils.RecursiveDecode(r.RequestURI, 5)
 	tx.ProcessURI(url, r.Method, r.Proto)
 	string_body := ""
 	if r.Body != nil {
