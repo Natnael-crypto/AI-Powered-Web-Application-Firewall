@@ -120,6 +120,14 @@ func AddCert(c *gin.Context) {
 	existingCert.Cert = certContent
 	existingCert.Key = keyContent
 
+	var existingAppConf models.AppConf
+	if err := config.DB.Where("application_id = ?", applicationID).First(&existingAppConf).Error; err != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Certificate doesn't exists for this application"})
+		return
+	}
+
+	existingAppConf.Tls = true
+
 	// newCert := models.Cert{
 	// 	CertID:        uuid.New().String(),
 	// 	Cert:          certContent,
@@ -128,6 +136,11 @@ func AddCert(c *gin.Context) {
 	// 	CreatedAt:     time.Now(),
 	// 	UpdatedAt:     time.Now(),
 	// }
+
+	if err := config.DB.Save(&existingAppConf).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to store certificate in database"})
+		return
+	}
 
 	if err := config.DB.Save(&existingCert).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to store certificate in database"})
