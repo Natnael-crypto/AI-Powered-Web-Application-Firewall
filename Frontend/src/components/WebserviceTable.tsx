@@ -81,54 +81,6 @@ function getColumns({
       accessorKey: 'port',
     },
     {
-      header: 'Detect Bot',
-      accessorKey: 'config.detect_bot',
-      cell: ({row}) => {
-        const [isLoading, setIsLoading] = useState(false)
-        const detectBot = row.original.config?.detect_bot ?? false
-
-        const handleToggle = async () => {
-          if (isLoading) return
-
-          setIsLoading(true)
-          try {
-            const newValue = await toggleBotDetection(
-              row.original.application_id,
-              detectBot,
-            )
-            console.log(
-              `Bot detection updated to ${newValue} for app ${row.original.application_id}`,
-            )
-          } catch (error) {
-            console.error('Failed to update bot detection:', error)
-          } finally {
-            setIsLoading(false)
-          }
-        }
-
-        return (
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={handleToggle}
-              disabled={isLoading}
-              className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
-                detectBot ? 'bg-purple-600' : 'bg-gray-200'
-              }`}
-            >
-              <span
-                className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                  detectBot ? 'translate-x-4' : 'translate-x-1'
-                } ${isLoading ? 'opacity-50' : ''}`}
-              />
-            </button>
-            <span className="text-sm text-gray-900">
-              {isLoading ? 'Updating...' : detectBot ? 'Enabled' : 'Disabled'}
-            </span>
-          </div>
-        )
-      },
-    },
-    {
       header: 'Max Data Size',
       accessorKey: 'config.max_post_data_size',
       cell: ({row}) => (

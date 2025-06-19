@@ -207,7 +207,6 @@ export const logFilterType = {
   user_agent: 'User Agent',
   geo_location: 'Geo Location',
   threat_detected: 'Threat Detected',
-  bot_detected: 'Bot Detected',
   rate_limited: 'Rate Limited',
   body: 'Body',
   response_code: 'Response Code',
