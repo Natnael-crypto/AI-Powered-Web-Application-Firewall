@@ -153,7 +153,7 @@ const AdminTable = () => {
         isOpen={isAssignModalOpen}
         admin={selectedAdmin}
         onClose={() => setIsAssignModalOpen(false)}
-        onConfirm={admin => {
+        onConfirm={_ => {
           setIsAssignModalOpen(false)
         }}
       />

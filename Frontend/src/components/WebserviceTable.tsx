@@ -4,7 +4,7 @@ import {DropdownActions} from './DropdownAction'
 import {Application} from '../lib/types'
 import ApplicationConfigModal from './ApplicationConfigModal'
 import {useState} from 'react'
-import {useUpdateDetectBot} from '../hooks/api/useApplication'
+// import {useUpdateDetectBot} from '../hooks/api/useApplication'
 import {Edit, Settings, Trash2, Upload} from 'lucide-react'
 
 interface WebserviceTableProps {
@@ -20,14 +20,14 @@ function getColumns({
   setSelectedApp,
   openModal,
   setIsConfigModalOpen,
-  toggleBotDetection,
+  // toggleBotDetection,
   handleDelete,
   setIsCertModalOpen,
 }: {
   setSelectedApp?: (app: Application) => void
   openModal: () => void
   setIsConfigModalOpen: (bool: boolean) => void
-  toggleBotDetection: (application_id: string, detectBot: boolean) => void
+  // toggleBotDetection: (application_id: string, detectBot: boolean) => void
   handleDelete?: (application_id: string) => void
   setIsCertModalOpen?: (bool: boolean) => void
 }): ColumnDef<Application>[] {
@@ -149,17 +149,17 @@ function WebserviceTable({
   setIsCertModalOpen,
 }: WebserviceTableProps) {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false)
-  const {mutate: updateDetectBOT} = useUpdateDetectBot()
+  // const {mutate: updateDetectBOT} = useUpdateDetectBot()
 
-  const toggleBotDetection = async (appId: string, currentValue: boolean) => {
-    return updateDetectBOT({application_id: appId, data: {detect_bot: !currentValue}})
-  }
+  // const toggleBotDetection = async (appId: string, currentValue: boolean) => {
+  //   return updateDetectBOT({application_id: appId, data: {detect_bot: !currentValue}})
+  // }
 
   const columns = getColumns({
     setSelectedApp,
     openModal,
     setIsConfigModalOpen,
-    toggleBotDetection,
+    // toggleBotDetection,
     handleDelete,
     setIsCertModalOpen,
   })
