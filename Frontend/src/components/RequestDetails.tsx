@@ -155,15 +155,6 @@ const RequestDetailsModal: React.FC<RequestDetailsModalProps> = ({
 
               <div className="space-y-1">
                 <label className="block text-xs text-red-600 font-medium">
-                  Bot Detected
-                </label>
-                <div className="text-sm text-red-800 font-medium">
-                  {request.bot_detected ? 'Yes' : 'No'}
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-xs text-red-600 font-medium">
                   Rate Limited
                 </label>
                 <div className="text-sm text-red-800 font-medium">
