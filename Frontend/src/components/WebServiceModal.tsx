@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react'
 import Modal from './Modal'
 import Button from './atoms/Button'
 import LoadingSpinner from './LoadingSpinner'
-import {validateIPAddress, validateHostname, validatePort} from '../lib/utils'
+import {validateIPAddressOrDomain, validateHostname, validatePort} from '../lib/utils'
 import {useGetCertification} from '../hooks/api/useApplication'
 
 export interface WebServiceData {
@@ -104,7 +104,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
 
     if (!form.ip_address.trim()) {
       newErrors.ip_address = 'IP address is required'
-    } else if (!validateIPAddress(form.ip_address)) {
+    } else if (!validateIPAddressOrDomain(form.ip_address)) {
       newErrors.ip_address = 'Invalid IP address format'
     }
 
@@ -158,9 +158,9 @@ const WebServiceModal: React.FC<WebServiceModalProps> = ({
                 required: true,
               },
               {
-                label: 'IP Address',
+                label: 'IP Address or Domain',
                 name: 'ip_address',
-                placeholder: '192.168.1.1',
+                placeholder: '192.168.1.1 or www.aait.com',
                 required: true,
               },
               {label: 'Port', name: 'port', placeholder: '8080', required: true},

@@ -9,7 +9,7 @@ import {
 import {useGetApplications} from '../hooks/api/useApplication'
 import {updateRule} from '../services/rulesApi'
 import Modal from './Modal'
-import { useToast } from '../hooks/useToast'
+import {useToast} from '../hooks/useToast'
 
 export type AppOption = {
   application_id: string
@@ -28,7 +28,6 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({isOpen, onClose, rule}) =>
   const [availableApps, setAvailableApps] = useState<AppOption[]>([])
   const {data: applications} = useGetApplications()
   const {addToast: toast} = useToast()
-
 
   useEffect(() => {
     if (!applications) return
@@ -66,10 +65,12 @@ const EditRuleModal: React.FC<EditRuleModalProps> = ({isOpen, onClose, rule}) =>
 
   const handleAppAdd = (appId: string) => {
     if (!ruleInput.applications.find(app => app.application_id === appId)) {
-      const appToAdd = availableApps.find(app => app.application_id === appId) || {
+      const appFromList = applications?.find(app => app.application_id === appId)
+      const appToAdd = {
         application_id: appId,
-        application_name: appId,
+        application_name: appFromList?.application_name || 'Unknown App',
       }
+
       setRuleInput({
         ...ruleInput,
         applications: [...ruleInput.applications, appToAdd],
