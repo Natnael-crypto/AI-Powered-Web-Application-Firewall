@@ -217,7 +217,7 @@ func UpdateTrainingSettings(c *gin.Context) {
 		return
 	}
 
-	trainTime := input.TrainEvery * 3600000
+	trainTime := input.TrainEvery * 86400000
 
 	if err := config.DB.Model(&models.AIModel{}).Where("id = ?", input.ID).Updates(map[string]interface{}{
 		"expected_accuracy":  input.ExpectedAccuracy,

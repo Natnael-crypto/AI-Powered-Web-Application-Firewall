@@ -10,7 +10,6 @@ import (
 	"backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 func safeString(val interface{}) string {
@@ -75,7 +74,7 @@ func HandleBatchRequests(c *gin.Context) {
 		headers := utils.ParseHeaders(safeString(requestData["headers"]))
 
 		request := models.Request{
-			RequestID:       uuid.New().String(),
+			RequestID:       safeString(requestData["request_id"]),
 			ApplicationName: safeString(requestData["application_name"]),
 			ApplicationID:   list_of_apps[safeString(requestData["application_name"])],
 			ClientIP:        ipParts[0],

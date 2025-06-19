@@ -172,6 +172,7 @@ export const AssignAdminModal = ({
             type="button"
             className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
             onClick={() => onConfirm(admin)}
+            style={{backgroundColor: '#1F263E'}}
           >
             Confirm Assignment
           </button>

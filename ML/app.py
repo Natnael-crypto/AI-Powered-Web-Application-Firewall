@@ -25,7 +25,7 @@ DEBUG=os.getenv("DEBUG", "False").lower() == "true"
 
 # API Endpoints
 BACKEND_API_URL = os.getenv("BACKEND_API_URL")
-BACKEND_API_ML_MODELS_PATH = "ml/models"
+BACKEND_API_ML_MODELS_PATH = "/ml/models"
 BACKEND_API_TYPE_ANALYSIS_PATH = "/ml/submit-analysis"
 MODEL_CHANGES_ENDPOINT = "/ml/changes"
 
@@ -45,10 +45,10 @@ train_every_interval = None
 
 prediction_queue = []
 queue_lock = threading.Lock()
-MAX_QUEUE_SIZE = 1000
+MAX_QUEUE_SIZE = 1050
 
 
-SELECTED_MODEL_ENDPOINT = "ml/model/selected"
+SELECTED_MODEL_ENDPOINT = "/ml/model/selected"
 model_change_watcher_started = False
 
 THREAT_TYPE_MAPPING = {
@@ -81,19 +81,35 @@ def flush_queue():
         to_send = prediction_queue[:]
         prediction_queue.clear()
     try:
+        print("passed1")
         response = requests.post(
             BACKEND_ENDPOINT,
             headers={"X-Service": "M"},
             json=to_send,
-            timeout=10,
+            timeout=30,
             verify=False
         )
         if response.status_code == 200:
             app.logger.info(f"Batch sent successfully: {len(to_send)} predictions")
+            print("passed1")
         else:
             app.logger.error(f"Failed to send batch: {response.status_code}")
     except Exception as e:
         app.logger.error(f"Error sending predictions: {e}")
+
+def schedule_queue_flush(interval_seconds=90):
+    """
+    Schedules the flush_queue function to run periodically.
+    """
+    def run():
+        while True:
+            time.sleep(interval_seconds)
+            app.logger.info("Attempting to flush prediction queue due to timer.")
+            flush_queue()
+
+    thread = threading.Thread(target=run, daemon=True)
+    thread.start()
+    app.logger.info(f"Queue flush scheduler started, flushing every {interval_seconds} seconds.")
 
 
 def watch_model_changes(poll_interval=120):
@@ -229,6 +245,7 @@ def predict_type(data):
         
         prediction = type_predictor_model.predict(features_df)[0]
         probability = type_predictor_model.predict_proba(features_df)[0]
+
         return {
             "threat_type": THREAT_TYPE_MAPPING[prediction],
             "confidence": float(max(probability)),
@@ -250,12 +267,14 @@ def predict_and_notify(data, endpoint):
     global BACKEND_ENDPOINT
     BACKEND_ENDPOINT = endpoint
     prediction = predict_type(data)
+
     if prediction is not None:
         request_id = data.get("request_id", "")
         result = {
             "request_id": request_id,
             "threat_type": prediction["threat_type"]
         }
+        print(result)
         add_result_to_queue(result)
 
 
@@ -329,6 +348,8 @@ def init_system(start_watcher=False):
         schedule_online_learning(train_every_interval)
     else:
         app.logger.warning("train_every is not defined; online learning will not run.")
+
+    schedule_queue_flush(90)
 
     if start_watcher and not model_change_watcher_started:
         watch_model_changes(120)
