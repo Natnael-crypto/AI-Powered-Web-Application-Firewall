@@ -36,6 +36,7 @@ const RulesTable = ({}: RulesTableProps) => {
   }
 
   const openEditModal = (rule: RuleResponse) => {
+    console.log(rule)
     setSelectedRule(rule)
     setEditModalOpen(true)
   }
