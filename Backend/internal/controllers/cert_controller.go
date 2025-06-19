@@ -7,14 +7,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 
 	"backend/internal/config"
 	"backend/internal/models"
 	"backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // Validation functions
@@ -77,8 +75,8 @@ func AddCert(c *gin.Context) {
 	}
 
 	var existingCert models.Cert
-	if err := config.DB.Where("application_id = ?", applicationID).First(&existingCert).Error; err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Certificate already exists for this application"})
+	if err := config.DB.Where("application_id = ?", applicationID).First(&existingCert).Error; err != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Certificate doesn't exists for this application"})
 		return
 	}
 
@@ -119,16 +117,19 @@ func AddCert(c *gin.Context) {
 		return
 	}
 
-	newCert := models.Cert{
-		CertID:        uuid.New().String(),
-		Cert:          certContent,
-		Key:           keyContent,
-		ApplicationID: applicationID,
-		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
-	}
+	existingCert.Cert = certContent
+	existingCert.Key = keyContent
 
-	if err := config.DB.Create(&newCert).Error; err != nil {
+	// newCert := models.Cert{
+	// 	CertID:        uuid.New().String(),
+	// 	Cert:          certContent,
+	// 	Key:           keyContent,
+	// 	ApplicationID: applicationID,
+	// 	CreatedAt:     time.Now(),
+	// 	UpdatedAt:     time.Now(),
+	// }
+
+	if err := config.DB.Save(&existingCert).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to store certificate in database"})
 		return
 	}
@@ -137,7 +138,7 @@ func AddCert(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Certificate uploaded successfully",
-		"cert_id": newCert.CertID,
+		"cert_id": existingCert.CertID,
 	})
 }
 
