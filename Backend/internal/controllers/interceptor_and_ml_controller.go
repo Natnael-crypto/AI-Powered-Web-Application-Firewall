@@ -1,8 +1,7 @@
-// controllers/interceptor_controller.go
 package controllers
 
 import (
-	"backend/internal/config"
+	"backend/internal/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,12 +12,9 @@ func StartInterceptor(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
 	}
-	if config.InterceptorRunning {
-		config.InterceptorRunning = false
-		c.JSON(http.StatusOK, gin.H{"message": "Interceptor will start soon."})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Interceptor is already running."})
+
+	message, statusCode := services.StartInterceptor()
+	c.JSON(statusCode, gin.H{"message": message})
 }
 
 func StopInterceptor(c *gin.Context) {
@@ -26,12 +22,9 @@ func StopInterceptor(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
 	}
-	if !config.InterceptorRunning {
-		config.InterceptorRunning = true
-		c.JSON(http.StatusOK, gin.H{"message": "Interceptor will stop soon."})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Interceptor is already stopped."})
+
+	message, statusCode := services.StopInterceptor()
+	c.JSON(statusCode, gin.H{"message": message})
 }
 
 func RestartInterceptor(c *gin.Context) {
@@ -39,26 +32,23 @@ func RestartInterceptor(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
 	}
-	// Set change to true regardless of the current state
-	config.Change = true
-	c.JSON(http.StatusOK, gin.H{"message": "Interceptor will restart soon."})
+
+	message, statusCode := services.RestartInterceptor()
+	c.JSON(statusCode, gin.H{"message": message})
 }
 
 func InterceptorCheckState(c *gin.Context) {
+	state := services.GetInterceptorState()
 	c.JSON(http.StatusOK, gin.H{
-		"running": config.InterceptorRunning,
-		"change":  config.Change,
+		"running": state.Running,
+		"change":  state.Change,
 	})
-	// After interceptor fetches the status, reset the change to false
-	config.Change = false
 }
 
 func MlCheckState(c *gin.Context) {
+	state := services.GetMlState()
 	c.JSON(http.StatusOK, gin.H{
-		"model_setting_updated": config.ModelSettingUpdated,
-		"select_model":          config.SelectModel,
+		"model_setting_updated": state.ModelSettingUpdated,
+		"select_model":          state.SelectModel,
 	})
-
-	config.ModelSettingUpdated = false
-	config.SelectModel = false
 }

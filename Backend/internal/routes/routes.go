@@ -50,7 +50,7 @@ func InitializeRoutes(r *gin.Engine) {
 		config.PUT("/update/rate-limit/:application_id", controllers.UpdateRateLimit)
 		config.PUT("/update/remote-log-server", controllers.UpdateRemoteLogServer)
 		config.PUT("/update/detect-bot/:application_id", controllers.UpdateDetectBot)
-		config.PUT("/update/post-data-size/:application_id", controllers.UpdateMaxPosyDataSize)
+		config.PUT("/update/post-data-size/:application_id", controllers.UpdateMaxPostDataSize)
 		config.PUT("/update/tls/:application_id", controllers.UpdateTls)
 		config.GET("/", controllers.GetConfigAdmin)
 		config.GET("/:application_id", controllers.GetAppConfig)

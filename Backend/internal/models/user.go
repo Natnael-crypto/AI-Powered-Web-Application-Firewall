@@ -13,3 +13,19 @@ type User struct {
 	LastLogin       time.Time `json:"last_login"`
 	ProfileImageURL string    `json:"profile_image_url"`
 }
+
+type RegisterInput struct {
+	Username string `json:"username" binding:"required,min=4"`
+	Password string `json:"password" binding:"required,min=8"`
+}
+
+type LoginInput struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type UpdatePasswordInput struct {
+	Username    string `json:"username" binding:"required"`
+	OldPassword string `json:"old_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required,min=8"`
+}

@@ -1,25 +1,20 @@
 package controllers
 
 import (
-	"backend/internal/config"
-	"backend/internal/models"
-	"log"
+	"backend/internal/services"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func GetNotificationRule(c *gin.Context) {
-
 	if c.GetString("role") != "super_admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
 		return
 	}
 
-	var rules []models.NotificationRule
-
-	if err := config.DB.Find(&rules).Error; err != nil {
+	rules, err := services.FetchNotificationRules()
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch notification rules"})
 		return
 	}
@@ -27,35 +22,17 @@ func GetNotificationRule(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"notification_rules": rules})
 }
 
+// Redundant with GetNotificationRule; kept for compatibility
 func GetNotificationRules(c *gin.Context) {
-
-	if c.GetString("role") != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
-		return
-	}
-
-	var rules []models.NotificationRule
-
-	if err := config.DB.Find(&rules).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch notification rules"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"notification_rules": rules})
+	GetNotificationRule(c)
 }
 
 func UpdateNotificationRule(c *gin.Context) {
 	ruleID := c.Param("rule_id")
 
-	var rule models.NotificationRule
-	if err := config.DB.Where("id = ?", ruleID).First(&rule).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "notification rule not found"})
-		return
-	}
-
 	var input struct {
 		Threshold  int   `json:"threshold" binding:"required"`
-		TimeWindow int   `json:"time_window" binding:"required"`
+		TimeWindow int   `json:"time_window" binding:"required"` // You can enable this when logic is ready
 		IsActive   *bool `json:"is_active" binding:"required"`
 	}
 
@@ -64,22 +41,6 @@ func UpdateNotificationRule(c *gin.Context) {
 		return
 	}
 
-	if input.Threshold != 0 {
-		rule.Threshold = input.Threshold
-	}
-	// if input.TimeWindow != 0 {
-	// 	rule.TimeWindow = input.TimeWindow
-	// }
-
-	rule.IsActive = *input.IsActive
-
-	rule.UpdatedAt = time.Now()
-
-	if err := config.DB.Save(&rule).Error; err != nil {
-		log.Printf("Error updating notification rule: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update notification rule"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "notification rule updated successfully"})
+	message, status := services.UpdateNotificationRule(ruleID, input.Threshold, input.TimeWindow, *input.IsActive)
+	c.JSON(status, gin.H{"message": message})
 }
