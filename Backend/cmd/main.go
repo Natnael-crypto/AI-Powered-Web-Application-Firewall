@@ -7,6 +7,7 @@ import (
 	"backend/internal/utils"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -18,8 +19,8 @@ func main() {
 	config.LoadConfig()
 	utils.CreateModel()
 	utils.AddNotificationRule()
-	err := utils.LoadIPRanges("./internal/static/iptogeo.csv")
-	if err != nil {
+
+	if err := utils.LoadIPRanges("./internal/static/iptogeo.csv"); err != nil {
 		fmt.Println("Error loading IP ranges:", err)
 		return
 	}
@@ -37,9 +38,19 @@ func main() {
 
 	routes.InitializeRoutes(r)
 
-	// Start HTTPS server on port 8443
-	log.Println("Starting HTTPS server on :8443")
-	if err := r.RunTLS(":8443", "./certs/cert.pem", "./certs/key.pem"); err != nil {
-		log.Fatalf("HTTPS server failed: %v", err)
-	}
+	go func() {
+		log.Println("Starting HTTPS server on :8443")
+		if err := r.RunTLS(":8443", "./certs/cert.pem", "./certs/key.pem"); err != nil {
+			log.Fatalf("HTTPS server failed: %v", err)
+		}
+	}()
+
+	go func() {
+		log.Println("Starting HTTP server on :8080")
+		if err := http.ListenAndServe(":8080", r); err != nil {
+			log.Fatalf("HTTP server failed: %v", err)
+		}
+	}()
+
+	select {}
 }
